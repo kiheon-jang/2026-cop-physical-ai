@@ -164,6 +164,7 @@ git config --global url."https://$(gh auth token)@github.com/".insteadOf "https:
 | 2026-04-21 | 최초 작성. 레포 구조화, 크론 3종 + 주간검수 설정 | AI Agent (OpenClaw) |
 | 2026-04-21 | 리서치 drafts/latest-tech 2단계 구조 추가 | AI Agent (OpenClaw) |
 | 2026-04-21 | SAMPLE_STATUS.md, CONTRIBUTING.md, AGENT_PROCESS.md 추가 | AI Agent (OpenClaw) |
+| 2026-04-21 | 메일 템플릿 전면 개편 — ASCII 특수문자 제거, plain text 메거진 형식으로 통일. 코드 리뷰 포인트, 경로 변경사항 섹션 추가. 템플릿 파일: docs/01_overview/mail-template.md | AI Agent (OpenClaw) |
 
 ---
 
