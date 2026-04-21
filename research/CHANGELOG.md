@@ -23,3 +23,4 @@
 - 📁 [구조] research/latest-tech/ 확정본 전용으로 용도 명확화
 - 📁 [구조] research/decisions/ 결정 로그 폴더 신설
 - 📋 [초안] 리서치 자동화 시작 — 매일 23:00 크론으로 drafts/ 에 초안 생성 예정
+- 📋 [초안] 2026-04-21_isaac-lab-sim-rl-trends.md — Isaac Lab/Isaac Sim 강화학습 최신 동향 (v2.3.x → 3.0, Isaac Sim 6.0 EAR)
