@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoP Physical AI — 기술 결정 폼</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1117; font-family: 'Segoe UI', -apple-system, sans-serif; color: #e2e8f0; min-height: 100vh; }
+  .wrapper { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+
+  /* 헤더 */
+  .header { margin-bottom: 32px; }
+  .back-link { font-size: 12px; color: #6366f1; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 16px; opacity: 0.8; }
+  .back-link:hover { opacity: 1; }
+  .header-badge { display: inline-block; background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+  .header-title { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+  .header-sub { font-size: 13px; color: #64748b; line-height: 1.6; }
+
+  /* 진행 표시 */
+  .progress-bar { display: flex; gap: 6px; margin-bottom: 32px; }
+  .step-dot { flex: 1; height: 4px; border-radius: 99px; background: #2d3748; transition: background 0.3s; }
+  .step-dot.active { background: #6366f1; }
+  .step-dot.done { background: #10b981; }
+
+  /* 카드 */
+  .card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 14px; padding: 24px; margin-bottom: 16px; transition: border-color 0.2s; }
+  .card.resolved { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.04); }
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+  .card-num { font-size: 10px; font-weight: 800; color: #6366f1; background: rgba(99,102,241,0.12); padding: 3px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+  .card-title { font-size: 15px; font-weight: 700; color: #e2e8f0; margin: 0 12px; flex: 1; }
+  .card-status { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 99px; flex-shrink: 0; }
+  .status-pending { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .status-done { background: rgba(16,185,129,0.15); color: #10b981; }
+  .card-desc { font-size: 12px; color: #64748b; margin-bottom: 16px; line-height: 1.6; padding-left: 0; }
+
+  /* 옵션 라디오 */
+  .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .option-label { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #111827; border: 1.5px solid #2d3748; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+  .option-label:hover { border-color: #6366f1; background: rgba(99,102,241,0.06); }
+  .option-label input[type="radio"] { display: none; }
+  .option-label.selected { border-color: #6366f1; background: rgba(99,102,241,0.1); }
+  .option-label.selected .radio-circle { background: #6366f1; border-color: #6366f1; }
+  .option-label.selected .radio-circle::after { opacity: 1; }
+  .radio-circle { width: 16px; height: 16px; border: 2px solid #374151; border-radius: 50%; flex-shrink: 0; position: relative; transition: all 0.15s; }
+  .radio-circle::after { content: ''; position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%,-50%); opacity: 0; transition: opacity 0.15s; }
+  .option-text { font-size: 13px; font-weight: 500; color: #e2e8f0; }
+  .option-desc { font-size: 11px; color: #64748b; margin-left: auto; }
+
+  /* 텍스트 입력 */
+  .input-label { font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 6px; display: block; }
+  .input-text { width: 100%; background: #111827; border: 1.5px solid #2d3748; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #e2e8f0; font-family: inherit; resize: vertical; min-height: 72px; transition: border-color 0.15s; outline: none; }
+  .input-text:focus { border-color: #6366f1; }
+  .input-text::placeholder { color: #374151; }
+
+  /* 결정자 */
+  .decider-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .input-short { flex: 1; background: #111827; border: 1.5px solid #2d3748; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #e2e8f0; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  .input-short:focus { border-color: #6366f1; }
+  .input-short::placeholder { color: #374151; }
+
+  /* 결정 완료 표시 */
+  .resolved-display { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: 8px; font-size: 13px; color: #10b981; }
+  .resolved-detail { font-size: 12px; color: #6ee7b7; margin-top: 6px; }
+
+  /* 제출 버튼 */
+  .submit-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; font-size: 14px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; transition: opacity 0.2s; margin-top: 8px; }
+  .submit-btn:hover { opacity: 0.9; }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* 결과 토스트 */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 14px 20px; font-size: 13px; color: #e2e8f0; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+  .toast.success { border-color: rgba(16,185,129,0.4); }
+  .toast.error { border-color: rgba(239,68,68,0.4); }
+
+  /* 설정 패널 */
+  .config-panel { background: #111827; border: 1px dashed #2d3748; border-radius: 10px; padding: 16px; margin-bottom: 24px; }
+  .config-title { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .config-row { display: flex; gap: 8px; align-items: center; }
+  .config-input { flex: 1; background: #0f1117; border: 1px solid #2d3748; border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #94a3b8; font-family: monospace; outline: none; }
+  .config-input:focus { border-color: #6366f1; color: #e2e8f0; }
+  .config-save-btn { background: #2d3748; color: #94a3b8; border: none; border-radius: 6px; padding: 8px 14px; font-size: 12px; cursor: pointer; }
+  .config-save-btn:hover { background: #374151; color: #e2e8f0; }
+  .config-hint { font-size: 11px; color: #374151; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="header">
+    <a href="https://github.com/kiheon-jang/2026-cop-physical-ai" class="back-link">← GitHub 레포로 돌아가기</a>
+    <div class="header-badge">🗂️ 기술 결정 로그</div>
+    <div class="header-title">결정이 필요한 항목</div>
+    <div class="header-sub">아래 항목에서 결정을 선택하고 이유를 입력하면, GitHub 레포에 자동으로 결정 로그가 기록됩니다.<br>다음 보고서부터 ✅ 결정완료로 표시됩니다.</div>
+  </div>
+
+  <!-- GitHub Token 설정 -->
+  <div class="config-panel" id="configPanel">
+    <div class="config-title">🔑 GitHub 설정 (최초 1회)</div>
+    <div class="config-row">
+      <input type="password" class="config-input" id="githubToken" placeholder="GitHub Personal Access Token (repo 권한)" />
+      <button class="config-save-btn" onclick="saveToken()">저장</button>
+    </div>
+    <div class="config-hint">토큰은 이 브라우저에만 저장됩니다. GitHub → Settings → Developer Settings → Personal access tokens</div>
+  </div>
+
+  <!-- 결정자 정보 -->
+  <div style="margin-bottom: 20px;">
+    <div style="font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 8px;">결정자</div>
+    <div class="decider-row">
+      <input type="text" class="input-short" id="deciderName" placeholder="이름 (예: 장기헌)" />
+      <input type="text" class="input-short" id="deciderRole" placeholder="역할 (예: CoP 리더)" />
+    </div>
+  </div>
+
+  <!-- ① ACT vs Diffusion Policy -->
+  <div class="card" id="card-1">
+    <div class="card-header">
+      <span class="card-num">DECISION 01</span>
+      <span class="card-title">학습 정책 선택</span>
+      <span class="card-status status-pending" id="status-1">⏳ 대기중</span>
+    </div>
+    <div class="card-desc">첫 모방학습 실험에 사용할 알고리즘을 결정합니다. SO-ARM101 로봇으로 50 에피소드 수집 후 학습에 사용될 핵심 선택입니다.</div>
+    <div class="options" id="options-1">
+      <label class="option-label" onclick="selectOption(1, 'ACT (Action Chunking Transformer)')">
+        <input type="radio" name="decision-1" value="ACT">
+        <div class="radio-circle"></div>
+        <span class="option-text">ACT (Action Chunking Transformer)</span>
+        <span class="option-desc">빠른 학습, 낮은 연산비용</span>
+      </label>
+      <label class="option-label" onclick="selectOption(1, 'Diffusion Policy')">
+        <input type="radio" name="decision-1" value="Diffusion">
+        <div class="radio-circle"></div>
+        <span class="option-text">Diffusion Policy</span>
+        <span class="option-desc">높은 성능, 무거운 연산</span>
+      </label>
+      <label class="option-label" onclick="selectOption(1, 'ACT 먼저, 이후 Diffusion Policy 비교')">
+        <input type="radio" name="decision-1" value="Both">
+        <div class="radio-circle"></div>
+        <span class="option-text">ACT 먼저 → 이후 Diffusion Policy 비교</span>
+        <span class="option-desc">권장</span>
+      </label>
+    </div>
+    <label class="input-label" for="reason-1">결정 이유 (선택)</label>
+    <textarea class="input-text" id="reason-1" placeholder="예) 우선 빠르게 검증하고 싶어서 ACT로 먼저 시작"></textarea>
+    <button class="submit-btn" onclick="submitDecision(1, 'ACT vs Diffusion Policy')">결정 기록하기 →</button>
+  </div>
+
+  <!-- ② Isaac Sim vs Isaac Lab -->
+  <div class="card" id="card-2">
+    <div class="card-header">
+      <span class="card-num">DECISION 02</span>
+      <span class="card-title">시뮬레이터 선택</span>
+      <span class="card-status status-pending" id="status-2">⏳ 대기중</span>
+    </div>
+    <div class="card-desc">NVIDIA Orin Nano Super 기반 강화학습 시뮬레이션에 사용할 플랫폼을 결정합니다. (Phase 3 준비)</div>
+    <div class="options" id="options-2">
+      <label class="option-label" onclick="selectOption(2, 'Isaac Lab')">
+        <input type="radio" name="decision-2" value="IsaacLab">
+        <div class="radio-circle"></div>
+        <span class="option-text">Isaac Lab</span>
+        <span class="option-desc">경량, 로봇팔 특화, 최신 권장</span>
+      </label>
+      <label class="option-label" onclick="selectOption(2, 'Isaac Sim')">
+        <input type="radio" name="decision-2" value="IsaacSim">
+        <div class="radio-circle"></div>
+        <span class="option-text">Isaac Sim</span>
+        <span class="option-desc">완전한 물리 시뮬레이션, 고사양 요구</span>
+      </label>
+      <label class="option-label" onclick="selectOption(2, '보류 — 추가 조사 후 결정')">
+        <input type="radio" name="decision-2" value="Pending">
+        <div class="radio-circle"></div>
+        <span class="option-text">보류 — AI 조사 결과 확인 후 결정</span>
+        <span class="option-desc">2026-04-22 자동 조사 예정</span>
+      </label>
+    </div>
+    <label class="input-label" for="reason-2">결정 이유 (선택)</label>
+    <textarea class="input-text" id="reason-2" placeholder="예) Orin Nano Super 사양상 Isaac Lab이 현실적"></textarea>
+    <button class="submit-btn" onclick="submitDecision(2, 'Isaac Sim vs Isaac Lab')">결정 기록하기 →</button>
+  </div>
+
+  <!-- ③ LeKiwi vs XLeRobot -->
+  <div class="card" id="card-3">
+    <div class="card-header">
+      <span class="card-num">DECISION 03</span>
+      <span class="card-title">모바일 플랫폼 선택</span>
+      <span class="card-status status-pending" id="status-3">⏳ 대기중</span>
+    </div>
+    <div class="card-desc">Phase 4에서 도입할 모바일 매니퓰레이터 플랫폼을 결정합니다. (현재는 Phase 2 진행중, 미리 방향 결정)</div>
+    <div class="options" id="options-3">
+      <label class="option-label" onclick="selectOption(3, 'LeKiwi')">
+        <input type="radio" name="decision-3" value="LeKiwi">
+        <div class="radio-circle"></div>
+        <span class="option-text">LeKiwi</span>
+        <span class="option-desc">LeRobot 공식 지원, 검증된 플랫폼</span>
+      </label>
+      <label class="option-label" onclick="selectOption(3, 'XLeRobot')">
+        <input type="radio" name="decision-3" value="XLeRobot">
+        <div class="radio-circle"></div>
+        <span class="option-text">XLeRobot</span>
+        <span class="option-desc">확장성 높음, 커뮤니티 성장중</span>
+      </label>
+      <label class="option-label" onclick="selectOption(3, '보류 — Phase 3 완료 후 결정')">
+        <input type="radio" name="decision-3" value="Pending">
+        <div class="radio-circle"></div>
+        <span class="option-text">보류 — Phase 3 완료 후 결정</span>
+        <span class="option-desc">권장</span>
+      </label>
+    </div>
+    <label class="input-label" for="reason-3">결정 이유 (선택)</label>
+    <textarea class="input-text" id="reason-3" placeholder="예) LeRobot 에코시스템과 통일하기 위해 LeKiwi 선택"></textarea>
+    <button class="submit-btn" onclick="submitDecision(3, 'LeKiwi vs XLeRobot')">결정 기록하기 →</button>
+  </div>
+
+  <!-- ④ 카메라 업그레이드 -->
+  <div class="card" id="card-4">
+    <div class="card-header">
+      <span class="card-num">DECISION 04</span>
+      <span class="card-title">카메라 업그레이드 여부</span>
+      <span class="card-status status-pending" id="status-4">⏳ 대기중</span>
+    </div>
+    <div class="card-desc">현재 사용중인 웹캠(2개)을 고화질 카메라로 업그레이드할지 결정합니다. 데이터 품질과 학습 성능에 직접 영향을 줍니다.</div>
+    <div class="options" id="options-4">
+      <label class="option-label" onclick="selectOption(4, '업그레이드 진행')">
+        <input type="radio" name="decision-4" value="Upgrade">
+        <div class="radio-circle"></div>
+        <span class="option-text">업그레이드 진행</span>
+        <span class="option-desc">예산 집행 필요</span>
+      </label>
+      <label class="option-label" onclick="selectOption(4, '현재 웹캠 유지')">
+        <input type="radio" name="decision-4" value="Keep">
+        <div class="radio-circle"></div>
+        <span class="option-text">현재 웹캠 유지</span>
+        <span class="option-desc">Phase 2 데이터 품질 확인 후 재검토</span>
+      </label>
+      <label class="option-label" onclick="selectOption(4, '보류 — 예산 확인 후 결정')">
+        <input type="radio" name="decision-4" value="Pending">
+        <div class="radio-circle"></div>
+        <span class="option-text">보류 — 예산 확인 후 결정</span>
+        <span class="option-desc"></span>
+      </label>
+    </div>
+    <label class="input-label" for="reason-4">결정 이유 + 예산 메모 (선택)</label>
+    <textarea class="input-text" id="reason-4" placeholder="예) 1차 데이터 수집 품질 보고 후 결정하기로 함"></textarea>
+    <button class="submit-btn" onclick="submitDecision(4, '카메라 업그레이드 여부')">결정 기록하기 →</button>
+  </div>
+
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+const REPO = 'kiheon-jang/2026-cop-physical-ai';
+const selections = {};
+
+// 토큰 저장/불러오기
+function saveToken() {
+  const t = document.getElementById('githubToken').value.trim();
+  if (t) { localStorage.setItem('gh_token', t); showToast('✅ 토큰 저장됨', 'success'); }
+}
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('gh_token');
+  if (saved) {
+    document.getElementById('githubToken').value = saved;
+    document.getElementById('configPanel').style.opacity = '0.5';
+  }
+  // 이미 결정된 항목 로드
+  loadExistingDecisions();
+});
+
+// 옵션 선택
+function selectOption(cardNum, value) {
+  selections[cardNum] = value;
+  document.querySelectorAll(`#options-${cardNum} .option-label`).forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+// GitHub에서 기존 결정 파일 확인
+async function loadExistingDecisions() {
+  const token = localStorage.getItem('gh_token');
+  if (!token) return;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/research/decisions`, {
+      headers: { Authorization: `token ${token}` }
+    });
+    if (!res.ok) return;
+    const files = await res.json();
+    const decisionMap = {
+      'ACT vs Diffusion Policy': 1,
+      'Isaac Sim vs Isaac Lab': 2,
+      'LeKiwi vs XLeRobot': 3,
+      '카메라 업그레이드 여부': 4
+    };
+    files.forEach(f => {
+      Object.entries(decisionMap).forEach(([key, num]) => {
+        const slug = key.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9가-힣-]/g, '');
+        if (f.name.includes(slug) || f.name.includes(encodeURIComponent(key))) {
+          markResolved(num, '(기존 결정 파일 발견 — GitHub에서 확인)');
+        }
+      });
+    });
+  } catch(e) {}
+}
+
+function markResolved(num, detail) {
+  const card = document.getElementById(`card-${num}`);
+  const status = document.getElementById(`status-${num}`);
+  card.classList.add('resolved');
+  status.textContent = '✅ 결정완료';
+  status.className = 'card-status status-done';
+  const btn = card.querySelector('.submit-btn');
+  btn.disabled = true;
+  btn.textContent = '이미 결정됨';
+}
+
+// 결정 제출 → GitHub API로 파일 생성
+async function submitDecision(num, topic) {
+  const token = localStorage.getItem('gh_token');
+  if (!token) { showToast('❗ GitHub 토큰을 먼저 입력해주세요', 'error'); return; }
+
+  const chosen = selections[num];
+  if (!chosen) { showToast('❗ 옵션을 선택해주세요', 'error'); return; }
+
+  const name = document.getElementById('deciderName').value.trim() || '미입력';
+  const role = document.getElementById('deciderRole').value.trim() || '';
+  const reason = document.getElementById(`reason-${num}`).value.trim() || '(이유 미입력)';
+
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const timeStr = now.toISOString().replace('T', ' ').split('.')[0] + ' UTC';
+
+  const slugMap = {
+    1: 'act-vs-diffusion-policy',
+    2: 'isaac-sim-vs-isaac-lab',
+    3: 'lekiwi-vs-xlerobot',
+    4: 'camera-upgrade'
+  };
+  const filename = `research/decisions/${dateStr}_${slugMap[num]}.md`;
+
+  const content = `# 결정: ${topic}
+
+| 항목 | 내용 |
+|------|------|
+| **결정일** | ${dateStr} |
+| **결정자** | ${name}${role ? ` (${role})` : ''} |
+| **결정내용** | ${chosen} |
+| **상태** | ✅ 결정완료 |
+
+## 결정 이유
+
+${reason}
+
+## 배경
+
+- 프로젝트: CoP Physical AI (현대엘리베이터)
+- 하드웨어: SO-ARM101 + NVIDIA Orin Nano Super
+- 현재 단계: Phase 2 (데이터 수집)
+
+---
+_이 문서는 결정 폼을 통해 자동 생성되었습니다._
+`;
+
+  const btn = document.querySelector(`#card-${num} .submit-btn`);
+  btn.disabled = true;
+  btn.textContent = '기록 중...';
+
+  try {
+    // 파일 존재 여부 확인
+    let sha = undefined;
+    try {
+      const check = await fetch(`https://api.github.com/repos/${REPO}/contents/${filename}`, {
+        headers: { Authorization: `token ${token}` }
+      });
+      if (check.ok) { const d = await check.json(); sha = d.sha; }
+    } catch(e) {}
+
+    const body = {
+      message: `✅ [결정] ${topic} — ${chosen}`,
+      content: btoa(unescape(encodeURIComponent(content))),
+      ...(sha ? { sha } : {})
+    };
+
+    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${filename}`, {
+      method: 'PUT',
+      headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (res.ok) {
+      markResolved(num, chosen);
+      showToast(`✅ "${topic}" 결정이 GitHub에 기록됐어요!`, 'success');
+    } else {
+      const err = await res.json();
+      throw new Error(err.message);
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '결정 기록하기 →';
+    showToast(`❌ 오류: ${e.message}`, 'error');
+  }
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+</script>
+</body>
+</html>
