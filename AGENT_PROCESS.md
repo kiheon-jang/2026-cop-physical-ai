@@ -6,6 +6,20 @@
 
 ---
 
+## 📦 상세 인수인계 패키지 → [`agent/`](./agent/)
+
+이 파일은 요약본입니다. 완전한 인수인계를 위한 상세 문서는 `agent/` 폴더에 있습니다.
+
+| 파일 | 내용 |
+|------|------|
+| [agent/HANDOVER.md](./agent/HANDOVER.md) | **메인 인덱스** — 새 에이전트가 가장 먼저 읽는 파일 |
+| [agent/env.md](./agent/env.md) | VM / GitHub / 이메일 / 하드웨어 환경 전체 |
+| [agent/cron-jobs.md](./agent/cron-jobs.md) | 크론 5개 페이로드 완전 서술 (재등록용) |
+| [agent/skills/README.md](./agent/skills/README.md) | 사용 스킬 목록 및 사용 패턴 |
+| [agent/templates/README.md](./agent/templates/README.md) | 메일/결정폼 템플릿 경로 안내 |
+
+---
+
 ## 📌 프로젝트 컨텍스트
 
 | 항목 | 내용 |
