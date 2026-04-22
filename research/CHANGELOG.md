@@ -18,6 +18,9 @@
 
 ## 이력
 
+### 2026-04-22
+- 📋 [초안] 2026-04-22_sim2real-gap-techniques.md — Sim2Real 격차 해소 최신 기법 (Digital Cousins, Sim2Real-VLA, RL Co-Training, PACE, lerobot-sim2real)
+
 ### 2026-04-21
 - 📁 [구조] research/drafts/ 폴더 신설 (초안 보관용)
 - 📁 [구조] research/latest-tech/ 확정본 전용으로 용도 명확화
