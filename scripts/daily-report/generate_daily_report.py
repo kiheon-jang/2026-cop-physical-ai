@@ -234,6 +234,14 @@ def html_to_plaintext(html_content):
     plaintext = re.sub(r'<[^>]+>', '', html_content)
     # 여러 공백을 하나의 공백으로 축소
     plaintext = re.sub(r'\\s+', ' ', plaintext).strip()
+    # HTML 엔티티 디코딩 (예: &nbsp; -> 공백)
+    # 이 단계는 Python 내장 기능만 사용해야 하므로, 간단한 엔티티만 처리하거나 생략
+    plaintext = plaintext.replace("&nbsp;", " ")
+    plaintext = plaintext.replace("&amp;", "&")
+    plaintext = plaintext.replace("&lt;", "<")
+    plaintext = plaintext.replace("&gt;", ">")
+    plaintext = plaintext.replace("&quot;", '"')
+    plaintext = plaintext.replace("&#39;", "'")
     return plaintext
 
 def main():
@@ -322,7 +330,7 @@ def main():
     # 어제 완료한 작업
     html_body = re.sub(r'<!-- 1\. 어제 완료 작업 -->.*?<div class=\\"section-badge\\">.*?건</div>.*?<div class=\\"task-item\\">.*?</div>.*?</div>\\s*</div>', 
                        f'''<!-- 1. 어제 완료 작업 -->
-  <div class=\\"section\\">
+  <div class=\\"section\\}>
     <div class=\\"section-header\\}>
       <span class=\\"section-icon\\">✅</span>
       <span class=\\"section-title\\">어제 완료한 작업</span>
@@ -334,10 +342,10 @@ def main():
     # 이슈/문제점 (현재 이슈가 없으므로 고정된 내용 사용)
     html_body = re.sub(r'<!-- 2\. 이슈 -->.*?</div>\\s*</div>', 
                        '''<!-- 2. 이슈 -->
-  <div class=\\"section\\">
+  <div class=\\"section\\}>
     <div class=\\"section-header\\}>
       <span class=\\"section-icon\\">🔴</span>
-      <span class=\\"section-title\\">이슈 / 문제점</span>
+      <span class=\\"section-title\\}>이슈 / 문제점</span>
     </div>
     <div class=\\"no-issue\\">현재 보고된 주요 이슈 없음</div>
   </div>''', html_body, flags=re.DOTALL)
@@ -361,10 +369,10 @@ def main():
     # 샘플코드 현황
     html_body = re.sub(r'<!-- 5\. 샘플코드 -->.*?</div>\\s*</div>', 
                        f'''<!-- 5. 샘플코드 -->
-  <div class=\\"section\\">
+  <div class=\\"section\\}>
     <div class=\\"section-header\\}>
       <span class=\\"section-icon\\">💻</span>
-      <span class=\\"section-title\\">샘플코드 현황</span>
+      <span class=\\"section-title\\}>샘플코드 현황</span>
     </div>
     {samples_html}
     {sample_review_box_html}
@@ -373,7 +381,7 @@ def main():
     # 경로 및 구조 변경
     html_body = re.sub(r'<!-- 6\. 경로 변경 -->.*?</div>\\s*</div>', 
                        f'''<!-- 6. 경로 변경 -->
-  <div class=\\"section\\">
+  <div class=\\"section\\}>
     <div class=\\"section-header\\}>
       <span class=\\"section-icon\\">📁</span>
       <span class=\\"section-title\\}>경로 및 구조 변경</span>
@@ -405,8 +413,16 @@ def main():
     # HTML을 순수 텍스트(마크다운)로 변환
     plaintext_content = html_to_plaintext(html_body)
     
-    # Markdown 헤더 추가
-    markdown_content = f"# CoP Physical AI 일일 보고 {today_info['vol_num']} | {today_info['today_date']} ({today_info['today_weekday']})\\n\\n" + plaintext_content
+    # Markdown 프론트매터 및 헤더 추가
+    markdown_content = f"""---
+tags: ["CoP/PhysicalAI", "DailyReport"]
+date: {today_info['today_date']}
+type: Daily Report
+status: generated
+project: 2026-cop-physical-ai
+---
+
+# CoP Physical AI 일일 보고 {today_info['vol_num']} | {today_info['today_date']} ({today_info['today_weekday']})\n\n""" + plaintext_content
 
     write_file(path=obsidian_report_file_path, content=markdown_content)
     print(f"Daily report (Markdown) saved to {obsidian_report_file_path}")
