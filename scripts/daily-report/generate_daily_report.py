@@ -300,6 +300,21 @@ def main():
         </div>
         '''
 
+    # 5.5. 현재 진행 중인 주요 AI 에이전트 작업
+    ongoing_tasks_content = get_file_content(f"{repo_path}/docs/01_overview/ongoing-agent-tasks.md")
+    ongoing_tasks_html = ""
+    if ongoing_tasks_content:
+        # Markdown content from ongoing-agent-tasks.md needs to be converted to HTML for the email
+        # For simplicity, we'll wrap it in a pre-formatted block or convert simple markdown to HTML manually
+        # Here, we'll just display it as pre-formatted text within the email for now.
+        # A more robust solution would involve a markdown to HTML converter, which is outside hermes_tools built-ins.
+        ongoing_tasks_html = f'''
+        <div class="no-issue" style="white-space: pre-wrap; font-family: monospace;">{ongoing_tasks_content}</div>
+        '''
+    else:
+        ongoing_tasks_html = "<div class=\\"no-issue\\">현재 진행 중인 주요 AI 에이전트 작업 없음</div>"
+
+
     # 6. 샘플코드 현황
     sample_status_content = get_file_content(f"{repo_path}/samples/SAMPLE_STATUS.md")
     samples_html, _ = parse_sample_status(sample_status_content)
@@ -333,7 +348,7 @@ def main():
   <div class=\\"section\\}>
     <div class=\\"section-header\\}>
       <span class=\\"section-icon\\">✅</span>
-      <span class=\\"section-title\\">어제 완료한 작업</span>
+      <span class=\\"section-title\\}>어제 완료한 작업</span>
       <span class=\\"section-badge\\">{commit_count_str}</span>
     </div>
     {formatted_commits}
@@ -349,6 +364,9 @@ def main():
     </div>
     <div class=\\"no-issue\\">현재 보고된 주요 이슈 없음</div>
   </div>''', html_body, flags=re.DOTALL)
+
+    # 현재 진행 중인 주요 AI 에이전트 작업
+    html_body = re.sub(r'<!-- ONGOING_AGENT_TASKS_PLACEHOLDER -->', ongoing_tasks_html, html_body, flags=re.DOTALL)
 
     # 팀 요청사항 (결정 대기 항목)
     html_body = re.sub(r'<div class=\\"pending-section\\">.*?<a href=\\"https://ookixght.gensparkclaw.com/decisions\\".*?</div>', 
