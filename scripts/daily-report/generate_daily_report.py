@@ -229,9 +229,16 @@ def get_next_day_cron_schedule(today_weekday_kor):
         ''')
     return "\\n".join(html_items)
 
+def html_to_plaintext(html_content):
+    # HTML 태그 제거
+    plaintext = re.sub(r'<[^>]+>', '', html_content)
+    # 여러 공백을 하나의 공백으로 축소
+    plaintext = re.sub(r'\\s+', ' ', plaintext).strip()
+    return plaintext
 
 def main():
     repo_path = "/Users/markmini/Documents/dev/2026-cop-physical-ai"
+    obsidian_vault_path = "/Users/markmini/Documents/second-brain"
 
     # 1. 오늘 날짜, 요일, Vol 번호 계산
     today_info = get_today_info()
@@ -316,7 +323,7 @@ def main():
     html_body = re.sub(r'<!-- 1\. 어제 완료 작업 -->.*?<div class=\\"section-badge\\">.*?건</div>.*?<div class=\\"task-item\\">.*?</div>.*?</div>\\s*</div>', 
                        f'''<!-- 1. 어제 완료 작업 -->
   <div class=\\"section\\">
-    <div class=\\"section-header\\">
+    <div class=\\"section-header\\}>
       <span class=\\"section-icon\\">✅</span>
       <span class=\\"section-title\\">어제 완료한 작업</span>
       <span class=\\"section-badge\\">{commit_count_str}</span>
@@ -328,7 +335,7 @@ def main():
     html_body = re.sub(r'<!-- 2\. 이슈 -->.*?</div>\\s*</div>', 
                        '''<!-- 2. 이슈 -->
   <div class=\\"section\\">
-    <div class=\\"section-header\\">
+    <div class=\\"section-header\\}>
       <span class=\\"section-icon\\">🔴</span>
       <span class=\\"section-title\\">이슈 / 문제점</span>
     </div>
@@ -355,7 +362,7 @@ def main():
     html_body = re.sub(r'<!-- 5\. 샘플코드 -->.*?</div>\\s*</div>', 
                        f'''<!-- 5. 샘플코드 -->
   <div class=\\"section\\">
-    <div class=\\"section-header\\">
+    <div class=\\"section-header\\}>
       <span class=\\"section-icon\\">💻</span>
       <span class=\\"section-title\\">샘플코드 현황</span>
     </div>
@@ -369,7 +376,7 @@ def main():
   <div class=\\"section\\">
     <div class=\\"section-header\\}>
       <span class=\\"section-icon\\">📁</span>
-      <span class=\\"section-title\\">경로 및 구조 변경</span>
+      <span class=\\"section-title\\}>경로 및 구조 변경</span>
     </div>
     {path_changes_html}
   </div>''', html_body, flags=re.DOTALL)
@@ -377,19 +384,32 @@ def main():
     # 내일 예정
     html_body = re.sub(r'<!-- 7\. 내일 예정 -->.*?</div>\\s*</div>', 
                        f'''<!-- 7. 내일 예정 -->
-  <div class=\\"section\\">
+  <div class=\\"section\\}>
     <div class=\\"section-header\\}>
       <span class=\\"section-icon\\">📅</span>
-      <span class=\\"section-title\\">내일 예정</span>
+      <span class=\\"section-title\\}>내일 예정</span>
     </div>
     {next_day_schedule_html}
   </div>''', html_body, flags=re.DOTALL)
     
-    # 메일 내용 파일로 저장
-    report_dir = f"{repo_path}/docs/01_overview/daily-reports"
-    report_file_path = f"{report_dir}/{today_info['today_date']}.html"
-    write_file(path=report_file_path, content=html_body)
-    print(f"Daily report saved to {report_file_path}")
+    # 메일 내용 파일로 저장 (HTML)
+    report_dir_html = f"{repo_path}/docs/01_overview/daily-reports"
+    report_file_path_html = f"{report_dir_html}/{today_info['today_date']}.html"
+    write_file(path=report_file_path_html, content=html_body)
+    print(f"Daily report (HTML) saved to {report_file_path_html}")
+
+    # 메일 내용 파일로 저장 (Obsidian Markdown)
+    obsidian_report_dir = f"{obsidian_vault_path}/00_AI_Wiki/2026-cop-physical-ai/Daily_Reports"
+    obsidian_report_file_path = f"{obsidian_report_dir}/{today_info['today_date']}.md"
+    
+    # HTML을 순수 텍스트(마크다운)로 변환
+    plaintext_content = html_to_plaintext(html_body)
+    
+    # Markdown 헤더 추가
+    markdown_content = f"# CoP Physical AI 일일 보고 {today_info['vol_num']} | {today_info['today_date']} ({today_info['today_weekday']})\\n\\n" + plaintext_content
+
+    write_file(path=obsidian_report_file_path, content=markdown_content)
+    print(f"Daily report (Markdown) saved to {obsidian_report_file_path}")
 
     # 이메일 발송
     recipients = ["xaqwer@gmail.com", "insoo.kum@hyundaielevator.com", "giheon.jang@hyundaielevator.com"]
