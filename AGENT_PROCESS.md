@@ -76,7 +76,8 @@
 
 ## ⚙️ 자동화 크론 스케줄
 
-> **플랫폼**: OpenClaw (https://openclaw.ai)  
+> **플랫폼**: **Hermes Agent** (로컬 Mac Mini 24/7, Gemini 2.5 Flash 무료 백엔드)  
+> **상태**: 2026-04-29 OpenClaw → Hermes 마이그레이션 완료 ✅  
 > **시간 기준**: KST (Asia/Seoul)
 
 | 크론 ID | 이름 | 스케줄 | 역할 |
@@ -175,6 +176,7 @@ git config --global url."https://$(gh auth token)@github.com/".insteadOf "https:
 
 | 날짜 | 변경 내용 | 변경자 |
 |------|-----------|--------|
+| 2026-04-29 | **OpenClaw → Hermes Agent 마이그레이션 완료**. 로컬 Mac (24/7) + Gemini Flash 무료로 전환. 4개 cron 정상 가동 확인. fcc-proxy 배제. | Claude Code (Mac M5) |
 | 2026-04-21 | 최초 작성. 레포 구조화, 크론 3종 + 주간검수 설정 | AI Agent (OpenClaw) |
 | 2026-04-21 | 리서치 drafts/latest-tech 2단계 구조 추가 | AI Agent (OpenClaw) |
 | 2026-04-21 | SAMPLE_STATUS.md, CONTRIBUTING.md, AGENT_PROCESS.md 추가 | AI Agent (OpenClaw) |
@@ -190,4 +192,4 @@ git config --global url."https://$(gh auth token)@github.com/".insteadOf "https:
 4. `research/decisions/README.md` 로 미결 결정 사항 파악
 5. `docs/05_data-collection/TRACKING.md` 로 진행률 확인
 6. GitHub 최신 커밋 이력으로 마지막 작업 확인
-7. 크론 스케줄은 OpenClaw에서 관리됨 (다른 툴은 수동 실행)
+7. **크론 스케줄은 Hermes Agent (로컬)에서 자동 관리됨** — `hermes cron list`로 확인 가능
