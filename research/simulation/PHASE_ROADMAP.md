@@ -7,11 +7,47 @@
 
 ## 환경 사양
 - **머신**: Mac Mini M5 16GB (Apple Silicon ARM64)
-- **시뮬레이터**: MuJoCo 3.x (네이티브)
+- **시뮬레이터**: MuJoCo 3.x (네이티브, **3.8.0** 설치됨)
 - **모델**: TheRobotStudio SO-ARM100/101 MJCF
 - **모델 URL**: https://github.com/TheRobotStudio/SO-ARM100
-- **언어**: Python 3.12 + uv
+- **언어**: Python 3.14 (.venv) + uv
 - **학습 프레임**: HuggingFace LeRobot (이미 설치됨)
+
+## 🐍 Python 가상환경 (.venv) — 절대규칙
+
+**모든 Python 작업은 `.venv` 안에서 실행되어야 한다.** 시스템 Python에는 mujoco 등의 패키지가 없다.
+
+### .venv 위치
+```
+/Users/markmini/Documents/dev/2026-cop-physical-ai/.venv
+```
+
+### 사용 패턴 (둘 중 하나, 권장: B)
+
+```bash
+# 방법 A — 활성화 후 사용 (한 셸에서 여러 명령)
+cd /Users/markmini/Documents/dev/2026-cop-physical-ai
+source .venv/bin/activate
+python3 -c "import mujoco; print(mujoco.__version__)"
+
+# 방법 B — .venv python 절대경로 (단일 명령, subshell 안전)
+/Users/markmini/Documents/dev/2026-cop-physical-ai/.venv/bin/python3 -c "import mujoco; print(mujoco.__version__)"
+```
+
+### 패키지 설치
+```bash
+cd /Users/markmini/Documents/dev/2026-cop-physical-ai
+source .venv/bin/activate
+uv pip install <패키지명>
+```
+
+### 크론 환경 주의사항
+
+크론은 매번 새 셸에서 시작되어 `.venv`가 자동으로 활성화되지 않는다. 따라서 모든 크론 prompt에서 매번:
+1. `.venv` 활성화 (`source .venv/bin/activate`), 또는
+2. `.venv/bin/python3` 절대경로 사용
+
+이 누락되면 `ModuleNotFoundError: No module named 'mujoco'` 에러 발생. 자세한 내용은 SOUL.md 및 jobs.json의 각 크론 prompt 참조.
 
 ---
 

@@ -112,6 +112,28 @@
 - 실기 검증: 학습 weights git push → Orin Nano에서 실기 추론 (별도 머신)
 - Isaac Lab은 Phase 3에서 NVIDIA GPU 필수 → 차년도 별도 서버 도입 검토
 
+### Python 환경 (절대규칙)
+
+| 항목 | 값 |
+|------|-----|
+| Python 버전 | 3.14 (.venv) |
+| 가상환경 | **`/Users/markmini/Documents/dev/2026-cop-physical-ai/.venv`** |
+| 패키지 관리자 | uv |
+| 핵심 패키지 | mujoco 3.8.0, LeRobot |
+
+**모든 Python 작업은 .venv 안에서**. 크론은 stateless 새 셸이므로 매번 활성화 명시 필요.
+
+```bash
+# 권장 — 단일 명령 시 .venv python 절대경로
+/Users/markmini/Documents/dev/2026-cop-physical-ai/.venv/bin/python3 <스크립트>
+
+# 또는 — 여러 명령 시 활성화 후
+source /Users/markmini/Documents/dev/2026-cop-physical-ai/.venv/bin/activate
+python3 <스크립트>
+```
+
+상세 가이드: [`research/simulation/PHASE_ROADMAP.md`](./research/simulation/PHASE_ROADMAP.md) "Python 가상환경 (.venv) — 절대규칙" 섹션
+
 ### Phase 로드맵 (5월~10월)
 
 | Phase | 기간 | 핵심 산출물 |
@@ -131,10 +153,14 @@
 
 ### 1. 시뮬 환경 단계별 구축 (매일 23:00)
 ```
+0. .venv 활성화 (필수, 매번)
+   cd /Users/markmini/Documents/dev/2026-cop-physical-ai
+   source .venv/bin/activate
 1. agent/research-log/{어제 날짜}.md 확인 → 진척 상태 파악
 2. research/simulation/PHASE_ROADMAP.md 확인 → 오늘 단계 식별
 3. 오늘 단계 작업 수행:
    - MuJoCo 환경 구축 / MJCF 수정 / 시뮬 코드 작성
+   - 무거운 작업은 claude -p '...' 호출 (Claude Code 구독 활용)
    - 결과물을 research/simulation/<단계명>.md 에 기록
 4. 동시에 ~/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI/2026-MM/ 에 복사
 5. git commit -m "🛠 [시뮬] <단계명> — YYYY-MM-DD"
