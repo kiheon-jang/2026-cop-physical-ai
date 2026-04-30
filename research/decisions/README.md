@@ -6,7 +6,8 @@
 
 | 날짜 | 주제 | 결정 | 결정자 | 근거 | 관련 리서치 |
 |------|------|------|--------|------|------------|
-| - | - | - | - | - | - |
+| 2026-04-22 / 05-01 확정 | 시뮬레이터 선택 | ✅ MuJoCo 3.x (Phase 0~2) + Isaac Lab (Phase 3+, 차년도) | Hermes Agent + 사용자 | Mac M5 호환, 단독 학습 가능 | [2026-04-22_simulator-selection.md](./2026-04-22_simulator-selection.md) |
+| 2026-04-29 | 자동화 플랫폼 | ✅ Hermes Agent (로컬 Mac Mini M5) | 사용자 | 비용 최적화, 24/7 운영 | - |
 
 ## 결정 상태 정의
 - ✅ **채택** — 실제 프로젝트에 적용
@@ -43,9 +44,13 @@
 
 ## 현재 검토 대기 항목
 
-| 주제 | 상태 | 담당 |
-|------|------|------|
-| ACT vs Diffusion Policy — 첫 학습 정책 선택 | 🔄 검토중 | - |
-| Isaac Sim vs Isaac Lab — 시뮬레이터 선택 | 🔄 검토중 | - |
-| LeKiwi vs XLeRobot — 모바일 플랫폼 선택 | 🔄 검토중 | - |
-| 카메라 업그레이드 — Logitech C920 vs RealSense | 🔄 검토중 | - |
+| 주제 | 상태 | 담당 | 결정 시기 |
+|------|------|------|----------|
+| ACT vs Diffusion Policy — 첫 학습 정책 선택 | 🔄 검토중 | Hermes Agent | Phase 2 (2026-07) 비교 후 |
+| LeKiwi vs XLeRobot — 모바일 플랫폼 선택 | ⏸️ 보류 | - | Phase 4 (차년도) |
+| 카메라 업그레이드 — Logitech C920 vs RealSense | ⏸️ 보류 | - | 예산 확정 후 |
+| MuJoCo 사내 라이선스 확인 | 🔄 검토중 | 전체 | 2026-05-03 마감 |
+
+### 결정 완료 항목 (참고)
+- ✅ **시뮬레이터 선택** (2026-04-22 / 05-01 확정): MuJoCo (Phase 0~2) + Isaac Lab (Phase 3+, 차년도)
+- ✅ **자동화 플랫폼** (2026-04-29): Hermes Agent (Mac Mini M5 로컬)

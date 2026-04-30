@@ -1,21 +1,25 @@
-# 환경 설정 (Environment)
+# 환경 설정 (env.md)
 
 > 이 문서는 다른 AI 에이전트가 이 프로젝트를 이어받을 때 필요한 **모든 환경 정보**를 담고 있습니다.
+> **최종 업데이트**: 2026-05-01 (Mac Mini M5 / Hermes Agent 환경)
 
 ---
 
-## VM 정보
+## 머신 정보
 
 | 항목 | 값 |
 |------|-----|
-| **VM 이름** | `$OPENCLAW_VM_NAME` (환경변수로 참조) |
-| **Public IP** | `104.210.221.70` |
-| **Provider FQDN** | `xaqwer-6ffab8b1-6148-vm.azure.gensparkclaw.com` |
-| **User Domain** | `ookixght.gensparkclaw.com` |
-| **OS** | Linux (Azure, Ubuntu) |
-| **Shell** | bash |
-| **작업 홈** | `/home/work/` (passwordless sudo) |
-| **워크스페이스** | `/home/work/.openclaw/workspace/` |
+| **머신** | Mac Mini M5 16GB (사용자 소유) |
+| **OS** | macOS (Apple Silicon ARM64) |
+| **Shell** | zsh |
+| **사용자 홈** | `/Users/markmini/` |
+| **워크스페이스** | `/Users/markmini/Documents/dev/` |
+| **로컬 레포** | `/Users/markmini/Documents/dev/2026-cop-physical-ai` |
+| **자동화 에이전트** | Hermes Agent (`~/.hermes/`, 24/7 가동) |
+| **메인 모델** | Claude Code → NVIDIA NIM 라우팅 (smart_model_routing) |
+| **보조 모델** | Gemini 2.5 Flash (간단한 요청용, 무료 RPM 15) |
+
+> ⚠️ **레거시 환경 제거**: OpenClaw Azure VM (104.210.221.70, /home/work/.openclaw/workspace/) 은 2026-04-29부로 폐기됨.
 
 ---
 
@@ -26,22 +30,37 @@
 | **레포 URL** | `https://github.com/kiheon-jang/2026-cop-physical-ai` |
 | **계정** | `kiheon-jang` |
 | **인증 방식** | `gh` CLI (사전 로그인 완료) |
-| **로컬 경로** | `/home/work/.openclaw/workspace/2026-cop-physical-ai` |
+| **로컬 경로** | `/Users/markmini/Documents/dev/2026-cop-physical-ai` |
 
-### Git Push 전 반드시 실행
-
-```bash
-git remote set-url origin https://$(gh auth token)@github.com/kiheon-jang/2026-cop-physical-ai.git
-```
-
-### 외부 클론 시 (크론 isolated 세션 등)
+### Git push 전 반드시 실행
 
 ```bash
 git config --global url."https://$(gh auth token)@github.com/".insteadOf "https://github.com/"
-git clone https://github.com/kiheon-jang/2026-cop-physical-ai.git /tmp/cop-repo \
-  || (cd /tmp/cop-repo && git pull)
-cd /tmp/cop-repo
 ```
+
+### 외부 동작 (크론 등 isolated 세션) 시
+
+```bash
+cd /Users/markmini/Documents/dev/2026-cop-physical-ai
+git pull origin main
+# 작업 수행
+git add -A
+git commit -m "..."
+git push origin main
+```
+
+---
+
+## Obsidian Vault
+
+| 항목 | 값 |
+|------|-----|
+| **Vault 경로** | `~/Documents/second-brain/` |
+| **AI Wiki (쓰기 가능)** | `~/Documents/second-brain/00_AI_Wiki/` |
+| **CoP 폴더** | `~/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI/` |
+| **월별 폴더** | `~/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI/2026-MM/` |
+
+> 매일 23:00, 23:30 크론이 GitHub와 Obsidian Vault를 동시 갱신.
 
 ---
 
@@ -49,96 +68,110 @@ cd /tmp/cop-repo
 
 | 항목 | 값 |
 |------|-----|
-| **발신자 주소** | `xaqwer@genspark.email` |
-| **발송 CLI** | `gsk vm_email send` |
-| **from 플래그** | `-f $OPENCLAW_VM_NAME` (반드시 포함) |
+| **발송 방식** | `scripts/daily-report/generate_daily_report.py` (Hermes 자동 실행) |
+| **메일 템플릿** | `docs/01_overview/mail-template.md`, `docs/01_overview/mail-template.html` |
+| **수신자 (3명)** | `xaqwer@gmail.com`, `insoo.kum@hyundaielevator.com`, `giheon.jang@hyundaielevator.com` |
 
-### 수신자 목록 (allowlist 등록 완료)
+> ⚠️ **레거시 제거**: `gsk vm_email send` 명령어는 OpenClaw 전용. 더 이상 사용하지 않음.
+
+### 수신자 상세
 
 | 이름 | 이메일 |
 |------|--------|
-| 장기헌 (CoP 리더) | `xaqwer@gmail.com` |
+| 장기헌 (CoP 리더, 본인) | `xaqwer@gmail.com` |
 | 금인수 | `insoo.kum@hyundaielevator.com` |
-| 장기헌(현대) | `giheon.jang@hyundaielevator.com` |
-
-### 발송 명령어 예시
-
-```bash
-gsk vm_email send "xaqwer@gmail.com" \
-  -s "[CoP Physical AI] 제목" \
-  -b "$HTML_OR_TEXT_BODY" \
-  -f $OPENCLAW_VM_NAME
-```
-
-> ⚠️ **주의**: `-f $OPENCLAW_VM_NAME` 없이 보내면 발신자가 잘못 지정될 수 있습니다.
+| 장기헌 (회사) | `giheon.jang@hyundaielevator.com` |
 
 ---
 
-## 웹 서비스
-
-| 서비스 | URL | 설명 |
-|--------|-----|------|
-| 결정 폼 | `https://ookixght.gensparkclaw.com/decisions.html` | 팀원 기술결정 입력 폼 |
-| 메일 미리보기 | `https://ookixght.gensparkclaw.com/mail-preview.html` | 메일 템플릿 확인용 |
-| 정적 파일 루트 | `/var/www/html/` | Caddy가 서빙 (caddy 유저 권한) |
-
-### Caddy 설정 파일
-
-```
-/etc/caddy/conf.d/custom.caddy
-```
-
-```caddy
-ookixght.gensparkclaw.com {
-    root * /var/www/html
-    file_server
-    encode gzip
-}
-```
-
-> 파일 수정 후 반영: `sudo systemctl reload caddy`
-
----
-
-## 하드웨어 (물리 로봇)
+## 하드웨어 (물리 로봇 — Mac Mini와 별도)
 
 | 항목 | 값 |
 |------|-----|
 | **로봇 모델** | SO-ARM101 (Leader + Follower) |
 | **Robot ID** | `hdel_iot_01` |
-| **Follower 포트** | `/dev/tty.usbmodem5AE60573201` |
+| **Follower 포트** | `/dev/tty.usbmodem5AE60573201` (실기 옆 머신 기준) |
 | **Leader 포트** | `/dev/tty.usbmodem5AE60537131` |
-| **모터** | Feetech STS3215 × 6 |
-| **컴퓨터** | NVIDIA Orin Nano Super + Raspberry Pi 5 |
-| **카메라** | 웹캠 2개 (Top + Gripper) |
+| **모터** | Feetech STS3215 × 6 (Follower 12V), STS3215 × 5 (Leader 7.4V) |
+| **추론 머신** | NVIDIA Orin Nano Super (실기 옆) |
+| **운영 보조** | Raspberry Pi 5 |
+| **카메라** | 웹캠 2개 (Top + Gripper, 실기 옆 머신에 연결) |
 
-> ⚠️ 하드웨어는 VM에서 직접 제어 불가. 팀원이 현장에서 LeRobot 명령어로 조작.
+> ⚠️ Mac Mini는 시뮬+학습 전담. 실기는 별도 머신(Orin Nano)에서 추론.
+> 실기 카메라 캘리브레이션값은 `agent/external-dependencies.md` 의 외부 의존 항목으로 관리.
+
+---
+
+## 시뮬레이터 환경 (Mac Mini)
+
+| 항목 | 값 |
+|------|-----|
+| **시뮬레이터** | MuJoCo 3.x (Apple Silicon 네이티브) |
+| **모델** | TheRobotStudio SO-ARM100/101 MJCF |
+| **모델 URL** | `https://github.com/TheRobotStudio/SO-ARM100` |
+| **Python** | 3.12 + uv |
+| **프레임워크** | HuggingFace LeRobot |
+| **렌더링** | `mujoco.Renderer` (Apple Metal/OpenGL 백엔드) |
+| **카메라** | 시뮬 가상 카메라 2대 (`<camera mode="fixed">`, `<camera>` 그리퍼 attach) |
+
+설치:
+```bash
+cd /Users/markmini/Documents/dev/2026-cop-physical-ai
+uv pip install mujoco
+git clone https://github.com/TheRobotStudio/SO-ARM100.git ~/dev/so-arm100-models
+```
 
 ---
 
 ## 주요 CLI 도구
 
-| 도구 | 용도 | 설치 위치 |
-|------|------|----------|
-| `gsk` | 웹검색, 이미지생성, 이메일 발송 | pre-installed |
-| `gh` | GitHub API 호출, 인증 | pre-installed |
-| `openclaw` | 크론 관리, 세션 | pre-installed |
-| `python3` | 스크립트 실행 | pre-installed |
-| `caddy` | HTTPS 정적 서빙 | pre-installed |
+| 도구 | 용도 | 설치 |
+|------|------|------|
+| `gh` | GitHub API 호출, 인증 | brew |
+| `hermes` | Hermes Agent CLI | uv tool install |
+| `python3` | 스크립트 실행 | brew (3.12) |
+| `uv` | Python 패키지 관리 | brew |
+| `mujoco` | 시뮬레이터 (Python 패키지) | uv pip install |
+| `git` | 버전 관리 | macOS 내장 |
 
 ---
 
-## OpenClaw 크론 플랫폼 주의사항
+## Hermes Agent 운영
 
-> ⚠️ **크론은 OpenClaw 플랫폼에 등록된 Job입니다.**  
-> 다른 AI 도구(Claude Code, Codex 등)에서는 자동 실행되지 않습니다.  
-> 새 플랫폼으로 이전 시 → [cron-jobs.md](./cron-jobs.md) 참조하여 수동 재등록 필요.
+> **크론은 Hermes Agent (Mac Mini M5)에서 자동 관리됩니다.**
 
-### 크론 관리 명령어
+### 크론 관리
 
 ```bash
-openclaw cron list                    # 전체 목록
-openclaw cron run <jobId>             # 즉시 실행
-openclaw cron update <jobId> [opts]   # 수정
-openclaw cron remove <jobId>          # 삭제
+# 게이트웨이 상태 확인
+launchctl list | grep hermes
+
+# 크론 목록 (jobs.json 직접 확인)
+cat ~/.hermes/cron/jobs.json | python3 -m json.tool
+
+# 또는 hermes CLI
+hermes cron list
 ```
+
+### 설정 파일
+
+- 메인 설정: `~/.hermes/config.yaml`
+- 환경변수: `~/.hermes/.env`
+- 크론 작업: `~/.hermes/cron/jobs.json`
+- 로그: `~/.local/logs/hermes-*.log`
+
+### 권한
+
+- macOS Full Disk Access: Terminal에 부여 (필요시)
+- Touch ID sudo: `/etc/pam.d/sudo_local` 에 `auth sufficient pam_tid.so`
+- Hermes config: `terminal.sudo_password: ""` (passwordless 시도)
+
+---
+
+## 변경 이력
+
+| 날짜 | 변경 |
+|------|------|
+| 2026-04-21 | 최초 작성 (OpenClaw Azure VM 기준) — 레거시 |
+| 2026-04-29 | OpenClaw → Hermes Agent (Mac Mini M5) 마이그레이션 |
+| 2026-05-01 | env.md 전면 재작성. Mac Mini 환경, MuJoCo 시뮬, Obsidian Vault 경로 추가. gsk/openclaw 레거시 명령어 제거 |

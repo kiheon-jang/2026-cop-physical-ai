@@ -2,7 +2,18 @@
 created: 2026-01-14 10:29
 tags: 
 aliases: []
+status: HISTORICAL — 초기 기획 문서 (2026-01-14 작성)
 ---
+
+> ⚠️ **이 문서는 초기 기획 단계(2026-01)의 요구사항입니다.** 현재(2026-05-01) 기준으로 일부 내용은 진화했습니다:
+> - **시뮬레이터**: IsaacSim → **MuJoCo 3.x** (Phase 0~2 메인) + Isaac Lab (차년도)
+> - **자동화 플랫폼**: 외부 클라우드 → **Hermes Agent (로컬 Mac Mini M5)**
+> - **현재 활성 계획**: [`research/simulation/PHASE_ROADMAP.md`](../../research/simulation/PHASE_ROADMAP.md) 참조
+>
+> 이 문서는 **역사 기록**으로 보존됩니다. 신규 에이전트는 PHASE_ROADMAP.md 와 AGENT_PROCESS.md 를 우선 참조하세요.
+
+---
+
 사내 CoP 학습조직을 진행 하려고해 준비과정 및 상세 Action Plan 과 도달하려고하는 목표 등을 아래의 간단하게 리서치한 내용을 바탕으로 준비해줘
 
 ---

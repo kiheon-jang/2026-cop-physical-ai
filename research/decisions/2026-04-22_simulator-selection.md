@@ -1,9 +1,13 @@
-# [결정] 시뮬레이터 선택 — Phase 3 강화학습 환경
+# [결정] 시뮬레이터 선택 — Phase 0~5 전체 로드맵
 
-- **날짜**: 2026-04-22
-- **결정**: ✅ 채택 (Isaac Lab + 경량 대안 MuJoCo 병행)
-- **결정자**: CoPAgent (AI 사전 조사)
-- **적용 시기**: Phase 3 (시뮬레이션 강화학습)
+- **날짜**: 2026-04-22 (사전 조사) / **2026-05-01 최종 확정**
+- **결정**: ✅ 채택
+  - **Phase 0~5 (메인)**: MuJoCo 3.x (Apple Silicon 네이티브)
+  - **Phase 3+ (차년도, 대규모 RL)**: Isaac Lab (NVIDIA GPU 별도 서버)
+- **결정자**: Hermes Agent (AI 조사) + 사용자 (확정)
+- **적용 시기**: Phase 0 (2026-05) 시작, 진행 중
+
+> **2026-05-01 변경 사유**: Mac Mini M5 (Apple Silicon)에서 Isaac Lab 미지원 확인 → MuJoCo로 메인 시뮬레이터 변경. Isaac Lab은 차년도 별도 GPU 서버 도입 시 사용.
 
 ---
 

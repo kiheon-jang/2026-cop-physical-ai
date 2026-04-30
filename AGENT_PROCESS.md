@@ -49,8 +49,8 @@
 │   ├── 04_teleoperation/   Follower/Leader/카메라 (✅ 완료)
 │   ├── 05_data-collection/ 데이터 수집 가이드 + TRACKING.md
 │   ├── 06_imitation-learning/ ACT/Diffusion Policy 학습
-│   ├── 07_simulation-rl/   Isaac Sim 강화학습 (예정)
-│   └── 08_expansion/       LeKiwi/XLeRobot 확장 (예정)
+│   ├── 07_simulation-rl/   시뮬 강화학습 (MuJoCo Phase 0~2 + Isaac Lab Phase 3+)
+│   └── 08_expansion/       LeKiwi/XLeRobot 확장 (차년도)
 │
 ├── research/
 │   ├── drafts/             ← 자동 생성 초안 (매일 밤 크론)
@@ -94,15 +94,23 @@
 > **보고용 트랙(월별 계획서)** 과 **실제 연구 트랙(시뮬 선행)** 을 분리합니다.
 > 보고용은 매월 보고 기준에 맞춰 증거만 추출, 실제 연구는 빠르게 선행 진행.
 
-### 시뮬레이터 결정 (2026-05-01)
+### 시뮬레이터 결정 (2026-05-01 확정)
 
-| 항목 | 결정 |
-|------|------|
-| 시뮬레이터 | **MuJoCo 3.x** (Apple Silicon 네이티브) |
-| 변경 사유 | Isaac Lab/Sim은 NVIDIA GPU 필수 → Mac M5 미지원 |
-| 모델 | TheRobotStudio SO-ARM100/101 MJCF 공식 모델 |
-| 학습 환경 | Mac Mini M5 16GB (단독으로 시뮬+학습+메트릭 처리 가능) |
-| 실기 검증 | 학습 모델 git push → Orin Nano에서 실기 추론 (별도) |
+| Phase | 기간 | 시뮬레이터 | 용도 |
+|-------|------|-----------|------|
+| Phase 0 | 5월 | **MuJoCo 3.x** | 환경 셋업, 카메라/관절 검증 |
+| Phase 1 | 6월 | **MuJoCo 3.x** | 200 에피소드 합성, ACT 사전학습 |
+| Phase 2 | 7월 | **MuJoCo + Domain Randomization** | Sim2Real 검증 |
+| Phase 3 | 8월 | **MuJoCo** | PCB 조정 시뮬 학습 |
+| Phase 4 | 9월 | **MuJoCo** | RS232 결선 정밀 시뮬 |
+| Phase 5 | 10월 | (시뮬 종료) | 실기 통합 시연 |
+| 차년도 | 2027~ | **Isaac Lab** | 대규모 RL 학습 (별도 GPU 서버) |
+
+**핵심 결정**:
+- Mac Mini M5 (16GB, Apple Silicon) 단독으로 Phase 0~5 진행 가능
+- 모델: TheRobotStudio SO-ARM100/101 MJCF 공식 모델
+- 실기 검증: 학습 weights git push → Orin Nano에서 실기 추론 (별도 머신)
+- Isaac Lab은 Phase 3에서 NVIDIA GPU 필수 → 차년도 별도 서버 도입 검토
 
 ### Phase 로드맵 (5월~10월)
 
