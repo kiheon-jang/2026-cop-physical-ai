@@ -82,66 +82,102 @@
 
 | 크론 ID | 이름 | 스케줄 | 역할 |
 |---------|------|--------|------|
-| `dc257031` | 일일 리서치 초안 (drafts) | 매일 23:00 KST | `research/drafts/`에 요일별 주제 초안 생성 |
-| `b2e623a4` | 일일 샘플코드 | 매일 23:30 KST | `samples/`에 샘플 작성 + 실행 검증 + SAMPLE_STATUS 업데이트 |
-| `dcbf84a5` | 아침 보고 메일 | 매일 07:00 KST | 매거진 형식 보고 메일 3명 발송 (검토대기 항목 포함) |
-| `ed5aff22` | 주간 검수 + 최신화 | 매주 일요일 22:00 KST | drafts→latest-tech 이동, 오래된 리서치 갱신, SAMPLE_STATUS 전체 업데이트 |
-| `20ee15d4` | Isaac Sim 사전 조사 | 2026-04-22 23:00 KST (1회) | `docs/07_simulation-rl/` + `research/decisions/` 채움 |
+| `9ad85007cf27` | 시뮬 환경 단계별 구축 | 매일 23:00 KST | `research/simulation/`에 Phase별 환경 구축 (MuJoCo) |
+| `85d322d3b37c` | 시뮬 테스트 + 메트릭 수집 | 매일 23:30 KST | `agent/research-log/`에 테스트 결과 기록 (성공률, 추론시간 등) |
+| `fb6d7cb26650` | 아침 보고 메일 | 매일 07:00 KST | 매거진 형식 보고 메일 3명 발송 (외부 의존 항목 포함) |
+| `0b1d4a7b2bf7` | 주간 정리 + 보고용 증거 식별 | 매주 일요일 22:00 KST | `agent/report-evidence/2026-MM/INDEX.md` 갱신 |
 
 ---
 
-## 🔄 작업 프로세스 상세
+## 🎯 실제 연구 트랙 (선행) — 2026-05-01 변경
 
-### 1. 일일 리서치 초안 (매일 23:00)
-```
-1. gsk search 로 해당 요일 주제 검색 (2025~2026 최신)
-2. research/drafts/YYYY-MM-DD_<주제>.md 작성
-3. git commit -m "🔬 [draft] <주제> — YYYY-MM-DD"
-4. git push
-```
-**요일별 주제 순환:**
-- 월: ACT vs Diffusion Policy vs π0 벤치마크 비교
-- 화: Isaac Lab / Isaac Sim 강화학습 최신 동향
-- 수: Sim2Real 격차 해소 최신 기법
-- 목: VLA(Vision-Language-Action) 모델 최신 논문
-- 금: 모방학습 데이터 효율화 기법
-- 토: LeRobot 커뮤니티 최신 업데이트
-- 일: 경쟁사/유사 프로젝트 동향
+> **보고용 트랙(월별 계획서)** 과 **실제 연구 트랙(시뮬 선행)** 을 분리합니다.
+> 보고용은 매월 보고 기준에 맞춰 증거만 추출, 실제 연구는 빠르게 선행 진행.
 
-### 2. 일일 샘플코드 (매일 23:30)
+### 시뮬레이터 결정 (2026-05-01)
+
+| 항목 | 결정 |
+|------|------|
+| 시뮬레이터 | **MuJoCo 3.x** (Apple Silicon 네이티브) |
+| 변경 사유 | Isaac Lab/Sim은 NVIDIA GPU 필수 → Mac M5 미지원 |
+| 모델 | TheRobotStudio SO-ARM100/101 MJCF 공식 모델 |
+| 학습 환경 | Mac Mini M5 16GB (단독으로 시뮬+학습+메트릭 처리 가능) |
+| 실기 검증 | 학습 모델 git push → Orin Nano에서 실기 추론 (별도) |
+
+### Phase 로드맵 (5월~10월)
+
+| Phase | 기간 | 핵심 산출물 |
+|-------|------|------------|
+| **Phase 0** 시뮬 환경 셋업 | 5월 (4주) | MJCF + 카메라 2대 + 관절 검증 |
+| **Phase 1** 사전학습 | 6월 (4주) | 시뮬 200 ep + ACT 학습 + 실기 fine-tune |
+| **Phase 2** Sim2Real 검증 | 7월 (4주) | DR 적용 + ACT/DP 비교 |
+| **Phase 3** PCB 조정 | 8월 (4주) | PCB MJCF + 학습 + 시뮬 검증 |
+| **Phase 4** RS232 결선 | 9월 (4주) | 정밀 삽입 (±0.5mm) |
+| **Phase 5** 통합 시연 | 10월 (4주) | 사내 발표 + 영상 |
+
+상세 내역: `research/simulation/PHASE_ROADMAP.md`
+
+---
+
+## 🔄 작업 프로세스 상세 (2026-05-01 재정의)
+
+### 1. 시뮬 환경 단계별 구축 (매일 23:00)
 ```
-1. 요일별 주제에 맞는 샘플 코드 작성
-2. 실제 실행하여 전체 PASS 확인
-3. SAMPLE_STATUS.md 업데이트
-4. git commit -m "💻 [샘플] <설명> — YYYY-MM-DD"
-5. git push
+1. agent/research-log/{어제 날짜}.md 확인 → 진척 상태 파악
+2. research/simulation/PHASE_ROADMAP.md 확인 → 오늘 단계 식별
+3. 오늘 단계 작업 수행:
+   - MuJoCo 환경 구축 / MJCF 수정 / 시뮬 코드 작성
+   - 결과물을 research/simulation/<단계명>.md 에 기록
+4. 동시에 ~/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI/2026-MM/ 에 복사
+5. git commit -m "🛠 [시뮬] <단계명> — YYYY-MM-DD"
+6. git push
 ```
-**완성도 기준 (CONTRIBUTING.md 참조):**
-- ⭐ 초안: 구조만 있음, 실행 안 됨
-- ⭐⭐ 기본: 하드웨어 없이 실행됨, 일부 PASS
-- ⭐⭐⭐ 완성: 전체 PASS, 주석 완비, 실사용 가능
+**5월 W1 단계 예시:**
+- 5/1: MuJoCo 설치 + Apple Silicon 호환성 검증
+- 5/2: SO-ARM100 MJCF 다운로드 + viewer 동작 확인
+- 5/3: 6-DoF 관절 동작 + joint limit 적용
+- 5/4~5: 그리퍼 추가 + 단순 동작 시연
+- 5/6~7: 5월 W1 정리 + W2 카메라 셋업 준비
+
+### 2. 시뮬 테스트 + 메트릭 수집 (매일 23:30)
+```
+1. 오늘 23:00에 구축한 환경 실행 테스트
+2. 메트릭 측정:
+   - 시뮬 동작 성공률
+   - 추론 속도 (ms)
+   - 시뮬-실기 관절각 오차 (Phase 1+ 부터)
+   - 학습 손실 (학습 시작 이후)
+3. agent/research-log/YYYY-MM-DD.md 작성 (메트릭 + 관찰 + 다음 단계)
+4. 새로운 외부 의존 항목 발견 시 agent/external-dependencies.md 추가
+5. git commit -m "📊 [로그] YYYY-MM-DD 시뮬 테스트 — <한줄 요약>"
+6. git push
+```
 
 ### 3. 아침 보고 메일 (매일 07:00)
 ```
 1. GitHub 최신 커밋 이력 확인
-2. research/drafts/ 또는 latest-tech/ 신규 파일 요약
-3. TRACKING.md 데이터 수집 현황 확인
-4. decisions/README.md 검토 대기 항목 확인
-5. 매거진 형식 메일 작성 (초심자 친화적 리서치 요약 포함)
-6. 3명에게 발송: xaqwer@gmail.com, insoo.kum@hyundaielevator.com, giheon.jang@hyundaielevator.com
+2. agent/research-log/{어제 날짜}.md 읽기
+3. research/simulation/ 신규 파일 확인
+4. agent/external-dependencies.md 의 [ ] 미완료 항목 추출 → [4-A] 섹션
+5. agent/report-evidence/2026-MM/INDEX.md 확인 → 보고용 증거 후보
+6. docs/01_overview/mail-template.md 형식대로 메일 작성
+7. 3명에게 발송: xaqwer@gmail.com, insoo.kum@hyundaielevator.com, giheon.jang@hyundaielevator.com
 ```
+**핵심 변경**: [4-A] 외부 의존 섹션 추가 — 사용자 수동 작업 항목을 매일 노출.
 
-### 4. 주간 검수 + 최신화 (매주 일요일 22:00)
+### 4. 주간 정리 + 보고용 증거 식별 (매주 일요일 22:00)
 ```
-1. research/drafts/ 전체 파일 품질 검토
-   - CONTRIBUTING.md 기준 통과 → latest-tech/ 로 이동
-   - 기준 미달 → 보완 후 이동 또는 삭제
-2. latest-tech/ 기존 파일 최신성 확인
-   - 6개월 이상 된 내용 → 갱신 또는 DEPRECATED 표시
-3. SAMPLE_STATUS.md 전체 업데이트
-4. research/CHANGELOG.md 업데이트
-5. git commit -m "🔄 [주간검수] YYYY-MM-DD 주간 정리"
-6. push
+1. agent/research-log/ 일주일치 파일 모아서 진행률 종합
+2. research/simulation/ 단계 진행 상태 업데이트
+3. agent/report-evidence/2026-MM/INDEX.md 갱신:
+   - 이번 주 결과 중 보고서에 인용 가능한 메트릭/스크린샷 식별
+   - 해당 월 보고서의 어느 섹션과 매핑되는지 표시
+4. agent/external-dependencies.md 정리:
+   - 7일 지난 완료 항목을 "완료 이력"으로 이동
+   - 새 외부 의존 항목 추가
+5. SAMPLE_STATUS.md 전체 업데이트
+6. git commit -m "🔄 [주간정리] YYYY-MM-DD W주차 — 보고용 증거 X건"
+7. push
 ```
 
 ---
@@ -164,11 +200,13 @@ git config --global url."https://$(gh auth token)@github.com/".insteadOf "https:
 
 | 상태 | 항목 | 담당 |
 |------|------|------|
-| 🔄 진행중 | Phase 2: 데이터 수집 50 에피소드 | 팀 |
-| ⏳ 대기 | ACT vs Diffusion Policy 결정 | 팀 결정 필요 |
-| ⏳ 대기 | Isaac Sim vs Isaac Lab 결정 | 2026-04-22 크론 조사 후 |
-| ⏳ 대기 | LeKiwi vs XLeRobot 결정 | Phase 4 |
-| ⏳ 대기 | 카메라 업그레이드 결정 | 예산 확인 필요 |
+| 🔄 진행중 | **Phase 0**: 시뮬 환경 셋업 (5월) — MuJoCo + SO-ARM101 MJCF | Hermes Agent |
+| ⏳ 대기 | MuJoCo 사내 라이선스 확인 (마감 5/3) | 전체 |
+| ⏳ 대기 | 웹캠 캘리브레이션값 측정 (마감 5/14) | 실기 담당 |
+| ⏳ 대기 | SO-ARM101 실측 무게/마찰 측정 (마감 5/21) | 실기 담당 |
+| ⏳ 대기 | LeKiwi vs XLeRobot 결정 | Phase 4 (차년도) |
+
+**상세**: [`agent/external-dependencies.md`](./agent/external-dependencies.md)
 
 ---
 
@@ -176,6 +214,7 @@ git config --global url."https://$(gh auth token)@github.com/".insteadOf "https:
 
 | 날짜 | 변경 내용 | 변경자 |
 |------|-----------|--------|
+| 2026-05-01 | **시뮬레이터 결정 변경**: Isaac Lab → MuJoCo 3.x (Mac M5 호환). 보고용/실제 연구 트랙 분리. Phase 0~5 로드맵 (5~10월). 4개 크론 prompt 전부 재작성 (시뮬 단계별). 메일 [4-A] 외부 의존 섹션 신설. | Hermes Agent (Mac M5) |
 | 2026-04-29 | **OpenClaw → Hermes Agent 마이그레이션 완료**. 로컬 Mac (24/7) + Gemini Flash 무료로 전환. 4개 cron 정상 가동 확인. fcc-proxy 배제. | Claude Code (Mac M5) |
 | 2026-04-21 | 최초 작성. 레포 구조화, 크론 3종 + 주간검수 설정 | AI Agent (OpenClaw) |
 | 2026-04-21 | 리서치 drafts/latest-tech 2단계 구조 추가 | AI Agent (OpenClaw) |
