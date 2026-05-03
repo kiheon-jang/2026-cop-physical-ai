@@ -822,6 +822,7 @@ def main():
             "xaqwer@gmail.com",
             "insoo.kum@hyundaielevator.com",
             "giheon.jang@hyundaielevator.com",
+            "kimeun091473@gmail.com",
         ]
         print(f"[정상 발송] {len(recipients)}명")
 
