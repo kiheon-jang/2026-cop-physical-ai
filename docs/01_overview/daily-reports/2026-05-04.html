@@ -135,7 +135,7 @@
   <div class="header">
     <div class="header-top">
       <span class="badge">🤖 AI Research Agent</span>
-      <span class="vol"><!--VOL_NUM--> &nbsp;|&nbsp; <!--TODAY_DATE--></span>
+      <span class="vol">Vol.014 &nbsp;|&nbsp; 2026-05-04 (월)</span>
     </div>
     <div class="title">CoP Physical AI</div>
     <div class="subtitle">일일 연구 보고</div>
@@ -145,13 +145,13 @@
   <!-- Phase 진행 -->
   <div class="progress-card">
     <div class="progress-label">
-      <span class="progress-title">🚀 <!--PHASE_TITLE--></span>
-      <span class="progress-count"><!--PROGRESS_COUNT--></span>
+      <span class="progress-title">🚀 Phase 0 (5월) — 시뮬 환경 셋업</span>
+      <span class="progress-count">W1 MuJoCo + 모델 import</span>
     </div>
     <div class="progress-bar-bg">
-      <div class="progress-bar-fill" style="width: <!--PROGRESS_PERCENT-->%"></div>
+      <div class="progress-bar-fill" style="width: 1%"></div>
     </div>
-    <div class="milestone"><!--MILESTONE--></div>
+    <div class="milestone">오늘: 2026-05-04 · Phase 종료: 05/31</div>
   </div>
 
   <!-- 1. 어제 완료 작업 -->
@@ -159,9 +159,29 @@
     <div class="section-header">
       <span class="section-icon">✅</span>
       <span class="section-title">어제 완료한 작업</span>
-      <span class="section-badge"><!--COMMITS_COUNT--></span>
+      <span class="section-badge">3건</span>
     </div>
-    <!--COMMITS_HTML-->
+    <div class="task-item">
+      <div class="task-num">1</div>
+      <div class="task-content">
+        <div><span class="task-type type-sample">LOG</span><span class="task-title">📊 [로그] 2026-05-03 시뮬 테스트 — 6-DoF 동작 확인</span></div>
+        <div class="task-path">agent/report-evidence/2026-05/INDEX.md · agent/research-log/2026-05-03.md</div>
+      </div>
+    </div>
+    <div class="task-item">
+      <div class="task-num">2</div>
+      <div class="task-content">
+        <div><span class="task-type type-sample">SAMPLE</span><span class="task-title">🛠 [시뮬] 6-DoF 동작 확인 — 2026-05-03</span></div>
+        <div class="task-path">research/simulation/5_3_6dof_viewer_verification.md · research/simulation/video/sim_6dof_animation.mp4</div>
+      </div>
+    </div>
+    <div class="task-item">
+      <div class="task-num">3</div>
+      <div class="task-content">
+        <div><span class="task-type type-docs">DOCS</span><span class="task-title">🔄 [주간정리] 2026-05-03 W1주차 — 보고용 증거 1건</span></div>
+        <div class="task-path">agent/external-dependencies.md · agent/report-evidence/2026-05/INDEX.md</div>
+      </div>
+    </div>
   </div>
 
   <!-- 2.5. 현재 진행 중인 주요 AI 에이전트 작업 -->
@@ -170,7 +190,16 @@
       <span class="section-icon">⚙️</span>
       <span class="section-title">오늘의 시뮬 진척</span>
     </div>
-    <!--SIM_PROGRESS_HTML-->
+    <div class="research-summary">
+      <div class="research-topic">Phase X - WX - 6-DoF 동작 확인</div>
+      <div class="research-oneliner">상세 로그 → <code>agent/research-log/2026-05-03.md</code></div>
+    </div>
+    <div class="why-card">
+      <pre style="margin:0;font-size:11px;color:#94a3b8;white-space:pre-wrap;font-family:monospace;">- 스크립트: sim_headless_6dof_video.py
+- 반복: 1회
+- 메트릭:
+  - 시뮬 동작 성공률: 100% (비디오 생성 성공)</pre>
+    </div>
   </div>
 
   <div class="section">
@@ -178,7 +207,7 @@
       <span class="section-icon">🔴</span>
       <span class="section-title">이슈 / 문제점</span>
     </div>
-    <!--ISSUES_HTML-->
+    <div class="issue-item">`mujoco.viewer` 대신 headless 렌더링 방식으로 6-DoF 관절 움직임 비디오를 성공적으로 생성했습니다.</div>
   </div>
 
   <!-- 3. 외부 의존 / 사용자 수동 작업 (★ 핵심 ★) -->
@@ -188,10 +217,26 @@
       <span class="section-title">외부 의존 / 사용자 수동 작업</span>
       <span class="section-badge">Action Required</span>
     </div>
-    <!--EXTERNAL_DEPS_HTML-->
+    <div class="action-item">
+      <span class="action-dot">📌</span>
+      <span class="action-text">[전체] **MuJoCo 사내 사용 라이선스 확인** <span style="color:#f59e0b;font-size:11px;">(마감 2026-05-03)</span></span>
+    </div>
+    <div class="action-item">
+      <span class="action-dot">📌</span>
+      <span class="action-text">[실기 담당] **웹캠 사양 측정 + 캘리브레이션값 제공** <span style="color:#f59e0b;font-size:11px;">(마감 2026-05-14)</span></span>
+    </div>
+    <div class="action-item">
+      <span class="action-dot">📌</span>
+      <span class="action-text">[실기 담당] **SO-ARM101 실측 무게 + 관절 마찰계수 측정** <span style="color:#f59e0b;font-size:11px;">(마감 2026-05-21)</span></span>
+    </div>
+    <div class="action-item">
+      <span class="action-dot">📌</span>
+      <span class="action-text">[CoP 위원회] **Phase 3/4 차년도 추진 여부 결정** <span style="color:#f59e0b;font-size:11px;">(마감 2026-09-30)</span></span>
+    </div>
     <div class="pending-section">
       <div class="pending-title">⏳ 결정 대기 항목</div>
-      <!--PENDING_DECISIONS_HTML-->
+      <div class="pending-item"><div class="pending-dot"></div><span class="pending-label">ACT vs Diffusion Policy</span><span class="pending-arrow">→</span><span class="pending-desc">첫 학습 정책 선택</span></div>
+      <div class="pending-item"><div class="pending-dot"></div><span class="pending-label">MuJoCo 사내 라이선스 확인</span><span class="pending-arrow">→</span><span class="pending-desc"></span></div>
     </div>
   </div>
 
@@ -199,18 +244,38 @@
   <div class="section">
     <div class="section-header">
       <span class="section-icon">🔬</span>
-      <span class="section-title"><!--PHASE_HEADER--></span>
-      <span class="section-badge"><!--PHASE_BADGE--></span>
+      <span class="section-title">오늘의 시뮬 진척</span>
+      <span class="section-badge">Phase 0</span>
     </div>
     <div class="research-summary">
-      <div class="research-topic"><!--PHASE_TOPIC--></div>
-      <div class="research-oneliner"><!--PHASE_ONELINER--></div>
+      <div class="research-topic">Phase 0 — MuJoCo 시뮬 환경 셋업</div>
+      <div class="research-oneliner">MuJoCo + SO-ARM101 MJCF 모델로 시뮬레이션 환경을 구축하고, viewer로 6-DoF 동작을 검증합니다.</div>
     </div>
     <div class="concept-list">
-      <!--PHASE_STEPS_HTML-->
+      <div class="concept-item">
+        <div class="concept-num">01</div>
+        <div>
+          <div class="concept-name">MuJoCo 3.x</div>
+          <div class="concept-desc">Apple Silicon 네이티브 패키지로 한 줄 설치, 환경변수 불필요</div>
+        </div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-num">02</div>
+        <div>
+          <div class="concept-name">SO-ARM100/101 MJCF</div>
+          <div class="concept-desc">TheRobotStudio 공식 모델, 6-DoF 관절 + 그리퍼</div>
+        </div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-num">03</div>
+        <div>
+          <div class="concept-name">viewer + Renderer</div>
+          <div class="concept-desc">macOS Metal 백엔드로 직접 시뮬 동작 검증</div>
+        </div>
+      </div>
     </div>
     <div class="why-card">
-      <!--PHASE_WHY-->
+      Mac Mini M5 단독으로 Phase 0~5(5~10월)를 진행하기 위한 환경. 실기 카메라 없이 시뮬 가상 카메라만 사용.
     </div>
     <div class="read-more">상세 로그: <a href="https://github.com/kiheon-jang/2026-cop-physical-ai/tree/main/research/simulation">research/simulation/ →</a></div>
   </div>
@@ -221,8 +286,15 @@
       <span class="section-icon">💻</span>
       <span class="section-title">시뮬/학습 스크립트 현황</span>
     </div>
-    <!--SAMPLES_HTML-->
-    <!--SAMPLE_REVIEW_HTML-->
+    <div class="sample-item"><span class="stars">⭐⭐</span><span class="sample-name">run_connection_check.py</span><span class="sample-desc">samples/hardware</span></div>
+    <div class="sample-item"><span class="stars">⭐⭐</span><span class="sample-name">test_data_pipeline.py</span><span class="sample-desc">samples/data-collection</span></div>
+    <div class="sample-item"><span class="stars">⭐⭐</span><span class="sample-name">test_diffusion_training.py</span><span class="sample-desc">samples/training</span></div>
+    <div class="sample-item"><span class="stars">⭐⭐</span><span class="sample-name">sim_viewer_6dof.py</span><span class="sample-desc">samples/training</span></div>
+    <div class="sample-item"><span class="stars">⭐⭐</span><span class="sample-name">sim_headless_6dof_video.py</span><span class="sample-desc">samples/training</span></div>
+    <div class="review-box">
+      💡 모든 시뮬/학습 스크립트는 <code>.venv</code>에서 실행되어야 합니다. 시스템 Python 사용 시 <code>ModuleNotFoundError</code> 발생.<br/>
+      실행: <code>source .venv/bin/activate &amp;&amp; python3 &lt;스크립트&gt;</code> 또는 <code>.venv/bin/python3 &lt;스크립트&gt;</code>
+    </div>
   </div>
 
   <!-- 6. 경로 변경 -->
@@ -231,7 +303,14 @@
       <span class="section-icon">📁</span>
       <span class="section-title">경로 및 구조 변경</span>
     </div>
-    <!--CHANGES_HTML-->
+    <div class="change-item"><span class="change-type type-add">ADD</span><span class="change-path">agent/report-evidence/2026-05/INDEX.md</span></div>
+    <div class="change-item"><span class="change-type type-add">ADD</span><span class="change-path">agent/research-log/2026-05-03.md</span></div>
+    <div class="change-item"><span class="change-type type-add">ADD</span><span class="change-path">research/simulation/5_3_6dof_viewer_verification.md</span></div>
+    <div class="change-item"><span class="change-type type-add">ADD</span><span class="change-path">research/simulation/video/sim_6dof_animation.mp4</span></div>
+    <div class="change-item"><span class="change-type type-add">ADD</span><span class="change-path">samples/training/__pycache__/sim_headless_6dof_video.cpython-314.pyc</span></div>
+    <div class="change-item"><span class="change-type type-add">ADD</span><span class="change-path">samples/training/__pycache__/sim_viewer_6dof.cpython-314.pyc</span></div>
+    <div class="change-item"><span class="change-type type-add">ADD</span><span class="change-path">samples/training/sim_headless_6dof_video.py</span></div>
+    <div class="change-item"><span class="change-type type-add">ADD</span><span class="change-path">samples/training/sim_viewer_6dof.py</span></div>
   </div>
 
   <!-- 7. 내일 예정 -->
@@ -240,7 +319,9 @@
       <span class="section-icon">📅</span>
       <span class="section-title">내일 예정</span>
     </div>
-    <!--TOMORROW_HTML-->
+    <div class="schedule-item"><span class="schedule-time">23:00</span><span class="schedule-tag tag-sample">시뮬 구축</span><span class="schedule-desc">PHASE_ROADMAP.md 다음 단계 자동 진행</span></div>
+    <div class="schedule-item"><span class="schedule-time">23:30</span><span class="schedule-tag tag-research">테스트</span><span class="schedule-desc">시뮬 메트릭 수집 + research-log 작성</span></div>
+    <div class="schedule-item"><span class="schedule-time">07:00</span><span class="schedule-tag tag-report">보고</span><span class="schedule-desc">일일 보고 메일 발송</span></div>
   </div>
 
   <!-- 8. 빠른 링크 -->
