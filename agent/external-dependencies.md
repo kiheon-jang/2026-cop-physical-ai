@@ -55,15 +55,15 @@
 
 ### 우선순위 3 — 정보성 (의사결정 무관, 참고용)
 
-- (현재 없음)
+- - [v] OpenClaw → Hermes Agent 마이그레이션 (2026-04-29)
+- [v] fcc-proxy 배제, NVIDIA NIM 직결 라우팅 (2026-04-29)
 
 ---
 
 ## ✅ 완료 이력
 
 ### 2026-04
-- [v] OpenClaw → Hermes Agent 마이그레이션 (2026-04-29)
-- [v] fcc-proxy 배제, NVIDIA NIM 직결 라우팅 (2026-04-29)
+
 
 ---
 
