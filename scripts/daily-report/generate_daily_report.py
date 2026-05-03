@@ -618,9 +618,9 @@ def get_tomorrow_html(today):
         phase_progress = get_phase_progress(tomorrow)
         next_step = phase_progress["count"]
 
-    return f'''<div class="schedule-item"><span class="schedule-time">23:00</span><span class="schedule-tag tag-sample">시뮬 구축</span><span class="schedule-desc">{html_escape(next_step)}</span></div>
-    <div class="schedule-item"><span class="schedule-time">23:30</span><span class="schedule-tag tag-research">테스트</span><span class="schedule-desc">시뮬 메트릭 수집 + research-log 작성</span></div>
-    <div class="schedule-item"><span class="schedule-time">07:00</span><span class="schedule-tag tag-report">보고</span><span class="schedule-desc">일일 보고 메일 발송</span></div>'''
+    return f'''<div class="schedule-item"><span class="schedule-tag tag-sample">시뮬 구축</span><span class="schedule-desc">{html_escape(next_step)}</span></div>
+    <div class="schedule-item"><span class="schedule-tag tag-research">테스트</span><span class="schedule-desc">시뮬 메트릭 수집 + research-log 작성</span></div>
+    <div class="schedule-item"><span class="schedule-tag tag-report">보고</span><span class="schedule-desc">일일 보고 메일 발송</span></div>'''
 
 
 # =============================================================================
