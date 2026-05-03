@@ -82,6 +82,16 @@ def html_escape(text):
                 .replace(">", "&gt;").replace('"', "&quot;"))
 
 
+def safe_html_with_br(text):
+    """텍스트는 escape, <br/> 태그만 복원 (LLM이 줄바꿈으로 사용한 것)."""
+    if not text:
+        return ""
+    escaped = html_escape(text)
+    for variant in ("&lt;br/&gt;", "&lt;br /&gt;", "&lt;br&gt;"):
+        escaped = escaped.replace(variant, "<br/>")
+    return escaped
+
+
 def strip_markdown(text):
     """마크다운 마커(`**`, `*`, backtick) 제거."""
     if not text:
@@ -667,8 +677,8 @@ def render_html():
         "<!--PROGRESS_PERCENT-->": str(phase_progress["percent"]),
         "<!--MILESTONE-->": phase_progress["milestone"],
         "<!--HEADLINE_ONELINER-->": html_escape(headline["oneliner"]),
-        "<!--HEADLINE_DETAIL-->": headline["detail"],  # <br/> 태그 보존 위해 escape 안 함
-        "<!--HEADLINE_WHY-->": html_escape(headline["why"]),
+        "<!--HEADLINE_DETAIL-->": safe_html_with_br(headline["detail"]),
+        "<!--HEADLINE_WHY-->": safe_html_with_br(headline["why"]),
         "<!--COMMITS_COUNT-->": f"{count}건",
         "<!--COMMITS_HTML-->": commits_to_html(commits),
         "<!--SIM_PROGRESS_HTML-->": get_sim_progress_html(header["yesterday"], header),
