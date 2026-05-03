@@ -601,6 +601,95 @@ def get_changes_html():
 
 
 # =============================================================================
+# 🎬 오늘의 결과물 — 어제 add된 미디어 파일 자동 추출 + GitHub 링크
+# =============================================================================
+
+MEDIA_EXT = {
+    "video": [".mp4", ".webm", ".mov", ".avi"],
+    "image": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"],
+    "pdf": [".pdf"],
+}
+
+MEDIA_ICON = {
+    "video": "🎬",
+    "image": "🖼",
+    "pdf": "📄",
+}
+
+GITHUB_REPO = "kiheon-jang/2026-cop-physical-ai"
+
+
+def get_media_artifacts():
+    """어제 git에 add된 미디어 파일 목록 + GitHub 링크."""
+    out, _ = run("git log --since='1 day ago' --diff-filter=A --name-only --pretty=format:")
+    if not out:
+        return []
+    paths = sorted(set(p for p in out.split("\n") if p.strip()))
+
+    items = []
+    for path in paths:
+        ext = Path(path).suffix.lower()
+        media_type = None
+        for t, exts in MEDIA_EXT.items():
+            if ext in exts:
+                media_type = t
+                break
+        if not media_type:
+            continue
+
+        # 실제 파일 존재 확인 + 크기
+        full_path = REPO_ROOT / path
+        if not full_path.exists():
+            continue
+        size_bytes = full_path.stat().st_size
+        if size_bytes < 1024:
+            size_str = f"{size_bytes} B"
+        elif size_bytes < 1024 * 1024:
+            size_str = f"{size_bytes // 1024} KB"
+        else:
+            size_str = f"{size_bytes / (1024*1024):.1f} MB"
+
+        items.append({
+            "path": path,
+            "name": Path(path).name,
+            "type": media_type,
+            "size": size_str,
+            "view_url": f"https://github.com/{GITHUB_REPO}/blob/main/{path}",
+            "raw_url": f"https://github.com/{GITHUB_REPO}/raw/main/{path}",
+        })
+    return items
+
+
+def get_media_section_html():
+    """🎬 오늘의 결과물 섹션 — 미디어 없으면 섹션 자체 비표시."""
+    items = get_media_artifacts()
+    if not items:
+        return ""  # 빈 섹션 (HTML 자체가 안 보임)
+
+    cards = []
+    for it in items[:6]:
+        icon = MEDIA_ICON[it["type"]]
+        cta_label = {"video": "▶ 재생하기", "image": "🔍 크게 보기", "pdf": "📖 열기"}[it["type"]]
+        cards.append(f'''<a href="{it["view_url"]}" class="media-card">
+        <div class="media-icon">{icon}</div>
+        <div class="media-name">{html_escape(it["name"])}</div>
+        <div class="media-meta">{html_escape(it["path"])} · {it["size"]}</div>
+        <div class="media-cta">{cta_label} →</div>
+      </a>''')
+
+    return f'''<div class="section">
+    <div class="section-header">
+      <span class="section-icon">🎬</span>
+      <span class="section-title">오늘의 결과물</span>
+      <span class="section-badge">{len(items)}건</span>
+    </div>
+    <div class="media-grid">
+      {chr(10).join(cards)}
+    </div>
+  </div>'''
+
+
+# =============================================================================
 # 내일 예정 — PHASE_ROADMAP.md 동적 파싱
 # =============================================================================
 
@@ -678,6 +767,7 @@ def render_html():
         "<!--HEADLINE_ONELINER-->": html_escape(headline["oneliner"]),
         "<!--HEADLINE_DETAIL-->": safe_html_with_br(headline["detail"]),
         "<!--HEADLINE_WHY-->": safe_html_with_br(headline["why"]),
+        "<!--MEDIA_SECTION-->": get_media_section_html(),
         "<!--COMMITS_COUNT-->": f"{count}건",
         "<!--COMMITS_HTML-->": commits_to_html(commits),
         "<!--SIM_PROGRESS_HTML-->": get_sim_progress_html(header["yesterday"], header),

@@ -124,6 +124,15 @@
   .decision-btn:hover { background: rgba(16,185,129,0.18); }
   .decision-hint { font-size: 11px; color: #4b5563; text-align: center; margin-top: 6px; }
 
+  /* 결과물 미디어 카드 */
+  .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .media-card { background: #111827; border: 1px solid #2d3748; border-radius: 10px; padding: 12px; text-decoration: none; display: block; transition: all 0.15s; }
+  .media-card:hover { border-color: #6366f1; }
+  .media-icon { font-size: 22px; margin-bottom: 6px; }
+  .media-name { font-size: 12px; font-weight: 700; color: #c4b5fd; margin-bottom: 3px; word-break: break-all; }
+  .media-meta { font-size: 10px; color: #64748b; font-family: monospace; }
+  .media-cta { display: inline-block; margin-top: 8px; font-size: 11px; color: #6366f1; font-weight: 600; }
+
   /* 푸터 */
   .footer { text-align: center; padding: 20px; font-size: 11px; color: #374151; }
 
@@ -191,6 +200,12 @@
     .link-label { font-size: 10px !important; }
     .link-url { font-size: 9px !important; }
 
+    /* 미디어 카드 — 1열 */
+    .media-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+    .media-card { padding: 10px !important; }
+    .media-name { font-size: 11px !important; }
+    .media-meta { font-size: 9px !important; }
+
     /* 푸터 */
     .footer { padding: 16px !important; font-size: 10px !important; }
   }
@@ -220,6 +235,9 @@
       <strong style="color:#10b981;">왜 중요한가:</strong> <!--HEADLINE_WHY-->
     </div>
   </div>
+
+  <!-- 🎬 오늘의 결과물 (영상/이미지/PDF 직접 링크) -->
+  <!--MEDIA_SECTION-->
 
   <!-- 1. 어제 완료 작업 -->
   <div class="section">
