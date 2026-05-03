@@ -126,6 +126,74 @@
 
   /* 푸터 */
   .footer { text-align: center; padding: 20px; font-size: 11px; color: #374151; }
+
+  /* ─── 모바일 반응형 (≤ 600px) ─── */
+  @media only screen and (max-width: 600px) {
+    .wrapper { padding: 12px 8px !important; }
+    .header { padding: 20px 18px !important; border-radius: 12px !important; }
+    .header-top { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; margin-bottom: 12px !important; }
+    .title { font-size: 22px !important; }
+    .subtitle { font-size: 12px !important; }
+    .vol { font-size: 11px !important; }
+    .github-btn { padding: 7px 14px !important; font-size: 12px !important; }
+
+    .section { padding: 16px 14px !important; border-radius: 10px !important; }
+    .section-header { gap: 6px !important; margin-bottom: 12px !important; padding-bottom: 10px !important; }
+    .section-title { font-size: 13px !important; }
+    .section-icon { font-size: 16px !important; }
+    .section-badge { font-size: 10px !important; padding: 2px 6px !important; }
+
+    /* 작업 항목 */
+    .task-item { gap: 8px !important; padding: 8px 0 !important; }
+    .task-num { width: 20px !important; height: 20px !important; font-size: 10px !important; }
+    .task-title { font-size: 12px !important; }
+    .task-path { font-size: 10px !important; word-break: break-all !important; }
+    .task-type { font-size: 9px !important; padding: 1px 5px !important; }
+
+    /* 외부 의존 */
+    .action-item { padding: 8px 0 !important; }
+    .action-text { font-size: 12px !important; line-height: 1.5 !important; }
+    .pending-item { font-size: 11px !important; flex-wrap: wrap !important; }
+    .pending-label { font-size: 11px !important; }
+    .pending-desc { font-size: 11px !important; }
+
+    /* 리서치 / 오늘의 한 줄 */
+    .research-summary { padding: 12px !important; }
+    .research-topic { font-size: 14px !important; line-height: 1.5 !important; }
+    .research-oneliner { font-size: 12px !important; }
+    .why-card { padding: 10px !important; font-size: 12px !important; line-height: 1.6 !important; }
+    .concept-item { gap: 8px !important; padding: 6px 0 !important; }
+    .concept-num { font-size: 10px !important; width: 18px !important; }
+    .concept-name { font-size: 11px !important; }
+    .concept-desc { font-size: 11px !important; }
+
+    /* 샘플 */
+    .sample-item { flex-wrap: wrap !important; gap: 6px !important; padding: 7px 0 !important; }
+    .sample-name { font-size: 11px !important; }
+    .sample-desc { font-size: 10px !important; margin-left: 0 !important; width: 100%; }
+    .stars { font-size: 11px !important; }
+    .review-box { font-size: 11px !important; padding: 8px 10px !important; }
+
+    /* 경로 변경 */
+    .change-item { gap: 6px !important; padding: 6px 0 !important; flex-wrap: wrap !important; }
+    .change-type { font-size: 9px !important; padding: 1px 5px !important; }
+    .change-path { font-size: 11px !important; word-break: break-all !important; }
+
+    /* 일정 */
+    .schedule-item { gap: 8px !important; padding: 8px 0 !important; flex-wrap: wrap !important; }
+    .schedule-time { font-size: 11px !important; width: auto !important; }
+    .schedule-tag { font-size: 9px !important; padding: 1px 6px !important; }
+    .schedule-desc { font-size: 12px !important; flex-basis: 100% !important; }
+
+    /* 빠른 링크 — 1열 */
+    .link-grid { grid-template-columns: 1fr !important; gap: 6px !important; }
+    .link-item { padding: 8px 10px !important; }
+    .link-label { font-size: 10px !important; }
+    .link-url { font-size: 9px !important; }
+
+    /* 푸터 */
+    .footer { padding: 16px !important; font-size: 10px !important; }
+  }
 </style>
 </head>
 <body>

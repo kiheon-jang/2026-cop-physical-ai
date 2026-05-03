@@ -126,6 +126,74 @@
 
   /* 푸터 */
   .footer { text-align: center; padding: 20px; font-size: 11px; color: #374151; }
+
+  /* ─── 모바일 반응형 (≤ 600px) ─── */
+  @media only screen and (max-width: 600px) {
+    .wrapper { padding: 12px 8px !important; }
+    .header { padding: 20px 18px !important; border-radius: 12px !important; }
+    .header-top { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; margin-bottom: 12px !important; }
+    .title { font-size: 22px !important; }
+    .subtitle { font-size: 12px !important; }
+    .vol { font-size: 11px !important; }
+    .github-btn { padding: 7px 14px !important; font-size: 12px !important; }
+
+    .section { padding: 16px 14px !important; border-radius: 10px !important; }
+    .section-header { gap: 6px !important; margin-bottom: 12px !important; padding-bottom: 10px !important; }
+    .section-title { font-size: 13px !important; }
+    .section-icon { font-size: 16px !important; }
+    .section-badge { font-size: 10px !important; padding: 2px 6px !important; }
+
+    /* 작업 항목 */
+    .task-item { gap: 8px !important; padding: 8px 0 !important; }
+    .task-num { width: 20px !important; height: 20px !important; font-size: 10px !important; }
+    .task-title { font-size: 12px !important; }
+    .task-path { font-size: 10px !important; word-break: break-all !important; }
+    .task-type { font-size: 9px !important; padding: 1px 5px !important; }
+
+    /* 외부 의존 */
+    .action-item { padding: 8px 0 !important; }
+    .action-text { font-size: 12px !important; line-height: 1.5 !important; }
+    .pending-item { font-size: 11px !important; flex-wrap: wrap !important; }
+    .pending-label { font-size: 11px !important; }
+    .pending-desc { font-size: 11px !important; }
+
+    /* 리서치 / 오늘의 한 줄 */
+    .research-summary { padding: 12px !important; }
+    .research-topic { font-size: 14px !important; line-height: 1.5 !important; }
+    .research-oneliner { font-size: 12px !important; }
+    .why-card { padding: 10px !important; font-size: 12px !important; line-height: 1.6 !important; }
+    .concept-item { gap: 8px !important; padding: 6px 0 !important; }
+    .concept-num { font-size: 10px !important; width: 18px !important; }
+    .concept-name { font-size: 11px !important; }
+    .concept-desc { font-size: 11px !important; }
+
+    /* 샘플 */
+    .sample-item { flex-wrap: wrap !important; gap: 6px !important; padding: 7px 0 !important; }
+    .sample-name { font-size: 11px !important; }
+    .sample-desc { font-size: 10px !important; margin-left: 0 !important; width: 100%; }
+    .stars { font-size: 11px !important; }
+    .review-box { font-size: 11px !important; padding: 8px 10px !important; }
+
+    /* 경로 변경 */
+    .change-item { gap: 6px !important; padding: 6px 0 !important; flex-wrap: wrap !important; }
+    .change-type { font-size: 9px !important; padding: 1px 5px !important; }
+    .change-path { font-size: 11px !important; word-break: break-all !important; }
+
+    /* 일정 */
+    .schedule-item { gap: 8px !important; padding: 8px 0 !important; flex-wrap: wrap !important; }
+    .schedule-time { font-size: 11px !important; width: auto !important; }
+    .schedule-tag { font-size: 9px !important; padding: 1px 6px !important; }
+    .schedule-desc { font-size: 12px !important; flex-basis: 100% !important; }
+
+    /* 빠른 링크 — 1열 */
+    .link-grid { grid-template-columns: 1fr !important; gap: 6px !important; }
+    .link-item { padding: 8px 10px !important; }
+    .link-label { font-size: 10px !important; }
+    .link-url { font-size: 9px !important; }
+
+    /* 푸터 */
+    .footer { padding: 16px !important; font-size: 10px !important; }
+  }
 </style>
 </head>
 <body>
@@ -149,11 +217,11 @@
       <span class="section-title">오늘의 한 줄</span>
     </div>
     <div class="research-summary">
-      <div class="research-topic">가상 로봇이 6가지 방향으로 움직이는 영상을 만들었어요!</div>
-      <div class="research-oneliner">컴퓨터 안의 가상 로봇이 마치 춤을 추듯 자유롭게 움직이는 모습을 영상으로 성공적으로 기록했습니다. <br/> 실제 로봇이 움직이기 전에, 게임 캐릭터처럼 컴퓨터 안에서 미리 움직임을 연습해본 것이죠.</div>
+      <div class="research-topic">가상 로봇이 복잡한 움직임을 완벽하게 해냈습니다!</div>
+      <div class="research-oneliner">컴퓨터 안의 가상 로봇이 마치 사람이 팔다리를 자유롭게 움직이듯이, 6개의 관절을 이용한 복잡한 동작을 성공적으로 시뮬레이션했습니다.<br/>이 움직임을 눈으로 확인할 수 있는 고화질 비디오도 문제없이 만들어냈습니다.</div>
     </div>
     <div class="why-card">
-      <strong style="color:#10b981;">왜 중요한가:</strong> 이 영상은 10월 PCB 조정과 RS232 HHT 결선 시연 목표를 달성하기 위한 중요한 첫걸음입니다. 로봇이 안전하고 정확하게 움직일 수 있는지 미리 확인하여, 실제 작업의 효율성을 높이는 데 기여할 것입니다.
+      <strong style="color:#10b981;">왜 중요한가:</strong> 이 성공은 10월에 있을 PCB 조정 및 RS232 HHT 결선 시연 목표를 달성하는 데 필수적인데요, 실제 로봇이 정교하게 움직이려면 먼저 가상 환경에서 정확한 동작을 검증하는 과정이 매우 중요하기 때문입니다.
     </div>
   </div>
 
@@ -162,45 +230,52 @@
     <div class="section-header">
       <span class="section-icon">✅</span>
       <span class="section-title">어제 완료한 작업</span>
-      <span class="section-badge">6건</span>
+      <span class="section-badge">7건</span>
     </div>
     <div class="task-item">
       <div class="task-num">1</div>
       <div class="task-content">
-        <div><span class="task-type type-sample">LOG</span><span class="task-title">🎨 [메일] 프로그레스바 제거 + 푸터 단순화 + LLM br 태그 복원 버그 수정</span></div>
+        <div><span class="task-type type-docs">DOCS</span><span class="task-title">✂️ [메일] 헤더/제목에서 Day N · D-N 제거 (날짜만 표시)</span></div>
         <div class="task-path">docs/01_overview/daily-reports/2026-05-04.html · docs/01_overview/mail-template.html</div>
       </div>
     </div>
     <div class="task-item">
       <div class="task-num">2</div>
       <div class="task-content">
-        <div><span class="task-type type-docs">DOCS</span><span class="task-title">✨ [메일] '오늘의 한 줄' 섹션 추가 + 8개 항목 개선</span></div>
+        <div><span class="task-type type-sample">LOG</span><span class="task-title">🎨 [메일] 프로그레스바 제거 + 푸터 단순화 + LLM br 태그 복원 버그 수정</span></div>
         <div class="task-path">docs/01_overview/daily-reports/2026-05-04.html · docs/01_overview/mail-template.html</div>
       </div>
     </div>
     <div class="task-item">
       <div class="task-num">3</div>
       <div class="task-content">
-        <div><span class="task-type type-sample">SIM</span><span class="task-title">📧 [메일] 일일 보고 시스템 시뮬 트랙으로 전면 재작성</span></div>
+        <div><span class="task-type type-docs">DOCS</span><span class="task-title">✨ [메일] '오늘의 한 줄' 섹션 추가 + 8개 항목 개선</span></div>
         <div class="task-path">docs/01_overview/daily-reports/2026-05-04.html · docs/01_overview/mail-template.html</div>
       </div>
     </div>
     <div class="task-item">
       <div class="task-num">4</div>
       <div class="task-content">
+        <div><span class="task-type type-sample">SIM</span><span class="task-title">📧 [메일] 일일 보고 시스템 시뮬 트랙으로 전면 재작성</span></div>
+        <div class="task-path">docs/01_overview/daily-reports/2026-05-04.html · docs/01_overview/mail-template.html</div>
+      </div>
+    </div>
+    <div class="task-item">
+      <div class="task-num">5</div>
+      <div class="task-content">
         <div><span class="task-type type-sample">SIM</span><span class="task-title">📊 [로그] 2026-05-03 시뮬 테스트 — 6-DoF 동작 확인</span></div>
         <div class="task-path">agent/report-evidence/2026-05/INDEX.md · agent/research-log/2026-05-03.md</div>
       </div>
     </div>
     <div class="task-item">
-      <div class="task-num">5</div>
+      <div class="task-num">6</div>
       <div class="task-content">
         <div><span class="task-type type-sample">SIM</span><span class="task-title">🛠 [시뮬] 6-DoF 동작 확인 — 2026-05-03</span></div>
         <div class="task-path">research/simulation/5_3_6dof_viewer_verification.md · research/simulation/video/sim_6dof_animation.mp4</div>
       </div>
     </div>
     <div class="task-item">
-      <div class="task-num">6</div>
+      <div class="task-num">7</div>
       <div class="task-content">
         <div><span class="task-type type-docs">DOCS</span><span class="task-title">🔄 [주간정리] 2026-05-03 W1주차 — 보고용 증거 1건</span></div>
         <div class="task-path">agent/external-dependencies.md · agent/report-evidence/2026-05/INDEX.md</div>
