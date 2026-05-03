@@ -670,7 +670,6 @@ def render_html():
     phase_details = get_phase_details(header["today"], header["weekday_idx"])
 
     placeholders = {
-        "<!--VOL_NUM-->": header["vol_label"],
         "<!--TODAY_DATE-->": header["today_date_full"],
         "<!--PHASE_TITLE-->": phase_progress["title"],
         "<!--PROGRESS_COUNT-->": phase_progress["count"],
@@ -736,7 +735,7 @@ def main():
         ]
         print(f"[정상 발송] {len(recipients)}명")
 
-    subject = f"[CoP Physical AI] 일일 연구 보고 {header['vol_label']} | {header['today_date']}"
+    subject = f"[CoP Physical AI] 일일 연구 보고 | {header['today_date']}"
 
     success = 0
     for r in recipients:
