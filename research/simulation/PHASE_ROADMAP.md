@@ -56,7 +56,7 @@ uv pip install <패키지명>
 ### W1 (5/1 ~ 5/7) — MuJoCo + 모델 import
 - [v] **5/1**: MuJoCo 설치 검증 (`uv pip install mujoco`) + Apple Silicon 호환성 확인
 - [v] **5/2**: SO-ARM100 MJCF 모델 다운로드 (`git clone TheRobotStudio/SO-ARM100`)
-- [ ] **5/3**: viewer로 6-DoF 동작 확인 (`python -m mujoco.viewer --mjcf=...`)
+- [v] **5/3**: viewer로 6-DoF 동작 확인 (`python -m mujoco.viewer --mjcf=...`)
 - [ ] **5/4**: Joint limits 적용 (STS3215 사양: 360° 회전, 1.5Nm 토크)
 - [ ] **5/5**: 그리퍼 추가 + 그리퍼 동작 확인
 - [ ] **5/6**: 단순 동작 시연 스크립트 (`samples/training/sim_basic_motion.py`)
