@@ -20,9 +20,11 @@
 
 ### 우선순위 1 — Phase 0 (5월 시뮬 환경 셋업) 차단 항목
 
-- [ ] [장기헌] **Claude Code CLI 인증 오류 해결**
-  - 마감: 2026-05-06
-  - 사유: `claude -p` 호출 시 `Invalid bearer token` 오류 발생. `claude configure` 또는 환경 변수 확인 필요.
+- [ ] [장기헌] **환경 설정 오류 해결 (Claude Code CLI / MuJoCo mjpython)**
+  - 마감: 2026-05-07
+  - 사유:
+    1. `claude -p` 호출 시 `Invalid bearer token` 오류 발생. `claude configure` 또는 환경 변수 확인 필요.
+    2. `mjpython` 실행 시 `Library not loaded: @executable_path/../lib/libpython3.14.dylib` 오류 발생. MuJoCo 뷰어 구동 불가. `.venv` 환경 내 Python 버전(3.14)과 `mjpython`의 호환성 또는 RPATH 설정 문제로 추정.
 
 
 - [ ] [전체] **MuJoCo 사내 사용 라이선스 확인**
