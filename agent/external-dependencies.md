@@ -20,11 +20,15 @@
 
 ### 우선순위 1 — Phase 0 (5월 시뮬 환경 셋업) 차단 항목
 
+- [ ] [장기헌] **SO-ARM100 Submodule 변경 사항 커밋 및 푸시**
+  - 마감: 2026-05-13
+  - 사유: Hermes Agent가 submodule 내부 변경 사항을 직접 커밋/푸시할 수 없음. (`SO-ARM100/Simulation/SO101/so101_new_calib.xml` 파일에 오버헤드 카메라 추가됨)
 - [ ] [장기헌] **환경 설정 오류 해결 (Claude Code CLI / MuJoCo mjpython)**
-  - 마감: 2026-05-07
+  - 마감: 2026-05-13 (새 마감일)
   - 사유:
     1. `claude -p` 호출 시 `Invalid bearer token` 오류 발생. `claude configure` 또는 환경 변수 확인 필요.
     2. `mjpython` 실행 시 `Library not loaded: @executable_path/../lib/libpython3.14.dylib` 오류 발생. MuJoCo 뷰어 구동 불가. `.venv` 환경 내 Python 버전(3.14)과 `mjpython`의 호환성 또는 RPATH 설정 문제로 추정.
+  - **상황**: `mujoco.Renderer` 검증 작업이 이 문제로 인해 차단됨.
 
 
 - [ ] [전체] **MuJoCo 사내 사용 라이선스 확인**
