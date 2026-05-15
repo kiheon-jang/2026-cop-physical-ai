@@ -20,9 +20,9 @@
 
 ### 우선순위 1 — Phase 0 (5월 시뮬 환경 셋업) 차단 항목
 
-- [ ] [장기헌] **SO-ARM100 Submodule 변경 사항 커밋 및 푸시**
-  - 마감: 2026-05-13 (OVERDUE)
-  - 사유: Hermes Agent가 submodule 내부 변경 사항을 직접 커밋/푸시할 수 없음. (`SO-ARM100/Simulation/SO101/so101_new_calib.xml` 파일에 오버헤드 카메라 추가됨)
+- [v] [장기헌] **SO-ARM100 로컬 커밋 완료** — 2026-05-15
+  - `Simulation/SO101/so101_new_calib.xml` 로컬 커밋 완료 (오버헤드 카메라 추가 + 관절 range 시뮬용 조정)
+  - 원본 TheRobotStudio 레포에는 push 안 함 (시뮬 전용 수정이므로 upstream 부적합)
 
 - [ ] [전체] **MuJoCo 사내 사용 라이선스 확인**
   - 마감: 2026-05-03 (OVERDUE)
