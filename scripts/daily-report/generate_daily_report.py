@@ -368,27 +368,37 @@ def get_sim_progress_html(yesterday, header_info):
         return '<div class="no-issue">어제 시뮬 진척 기록 없음</div>'
     content = read_text(log_path)
 
-    # 단계명 추출 — "Phase X - WX" 형식이면 실제 Phase로 치환
+    # 단계명 추출 — 여러 헤더 형식 대응
     phase_step = "Phase 진행 중"
-    m = re.search(r"## 오늘 진행 단계\s*\n+(.+?)(?=\n##|\Z)", content, re.DOTALL)
-    if m:
-        first = m.group(1).strip().split("\n")[0].strip()
-        # "Phase X - WX - 6-DoF" 같은 placeholder 치환
-        if re.search(r"Phase\s+X|WX", first):
-            phase_progress = get_phase_progress(header_info["today"])
-            actual_phase = phase_progress["title"].split(" — ")[0]  # "Phase 0"
-            actual_week = phase_progress["count"].split(" ")[0]      # "W1"
-            # 마지막 부분만 (실제 단계 설명)
-            tail = re.sub(r"^.*?-\s*", "", first) if " - " in first else first
-            phase_step = f"{actual_phase} {actual_week} — {tail}".strip()
-        else:
-            phase_step = strip_markdown(first)
+    for pat in [
+        r"## 오늘 진행 단계\s*\n+(.+?)(?=\n##|\Z)",
+        r"### 진행 상황\s*\n+(.+?)(?=\n##|\n###|\Z)",
+        r"### 차단 사유\s*\n+(.+?)(?=\n##|\n###|\Z)",
+    ]:
+        m = re.search(pat, content, re.DOTALL)
+        if m:
+            first = m.group(1).strip().split("\n")[0].strip()
+            if re.search(r"Phase\s+X|WX", first):
+                phase_progress = get_phase_progress(header_info["today"])
+                actual_phase = phase_progress["title"].split(" — ")[0]
+                actual_week = phase_progress["count"].split(" ")[0]
+                tail = re.sub(r"^.*?-\s*", "", first) if " - " in first else first
+                phase_step = f"{actual_phase} {actual_week} — {tail}".strip()
+            else:
+                phase_step = strip_markdown(first)
+            break
 
-    # 메트릭 추출
+    # 메트릭 추출 — 여러 헤더 형식 대응
     metrics = ""
-    m2 = re.search(r"## 실행 테스트 결과\s*\n+(.+?)(?=\n##|\Z)", content, re.DOTALL)
-    if m2:
-        metrics = strip_markdown(m2.group(1).strip())
+    for pat2 in [
+        r"## 실행 테스트 결과\s*\n+(.+?)(?=\n##|\Z)",
+        r"### 차단 사유\s*\n+(.+?)(?=\n##|\n###|\Z)",
+        r"### 진행 상황\s*\n+(.+?)(?=\n##|\n###|\Z)",
+    ]:
+        m2 = re.search(pat2, content, re.DOTALL)
+        if m2:
+            metrics = strip_markdown(m2.group(1).strip())
+            break
 
     return f'''<div class="research-summary">
       <div class="research-topic">{html_escape(phase_step)}</div>
@@ -408,7 +418,16 @@ def get_issues_html(yesterday):
     content = read_text(log_path)
     if not content:
         return '<div class="no-issue">현재 이슈 없음</div>'
-    m = re.search(r"## 관찰 / 이슈\s*\n+(.+?)(?=\n##|\Z)", content, re.DOTALL)
+    # 여러 헤더 형식 대응
+    m = None
+    for pat in [
+        r"## 관찰 / 이슈\s*\n+(.+?)(?=\n##|\Z)",
+        r"### 차단 사유\s*\n+(.+?)(?=\n##|\n###|\Z)",
+        r"### 이슈\s*\n+(.+?)(?=\n##|\n###|\Z)",
+    ]:
+        m = re.search(pat, content, re.DOTALL)
+        if m:
+            break
     if not m:
         return '<div class="no-issue">현재 이슈 없음</div>'
     issues_text = strip_markdown(m.group(1).strip())
@@ -435,6 +454,8 @@ def get_external_deps_html(today):
     items = []
     for match in re.finditer(r"-\s*\[\s*\]\s*(.+?)(?=\n-\s*\[|\n##|\Z)", section, re.DOTALL):
         body = match.group(1).strip()
+        # 리터럴 \n (두 글자)을 실제 줄바꿈으로 변환
+        body = body.replace("\\n", "\n")
         first_line = strip_markdown(body.split("\n", 1)[0].strip())
         title_html = html_escape(first_line[:120])
         deadline_m = re.search(r"마감[:\s]+(\d{4}-\d{2}-\d{2})", body)

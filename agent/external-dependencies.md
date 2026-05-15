@@ -20,20 +20,17 @@
 
 ### 우선순위 1 — Phase 0 (5월 시뮬 환경 셋업) 차단 항목
 
-- [ ] [장기헌] **SO-ARM100 Submodule 변경 사항 커밋 및 푸시**\n  - 마감: 2026-05-13 (OVERDUE)
+- [ ] [장기헌] **SO-ARM100 Submodule 변경 사항 커밋 및 푸시**
+  - 마감: 2026-05-13 (OVERDUE)
   - 사유: Hermes Agent가 submodule 내부 변경 사항을 직접 커밋/푸시할 수 없음. (`SO-ARM100/Simulation/SO101/so101_new_calib.xml` 파일에 오버헤드 카메라 추가됨)
-- [ ] [장기헌] **환경 설정 오류 해결 (Claude Code CLI / MuJoCo mjpython)**\n  - 마감: 2026-05-13 (OVERDUE)
-  - 사유:
-    1. `claude -p` 호출 시 `Invalid bearer token` 오류 발생. `claude configure` 또는 환경 변수 확인 필요.
-    2. `mjpython` 실행 시 `Library not loaded: @executable_path/../lib/libpython3.14.dylib` 오류 발생. MuJoCo 뷰어 구동 불가. `.venv` 환경 내 Python 버전(3.14)과 `mjpython`의 호환성 또는 RPATH 설정 문제로 추정.
-  - **상황**: `mujoco.Renderer` 검증 작업이 이 문제로 인해 차단됨.
 
-
-- [ ] [전체] **MuJoCo 사내 사용 라이선스 확인**\n  - 마감: 2026-05-03 (OVERDUE)
+- [ ] [전체] **MuJoCo 사내 사용 라이선스 확인**
+  - 마감: 2026-05-03 (OVERDUE)
   - 사유: 오픈소스(Apache 2.0)이지만 사내 정책 확인 필요
   - 결과 위치: research/decisions/2026-05-XX_mujoco-license.md
 
-- [ ] [실기 담당] **웹캠 사양 측정 + 캘리브레이션값 제공**\n  - 마감: 2026-05-14 (TODAY - CRITICAL)
+- [ ] [실기 담당] **웹캠 사양 측정 + 캘리브레이션값 제공**
+  - 마감: 2026-05-21 (W3 카메라 캘리브레이션 반영 전까지)
   - 필요 정보:
     1. 웹캠 모델명/제조사
     2. 해상도 (보통 640x480 또는 1280x720)
@@ -44,7 +41,7 @@
   - 결과 저장: docs/02_hardware/camera-spec.yaml
 
 - [ ] [실기 담당] **SO-ARM101 실측 무게 + 관절 마찰계수 측정**
-  - 마감: 2026-05-21 (Phase 0 W3 동기화 검증 전까지)
+  - 마감: 2026-05-21 (W3 무게/관성 조정 전까지)
   - 필요 정보:
     1. 각 링크별 무게 (g 단위)
     2. 그리퍼 무게 (g 단위)
@@ -68,6 +65,13 @@
 ---
 
 ## ✅ 완료 이력
+
+### 2026-05
+
+- [v] **환경 설정 오류 해결 (Claude Code CLI / MuJoCo)** — 2026-05-15
+  - `claude -p` 인증 정상 복구 확인
+  - `mjpython` 대신 `.venv/bin/python3 + mujoco.Renderer` 방식으로 전환 확인 (3.8.0 정상 동작)
+  - W2 5/12 (mujoco.Renderer 검증) 진행 가능 상태
 
 ### 2026-04
 
