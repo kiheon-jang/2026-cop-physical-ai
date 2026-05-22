@@ -841,8 +841,6 @@ def update_agent_docs(phase_progress, header):
     # Week 추출
     week_part = phase_progress["count"].split(" ")[0]  # e.g. "W4"
     desc_part = ""
-    for _, _, _, w_weeks in PHASES:
-        pass  # 아래에서 직접 파싱
     # PHASE_ROADMAP의 weeks dict에서 현재 주차 설명 추출
     today = header["today"]
     for p_name, p_label, p_start, p_end, p_weeks in PHASES:
