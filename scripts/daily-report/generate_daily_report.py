@@ -828,8 +828,52 @@ def update_readme_status(phase_progress, commits, header):
     return False
 
 
-def git_commit_docs(header):
-    """CHANGELOG.md + README.md 변경사항을 git commit + push.
+def update_agent_docs(phase_progress, header):
+    """AGENT_PROCESS.md와 HANDOVER.md의 '현재 단계' 라인을 최신 Phase로 갱신.
+
+    Returns list of updated filenames.
+    """
+    updated = []
+    phase_title = phase_progress["title"]  # e.g. "Phase 0 — W4 Pick-Place + 데이터셋"
+    today_str = header["today_date"]
+    # Phase 0 W4 같은 형식으로 단축
+    phase_short = phase_title.split(" — ")[0] if " — " in phase_title else phase_title
+    # Week 추출
+    week_part = phase_progress["count"].split(" ")[0]  # e.g. "W4"
+    desc_part = ""
+    for _, _, _, w_weeks in PHASES:
+        pass  # 아래에서 직접 파싱
+    # PHASE_ROADMAP의 weeks dict에서 현재 주차 설명 추출
+    today = header["today"]
+    for p_name, p_label, p_start, p_end, p_weeks in PHASES:
+        if p_start <= today <= p_end:
+            for w_name, w_start, w_end, w_desc in p_weeks:
+                if w_start <= today <= w_end:
+                    desc_part = w_desc
+                    break
+            break
+    new_stage = f"**{phase_short} {week_part} 진행중** — {desc_part} ({today_str}~)"
+
+    for rel_path in ["AGENT_PROCESS.md", "agent/HANDOVER.md"]:
+        fpath = REPO_ROOT / rel_path
+        if not fpath.exists():
+            continue
+        content = fpath.read_text(encoding="utf-8")
+        # "현재 단계" 행의 값 부분을 교체 (테이블 행 형식: | **현재 단계** | ... |)
+        new_content = re.sub(
+            r"(\|\s*\*\*현재 단계\*\*\s*\|)[^\|]+(\|)",
+            rf"\1 {new_stage} \2",
+            content
+        )
+        if new_content != content:
+            fpath.write_text(new_content, encoding="utf-8")
+            updated.append(rel_path)
+
+    return updated
+
+
+def git_commit_docs(header, extra_files=None):
+    """CHANGELOG.md + README.md + extra_files 변경사항을 git commit + push.
 
     Returns (success, message).
     """
@@ -837,7 +881,8 @@ def git_commit_docs(header):
     yesterday = header["yesterday"]
 
     # 스테이징
-    _, rc1 = run("git add research/CHANGELOG.md README.md")
+    files_to_stage = "research/CHANGELOG.md README.md AGENT_PROCESS.md agent/HANDOVER.md agent/cron-jobs.md research/decisions/README.md"
+    _, rc1 = run(f"git add {files_to_stage}")
 
     # 변경사항 있는지 확인
     diff_out, _ = run("git diff --cached --name-only")
@@ -994,6 +1039,7 @@ def main():
     print("\n[히스토리 업데이트]")
     cl_updated = update_changelog(commits, header)
     rm_updated = update_readme_status(phase_progress, commits, header)
+    agent_docs_updated = update_agent_docs(phase_progress, header)
 
     if cl_updated:
         print(f"  CHANGELOG.md ← {header['yesterday']} 항목 추가")
@@ -1005,7 +1051,13 @@ def main():
     else:
         print(f"  README.md — 변경 없음")
 
-    if cl_updated or rm_updated:
+    if agent_docs_updated:
+        for f in agent_docs_updated:
+            print(f"  {f} ← 현재 단계 갱신")
+    else:
+        print(f"  AGENT_PROCESS.md / HANDOVER.md — 변경 없음")
+
+    if cl_updated or rm_updated or agent_docs_updated:
         ok, msg = git_commit_docs(header)
         print(f"  git: {msg}")
     else:

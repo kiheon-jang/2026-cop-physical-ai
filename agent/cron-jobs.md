@@ -2,7 +2,7 @@
 
 > **Hermes Agent (Mac Mini M5) 의 크론 4개 완전 서술**
 > 다른 환경으로 이전 시 이 파일의 페이로드를 참고하여 재등록.
-> **최종 업데이트**: 2026-05-01 (시뮬 트랙 전환)
+> **최종 업데이트**: 2026-05-22 (스킬 필드 수정 + 크론 3 동작 설명 갱신)
 
 ---
 
@@ -23,7 +23,8 @@ ID       : 9ad85007cf27
 이름     : CoP Physical AI — 시뮬 환경 단계별 구축 (MuJoCo)
 스케줄   : 0 23 * * *  (매일 23:00 KST)
 타임아웃 : 600초
-스킬     : terminal, file, web
+스킬     : cop-physical-ai-self-heal
+변경이력 : terminal/file/web → cop-physical-ai-self-heal (2026-05-22, Hermes v0.13.0 이후 오탐 수정)
 ```
 
 ### 페이로드 (전체)
@@ -73,7 +74,8 @@ ID       : 85d322d3b37c
 이름     : CoP Physical AI — 시뮬 테스트 + 메트릭 수집
 스케줄   : 30 23 * * *  (매일 23:30 KST)
 타임아웃 : 600초
-스킬     : terminal, file
+스킬     : cop-physical-ai-self-heal
+변경이력 : terminal/file → cop-physical-ai-self-heal (2026-05-22)
 ```
 
 ### 페이로드 (요약)
@@ -109,19 +111,18 @@ ID       : fb6d7cb26650
 이름     : CoP Physical AI — 아침 보고 메일
 스케줄   : 0 7 * * *  (매일 07:00 KST)
 타임아웃 : 600초
-스킬     : terminal, file, web, send_message
+스킬     : (없음 — 스크립트 방식)
 스크립트 : scripts/daily-report/generate_daily_report.py
+변경이력 : terminal/file/web/send_message 스킬 제거 (2026-05-22), 스크립트 직접 실행 방식
 ```
 
-### 동작
+### 동작 (2026-05-22 현재)
 
-- `scripts/daily-report/generate_daily_report.py` 실행
-- 어제 GitHub 커밋 + agent/research-log/ + agent/external-dependencies.md 수집
-- `docs/01_overview/mail-template.md` 형식으로 메일 작성
-- **[4-A] 외부 의존 / 사용자 수동 작업 섹션** 포함 (사용자 매일 노출)
-- 3명 발송: xaqwer@gmail.com, insoo.kum@hyundaielevator.com, giheon.jang@hyundaielevator.com
-
-> **TODO (2026-05-02 이후)**: generate_daily_report.py + mail-template.html 시뮬 트랙으로 전면 갱신 필요. 현재는 OpenClaw 시대 코드 일부 잔존.
+- `scripts/daily-report/generate_daily_report.py` 실행 (`.venv/bin/python3`)
+- 어제 GitHub 커밋 + `agent/research-log/` + `agent/external-dependencies.md` 수집
+- Gemini API로 비전공자 친화적 `오늘의 한 줄` 자동 생성
+- HTML 이메일 생성 → **4명 발송**: xaqwer@gmail.com, insoo.kum@hyundaielevator.com, giheon.jang@hyundaielevator.com, kimeun091473@gmail.com
+- **메일 발송 후 자동**: `research/CHANGELOG.md` 어제 커밋 항목 추가 + `README.md` 현황 업데이트 + git push
 
 ---
 
@@ -132,7 +133,8 @@ ID       : 0b1d4a7b2bf7
 이름     : CoP Physical AI — 주간 정리 + 보고용 증거 식별
 스케줄   : 0 22 * * 0  (매주 일요일 22:00 KST)
 타임아웃 : 600초
-스킬     : terminal, file, web
+스킬     : (없음)
+변경이력 : terminal/file/web 제거 (2026-05-22)
 ```
 
 ### 페이로드 (요약)

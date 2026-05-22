@@ -26,7 +26,7 @@
 |------|------|
 | **프로젝트명** | 사내 CoP Physical AI — 첫걸음 |
 | **목적** | SO-ARM101 로봇팔 기반 모방학습 → 강화학습 → 모바일 매니퓰레이터 |
-| **현재 단계** | Phase 1 완료 (조립/환경/텔레오퍼레이션), Phase 2 진입 직전 (데이터 수집) |
+| **현재 단계** | **Phase 0 W4 진행중** — Pick-Place 시뮬 + 자동 데이터셋 (2026-05-22~) |
 | **GitHub** | https://github.com/kiheon-jang/2026-cop-physical-ai |
 | **담당자** | 장기헌 (xaqwer@gmail.com) |
 | **보고 수신자** | insoo.kum@hyundaielevator.com, giheon.jang@hyundaielevator.com |
@@ -80,12 +80,14 @@
 > **상태**: 2026-04-29 OpenClaw → Hermes 마이그레이션 완료 ✅  
 > **시간 기준**: KST (Asia/Seoul)
 
-| 크론 ID | 이름 | 스케줄 | 역할 |
-|---------|------|--------|------|
-| `9ad85007cf27` | 시뮬 환경 단계별 구축 | 매일 23:00 KST | `research/simulation/`에 Phase별 환경 구축 (MuJoCo) |
-| `85d322d3b37c` | 시뮬 테스트 + 메트릭 수집 | 매일 23:30 KST | `agent/research-log/`에 테스트 결과 기록 (성공률, 추론시간 등) |
-| `fb6d7cb26650` | 아침 보고 메일 | 매일 07:00 KST | 매거진 형식 보고 메일 3명 발송 (외부 의존 항목 포함) |
-| `0b1d4a7b2bf7` | 주간 정리 + 보고용 증거 식별 | 매주 일요일 22:00 KST | `agent/report-evidence/2026-MM/INDEX.md` 갱신 |
+| 크론 ID | 이름 | 스케줄 | 스킬 | 역할 |
+|---------|------|--------|------|------|
+| `9ad85007cf27` | 시뮬 환경 단계별 구축 | 매일 23:00 KST | `cop-physical-ai-self-heal` | `research/simulation/`에 Phase별 환경 구축 (MuJoCo) |
+| `85d322d3b37c` | 시뮬 테스트 + 메트릭 수집 | 매일 23:30 KST | `cop-physical-ai-self-heal` | `agent/research-log/`에 테스트 결과 기록 (성공률, 추론시간 등) |
+| `fb6d7cb26650` | 아침 보고 메일 | 매일 07:00 KST | (스크립트) | `generate_daily_report.py` 실행 → 메일 4명 + CHANGELOG/README 업데이트 + git push |
+| `0b1d4a7b2bf7` | 주간 정리 + 보고용 증거 식별 | 매주 일요일 22:00 KST | — | `agent/report-evidence/2026-MM/INDEX.md` 갱신 |
+
+> **v0.13.0 변경사항 (2026-05-15)**: `terminal/file/web`은 유효하지 않은 스킬명이었음. 제거 후 `cop-physical-ai-self-heal` 스킬로 대체. 내장 toolset은 자동 활성화.
 
 ---
 
@@ -234,11 +236,11 @@ git config --global url."https://$(gh auth token)@github.com/".insteadOf "https:
 
 | 상태 | 항목 | 담당 |
 |------|------|------|
-| 🔄 진행중 | **Phase 0**: 시뮬 환경 셋업 (5월) — MuJoCo + SO-ARM101 MJCF | Hermes Agent |
-| ⏳ 대기 | MuJoCo 사내 라이선스 확인 (마감 5/3) | 전체 |
-| ⏳ 대기 | 웹캠 캘리브레이션값 측정 (마감 5/14) | 실기 담당 |
-| ⏳ 대기 | SO-ARM101 실측 무게/마찰 측정 (마감 5/21) | 실기 담당 |
-| ⏳ 대기 | LeKiwi vs XLeRobot 결정 | Phase 4 (차년도) |
+| 🔄 진행중 | **Phase 0 W4**: Pick-Place 시뮬 동작 + 자동 데이터셋 (5/22~5/31) | Hermes Agent |
+| ⏳ 대기 | MuJoCo 사내 라이선스 확인 (마감 2026-06-01) | 전체 |
+| 🟡 옵션 | 웹캠 캘리브레이션값 제공 — 없으면 기본값(fovy=45, 640×480) 사용 | 실기 담당 |
+| 🟡 옵션 | SO-ARM101 실측 무게/마찰 제공 — 없으면 MJCF 기본값 사용 | 실기 담당 |
+| ⏳ 대기 | Phase 3/4 차년도 추진 여부 결정 | CoP 위원회 (2026-09-30) |
 
 **상세**: [`agent/external-dependencies.md`](./agent/external-dependencies.md)
 
@@ -248,12 +250,11 @@ git config --global url."https://$(gh auth token)@github.com/".insteadOf "https:
 
 | 날짜 | 변경 내용 | 변경자 |
 |------|-----------|--------|
+| 2026-05-22 | **크론 자가치유 스킬** `cop-physical-ai-self-heal` 추가. **히스토리 자동업데이트** (CHANGELOG+README 매일 git push). 전체 문서 소급 업데이트. | Claude Code |
+| 2026-05-15 | **Hermes v0.13.0 업그레이드**. 크론 스킬 `terminal/file/web` → `cop-physical-ai-self-heal` 교체. 일일보고 파싱 버그 3개 수정. 웹캠/실측값 옵션 재분류. | Claude Code |
 | 2026-05-01 | **시뮬레이터 결정 변경**: Isaac Lab → MuJoCo 3.x (Mac M5 호환). 보고용/실제 연구 트랙 분리. Phase 0~5 로드맵 (5~10월). 4개 크론 prompt 전부 재작성 (시뮬 단계별). 메일 [4-A] 외부 의존 섹션 신설. | Hermes Agent (Mac M5) |
 | 2026-04-29 | **OpenClaw → Hermes Agent 마이그레이션 완료**. 로컬 Mac (24/7) + Gemini Flash 무료로 전환. 4개 cron 정상 가동 확인. fcc-proxy 배제. | Claude Code (Mac M5) |
 | 2026-04-21 | 최초 작성. 레포 구조화, 크론 3종 + 주간검수 설정 | AI Agent (OpenClaw) |
-| 2026-04-21 | 리서치 drafts/latest-tech 2단계 구조 추가 | AI Agent (OpenClaw) |
-| 2026-04-21 | SAMPLE_STATUS.md, CONTRIBUTING.md, AGENT_PROCESS.md 추가 | AI Agent (OpenClaw) |
-| 2026-04-21 | 메일 템플릿 전면 개편 — ASCII 특수문자 제거, plain text 메거진 형식으로 통일. 코드 리뷰 포인트, 경로 변경사항 섹션 추가. 템플릿 파일: docs/01_overview/mail-template.md | AI Agent (OpenClaw) |
 
 ---
 

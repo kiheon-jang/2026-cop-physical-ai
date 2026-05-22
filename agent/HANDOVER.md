@@ -2,7 +2,7 @@
 
 > **다른 AI 에이전트가 이 프로젝트를 이어받을 때 가장 먼저 읽는 파일입니다.**
 > 모든 설정, 크론, 스킬, 환경이 하위 파일에 완전히 서술되어 있습니다.
-> **최종 업데이트**: 2026-05-01 (시뮬 트랙 전환)
+> **최종 업데이트**: 2026-05-22 (W3 완료 / W4 시작 / 크론 스킬 수정 / 히스토리 자동업데이트 추가)
 
 ---
 
@@ -17,7 +17,7 @@
 | **자동화 플랫폼** | Hermes Agent (Mac Mini M5, 24/7 로컬 운영) |
 | **시뮬레이터** | MuJoCo 3.x (Apple Silicon 네이티브) — Phase 0~2 |
 | **담당자** | 장기헌 (xaqwer@gmail.com) |
-| **현재 단계** | **Phase 0 — 시뮬 환경 셋업 (5월)** |
+| **현재 단계** | **Phase 0 W4 — Pick-Place 시뮬 + 자동 데이터셋 (2026-05-22~31)** |
 
 ---
 
@@ -123,9 +123,12 @@ ls ~/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI/2026-05/
 매일 07:00 KST
   └─ [크론 fb6d7cb26650] 아침 보고 메일
        → 어제 research-log + external-dependencies 수집
-       → mail-template.md 형식으로 메일 작성
-       → [4-A] 외부 의존 섹션에 사용자 수동 작업 매일 노출
-       → 3명 발송 (xaqwer@gmail.com, insoo.kum@hyundaielevator.com, giheon.jang@hyundaielevator.com)
+       → Gemini API 비전공자 친화 요약 자동 생성
+       → HTML 이메일 생성 → 4명 발송
+         (xaqwer@gmail.com, insoo.kum@hyundaielevator.com,
+          giheon.jang@hyundaielevator.com, kimeun091473@gmail.com)
+       → [신규] research/CHANGELOG.md 어제 작업 항목 추가 + git push
+       → [신규] README.md 시뮬 트랙 현황 섹션 갱신 + git push
 
 매주 일요일 22:00 KST
   └─ [크론 0b1d4a7b2bf7] 주간 정리 + 보고용 증거 식별
