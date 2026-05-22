@@ -47,14 +47,16 @@
 
 ### 우선순위 2 — 의사결정 대기
 
-- [ ] [실기 담당] **Phase 1 W4 실기 에피소드 수집 + Orin Nano 접근 계획**
-  - 마감: 2026-06-22 (Phase 1 W4 시작일)
-  - 사유: Phase 1 W4 "실기 5~10 에피소드로 fine-tune" — Hermes 크론 단독 처리 불가
-  - 필요 항목:
-    1. SO-ARM101 실기 로봇 연결된 머신에서 LeRobot 텔레오퍼레이션 5~10 에피소드 수집
-    2. 에피소드를 LeRobot Dataset 포맷으로 저장 후 GitHub push
-    3. Orin Nano (추론 머신) SSH 접속 정보 또는 로컬 실행 방법 확인
-  - 이 항목이 없으면 Phase 1 W4 fine-tune은 시뮬 only로 대체
+- [v] [실기 담당] **Phase 1 W4 실기 에피소드 수집 → 시뮬 200 에피소드로 대체 확정** — 2026-05-22 결정
+  - 실기팀 에피소드 없음 확정 → Phase 1 W4 fine-tune 시 시뮬 추가 200 에피소드로 대체
+  - 크론이 자동으로 `sim_data_collector.py` 200 에피소드 추가 생성으로 처리
+  - Orin Nano SSH 접속 정보는 별도 항목으로 분리 (아래 참조)
+
+- [ ] [장기헌] **Orin Nano SSH 접속 정보 제공**
+  - 마감: 2026-06-22 (Phase 1 W4 모델 배포 전)
+  - 필요 정보: IP 또는 hostname / SSH 유저명 / Mac Mini와 동일 네트워크 여부
+  - 제공 시: `~/.ssh/config` + `scripts/deploy_to_orin.sh` 즉시 생성
+  - 미제공 시: Phase 1 W4 배포 단계 건너뜀, 모델은 git에만 push
 
 - [ ] [CoP 위원회] **Phase 3/4 차년도 추진 여부 결정**
   - 마감: 2026-09-30

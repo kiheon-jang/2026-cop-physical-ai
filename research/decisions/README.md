@@ -12,6 +12,7 @@
 | 2026-05-15 | Hermes 크론 `terminal/file/web` 스킬 | ✅ 제거 + `cop-physical-ai-self-heal` 스킬로 대체 | Claude Code | Hermes v0.13.0에서 해당 이름이 스킬 플러그인으로 해석되어 "not found" 오탐 발생. 내장 toolset은 별도 등록 불필요. | - |
 | 2026-05-22 | MuJoCo 사내 라이선스 | ✅ 사용 승인 | 장기헌 | CoP 내부 R&D 용도, Apache 2.0 오픈소스, 상업 배포 아님 | - |
 | 2026-05-22 | 에피소드 데이터셋 저장 방식 | ✅ 2단계 전략 채택 | 장기헌 | Phase 0: 로컬(`data/episodes/`, gitignore). Phase 1+: HuggingFace private(`kiheon-jang/cop-pickplace-v1`). LeRobot 네이티브 통합 + Orin Nano pull 가능. | - |
+| 2026-05-22 | Phase 1 W4 실기 에피소드 수집 | ✅ 시뮬 200 ep 대체 확정 | 장기헌 | 실기팀 에피소드 없음 확정. `sim_data_collector.py` 추가 200 에피소드 자동 생성으로 대체. | - |
 
 ## 결정 상태 정의
 - ✅ **채택** — 실제 프로젝트에 적용

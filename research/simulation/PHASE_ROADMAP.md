@@ -132,12 +132,12 @@ uv pip install <패키지명>
 - [ ] 매일 크론이 `logs/act_train.log` 마지막 줄 확인 → research-log에 진행률 기록
 - [ ] 학습 완료 후 `models/act_phase1.pt` 저장 + git push
 
-### W4 (6/22 ~ 6/30) — 실기 fine-tune (예정)
-> ⚠️ **외부 의존**: 실기팀 에피소드 수집 필요 (agent/external-dependencies.md 참조)
-> 실기 에피소드 없으면: 시뮬 추가 200 에피소드로 대체 학습 진행
-- [ ] 학습 모델 git push → Orin Nano
-- [ ] 실기 5~10 에피소드로 fine-tune (실기팀) — 또는 시뮬 200 ep 추가 학습으로 대체
-- [ ] 시뮬 vs 실기 정확도 비교
+### W4 (6/22 ~ 6/30) — 시뮬 추가 학습 (실기팀 없음 확정)
+> ✅ **결정 완료 (2026-05-22)**: 실기팀 에피소드 없음 → 시뮬 추가 200 에피소드로 대체
+- [ ] `sim_data_collector.py` 추가 200 에피소드 생성 (총 400 에피소드)
+- [ ] 추가 데이터로 ACT 재학습 또는 fine-tune (epoch 50 추가)
+- [ ] 학습 모델 저장 → `models/act_phase1_v2.pt` + git push
+- [ ] 학습 모델 Orin Nano 배포 (SSH 연결 확보 시)
 
 **Phase 1 완료 기준**: 시뮬 Pick 성공률 90% 이상
 
