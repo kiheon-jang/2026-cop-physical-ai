@@ -734,6 +734,133 @@ def get_tomorrow_html(today):
 
 
 # =============================================================================
+# CHANGELOG + README 자동 업데이트
+# =============================================================================
+
+def update_changelog(commits, header):
+    """research/CHANGELOG.md에 어제 작업 항목 추가 (중복 방지).
+
+    Returns True if updated, False if skipped.
+    """
+    changelog_path = REPO_ROOT / "research/CHANGELOG.md"
+    if not changelog_path.exists():
+        return False
+
+    yesterday = header["yesterday"]
+    entry_header = f"### {yesterday}"
+
+    content = changelog_path.read_text(encoding="utf-8")
+    if entry_header in content:
+        return False  # 이미 있으면 스킵
+
+    if not commits:
+        return False  # 커밋 없으면 추가 안 함
+
+    lines = [entry_header]
+    for c in commits[:5]:
+        lines.append(f"- {c['msg']}")
+    entry = "\n".join(lines) + "\n"
+
+    # "## 이력" 섹션 직후에 삽입
+    m = re.search(r"^## 이력\s*$", content, re.MULTILINE)
+    if m:
+        insert_pos = m.end()
+        new_content = content[:insert_pos] + "\n\n" + entry + content[insert_pos:]
+    else:
+        # fallback: 첫 번째 ### 날짜 항목 앞에 삽입
+        m2 = re.search(r"^### \d{4}-\d{2}-\d{2}", content, re.MULTILINE)
+        if m2:
+            new_content = content[:m2.start()] + entry + "\n" + content[m2.start():]
+        else:
+            new_content = content + "\n\n" + entry
+
+    changelog_path.write_text(new_content, encoding="utf-8")
+    return True
+
+
+def update_readme_status(phase_progress, commits, header):
+    """README.md의 <!-- AUTO_STATUS_START --> ... <!-- AUTO_STATUS_END --> 섹션을 갱신.
+
+    Returns True if updated, False if section not found.
+    """
+    readme_path = REPO_ROOT / "README.md"
+    if not readme_path.exists():
+        return False
+
+    content = readme_path.read_text(encoding="utf-8")
+    start_marker = "<!-- AUTO_STATUS_START -->"
+    end_marker = "<!-- AUTO_STATUS_END -->"
+
+    if start_marker not in content or end_marker not in content:
+        return False
+
+    today_str = header["today_date"]
+    phase_title = phase_progress["title"]  # e.g. "Phase 0 — W4 Pick-Place + 데이터셋"
+    milestone = phase_progress["milestone"]
+
+    # 최근 작업 한 줄 (어제 첫 커밋 메시지)
+    recent_work = commits[0]["msg"] if commits else "작업 기록 없음"
+    recent_work = recent_work[:60]
+
+    new_section = f"""{start_marker}
+## 📊 시뮬레이션 트랙 현황
+
+> 매일 07:00 자동 업데이트 (generate_daily_report.py)
+
+| 항목 | 내용 |
+|------|------|
+| **현재 Phase** | {phase_title} |
+| **마지막 업데이트** | {today_str} |
+| **다음 마일스톤** | {milestone} |
+| **최근 작업** | {recent_work} |
+{end_marker}"""
+
+    # 기존 섹션 교체
+    pattern = re.compile(
+        re.escape(start_marker) + r".*?" + re.escape(end_marker),
+        re.DOTALL
+    )
+    new_content = pattern.sub(new_section, content)
+
+    if new_content != content:
+        readme_path.write_text(new_content, encoding="utf-8")
+        return True
+    return False
+
+
+def git_commit_docs(header):
+    """CHANGELOG.md + README.md 변경사항을 git commit + push.
+
+    Returns (success, message).
+    """
+    today_str = header["today_date"]
+    yesterday = header["yesterday"]
+
+    # 스테이징
+    _, rc1 = run("git add research/CHANGELOG.md README.md")
+
+    # 변경사항 있는지 확인
+    diff_out, _ = run("git diff --cached --name-only")
+    if not diff_out.strip():
+        return False, "변경 없음 (스킵)"
+
+    msg = f"📝 [히스토리] {yesterday} 작업 기록 + README 현황 업데이트 — {today_str}"
+    _, rc2 = run(f'git commit -m "{msg}"')
+    if rc2 != 0:
+        return False, f"commit 실패 (rc={rc2})"
+
+    _, rc3 = run("git push origin main")
+    if rc3 != 0:
+        # push 실패 시 rebase 후 재시도
+        run("git pull --rebase origin main")
+        _, rc3b = run("git push origin main")
+        if rc3b != 0:
+            return False, "push 실패 (rebase 후에도)"
+
+    return True, f"commit+push 성공 ({diff_out.strip()})"
+
+
+# =============================================================================
 # 메일 발송
 # =============================================================================
 
@@ -821,12 +948,12 @@ def render_html():
     html = template
     for k, v in placeholders.items():
         html = html.replace(k, v)
-    return html, header
+    return html, header, commits, phase_progress
 
 
 def main():
     _load_smtp_env_from_hermes()
-    html, header = render_html()
+    html, header, commits, phase_progress = render_html()
 
     out_dir = REPO_ROOT / "docs/01_overview/daily-reports"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -860,6 +987,30 @@ def main():
             print(f"❌ {err}")
 
     print(f"\n발송 결과: {success}/{len(recipients)} 성공")
+
+    # ==========================================================================
+    # 히스토리 업데이트 — CHANGELOG + README + git push
+    # ==========================================================================
+    print("\n[히스토리 업데이트]")
+    cl_updated = update_changelog(commits, header)
+    rm_updated = update_readme_status(phase_progress, commits, header)
+
+    if cl_updated:
+        print(f"  CHANGELOG.md ← {header['yesterday']} 항목 추가")
+    else:
+        print(f"  CHANGELOG.md — 변경 없음 (이미 있거나 커밋 없음)")
+
+    if rm_updated:
+        print(f"  README.md ← 시뮬 트랙 현황 갱신")
+    else:
+        print(f"  README.md — 변경 없음")
+
+    if cl_updated or rm_updated:
+        ok, msg = git_commit_docs(header)
+        print(f"  git: {msg}")
+    else:
+        print("  git: 업데이트 없음, 스킵")
+
     return 0 if success == len(recipients) else 1
 
 
