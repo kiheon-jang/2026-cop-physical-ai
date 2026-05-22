@@ -1,78 +1,87 @@
+"""sim_basic_motion.py — SO-ARM101 기본 sin파 동작 시연 (headless 기본, 크론 안전)
 
+기본 실행 (headless, 크론/CI 환경):
+    .venv/bin/python3 samples/training/sim_basic_motion.py
+
+인터랙티브 뷰어 (로컬 테스트 전용):
+    .venv/bin/python3 samples/training/sim_basic_motion.py --interactive
+"""
+
+import argparse
 import mujoco
-import mujoco.viewer
 import numpy as np
 import os
 
-# Absolute path to the MJCF model
-MODEL_PATH = "/Users/markmini/Documents/dev/2026-cop-physical-ai/SO-ARM100/Simulation/SO101/so101_new_calib.xml"
-
-if not os.path.exists(MODEL_PATH):
-    print(f"Error: Model file not found at {MODEL_PATH}")
-    exit(1)
-
-# Load the model and data
-model = mujoco.MjModel.from_xml_path(MODEL_PATH)
-data = mujoco.MjData(model)
-
-# Find the joint IDs for the robot arm
-# Assuming the robot has 6 joints based on the 6-DoF description
-# This might need refinement based on the actual model's joint names
-joint_names = ["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll"] # Exclude gripper for now 
-joint_ids = [model.joint(name).id for name in joint_names if model.joint(name).id != -1]
-
-if not joint_ids:
-    print("Warning: No controllable joints found. Please check joint names in the MJCF model.")
-    # Attempt to use all free joints if no specific names found
-    joint_ids = [i for i in range(model.nu)]
-    if not joint_ids:
-        print("Error: No joints available to control. Exiting.")
-        exit(1)
-    else:
-        print(f"Controlling {len(joint_ids)} joints using default indices.")
-
-# Simulation duration and control frequency
-duration = 5  # seconds
-framerate = 60  # Hz
-n_frames = int(duration * framerate)
-
-# Create a viewer
-with mujoco.viewer.launch_passive(model, data) as viewer:
-    # Set the camera to an overhead view if possible
-    # You might need to adjust these values to get a good overhead view
-    # Example for setting a specific camera if available in the model
-    # If the model has named cameras, you can use: viewer.cam.fixedcamid = model.camera('overhead_camera_name').id
-    # Otherwise, you can adjust the spectator camera
-    viewer.cam.azimuth = 90
-    viewer.cam.elevation = -45
-    viewer.cam.distance = 2
-    viewer.cam.lookat[0] = 0
-    viewer.cam.lookat[1] = 0
-    viewer.cam.lookat[2] = 0.5
+REPO_ROOT = "/Users/markmini/Documents/dev/2026-cop-physical-ai"
+MODEL_PATH = os.path.join(REPO_ROOT, "SO-ARM100/Simulation/SO101/so101_new_calib.xml")
 
 
-    # Simulation loop
-    for i in range(n_frames):
-        # Calculate sine wave joint targets
-        # Assuming a range of -1 to 1 radian for demonstration
-        # You may need to adjust amplitude and frequency
-        amplitude = np.pi / 4  # 45 degrees
-        frequency = 1 # Hz
-        target_angle = amplitude * np.sin(2 * np.pi * frequency * data.time)
+def run_headless(model, data, duration=5.0, fps=30):
+    """Renderer 방식 — headless 환경(크론) 안전. 프레임 수 반환."""
+    renderer = mujoco.Renderer(model, height=480, width=640)
+    frames = []
 
-        # Apply the same target to all controllable joints
-        for jid in joint_ids:
-            if jid < data.ctrl.shape[0]: # Ensure jid is a valid control index
-                data.ctrl[jid] = target_angle
-            
-        # Step the simulation
+    frequency = 1.0   # Hz
+    amplitude = 0.4   # radians (~23°)
+
+    mujoco.mj_resetData(model, data)
+    n_joints = min(model.nu, 6)
+
+    while data.time < duration:
+        for j in range(n_joints):
+            data.ctrl[j] = amplitude * np.sin(2 * np.pi * frequency * data.time)
         mujoco.mj_step(model, data)
+        renderer.update_scene(data)
+        frames.append(renderer.render().copy())
 
-        # Update viewer and synchronize
-        viewer.sync()
+    renderer.close()
+    print(f"[headless] {len(frames)} frames generated, sim_time={data.time:.2f}s")
+    return frames
 
-        # Check if the viewer window was closed
-        if viewer.is_closing():
-            break
 
-print("Simulation finished.")
+def run_interactive(model, data, duration=5.0):
+    """viewer 방식 — 로컬 GUI 전용. 크론에서 절대 호출 금지."""
+    import mujoco.viewer
+
+    frequency = 1.0
+    amplitude = 0.4
+    n_joints = min(model.nu, 6)
+
+    with mujoco.viewer.launch_passive(model, data) as viewer:
+        viewer.cam.azimuth = 90
+        viewer.cam.elevation = -45
+        viewer.cam.distance = 2.0
+        viewer.cam.lookat[:] = [0, 0, 0.5]
+
+        while data.time < duration and viewer.is_running():
+            for j in range(n_joints):
+                data.ctrl[j] = amplitude * np.sin(2 * np.pi * frequency * data.time)
+            mujoco.mj_step(model, data)
+            viewer.sync()
+
+    print(f"[interactive] sim_time={data.time:.2f}s")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--interactive", action="store_true",
+                        help="GUI viewer 사용 (로컬 전용, 크론 실행 금지)")
+    parser.add_argument("--duration", type=float, default=5.0)
+    args = parser.parse_args()
+
+    if not os.path.exists(MODEL_PATH):
+        print(f"Error: MJCF not found at {MODEL_PATH}")
+        raise SystemExit(1)
+
+    model = mujoco.MjModel.from_xml_path(MODEL_PATH)
+    data = mujoco.MjData(model)
+    print(f"Model loaded: {model.njnt} joints, {model.nu} actuators")
+
+    if args.interactive:
+        run_interactive(model, data, args.duration)
+    else:
+        run_headless(model, data, args.duration)
+
+
+if __name__ == "__main__":
+    main()

@@ -78,10 +78,32 @@ uv pip install <패키지명>
 - [v] **5/21**: W3 마무리 + Phase 0 W4 시작 준비
 
 ### W4 (5/22 ~ 5/31) — Pick-and-Place 시뮬 + 자동 데이터셋
+
+> ⚠️ **코드 작성 규칙 (크론 에이전트 필독)**
+> - 모든 스크립트는 **headless (`mujoco.Renderer`)** 방식으로 작성. `mujoco.viewer` 호출 금지.
+> - 완료된 항목은 반드시 `[ ]` → `[v]` 체크 후 git commit.
+
 - [ ] **5/22~24**: Pick-Place 시나리오 (큐브 1개) 시뮬 동작
+  - 출력 파일: `samples/training/sim_pick_place.py`
+  - 큐브 스펙: 50mm 정육면체, 질량 50g, MJCF body 이름 `cube`
+  - 큐브 초기 위치: `pos="0.15 0 0.025"` (작업대 위)
+  - 성공 기준: 그리퍼가 큐브에 접근(±5mm) 후 들어올리기(Z+50mm) 완료
+  - headless 렌더링으로 프레임 저장 (`research/simulation/video/pick_place_demo.mp4`)
+
 - [ ] **5/25~27**: 자동 데이터 수집 스크립트 (`samples/training/sim_data_collector.py`)
+  - LeRobot 로컬 저장 패턴: `LeRobotDataset.create(repo_id="local/cop-pickplace", root="data/episodes")`
+  - 에피소드 구조: `observations.images.top` (640×480 RGB), `observations.state` (6DoF qpos), `actions` (6DoF ctrl), `timestamps`
+  - 에피소드당 큐브 초기 위치 랜덤 변동: x±20mm, y±20mm
+  - 목표: 50 에피소드
+
 - [ ] **5/28~30**: LeRobot Dataset 포맷으로 50 에피소드 합성
+  - `sim_data_collector.py` 실행 → `data/episodes/` 로컬 저장
+  - `info.json` + `data/chunk-000/` 구조 검증
+  - 50 에피소드 완료 후 `agent/research-log/YYYY-MM-DD.md` 에 성공률/소요시간 기록
+
 - [ ] **5/31**: Phase 0 완료 리포트 + 6월 Phase 1 준비
+  - `research/simulation/phase0_completion_report.md` 작성
+  - Phase 0 완료 기준 4개 항목 체크
 
 **Phase 0 완료 기준**:
 - ✅ MuJoCo에서 SO-ARM101이 viewer로 동작
@@ -98,13 +120,23 @@ uv pip install <패키지명>
 - [ ] LeRobot Dataset 포맷 검증
 
 ### W3 (6/15 ~ 6/21) — ACT 학습
-- [ ] LeRobot ACT 학습 파이프라인 구성
-- [ ] epoch 100 학습 실행
-- [ ] 학습 곡선 모니터링
+> ⚠️ **학습 실행 전략**: ACT epoch 100은 크론 타임아웃(600초) 초과. 아래 방식으로 실행.
+> ```bash
+> # 크론 1이 실행 (nohup 백그라운드)
+> nohup .venv/bin/python3 scripts/train_act.py --epochs 100 > logs/act_train.log 2>&1 &
+> echo $! > logs/act_train.pid
+> # 다음 날 크론 1이 pid 파일 확인 → 완료 여부 체크
+> ```
+- [ ] LeRobot ACT 학습 파이프라인 구성 (`scripts/train_act.py`)
+- [ ] nohup 백그라운드로 epoch 100 학습 실행 (완료까지 수일 소요)
+- [ ] 매일 크론이 `logs/act_train.log` 마지막 줄 확인 → research-log에 진행률 기록
+- [ ] 학습 완료 후 `models/act_phase1.pt` 저장 + git push
 
 ### W4 (6/22 ~ 6/30) — 실기 fine-tune (예정)
+> ⚠️ **외부 의존**: 실기팀 에피소드 수집 필요 (agent/external-dependencies.md 참조)
+> 실기 에피소드 없으면: 시뮬 추가 200 에피소드로 대체 학습 진행
 - [ ] 학습 모델 git push → Orin Nano
-- [ ] 실기 5~10 에피소드로 fine-tune (실기팀)
+- [ ] 실기 5~10 에피소드로 fine-tune (실기팀) — 또는 시뮬 200 ep 추가 학습으로 대체
 - [ ] 시뮬 vs 실기 정확도 비교
 
 **Phase 1 완료 기준**: 시뮬 Pick 성공률 90% 이상
