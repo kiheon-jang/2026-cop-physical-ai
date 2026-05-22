@@ -24,10 +24,9 @@
   - `Simulation/SO101/so101_new_calib.xml` 로컬 커밋 완료 (오버헤드 카메라 추가 + 관절 range 시뮬용 조정)
   - 원본 TheRobotStudio 레포에는 push 안 함 (시뮬 전용 수정이므로 upstream 부적합)
 
-- [ ] [전체] **MuJoCo 사내 사용 라이선스 확인**
-  - 마감: 2026-06-01
-  - 사유: 오픈소스(Apache 2.0)이지만 사내 정책 확인 필요
-  - 결과 위치: research/decisions/2026-05-XX_mujoco-license.md
+- [v] [전체] **MuJoCo 사내 사용 라이선스 확인** — 2026-05-22 결정
+  - CoP 단계 내부 연구개발 용도로 사용 승인 (Apache 2.0, 상업 배포 아님)
+  - 결과: research/decisions/README.md 결정 완료 항목으로 이동
 
 ---
 

@@ -1,0 +1,52 @@
+# =============================================================================
+# CoP Physical AI — .gitignore
+# =============================================================================
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+*.egg-info/
+dist/
+build/
+
+# 에피소드 데이터 (대용량 바이너리 — git 관리 제외)
+# Phase 0~1: 로컬 저장, Phase 1부터 HuggingFace private으로 이관
+data/episodes/
+data/videos/
+data/chunks/
+data/*.parquet
+*.mp4
+*.avi
+*.webm
+
+# 단, 메타데이터는 git 추적
+!data/metadata/
+!data/metadata/*.json
+
+# 학습 체크포인트 (대용량)
+models/*.pt
+models/*.pth
+models/checkpoints/
+logs/
+outputs/
+
+# MuJoCo 렌더링 임시 파일
+*.png.tmp
+/tmp/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 환경변수 (보안)
+.env
+*.env.local

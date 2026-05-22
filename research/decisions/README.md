@@ -10,6 +10,8 @@
 | 2026-04-29 | 자동화 플랫폼 | ✅ Hermes Agent (로컬 Mac Mini M5) | 사용자 | 비용 최적화, 24/7 운영 | - |
 | 2026-05-15 | 웹캠 캘리브레이션 / 실측 물리값 | ✅ 옵션으로 분류 — 없어도 시뮬 진행 | 사용자 | 실기 없는 시뮬 전용 운영 확정. 없으면 기본값(fovy=45, 640×480, MJCF 기본 inertial) 사용. 실측값 있으면 Sim2Real 정확도 향상. | - |
 | 2026-05-15 | Hermes 크론 `terminal/file/web` 스킬 | ✅ 제거 + `cop-physical-ai-self-heal` 스킬로 대체 | Claude Code | Hermes v0.13.0에서 해당 이름이 스킬 플러그인으로 해석되어 "not found" 오탐 발생. 내장 toolset은 별도 등록 불필요. | - |
+| 2026-05-22 | MuJoCo 사내 라이선스 | ✅ 사용 승인 | 장기헌 | CoP 내부 R&D 용도, Apache 2.0 오픈소스, 상업 배포 아님 | - |
+| 2026-05-22 | 에피소드 데이터셋 저장 방식 | ✅ 2단계 전략 채택 | 장기헌 | Phase 0: 로컬(`data/episodes/`, gitignore). Phase 1+: HuggingFace private(`kiheon-jang/cop-pickplace-v1`). LeRobot 네이티브 통합 + Orin Nano pull 가능. | - |
 
 ## 결정 상태 정의
 - ✅ **채택** — 실제 프로젝트에 적용
@@ -51,7 +53,7 @@
 | ACT vs Diffusion Policy — 첫 학습 정책 선택 | 🔄 검토중 | Hermes Agent | Phase 2 (2026-07) 비교 후 |
 | LeKiwi vs XLeRobot — 모바일 플랫폼 선택 | ⏸️ 보류 | - | Phase 4 (차년도) |
 | 카메라 업그레이드 — Logitech C920 vs RealSense | ⏸️ 보류 | - | 예산 확정 후 |
-| MuJoCo 사내 라이선스 확인 | 🔄 검토중 | 전체 | 2026-06-01 마감 |
+| MuJoCo 사내 라이선스 확인 | ✅ 승인 | 장기헌 | 2026-05-22 — CoP 내부 R&D 용도, Apache 2.0 사용 가능 |
 
 ### 결정 완료 항목 (참고)
 - ✅ **시뮬레이터 선택** (2026-04-22 / 05-01 확정): MuJoCo (Phase 0~2) + Isaac Lab (Phase 3+, 차년도)
