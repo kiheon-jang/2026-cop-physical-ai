@@ -18,6 +18,11 @@
 
 ## 이력
 
+
+### 2026-05-21
+- 📋 [로그] 2026-05-19~21 research-log 소급 작성
+- ✅ [로드맵] W1~W3 완료 항목 체크 — 크론 혼선 방지
+
 ### 2026-05-01
 - 🛠 [의사결정] 시뮬레이터 최종 확정: **MuJoCo 3.x** (Phase 0~2 메인) + Isaac Lab (Phase 3+, 차년도 별도 GPU 서버)
   - 사유: Mac Mini M5 (Apple Silicon)에서 Isaac Lab 미지원
