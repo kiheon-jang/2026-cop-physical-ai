@@ -83,7 +83,7 @@ uv pip install <패키지명>
 > - 모든 스크립트는 **headless (`mujoco.Renderer`)** 방식으로 작성. `mujoco.viewer` 호출 금지.
 > - 완료된 항목은 반드시 `[ ]` → `[v]` 체크 후 git commit.
 
-- [ ] **5/22~24**: Pick-Place 시나리오 (큐브 1개) 시뮬 동작
+- [v] **5/22~24**: Pick-Place 시나리오 (큐브 1개) 시뮬 동작
   - 출력 파일: `samples/training/sim_pick_place.py`
   - 큐브 스펙: 50mm 정육면체, 질량 50g, MJCF body 이름 `cube`
   - 큐브 초기 위치: `pos="0.15 0 0.025"` (작업대 위)
