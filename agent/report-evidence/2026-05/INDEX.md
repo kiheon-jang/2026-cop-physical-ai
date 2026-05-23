@@ -13,3 +13,6 @@
 
 ### [2.4 정량 성과]
 - 증거: (이번 주 정량 성과 없음)
+
+### [2.X] Pick-Place 시뮬 동작 증거
+- 증거: research/simulation/video/pick_place_demo.mp4 (Pick-Place 시뮬 동작 동영상)
