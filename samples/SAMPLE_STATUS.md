@@ -15,10 +15,10 @@
 
 | 카테고리 | 완성 | 기본 | 작성중 | 계획 |
 |---------|------|------|--------|------|
-| unit/ | 0 | 0 | 0 | 0 |
+| unit/ | 0 | 0 | 0 | 2 |
 | hardware/ | 0 | 1 | 0 | 3 |
-| training/ | 1 | 0 | 0 | 0 |
-| inference/ | 0 | 0 | 0 | 2 |
+| training/ | 3 | 0 | 0 | 5 |
+| inference/ | 0 | 0 | 0 | 3 |
 | motor-control/ | 1 | 0 | 0 | 0 |
 | data-collection/ | 1 | 0 | 0 | 0 |
 
@@ -28,8 +28,8 @@
 
 | 파일 | 상태 | 완성도 | 마지막 검증 | 설명 |
 |------|------|--------|------------|------|
-| `test_act_training.py` | 📋 계획 | - | - | ACT 학습 루프 단위테스트 |
-| `test_inference_pipeline.py` | 📋 계획 | - | - | 인퍼런스 비동기 루프 |
+| `unit/test_act_training.py` | 📋 계획 | - | - | ACT 학습 루프 단위테스트 |
+| `unit/test_inference_pipeline.py` | 📋 계획 | - | - | 인퍼런스 비동기 루프 |
 
 ---
 
@@ -37,10 +37,10 @@
 
 | 파일 | 상태 | 완성도 | 마지막 검증 | 설명 |
 |------|------|--------|------------|------|
-| `samples/hardware/run_connection_check.py` | ✅ 기본완성 | ⭐⭐ | 2026-04-21 | 전체 하드웨어 연결 상태 확인 |
-| `run_home_position.py` | 📋 계획 | - | - | 홈 포지션 이동 |
-| `run_teleoperation_test.py` | 📋 계획 | - | - | 텔레오퍼레이션 단기 테스트 |
-| `run_camera_check.py` | 📋 계획 | - | - | 카메라 스냅샷 확인 |
+| `hardware/run_connection_check.py` | ✅ 기본완성 | ⭐⭐ | 2026-04-21 | 전체 하드웨어 연결 상태 확인 |
+| `hardware/run_home_position.py` | 📋 계획 | - | - | 홈 포지션 이동 |
+| `hardware/run_teleoperation_test.py` | 📋 계획 | - | - | 텔레오퍼레이션 단기 테스트 |
+| `hardware/run_camera_check.py` | 📋 계획 | - | - | 카메라 스냅샷 확인 |
 
 ---
 
@@ -48,8 +48,15 @@
 
 | 파일 | 상태 | 완성도 | 마지막 검증 | 설명 |
 |------|------|--------|------------|------|
-| `samples/training/test_diffusion_training.py` | ✅ 완성 | ⭐⭐⭐ | 2026-04-21 | Diffusion Policy 학습 |
-| `test_hyperparameter_search.py` | 📋 계획 | - | - | 하이퍼파라미터 탐색 |
+| `training/test_diffusion_training.py` | ✅ 완성 | ⭐⭐⭐ | 2026-04-21 | Diffusion Policy 학습 |
+| `training/sim_camera_verification.py` | ✅ 완성 | ⭐⭐⭐ | 2026-05-24 | 시뮬레이션 카메라 검증 (Mujoco Renderer) |
+| `training/sim_basic_motion.py` | ✅ 완성 | ⭐⭐⭐ | 2026-05-24 | 기본 모션 시뮬레이션 |
+| `training/sim_viewer_6dof.py` | 📋 계획 | - | - | 6-DoF 뷰어 시뮬레이션 |
+| `training/sim_headless_6dof_video.py` | 📋 계획 | - | - | 헤드리스 6-DoF 비디오 시뮬레이션 |
+| `training/sim_pick_place.py` | ✅ 완성 | ⭐⭐⭐ | 2026-05-23 | Pick-Place 시뮬레이션 |
+| `training/sim_friction_tuning.py` | ✅ 완성 | ⭐⭐⭐ | 2026-05-19 | 마찰계수 튜닝 시뮬레이션 |
+| `training/sim_joint_angle_comparison_script.py` | 📋 계획 | - | - | 관절 각도 비교 스크립트 |
+| `training/test_hyperparameter_search.py` | 📋 계획 | - | - | 하이퍼파라미터 탐색 |
 
 ---
 
@@ -57,8 +64,9 @@
 
 | 파일 | 상태 | 완성도 | 마지막 검증 | 설명 |
 |------|------|--------|------------|------|
-| `test_inference_pipeline.py` | 📋 계획 | - | - | 인퍼런스 비동기 루프 |
-| `test_camera_pipeline.py` | 📋 계획 | - | - | 카메라 입력 전처리 |
+| `inference/test_inference_pipeline.py` | 📋 계획 | - | - | 인퍼런스 비동기 루프 |
+| `inference/test_camera_pipeline.py` | 📋 계획 | - | - | 카메라 입력 전처리 |
+| `inference/joint_angle_comparison_sim.py` | 📋 계획 | - | - | 시뮬레이션 관절 각도 비교 |
 
 ---
 
@@ -66,7 +74,7 @@
 
 | 파일 | 상태 | 완성도 | 마지막 검증 | 설명 |
 |------|------|--------|------------|------|
-| `samples/motor-control/test_follower_basic.py` | ✅ 완성 | ⭐⭐⭐ | 2026-04-21 | 모터 6개 ID/각도 범위 검증 |
+| `motor-control/test_follower_basic.py` | ✅ 완성 | ⭐⭐⭐ | 2026-04-21 | 모터 6개 ID/각도 범위 검증 |
 
 ---
 
@@ -74,7 +82,7 @@
 
 | 파일 | 상태 | 완성도 | 마지막 검증 | 설명 |
 |------|------|--------|------------|------|
-| `samples/data-collection/test_data_pipeline.py` | ✅ 완성 | ⭐⭐⭐ | 2026-04-21 | 데이터 수집 파이프라인 구조 검증 |
+| `data-collection/test_data_pipeline.py` | ✅ 완성 | ⭐⭐⭐ | 2026-04-21 | 데이터 수집 파이프라인 구조 검증 |
 
 ---
 
@@ -82,6 +90,7 @@
 
 | 날짜 | 내용 |
 |------|------|
-| 2026-05-03 | 주간 정리: `samples/` 디렉토리 구조에 맞춰 `SAMPLE_STATUS.md` 갱신. `unit/` 및 `training/` 내 `test_act_training.py`는 실제 파일 경로를 반영하도록 이동. `test_diffusion_training.py`도 실제 경로 반영. `motor-control/` 및 `data-collection/` 카테고리 추가 및 파일 반영. 이전 `unit/test_diffusion_training.py` 항목 삭제.
+| 2026-05-24 | 주간 정리: `samples/` 디렉토리 구조 및 최신 작업 내용 반영하여 `SAMPLE_STATUS.md` 갱신. `training/`에 새로운 시뮬레이션 스크립트 추가 및 상태 업데이트. |
+| 2026-05-03 | 주간 정리: `samples/` 디렉토리 구조에 맞춰 `SAMPLE_STATUS.md` 갱신. `unit/` 및 `training/` 내 `test_act_training.py`는 실제 파일 경로를 반영하도록 이동. `test_diffusion_training.py`도 실제 경로 반영. `motor-control/` 및 `data-collection/` 카테고리 추가 및 파일 반영. 이전 `unit/test_diffusion_training.py` 항목 삭제. |
 | 2026-04-21 | 최초 작성. unit 2개 완성, hardware 1개 기본완성 |
 | 2026-04-21 | training/test_diffusion_training.py 신규 작성 (7 PASSED) |
