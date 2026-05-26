@@ -90,7 +90,7 @@ uv pip install <패키지명>
   - 성공 기준: 그리퍼가 큐브에 접근(±5mm) 후 들어올리기(Z+50mm) 완료
   - headless 렌더링으로 프레임 저장 (`research/simulation/video/pick_place_demo.mp4`)
 
-- [ ] **5/25~27**: 자동 데이터 수집 스크립트 (`samples/training/sim_data_collector.py`)
+- [v] **5/25~27**: 자동 데이터 수집 스크립트 (`samples/training/sim_data_collector.py`)
   - LeRobot 로컬 저장 패턴: `LeRobotDataset.create(repo_id="local/cop-pickplace", root="data/episodes")`
   - 에피소드 구조: `observations.images.top` (640×480 RGB), `observations.state` (6DoF qpos), `actions` (6DoF ctrl), `timestamps`
   - 에피소드당 큐브 초기 위치 랜덤 변동: x±20mm, y±20mm
