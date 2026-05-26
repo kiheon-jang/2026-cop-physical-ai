@@ -39,6 +39,78 @@ KST = datetime.timezone(datetime.timedelta(hours=9))
 # 유틸리티
 # =============================================================================
 
+# Upstream nightly sim jobs (must both succeed before this report is meaningful).
+# IDs are pinned in ~/.hermes/cron/jobs.json.
+_UPSTREAM_SIM_JOBS = [
+    ("9ad85007cf27", "시뮬 환경 단계별 구축 (MuJoCo)"),
+    ("85d322d3b37c", "시뮬 테스트 + 메트릭 수집"),
+]
+
+
+def _check_upstream_failures():
+    """Return list of (name, last_error_tail) for sim jobs that did NOT succeed today.
+
+    Empty list = all upstream OK, proceed with normal report.
+    Returns None on read errors — caller should fall through to normal report
+    (don't block the user's email over a missing jobs.json).
+    """
+    jobs_file = Path(os.path.expanduser("~/.hermes/cron/jobs.json"))
+    try:
+        data = json.loads(jobs_file.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
+    by_id = {j.get("id"): j for j in data.get("jobs", [])}
+    today = datetime.datetime.now(KST).date()
+    failures = []
+    for job_id, label in _UPSTREAM_SIM_JOBS:
+        job = by_id.get(job_id)
+        if not job:
+            failures.append((label, f"job {job_id} not registered"))
+            continue
+        if job.get("last_status") == "ok":
+            ts = job.get("last_run_at") or ""
+            try:
+                ran = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                if ran.astimezone(KST).date() == today:
+                    continue  # Succeeded today — fine.
+            except ValueError:
+                pass
+        tail = (job.get("last_error") or "").strip().splitlines()
+        failures.append((label, tail[-1] if tail else job.get("last_status", "unknown")))
+    return failures
+
+
+def _send_upstream_failure_alert(failures):
+    """Send a minimal alert email to ops (xaqwer only) and return exit code."""
+    today_str = datetime.datetime.now(KST).strftime("%Y-%m-%d")
+    subject = f"[CoP Physical AI] ⚠ 어젯밤 시뮬 작업 실패 — 보고 건너뜀 | {today_str}"
+    rows = "\n".join(
+        f"<li><b>{html_escape(name)}</b><br><code>{html_escape(detail)}</code></li>"
+        for name, detail in failures
+    )
+    html = (
+        "<html><body style='font-family:-apple-system,BlinkMacSystemFont,sans-serif;"
+        "max-width:600px;margin:24px auto;color:#222'>"
+        f"<h2 style='color:#c00'>⚠ 어젯밤 시뮬 작업 실패</h2>"
+        f"<p>오늘 ({today_str}) 일일 보고를 건너뜁니다. 다음 업스트림 잡이 성공하지 않아 "
+        f"보고할 시뮬 결과가 없습니다.</p>"
+        f"<ul>{rows}</ul>"
+        "<p style='color:#666;font-size:13px'>01:00에 자동 재시도가 한 번 더 실행됩니다 "
+        "(<code>cop_retry_watcher.py</code>). 재시도도 실패하면 이 메일이 발송됩니다.</p>"
+        "<p style='color:#666;font-size:13px'>수동 점검: "
+        "<code>hermes cron list</code> · "
+        "<code>tail /tmp/cop_retry_watcher_*.log</code></p>"
+        "</body></html>"
+    )
+    print(f"[전제 실패 감지] {len(failures)}건 — alert 메일을 xaqwer에게만 발송")
+    ok, err = send_email_smtp("xaqwer@gmail.com", subject, html)
+    if ok:
+        print("  ✅ alert 발송")
+    else:
+        print(f"  ❌ alert 발송 실패: {err}")
+    return 0  # Treat as successful watchdog run — script did its job.
+
+
 def _load_smtp_env_from_hermes():
     """~/.hermes/.env에서 EMAIL_*, GEMINI_API_KEY를 os.environ에 로드."""
     env_path = os.path.expanduser("~/.hermes/.env")
@@ -996,6 +1068,13 @@ def render_html():
 
 def main():
     _load_smtp_env_from_hermes()
+
+    # Plan C guard: if last night's sim jobs failed, send an alert instead of
+    # a fake "no data" daily report. Returns None on read errors → fall through.
+    upstream_failures = _check_upstream_failures()
+    if upstream_failures:
+        return _send_upstream_failure_alert(upstream_failures)
+
     html, header, commits, phase_progress = render_html()
 
     out_dir = REPO_ROOT / "docs/01_overview/daily-reports"
