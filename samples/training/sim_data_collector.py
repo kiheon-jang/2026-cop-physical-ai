@@ -59,7 +59,7 @@ except ImportError:
 
 # MJCF 모델 파일 경로 (cube body가 포함된 커스텀 씬)
 MODEL_XML_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "..", "SO-ARM100", "Simulation", "SO101", "cop_pickplace_scene.xml"
+    os.path.dirname(__file__), "..", "..", "SO-ARM100", "Simulation", "SO101", "scene.xml"
 )
 
 # 데이터셋 저장 경로
