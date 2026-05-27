@@ -96,7 +96,7 @@ uv pip install <패키지명>
   - 에피소드당 큐브 초기 위치 랜덤 변동: x±20mm, y±20mm
   - 목표: 50 에피소드
 
-- [ ] **5/28~30**: LeRobot Dataset 포맷으로 50 에피소드 합성
+- [v] **5/28~30**: LeRobot Dataset 포맷으로 50 에피소드 합성
   - `sim_data_collector.py` 실행 → `data/episodes/` 로컬 저장
   - `info.json` + `data/chunk-000/` 구조 검증
   - 50 에피소드 완료 후 `agent/research-log/YYYY-MM-DD.md` 에 성공률/소요시간 기록
