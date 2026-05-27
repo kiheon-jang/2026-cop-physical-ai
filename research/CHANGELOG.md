@@ -22,6 +22,14 @@
 
 
 
+
+### 2026-05-27
+- 🛠 [시뮬] LeRobot Dataset 포맷으로 50 에피소드 합성 — 2026-05-28
+- chore(self-heal): 자가치유 기록 추가 (research-log 2026-05-28 소급 작성)
+- 📊 [로그] 2026-05-27 시뮬 테스트 — 데이터 수집 및 시뮬 스크립트 실행
+- 🛠 [시뮬] 자동 데이터 수집 스크립트 실행 — 2026-05-27
+- chore(submodule): Update SO-ARM100 submodule reference with cube additions
+
 ### 2026-05-25
 - chore(self-heal): 자가치유 기록 추가
 - 📝 [히스토리] 2026-05-24 작업 기록 + README 현황 업데이트 — 2026-05-25
