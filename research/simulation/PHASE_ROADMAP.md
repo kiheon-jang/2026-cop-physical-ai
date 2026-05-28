@@ -101,7 +101,7 @@ uv pip install <패키지명>
   - `info.json` + `data/chunk-000/` 구조 검증
   - 50 에피소드 완료 후 `agent/research-log/YYYY-MM-DD.md` 에 성공률/소요시간 기록
 
-- [ ] **5/31**: Phase 0 완료 리포트 + 6월 Phase 1 준비
+- [v] **5/31**: Phase 0 완료 리포트 + 6월 Phase 1 준비
   - `research/simulation/phase0_completion_report.md` 작성
   - Phase 0 완료 기준 4개 항목 체크
 
