@@ -18,6 +18,7 @@
 
 ### [2.4 정량 성과]
 - 증거: research/simulation/video/pick_place_demo.mp4 (Pick-Place 시뮬 동작 동영상)
+- 증거: agent/research-log/2026-05-30.md (50 에피소드 데이터 수집 완료)
 
 ### [2.5 기타 특이사항]
 - 증거: agent/research-log/2026-05-20.md 및 2026-05-21.md (Hermes 크론 스킬 미등록 이슈 및 해결)
