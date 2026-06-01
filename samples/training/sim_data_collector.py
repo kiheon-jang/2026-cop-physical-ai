@@ -184,7 +184,7 @@ def main():
         vcodec="h264",
     )
 
-    num_episodes = 50
+    num_episodes = 200
     phase_sequence = list(PICK_PLACE_POSES.keys())
 
     for episode_idx in range(num_episodes):
