@@ -16,3 +16,10 @@
 - `sim_camera_verification.py` 이미지: `/Users/markmini/Documents/dev/2026-cop-physical-ai/research/simulation/video/camera_top_frame_0.png`
 - `sim_pick_place.py` 비디오: `/Users/markmini/Documents/dev/2026-cop-physical-ai/research/simulation/video/pick_place_demo.mp4`
 - `sim_data_collector.py` 데이터셋 메타정보: `/Volumes/MARK_DATA/dev/2026-cop-physical-ai/data/episodes/info.json`
+## 2026-06-06
+- `sim_headless_6dof_video.py` 비디오: `/Users/markmini/Documents/dev/2026-cop-physical-ai/research/simulation/video/sim_6dof_animation.mp4`
+- `sim_camera_verification.py` 이미지: `/Users/markmini/Documents/dev/2026-cop-physical-ai/research/simulation/video/top_view_frame_0.png`, `/Users/markmini/Documents/dev/2026-cop-physical-ai/research/simulation/video/gripper_view_frame_0.png`
+- `sim_pick_place.py` 비디오: `/Users/markmini/Documents/dev/2026-cop-physical-ai/research/simulation/video/pick_place_demo.mp4`
+- `sim_data_collector.py` 데이터셋 메타정보: `/Volumes/MARK_DATA/dev/2026-cop-physical-ai/data/episodes/meta/info.json`
+- `sim_data_collector.py` 데이터셋 파일: `/Volumes/MARK_DATA/dev/2026-cop-physical-ai/data/episodes/data/chunk-000/file-000.parquet`
+
