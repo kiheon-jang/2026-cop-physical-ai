@@ -42,8 +42,10 @@ KST = datetime.timezone(datetime.timedelta(hours=9))
 # Upstream nightly sim jobs (must both succeed before this report is meaningful).
 # IDs are pinned in ~/.hermes/cron/jobs.json.
 _UPSTREAM_SIM_JOBS = [
-    ("9ad85007cf27", "시뮬 환경 단계별 구축 (MuJoCo)"),
-    ("85d322d3b37c", "시뮬 테스트 + 메트릭 수집"),
+    # 2026-06-07: 옛 9ad85007cf27 / 85d322d3b37c (Hermes agent + Gemini) →
+    # v3.2 패턴 (no_agent + claude -p 위임) 으로 마이그레이션. 옛 잡은 pause 보존.
+    ("76b3cd4eb4fc", "v3.2 시뮬 환경 구축"),
+    ("f88b3198c9b6", "v3.2 시뮬 테스트 + 메트릭"),
 ]
 
 
