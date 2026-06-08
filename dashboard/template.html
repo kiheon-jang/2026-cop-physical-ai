@@ -141,6 +141,15 @@
   [data-theme="dark"] .hm-cell.l3 { background: rgba(0,179,119,.62); }
   [data-theme="dark"] .hm-cell.l4 { background: var(--accent); }
 
+  /* R3 — CoP 한 줄 설명 (Overview 최상단) */
+  .cop-intro { display: flex; align-items: center; gap: 14px; background: var(--bg-sub);
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; margin-bottom: 14px; }
+  .cop-intro .cop-label { font-size: 10px; font-weight: 800; letter-spacing: 1.8px;
+    color: #fff; background: var(--accent); padding: 4px 10px; border-radius: 4px;
+    flex: 0 0 auto; }
+  .cop-intro .cop-text { font-size: 13px; color: var(--text-sub); line-height: 1.55; }
+  .cop-intro .cop-text b { color: var(--text); font-weight: 700; }
+
   /* R3 — Vision hero (Overview) */
   .vision-hero { background: linear-gradient(135deg, var(--accent-soft), var(--bg-sub));
     border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px;
@@ -305,6 +314,100 @@
     padding: 1px 5px; background: var(--bg); border-radius: 3px; font-size: 10px; margin-right: 6px; }
   .tl-card .tl-detail .heal-line { padding: 3px 0; color: var(--action); }
   .tl-card .tl-detail .heal-line::before { content: '🛟 '; }
+
+  /* OPS — AI 자동화 운영 방법 페이지 */
+  .ops-summary { background: var(--accent-soft); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 22px; margin-bottom: 22px; }
+  .ops-summary p { margin: 0; font-size: 14px; line-height: 1.7; color: var(--text); }
+  .ops-summary p b { color: var(--accent-strong); font-weight: 800; }
+
+  /* 시스템 구성도 (트리) */
+  .ops-tree { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 24px; font-family: ui-monospace, monospace; font-size: 12px; line-height: 1.9;
+    overflow-x: auto; }
+  .ops-tree .root { font-weight: 800; color: var(--text); font-size: 13px; padding-bottom: 4px; }
+  .ops-tree .branch { color: var(--text-sub); white-space: nowrap; }
+  .ops-tree .branch b { color: var(--text); font-weight: 700; }
+  .ops-tree .branch .desc { color: var(--text-dim); font-family: -apple-system, sans-serif; font-size: 11px; margin-left: 6px; }
+  .ops-tree .cron { color: var(--accent-strong); font-weight: 600; }
+
+  /* cron 표 */
+  .cron-table { width: 100%; border-collapse: collapse; background: var(--bg-sub);
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .cron-table th, .cron-table td { padding: 12px 14px; text-align: left;
+    border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: top; }
+  .cron-table th { background: var(--bg); font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text-dim); }
+  .cron-table tr:last-child td { border-bottom: none; }
+  .cron-table .when { font-family: ui-monospace, monospace; font-weight: 700; color: var(--accent-strong);
+    white-space: nowrap; }
+  .cron-table .role { font-weight: 700; color: var(--text); }
+  .cron-table .desc { color: var(--text-sub); font-size: 12px; line-height: 1.55; margin-top: 4px; }
+  .cron-table .out code { background: var(--bg); padding: 1px 6px; border-radius: 3px;
+    font-family: ui-monospace, monospace; font-size: 11px; color: var(--text); }
+
+  /* 1일 timeline */
+  .day-timeline { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px;
+    padding: 22px 24px; }
+  .timeline-axis { position: relative; height: 50px; margin: 16px 0 8px;
+    background: linear-gradient(to right, var(--border) 0%, var(--border) 100%);
+    background-size: 100% 2px; background-repeat: no-repeat; background-position: 0 24px; }
+  .timeline-axis .hour { position: absolute; top: 24px; width: 1px; height: 8px;
+    background: var(--border-strong); transform: translateX(-50%); }
+  .timeline-axis .hour::after { content: attr(data-hour); position: absolute; top: 12px;
+    left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-dim);
+    font-family: ui-monospace, monospace; }
+  .timeline-event { position: absolute; top: 0; transform: translateX(-50%);
+    background: var(--bg); border: 1px solid var(--accent); border-radius: 6px;
+    padding: 4px 8px; font-size: 10px; font-weight: 700; color: var(--accent-strong);
+    white-space: nowrap; cursor: default; }
+  .timeline-event::after { content: ''; position: absolute; bottom: -8px; left: 50%;
+    transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent;
+    border-right: 4px solid transparent; border-top: 6px solid var(--accent); }
+  .timeline-event.alt { top: 32px; border-color: var(--action); color: var(--action); }
+  .timeline-event.alt::after { border-top-color: var(--action); border-bottom: none; }
+
+  /* Hermes 핵심 카드 */
+  .hermes-card { background: linear-gradient(135deg, var(--accent-soft), var(--bg-sub));
+    border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+  .hermes-card .head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .hermes-card .head h4 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.3px; }
+  .hermes-card .head .tag { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;
+    background: var(--accent); color: #fff; padding: 3px 8px; border-radius: 4px; }
+  .hermes-card .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .hermes-card .features .f { background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; }
+  .hermes-card .features .f .l { font-size: 10px; color: var(--text-dim); letter-spacing: 1px;
+    text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+  .hermes-card .features .f .v { font-size: 13px; color: var(--text); font-weight: 700; line-height: 1.4; }
+  .hermes-card .features .f .v code { background: var(--bg-sub); padding: 1px 5px; border-radius: 3px;
+    font-family: ui-monospace, monospace; font-size: 11px; }
+
+  /* 데이터 흐름 박스 */
+  .dataflow { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 24px; }
+  .dataflow .row { display: flex; align-items: center; gap: 14px; padding: 8px 0; flex-wrap: wrap; }
+  .dataflow .row .step { background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 12px; color: var(--text); font-weight: 600; }
+  .dataflow .row .step code { background: var(--bg-sub); padding: 1px 5px; border-radius: 3px;
+    font-family: ui-monospace, monospace; font-size: 11px; color: var(--accent-strong); }
+  .dataflow .row .step.start { background: rgba(34,197,94,.10); border-color: #22c55e; }
+  .dataflow .row .step.end { background: rgba(37,99,235,.10); border-color: #2563eb; }
+  .dataflow .arrow { color: var(--text-dim); font-size: 14px; font-family: ui-monospace, monospace; }
+
+  /* 사람 vs AI 분담 표 */
+  .who-table { width: 100%; border-collapse: collapse; background: var(--bg-sub);
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .who-table th, .who-table td { padding: 10px 14px; text-align: left;
+    border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  .who-table th { background: var(--bg); font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text-dim); }
+  .who-table th:nth-child(2), .who-table th:nth-child(3),
+  .who-table td:nth-child(2), .who-table td:nth-child(3) { text-align: center; width: 80px; }
+  .who-table tr:last-child td { border-bottom: none; }
+  .who-table .check { color: #22c55e; font-weight: 800; font-size: 16px; }
+  .who-table .dash { color: var(--text-dim); }
+  .who-table .partial { color: var(--action); font-weight: 700; font-size: 12px; }
 
   /* GUIDE — 기술 가이드 페이지 */
   .tech-summary { background: var(--accent-soft); border-radius: 14px; padding: 22px 26px;
@@ -680,6 +783,7 @@
     <div class="nav">
       <a class="nav-item active" data-route="home"><span class="ico">📊</span> Overview</a>
       <a class="nav-item" data-route="tech"><span class="ico">🎓</span> CoP 리뷰</a>
+      <a class="nav-item" data-route="ops"><span class="ico">🤖</span> AI 자동화 운영</a>
       <a class="nav-item" data-route="apps"><span class="ico">🗓</span> Phase 로드맵 <span class="count" id="cnt-apps">6</span></a>
       <a class="nav-item" data-route="videos"><span class="ico">🎥</span> 시뮬 영상 <span class="count" id="cnt-videos">0</span></a>
       <a class="nav-item" data-route="daily"><span class="ico">📅</span> 활동 타임라인 <span class="count" id="cnt-daily">0</span></a>
@@ -719,6 +823,10 @@
 
     <!-- HOME (R3 — Overview) -->
     <div class="view" id="view-home">
+      <div class="cop-intro">
+        <span class="cop-label">CoP</span>
+        <span class="cop-text"><b>Community of Practice</b> — Physical AI 기술 내재화 사내 학습 트랙. SO-ARM101 로봇팔로 정비현장 PCB 작업 자동화를 단계적으로 학습합니다.</span>
+      </div>
       <div class="vision-hero" id="vision-hero">
         <div class="vh-left">
           <h1 class="title" id="vh-title">—</h1>
@@ -843,11 +951,189 @@
       </div>
     </div>
 
+    <!-- OPS — AI 자동화 운영 방법 -->
+    <div class="view hidden" id="view-ops">
+      <div class="home-hero">
+        <h1>🤖 AI 자동화 운영 방법</h1>
+        <div class="sub">사람이 매일 손대지 않아도 학습이 진행되는 구조 — 24시간 가동되는 Mac Mini 위에서 Hermes 라는 AI 에이전트가 정해진 시각에 시뮬·테스트·보고를 자동 실행합니다.</div>
+      </div>
+
+      <!-- 1. 한 줄 결론 -->
+      <div class="ops-summary">
+        <p>이 프로젝트는 <b>사람 없이 자동으로 굴러갑니다</b>. Mac Mini M5 한 대가 24시간 켜져 있고, <b>Hermes Agent (AI 에이전트)</b>가 하루 4번 정해진 시각에 시뮬 환경 구축 · 테스트 · 보고서 작성 · 메일 발송까지 수행합니다. 사람은 의사결정과 외부 의존 (부품 구매 · 3D 프린팅) 해결만 담당합니다.</p>
+      </div>
+
+      <!-- 2. 시스템 구성도 (트리) -->
+      <div class="section-head"><h3>시스템 구성</h3><div class="right">Mac Mini M5 한 대로 운영</div></div>
+      <div class="ops-tree">
+        <div class="root">💻 Mac Mini M5 (16GB · 24/7 가동)</div>
+        <div class="branch">├─ <b>Hermes Agent</b><span class="desc">로컬 AI 에이전트 · Gemini 2.5 Flash 백엔드 (무료)</span></div>
+        <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 1 · 매일 23:00</span><span class="desc">시뮬 환경 단계별 구축 (MuJoCo)</span></div>
+        <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 2 · 매일 23:30</span><span class="desc">시뮬 테스트 + 메트릭 수집</span></div>
+        <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 3 · 매일 07:00</span><span class="desc">아침 보고 메일 자동 발송</span></div>
+        <div class="branch">│&nbsp;&nbsp;&nbsp;└─ <span class="cron">cron 4 · 일요 22:00</span><span class="desc">주간 정리 + 보고용 증거 식별</span></div>
+        <div class="branch">├─ <b>Self-heal</b><span class="desc">실패 시 자가복구 기록 + 다음 cron 에서 재시도</span></div>
+        <div class="branch">├─ <b>Claude Max 위임</b><span class="desc">복잡한 추론은 <code style="font-family:inherit;font-size:12px">claude -p</code> 로 위임 (v3.2 패턴)</span></div>
+        <div class="branch">├─ <b>Git auto-push</b><span class="desc">코드/로그/보고서 자동 commit + push</span></div>
+        <div class="branch">└─ <b>hermes-mark</b><span class="desc">이 대시보드 서버 (Fastify + Cloudflare Tunnel)</span></div>
+        <div class="branch">&nbsp;&nbsp;&nbsp;&nbsp;├─ chokidar<span class="desc">파일 변경 감지</span></div>
+        <div class="branch">&nbsp;&nbsp;&nbsp;&nbsp;├─ WebSocket<span class="desc">브라우저 라이브 갱신</span></div>
+        <div class="branch">&nbsp;&nbsp;&nbsp;&nbsp;└─ Cloudflare Tunnel<span class="desc">외부 도메인 노출 (cop-physical-ai.hermesmark.site)</span></div>
+      </div>
+
+      <!-- 3. cron 표 -->
+      <div class="section-head"><h3>크론 작업 — 매일 정해진 시각에 자동 실행</h3><div class="right">4개 잡 · KST 기준</div></div>
+      <table class="cron-table">
+        <thead>
+          <tr><th>시각</th><th>잡 이름</th><th>역할</th><th>결과물</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="when">매일 23:00</td>
+            <td>
+              <div class="role">시뮬 환경 단계별 구축</div>
+              <div class="desc">PHASE_ROADMAP 읽어 오늘 작업 단계 식별 → MuJoCo 코드 작성/실행</div>
+            </td>
+            <td class="desc">MuJoCo 환경 셋업, MJCF 모델 검증, 시뮬 스크립트 작성. Phase 0~5 단계별 진행.</td>
+            <td class="out"><code>research/simulation/*.md</code><br><code>samples/training/*.py</code></td>
+          </tr>
+          <tr>
+            <td class="when">매일 23:30</td>
+            <td>
+              <div class="role">시뮬 테스트 + 메트릭</div>
+              <div class="desc">23:00 작업 결과를 테스트하고 측정치 기록</div>
+            </td>
+            <td class="desc">Pick-Place 성공률, 추론 시간, 200ep 데이터셋 정합성 검증. 자가치유 로그 첨부.</td>
+            <td class="out"><code>agent/research-log/YYYY-MM-DD.md</code></td>
+          </tr>
+          <tr>
+            <td class="when">매일 07:00</td>
+            <td>
+              <div class="role">아침 보고 메일</div>
+              <div class="desc"><code style="font-family:inherit;font-size:12px">generate_daily_report.py</code> 실행 → 메일 4명 자동 발송</div>
+            </td>
+            <td class="desc">전일 작업 요약 + 진척 차트 + 자가치유 통계. CHANGELOG/README 자동 갱신 후 git push.</td>
+            <td class="out">이메일 (담당자 + 보고 수신자)<br><code>CHANGELOG.md</code></td>
+          </tr>
+          <tr>
+            <td class="when">일요 22:00</td>
+            <td>
+              <div class="role">주간 정리 + 보고용 증거</div>
+              <div class="desc">한 주 결과 정리 + 월별 보고서 후보 식별</div>
+            </td>
+            <td class="desc">주간 보고용 증거 (영상 · 메트릭 · 결정 기록) 분류. 다음 주 우선순위 정리.</td>
+            <td class="out"><code>agent/report-evidence/YYYY-MM/INDEX.md</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 4. 1일 timeline -->
+      <div class="section-head"><h3>하루 자동화 흐름</h3><div class="right">00:00 ~ 24:00 KST</div></div>
+      <div class="day-timeline">
+        <div class="timeline-axis">
+          <div class="hour" data-hour="0" style="left:0%"></div>
+          <div class="hour" data-hour="6" style="left:25%"></div>
+          <div class="hour" data-hour="12" style="left:50%"></div>
+          <div class="hour" data-hour="18" style="left:75%"></div>
+          <div class="hour" data-hour="24" style="left:100%"></div>
+          <div class="timeline-event" style="left:29%">07:00 · 아침 보고 메일</div>
+          <div class="timeline-event alt" style="left:91.6%">일요 22:00 · 주간 정리</div>
+          <div class="timeline-event" style="left:95.8%">23:00 · 시뮬 구축</div>
+          <div class="timeline-event alt" style="left:97.9%">23:30 · 테스트+메트릭</div>
+        </div>
+        <p style="font-size:12px; color:var(--text-sub); margin-top:14px; line-height:1.7;">
+          밤 시간대 (23:00, 23:30) 에 시뮬·학습 작업 → 결과를 다음 날 07:00 메일로 받음. 일요일 밤은 주간 정리 추가. <b>사람이 개입할 필요 없음</b> — 사고 (실패/차단) 발생 시 자가치유 메커니즘이 다음 cron 에서 자동 재시도.
+        </p>
+      </div>
+
+      <!-- 5. Hermes Agent 카드 -->
+      <div class="section-head"><h3>Hermes Agent — 24시간 운영 AI</h3><div class="right">로컬 + 무료 + 자가치유</div></div>
+      <div class="hermes-card">
+        <div class="head">
+          <h4>Hermes Agent</h4>
+          <span class="tag">로컬 AI 에이전트</span>
+          <span style="font-size:11px; color:var(--text-sub); margin-left:auto;">OpenClaw → Hermes 마이그레이션 2026-04-29 완료</span>
+        </div>
+        <div class="features">
+          <div class="f"><div class="l">호스트</div><div class="v">Mac Mini M5 16GB</div></div>
+          <div class="f"><div class="l">가동</div><div class="v">24/7 (재부팅 자동 복구)</div></div>
+          <div class="f"><div class="l">백엔드 모델</div><div class="v">Gemini 2.5 Flash <span style="color:var(--text-dim);font-weight:400">(무료)</span></div></div>
+          <div class="f"><div class="l">복잡 추론</div><div class="v"><code>claude -p</code> 위임 <span style="color:var(--text-dim);font-weight:400">(Claude Max)</span></div></div>
+          <div class="f"><div class="l">스킬</div><div class="v"><code>cop-physical-ai-self-heal</code></div></div>
+          <div class="f"><div class="l">권한</div><div class="v">gh CLI · git · file system · Python venv</div></div>
+        </div>
+        <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border); font-size:12px; color:var(--text-sub); line-height:1.7;">
+          <b style="color:var(--text)">자가치유 (Self-heal)</b> — 매 cron 작업 끝에 실패/차단 항목을 자동 기록. 예: Claude API rate limit · sandbox 권한 차단 · 파일 누락. <code>chore(self-heal)</code> commit 으로 남고, 다음 cron 에서 자동 재시도. 활동 타임라인의 🛟 아이콘이 자가치유 발생 일수.
+        </div>
+      </div>
+
+      <!-- 6. 데이터 흐름 -->
+      <div class="section-head"><h3>데이터 흐름 — 학습이 어떻게 진행되는가</h3><div class="right">cron → 시뮬 → 학습 → 대시보드</div></div>
+      <div class="dataflow">
+        <div class="row">
+          <div class="step start">⏰ Hermes cron (23:00)</div>
+          <span class="arrow">→</span>
+          <div class="step">MuJoCo 시뮬 실행</div>
+          <span class="arrow">→</span>
+          <div class="step"><code>data/episodes/</code> (LeRobot Dataset)</div>
+          <span class="arrow">→</span>
+          <div class="step">ACT 학습 <span style="color:var(--text-dim);font-weight:400">(6/15~)</span></div>
+        </div>
+        <div class="row">
+          <div class="step start">⏰ Hermes cron (23:30)</div>
+          <span class="arrow">→</span>
+          <div class="step">메트릭 측정</div>
+          <span class="arrow">→</span>
+          <div class="step"><code>research-log/*.md</code></div>
+          <span class="arrow">→</span>
+          <div class="step">git push</div>
+        </div>
+        <div class="row">
+          <div class="step start">📁 파일 변경</div>
+          <span class="arrow">→</span>
+          <div class="step">hermes-mark chokidar</div>
+          <span class="arrow">→</span>
+          <div class="step"><code>build.py</code> 자동 실행</div>
+          <span class="arrow">→</span>
+          <div class="step">WebSocket 푸시</div>
+          <span class="arrow">→</span>
+          <div class="step end">🌐 브라우저 라이브 갱신</div>
+        </div>
+        <div class="row">
+          <div class="step start">📝 Obsidian 월별 보고서</div>
+          <span class="arrow">→</span>
+          <div class="step"><code>build.py</code> 읽음</div>
+          <span class="arrow">→</span>
+          <div class="step">renderMarkdown</div>
+          <span class="arrow">→</span>
+          <div class="step end">📋 보고용 자료 메뉴 임베드</div>
+        </div>
+      </div>
+
+      <!-- 7. 사람 vs AI 분담 -->
+      <div class="section-head"><h3>역할 분담 — 무엇이 자동이고 무엇이 사람의 일인가</h3></div>
+      <table class="who-table">
+        <thead><tr><th>영역</th><th>AI (자동)</th><th>사람</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>시뮬 코드 작성</td><td class="check">✓</td><td class="dash">—</td><td class="desc">Hermes + Claude 위임</td></tr>
+          <tr><td>시뮬 실행 + 메트릭 수집</td><td class="check">✓</td><td class="dash">—</td><td class="desc">매일 23:00, 23:30 cron</td></tr>
+          <tr><td>일일 research-log 작성</td><td class="check">✓</td><td class="dash">—</td><td class="desc">자가치유 포함 자동 작성</td></tr>
+          <tr><td>아침 보고 메일</td><td class="check">✓</td><td class="dash">—</td><td class="desc">매일 07:00 자동 발송 (4명)</td></tr>
+          <tr><td>주간/월간 보고용 증거 식별</td><td class="check">✓</td><td class="dash">—</td><td class="desc">매주 일요 22:00</td></tr>
+          <tr><td>월별 활동보고서 초안</td><td class="partial">초안</td><td class="check">✓</td><td class="desc">사람이 수정·보완 (Obsidian)</td></tr>
+          <tr><td>의사결정 (시뮬레이터 등)</td><td class="partial">제안</td><td class="check">✓</td><td class="desc">AI 가 조사·제안 / 사람이 확정 (<code>research/decisions/</code>)</td></tr>
+          <tr><td>외부 의존 (부품 · 3D 프린팅)</td><td class="partial">식별</td><td class="check">✓</td><td class="desc">AI 가 차단 항목 식별 / 사람이 해결</td></tr>
+          <tr><td>디자인 · 톤 · 보고 방향</td><td class="dash">—</td><td class="check">✓</td><td class="desc">전적으로 사람</td></tr>
+          <tr><td>대시보드 (이 사이트)</td><td class="check">✓</td><td class="partial">설계</td><td class="desc">데이터 + 빌드 자동 / 디자인은 사람</td></tr>
+        </tbody>
+      </table>
+    </div>
+
     <!-- TECH GUIDE -->
     <div class="view hidden" id="view-tech">
       <div class="home-hero">
         <h1>🎓 CoP 리뷰</h1>
-        <div class="sub">이 프로젝트가 어떤 기술을 어떻게 쓰는지 — 비전공자도 이해하도록 정리</div>
+        <div class="sub">사용 기술, 학습 방법, 의사결정 근거를 한 페이지에 정리했습니다.</div>
       </div>
 
       <!-- 1. 한 줄 결론 -->
@@ -1354,10 +1640,10 @@ function setTheme(mode) {
 })();
 
 /* ====== ROUTING ====== */
-const ROUTES = ['home', 'tech', 'apps', 'videos', 'proposals', 'daily', 'magazines',
+const ROUTES = ['home', 'tech', 'ops', 'apps', 'videos', 'proposals', 'daily', 'magazines',
                 'blockers', 'samples', 'decisions',
                 'bookmarks', 'analytics', 'about', 'guide'];
-const ROUTE_LABEL = { home: 'Overview', apps: 'Phase 로드맵', tech: 'CoP 리뷰', videos: '시뮬 영상', proposals: '시뮬 작업',
+const ROUTE_LABEL = { home: 'Overview', apps: 'Phase 로드맵', tech: 'CoP 리뷰', ops: 'AI 자동화 운영', videos: '시뮬 영상', proposals: '시뮬 작업',
   daily: '활동 타임라인', magazines: '보고용 자료',
   blockers: '외부 의존 차단', samples: '샘플 코드 상태', decisions: '결정',
   bookmarks: '북마크', analytics: '분석', about: '사이트 설명', guide: '사용가이드' };
