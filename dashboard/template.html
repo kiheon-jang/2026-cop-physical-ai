@@ -730,10 +730,10 @@
         <div class="frame-strip" id="frame-strip"></div>
       </div>
       <div class="video-explainer">
-        <h4>이 영상이 보여주는 것</h4>
-        <p>로봇팔 모델(<b>SO-ARM101</b>)이 가상 환경에서 큐브와 PCB 부품을 집어 옮기는 모습입니다. 실제 로봇은 아직 학습 중이고, 이 시뮬에서 만들어진 동작 데이터로 모방학습 모델을 1차 학습합니다.</p>
-        <p><b>왜 중요한지</b>: 실기 로봇을 24시간 가동하지 않고도 일주일에 수백 에피소드의 학습 데이터를 자동 생성할 수 있습니다. 실기 적용 전 알고리즘 안정성을 미리 검증하는 단계.</p>
-        <p><b>다음 단계</b>: 이 시뮬에서 학습한 모델을 7월부터 실제 로봇팔에 옮겨 검증합니다 (Phase 2 실기 검증).</p>
+        <h4>지금 보고 있는 영상이 어떤 단계인지</h4>
+        <p><b>학습 전 단계의 시뮬레이션입니다.</b> 휴리스틱(IK · 역기구학) 기반 시나리오 동작이며, AI 모델이 학습한 결과가 <b>아닙니다</b>. 영상에서 큐브를 정확히 집지 못하는 모습이 보일 수 있는데, 이는 오류가 아니라 <b>학습 전 정상 상태</b>입니다.</p>
+        <p><b>현재까지 한 일</b>: 시뮬 환경 셋업 완료 (Phase 0) · 200 에피소드 데이터 합성 완료 (Phase 1 W1-2). 이 영상은 그 데이터 수집 과정에서 생성된 시나리오 동작입니다.</p>
+        <p><b>다음 단계 (실제 학습)</b>: 2026-06-15 부터 ACT 학습 시작 (Phase 1 W3). 학습이 완료되면 모델의 inference 결과 영상이 별도로 추가될 예정입니다. 7월부터는 실제 로봇팔로 검증 (Phase 2).</p>
       </div>
     </div>
 
@@ -1588,7 +1588,6 @@ function renderMagazines() {
 
   picker.innerHTML = reports.map(r => {
     const isOn = r.id === SELECTED_REPORT_ID;
-    const vlabel = r.version ? ` v${r.version}` : '';
     const phase = phasesByMonth[r.month];
     const status = phase ? phase.status : null;
     const sCls = status === '완료' ? 'is-done' : (status === '진행' ? 'is-active' : (status === '예정' ? 'is-plan' : ''));
@@ -1597,10 +1596,9 @@ function renderMagazines() {
       : status === '완료' ? '<span class="rp-badge done">완료</span>'
       : '';
     return `<div class="rp-card ${sCls} ${isOn ? 'on' : ''}" data-rid="${escapeHtml(r.id)}" onclick="selectReport('${escapeHtml(r.id)}')">
-      <div class="m">${escapeHtml(r.month || '')}${vlabel}</div>
+      <div class="m">${escapeHtml(r.month || '')}</div>
       <div class="t">활동보고서</div>
       ${sBadge}
-      <div class="s">${(r.size_bytes || 0).toLocaleString()}B</div>
     </div>`;
   }).join('');
 
@@ -1637,7 +1635,7 @@ function renderReportBody() {
     : '';
   body.innerHTML = `
     <div class="rh-head">
-      <span class="month">${escapeHtml(r.month || '')}${r.version ? ' v' + r.version : ''}</span>
+      <span class="month">${escapeHtml(r.month || '')}</span>
       <span class="title">${escapeHtml(r.title || '')}</span>
       <span class="path">${escapeHtml((r.path || '').split('/').slice(-2).join('/'))}</span>
     </div>

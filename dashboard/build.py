@@ -604,23 +604,29 @@ def build_business_kpi(phases: list[dict]) -> dict:
 
 
 def build_monthly_reports() -> list[dict]:
-    """Obsidian 03 Areas/회사문서/CoP_PhysicalAI/CoP_*_활동보고서.md 풀 임베드."""
+    """Obsidian 03 Areas/회사문서/CoP_PhysicalAI/CoP_*_활동보고서.md 풀 임베드.
+
+    같은 month 에 여러 파일 (예: 4월 v1 + v20260427) 있으면 mtime 최신 1건만 노출.
+    """
     if not OBSIDIAN_REPORT_DIR.exists():
         return []
+    # month → (mtime, path) 매핑으로 최신만 선택
+    latest_by_month: dict[str, Path] = {}
+    for f in OBSIDIAN_REPORT_DIR.glob("CoP_PhysicalAI_*_활동보고서*.md"):
+        m = re.search(r"(\d{4}-\d{2})", f.name)
+        month = m.group(1) if m else f.stem
+        cur = latest_by_month.get(month)
+        if cur is None or f.stat().st_mtime > cur.stat().st_mtime:
+            latest_by_month[month] = f
     out: list[dict] = []
-    for f in sorted(OBSIDIAN_REPORT_DIR.glob("CoP_PhysicalAI_*_활동보고서*.md")):
+    for month in sorted(latest_by_month.keys()):
+        f = latest_by_month[month]
         text = read_text(f, limit=40_000)
         if not text:
             continue
-        m = re.search(r"(\d{4}-\d{2})", f.name)
-        month = m.group(1) if m else f.stem
-        # 버전 suffix (예: _20260427) 구별
-        version_m = re.search(r"_(\d{8})\.md$", f.name)
-        version = version_m.group(1) if version_m else ""
         out.append({
             "id": make_id("report", f.name),
             "month": month,
-            "version": version,
             "title": first_h1(text) or f.stem,
             "filename": f.name,
             "excerpt": excerpt(text, 400),
@@ -631,10 +637,11 @@ def build_monthly_reports() -> list[dict]:
     return out
 
 
-# 비전공자용 영상 설명 — 파일명 키워드 기반
+# 비전공자용 영상 설명 — 파일명 키워드 기반.
+# 모든 영상은 학습 전 단계 시뮬 (휴리스틱/IK 기반). ACT 학습 결과 X.
 _VIDEO_DESCRIPTIONS = [
-    (("6dof", "6-dof"),     "6축 로봇팔의 기본 움직임 시뮬레이션"),
-    (("pick_place", "pick-place", "pickplace"),  "큐브 픽앤플레이스 — 로봇이 물체를 집어서 옮기는 동작"),
+    (("6dof", "6-dof"),     "6축 로봇팔 기본 움직임 — 시뮬 환경 동작 검증"),
+    (("pick_place", "pick-place", "pickplace"),  "픽앤플레이스 시나리오 시뮬 — 데이터 수집용 (학습 전, IK 기반. 큐브 실패가 정상)"),
     (("camera",),           "시뮬 환경 내 카메라 동작 검증"),
     (("headless",),         "헤드리스 모드 비디오 (UI 없이 백그라운드 렌더)"),
     (("data_collect", "data-collect"),  "학습용 데이터 수집 — 한 에피소드 기록"),
@@ -702,9 +709,15 @@ def build_videos() -> list[dict]:
 def build_activity_timeline(daily: list[dict], sim_tasks: list[dict], days: int = 60) -> list[dict]:
     """git log + research-log + sim_tasks 를 날짜별로 묶음.
 
-    같은 날의 자동 cron commit (시뮬/로그/히스토리) 가 3건+ 중첩되는 패턴을
-    한 카드로 통합. self-heal 커밋은 별도 카운트 (작은 인디케이터).
+    "활동 타임라인" — CoP 학습 본질 활동만 (시뮬/로그/히스토리/데이터/학습/테스트).
+    [대시보드]/[보고가드] 등 도구 작업은 제외. self-heal 커밋은 별도 카운트.
     """
+    # CoP 학습 본질 카테고리만 통과시키는 화이트리스트.
+    # commit 메시지의 [태그] 가 이 prefix 중 하나로 시작해야 활동 타임라인에 포함.
+    CORE_ACTIVITY_TAGS = (
+        "시뮬", "로그", "히스토리", "주간정리", "데이터", "학습", "테스트",
+        "보고서", "결정", "메일",
+    )
     today = datetime.now(KST).date()
     cutoff = today - timedelta(days=days)
     log_out = run(
@@ -725,11 +738,15 @@ def build_activity_timeline(daily: list[dict], sim_tasks: list[dict], days: int 
         if "self-heal" in msg.lower() or "자가치유" in msg:
             bucket["self_heal_count"] += 1
             continue
-        bucket["commits"].append({"msg": msg[:120], "sha": sha})
         # 카테고리 추출 — 메시지의 [태그] 패턴
         cm = re.search(r"\[([^\]]+)\]", msg)
-        if cm:
-            bucket["categories"].add(cm.group(1))
+        tag = cm.group(1).strip() if cm else ""
+        # 화이트리스트: 학습 본질 태그가 아니면 commit 자체를 활동 타임라인에서 제외.
+        # 단, daily/sim_tasks 매칭은 그대로 살리기 위해 bucket 자체는 보존.
+        if not tag or not any(tag.startswith(p) for p in CORE_ACTIVITY_TAGS):
+            continue
+        bucket["commits"].append({"msg": msg[:120], "sha": sha})
+        bucket["categories"].add(tag)
 
     daily_by_date = {d["date"]: d for d in daily if d.get("date")}
     sim_by_date: dict[str, list[dict]] = {}
@@ -737,11 +754,16 @@ def build_activity_timeline(daily: list[dict], sim_tasks: list[dict], days: int 
         if t.get("date"):
             sim_by_date.setdefault(t["date"], []).append(t)
 
+    # 학습 본질 활동이 0건인 날은 타임라인에서 제외. sim_task 만 있거나 self-heal 만 있는 날은 유지.
+    all_dates = set(by_date.keys()) | set(daily_by_date.keys()) | set(sim_by_date.keys())
     timeline: list[dict] = []
-    for date in sorted(by_date.keys(), reverse=True):
-        info = by_date[date]
+    for date in sorted(all_dates, reverse=True):
+        info = by_date.get(date, {"commits": [], "self_heal_count": 0, "categories": set()})
         d = daily_by_date.get(date, {})
         sims = sim_by_date.get(date, [])
+        has_activity = bool(info["commits"]) or bool(sims) or info["self_heal_count"] > 0
+        if not has_activity:
+            continue
         # 비즈니스 라벨: 카테고리 → 한국어 친화 변환
         cat_labels = []
         for c in info["categories"]:
@@ -751,7 +773,15 @@ def build_activity_timeline(daily: list[dict], sim_tasks: list[dict], days: int 
             elif "주간정리" in c: cat_labels.append("주간 정리")
             elif "보고서" in c or "메일" in c: cat_labels.append("보고")
             elif "결정" in c: cat_labels.append("아키텍처 결정")
+            elif "데이터" in c: cat_labels.append("데이터 수집")
+            elif "학습" in c: cat_labels.append("학습")
+            elif "테스트" in c: cat_labels.append("테스트")
             else: cat_labels.append(c)
+        # commit 이 도구 작업뿐이라 cat_labels 비었지만 sim_task 가 있으면 "시뮬 작업" 으로 표시
+        if not cat_labels and sims:
+            cat_labels = ["시뮬 작업"]
+        elif not cat_labels and info["self_heal_count"] > 0:
+            cat_labels = ["자가치유"]
         cat_labels = sorted(set(cat_labels))
 
         timeline.append({
