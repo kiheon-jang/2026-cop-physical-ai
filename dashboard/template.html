@@ -710,14 +710,17 @@
  * build.py 가 정적 모드일 때 이 자리에 데이터 박힘. 서버 모드(hermes-mark)
  * 에서는 빈 placeholder 로 로드되어 자동으로 API 에서 fetch.
  */
-window.DATA = /*__DATA__*/{"meta":{"built_at":"","today":"","current_phase":""},"phases":[],"sim_tasks":[],"daily":[],"evidence":[],"blockers":[],"samples":{"summary":{},"files":[]},"decisions":[],"stats":{}};
+window.DATA = /*__DATA__*/{"meta":{"built_at":"","today":"","current_phase":""},"phases":[],"sim_tasks":[],"daily":[],"evidence":[],"blockers":[],"samples":{"summary":{},"files":[]},"decisions":[],"stats":{},"proposals":[],"apps":[],"magazines":[]};
 
 /* 라이브 모드 감지: 데이터가 비어있고 API 가 있으면 fetch */
 const PROJECT_SLUG = 'cop-physical-ai';
 const API_URL = `/api/projects/${PROJECT_SLUG}/data`;
 const WS_URL = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.host + '/ws';
 const WS_CHANGE_TYPE = `projects-${PROJECT_SLUG}:changed`;
-const IS_LIVE = !window.DATA.proposals.length && !window.DATA.daily.length;
+/* IS_LIVE: 정적 임베드 데이터가 비어있으면 서버 모드로 간주 (placeholder + API fetch).
+   alias 키가 누락된 경우에도 안전하도록 ?.length 사용. */
+const IS_LIVE = !((window.DATA.proposals?.length || window.DATA.sim_tasks?.length) ||
+                  (window.DATA.daily?.length));
 
 let D = window.DATA;
 let REPO_URL = D.meta.repo_url || '';
@@ -853,7 +856,8 @@ function setRoute(r) {
 
 /* ====== Markdown rendering (lightweight) ====== */
 function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function renderMarkdown(md) {
   if (!md) return '<p style="color:var(--text-dim)">본문 없음</p>';
@@ -1195,17 +1199,20 @@ function renderDaily() {
   document.getElementById('daily-sub').textContent = `${D.daily.length}건 · 가장 최근부터`;
 }
 
-/* ====== Magazines view ====== */
+/* ====== Magazines view (CoP: 월간 보고용 증거) ====== */
 function renderMagazines() {
   const grid = document.getElementById('mag-grid');
-  if (!D.magazines.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">아직 매거진이 없습니다.</div>'; return; }
-  grid.innerHTML = D.magazines.map((m, i) => {
+  // CoP evidence 형식: {month, index_path, index_excerpt, weekly_summaries: [{week, path, excerpt}]}
+  const items = D.magazines || D.evidence || [];
+  if (!items.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">아직 월간 보고용 증거가 없습니다.</div>'; return; }
+  grid.innerHTML = items.map((m, i) => {
     const cls = i % 2 === 0 ? 'dark' : 'light';
-    const top = m.kind === 'monthly' ? `MONTHLY · ${m.period_end || ''}` : `VOL. ${m.period_end || ''}`;
-    return `<div class="mag-cover ${cls}" data-id="${m.id}" data-kind="magazine">
-      <div class="mtop">${escapeHtml(top)}</div>
-      <div class="mtitle">${escapeHtml(m.title || '주간 보고')}</div>
-      <div class="mbot">${escapeHtml(m.period_start || '')} → ${escapeHtml(m.period_end || '')}</div>
+    const weeks = (m.weekly_summaries || []).length;
+    return `<div class="mag-cover ${cls}" data-month="${escapeHtml(m.month || '')}">
+      <div class="mtop">MONTHLY · ${escapeHtml(m.month || '')}</div>
+      <div class="mtitle">월간 보고용 증거</div>
+      <div class="mbot">${weeks ? `${weeks}개 주차 요약` : 'INDEX.md'}${m.index_path ? ` · <code style="font-size:10px; opacity:.7;">${escapeHtml(m.index_path)}</code>` : ''}</div>
+      ${m.index_excerpt ? `<div style="margin-top:10px; font-size:11px; opacity:.85; line-height:1.4;">${escapeHtml(m.index_excerpt.slice(0, 140))}</div>` : ''}
     </div>`;
   }).join('');
   document.getElementById('mag-sub').textContent = `${D.magazines.length}건 · 최신순`;
@@ -1303,44 +1310,52 @@ function renderDecisions() {
 
 /* ====== Home ====== */
 function renderHome() {
+  /* CoP 용: 현재 단계 / 시뮬 작업 / 외부 의존 차단 / 북마크 */
   const s = D.stats || {};
-  const totalProp = D.proposals.length;
-  const newCount = D.proposals.filter(p => !p.is_develop).length;
-  const devCount = D.proposals.filter(p => p.is_develop).length;
+  const simCount = (D.proposals || D.sim_tasks || []).length;
+  const dailyCount = (D.daily || []).length;
+  const activeBlockers = (D.blockers || []).filter(b => !b.checked).length;
   const bmCount = Object.keys(STATE.bookmarks).length;
-  const dailyCount = D.daily.length;
   document.getElementById('kpi-row').innerHTML = `
-    <div class="kpi is-accent"><div class="l">Daily Research</div><div class="n">${dailyCount}</div><div class="d">AI 기술 조사</div></div>
-    <div class="kpi"><div class="l">New Proposals</div><div class="n">${newCount}</div><div class="d">신규 기획</div></div>
-    <div class="kpi"><div class="l">Developed</div><div class="n">${devCount}</div><div class="d">기존 보완</div></div>
-    <div class="kpi"><div class="l">Bookmarks</div><div class="n">${bmCount}</div><div class="d">개인 컬렉션</div></div>
+    <div class="kpi is-accent"><div class="l">시뮬 작업</div><div class="n">${simCount}</div><div class="d">research/simulation/</div></div>
+    <div class="kpi"><div class="l">일일 진척</div><div class="n">${dailyCount}</div><div class="d">research-log</div></div>
+    <div class="kpi"><div class="l">차단 항목</div><div class="n">${activeBlockers}</div><div class="d">외부 의존 미완</div></div>
+    <div class="kpi"><div class="l">북마크</div><div class="n">${bmCount}</div><div class="d">개인 컬렉션</div></div>
   `;
-  const hotIds = s.hot || D.proposals.slice(0, 5).map(p => p.id);
+  // hot-list: 최근 sim_task 5개 (날짜 내림차순). build.py 가 이미 date desc 로 정렬해서 emit.
+  const items = (D.proposals || D.sim_tasks || []).slice(0, 5);
   const hotEl = document.getElementById('hot-list');
-  const hot = hotIds.map(id => D.proposals.find(p => p.id === id)).filter(Boolean);
-  hotEl.innerHTML = hot.length
-    ? hot.map((p, i) => `<div class="hot-item" data-id="${p.id}">
-        <div class="rk">${i+1}</div>
-        <div class="meta">
-          <div class="t">${escapeHtml(p.title)}</div>
-          <div class="m"><span class="pill ${p.is_develop ? 'dev' : 'new'}">${p.is_develop ? 'DEVELOP' : 'NEW'}</span> ${escapeHtml(p.app_display)} · ${escapeHtml(p.group)} · ${p.date}</div>
-        </div>
-        <div class="bm ${isBookmarked(p.id) ? 'on' : ''}" data-bm="${p.id}">${isBookmarked(p.id) ? '★' : '☆'}</div>
-      </div>`).join('')
-    : '<div class="empty">아직 기획 제안이 없습니다.</div>';
+  hotEl.innerHTML = items.length
+    ? items.map((p, i) => {
+        const phaseTag = p.phase_id ? p.phase_id.replace('phase', 'Phase ') : (p.phase_label || '');
+        return `<div class="hot-item" data-id="${p.id}">
+          <div class="rk">${i+1}</div>
+          <div class="meta">
+            <div class="t">${escapeHtml(p.title || '')}</div>
+            <div class="m">${escapeHtml(phaseTag)}${p.category ? ' · ' + escapeHtml(p.category) : ''}${p.date ? ' · ' + p.date : ''}</div>
+          </div>
+          <div class="bm ${isBookmarked(p.id) ? 'on' : ''}" data-bm="${p.id}">${isBookmarked(p.id) ? '★' : '☆'}</div>
+        </div>`;
+      }).join('')
+    : '<div class="empty">아직 시뮬 작업 기록이 없습니다.</div>';
 
+  // home-sub: 현재 phase + 빌드 메타
+  const meta = D.meta || {};
   document.getElementById('home-sub').textContent =
-    `${D.meta.period_end || ''} 기준 · 활성 6개 앱 · 현대엘리베이터 모바일 선행연구`
-    + (D.meta.demo ? ' · MOCK 데이터' : '');
+    `${meta.current_phase || '(no active phase)'} · 빌드 ${(meta.built_at || '').slice(0, 16)}`;
 
+  // donut-legend: 카테고리 분포 상위 6개 (Hdel 의 s.donut 자리에 CoP 의 stats.category_distribution 매핑)
   const dlEl = document.getElementById('donut-legend');
-  dlEl.innerHTML = (s.donut || []).map((d, i) => {
-    const colors = ['var(--hl-green)', 'var(--hl-blue)', 'var(--text-dim)'];
-    return `<div style="display:flex; align-items:center; gap:8px; margin:6px 0;">
-      <span style="width:10px;height:10px;border-radius:2px;background:${colors[i % 3]}"></span>
-      ${escapeHtml(d.label)} <b style="margin-left:auto; color: var(--text)">${d.value}</b>
-    </div>`;
-  }).join('');
+  const catDist = s.category_distribution || {};
+  const catEntries = Object.entries(catDist).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const colors = ['#22c55e', '#2563eb', '#f59e0b', '#8b5cf6', '#06b6d4', '#94a3b8'];
+  dlEl.innerHTML = catEntries.length
+    ? catEntries.map(([label, value], i) =>
+        `<div style="display:flex; align-items:center; gap:8px; margin:6px 0;">
+           <span style="width:10px;height:10px;border-radius:2px;background:${colors[i % colors.length]}"></span>
+           ${escapeHtml(label)} <b style="margin-left:auto; color: var(--text)">${value}</b>
+         </div>`).join('')
+    : '<div style="color:var(--text-dim); font-size:12px;">카테고리 데이터 없음.</div>';
 }
 
 function updateBookmarkCount() {

@@ -498,6 +498,72 @@ def build_decisions() -> list[dict]:
 # 통계 (메뉴 12 — 분석)
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _build_chart_stats(
+    sim_tasks: list[dict], daily: list[dict], phases: list[dict],
+    category_counts: dict,
+) -> dict:
+    """Hdel template.html 의 차트 함수 (drawHeatmap/AppBar/Donut/Trend/CatChart) 가
+    기대하는 형식으로 데이터 emit. 분석 페이지 + 홈 차트가 채워지도록.
+    """
+    today = datetime.now(KST).date()
+
+    # heatmap: 최근 60일 일별 활동 카운트 (sim_task + daily). [int, ...].
+    heatmap = []
+    by_date: dict[str, int] = {}
+    for t in sim_tasks:
+        if t.get("date"):
+            by_date[t["date"]] = by_date.get(t["date"], 0) + 1
+    for r in daily:
+        if r.get("date"):
+            by_date[r["date"]] = by_date.get(r["date"], 0) + 1
+    for i in range(60):
+        d = (today - timedelta(days=59 - i)).isoformat()
+        heatmap.append(min(by_date.get(d, 0), 4))
+
+    # appbar: phase 별 (n=완료, d=미완료). drawAppBar 는 a.name / a.n / a.d 사용.
+    appbar = []
+    for p in phases:
+        if p.get("total", 0) == 0:
+            continue
+        appbar.append({
+            "name": p["name"].replace(" — ", " ")[:20],
+            "n": p.get("done", 0),
+            "d": max(0, p.get("total", 0) - p.get("done", 0)),
+        })
+
+    # donut: 카테고리 분포 상위 3개 + 기타. drawDonut 은 {label, value} 사용.
+    sorted_cats = sorted(category_counts.items(), key=lambda x: -x[1])
+    donut = [{"label": k, "value": v} for k, v in sorted_cats[:3]]
+    other = sum(v for _, v in sorted_cats[3:])
+    if other:
+        donut.append({"label": "기타", "value": other})
+
+    # trend: 최근 30일 일별 카운트. drawTrend 는 d.w / d.n / d.d 사용.
+    trend = []
+    for i in range(30):
+        d = today - timedelta(days=29 - i)
+        ds = d.isoformat()
+        n_sim = sum(1 for t in sim_tasks if t.get("date") == ds)
+        n_daily = sum(1 for r in daily if r.get("date") == ds)
+        if i % 3 == 0 or n_sim or n_daily:  # 빈 라벨 줄이기
+            trend.append({"w": d.strftime("%m/%d"), "n": n_sim, "d": n_daily})
+
+    # catChart: 카테고리 top 8. drawCatChart 는 it.name / it.v 사용 (단색 가로 바).
+    catChart = [{"name": k, "v": v} for k, v in sorted_cats[:8]]
+
+    # hot: 최근 sim_task 5개 id (sim_tasks 가 date desc 정렬되어 있음).
+    hot = [t["id"] for t in sim_tasks[:5]]
+
+    return {
+        "heatmap": heatmap,
+        "appbar": appbar,
+        "donut": donut,
+        "trend": trend,
+        "catChart": catChart,
+        "hot": hot,
+    }
+
+
 def compute_stats(sim_tasks: list[dict], daily: list[dict], blockers: list[dict]) -> dict:
     cat_counter: Counter = Counter()
     for t in sim_tasks:
@@ -563,6 +629,8 @@ def build_real_data() -> dict:
     samples = build_samples()
     decisions = build_decisions()
     stats = compute_stats(sim_tasks, daily, blockers)
+    # Hdel template 의 차트 함수 호환 키 보강 (heatmap/appbar/donut/trend/catChart/hot)
+    stats.update(_build_chart_stats(sim_tasks, daily, phases, stats.get("category_distribution", {})))
     data = {
         "meta": build_meta(current_phase),
         "phases": phases,
