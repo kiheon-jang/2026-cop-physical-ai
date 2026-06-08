@@ -306,6 +306,108 @@
   .tl-card .tl-detail .heal-line { padding: 3px 0; color: var(--action); }
   .tl-card .tl-detail .heal-line::before { content: '🛟 '; }
 
+  /* GUIDE — 기술 가이드 페이지 */
+  .tech-summary { background: var(--accent-soft); border-radius: 14px; padding: 22px 26px;
+    margin-bottom: 24px; border: 1px solid var(--border); }
+  .tech-summary p { margin: 0; font-size: 15px; line-height: 1.7; color: var(--text); }
+  .tech-summary p b { color: var(--accent-strong); font-weight: 800; }
+
+  /* Flow chart (세로) */
+  .flow-chart { display: flex; flex-direction: column; align-items: stretch; max-width: 760px; margin: 0 auto; }
+  .flow-step { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 18px; display: flex; align-items: center; gap: 14px; position: relative; }
+  .flow-step.done { border-color: #22c55e; background: rgba(34,197,94,.06); }
+  .flow-step.current { border-color: #2563eb; background: rgba(37,99,235,.08); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+  .flow-step.plan { opacity: .72; border-style: dashed; }
+  .flow-step .idx { font-size: 22px; font-weight: 800; color: var(--text-dim); flex: 0 0 36px;
+    text-align: center; font-family: ui-monospace, monospace; letter-spacing: -1px; }
+  .flow-step.done .idx { color: #22c55e; }
+  .flow-step.current .idx { color: #2563eb; }
+  .flow-step .body { flex: 1; min-width: 0; }
+  .flow-step .body b { display: block; font-size: 15px; font-weight: 800; color: var(--text);
+    letter-spacing: -.2px; line-height: 1.4; }
+  .flow-step .body small { display: block; font-size: 12px; color: var(--text-sub);
+    margin-top: 4px; font-family: ui-monospace, monospace; }
+  .flow-step .tag { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px; flex: 0 0 auto; }
+  .flow-step.done .tag { background: rgba(34,197,94,.14); color: #16a34a; }
+  .flow-step.current .tag { background: rgba(37,99,235,.14); color: #2563eb; }
+  .flow-step.plan .tag { background: var(--bg); color: var(--text-dim); border: 1px solid var(--border); }
+  .flow-arrow { font-size: 18px; color: var(--text-dim); text-align: center; padding: 6px 0;
+    line-height: 1; font-family: ui-monospace, monospace; }
+
+  /* Tech cards (2-col grid) */
+  .tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .tech-grid { grid-template-columns: 1fr; } }
+  .tech-card { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px; }
+  .tech-card .tc-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .tech-card .tc-head h4 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.3px; }
+  .tech-card .tc-head .role { font-size: 11px; color: var(--text-dim); }
+  .tech-card .tc-license { display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: 1px;
+    padding: 2px 6px; border-radius: 3px; background: var(--bg); color: var(--text-dim);
+    border: 1px solid var(--border); margin-left: auto; }
+  .tech-card section { margin-top: 14px; }
+  .tech-card section h5 { margin: 0 0 6px; font-size: 10px; font-weight: 800; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--text-dim); }
+  .tech-card section p { margin: 0; font-size: 13px; color: var(--text); line-height: 1.65; }
+  .tech-card section p code { background: var(--bg); padding: 1px 6px; border-radius: 3px;
+    font-family: ui-monospace, monospace; font-size: 11px; }
+  .tech-card section.why h5 { color: var(--accent-strong); }
+  .tech-card section.how h5 { color: var(--action); }
+
+  /* Dataset stats card */
+  .dataset-stats { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px;
+    padding: 22px 24px; }
+  .ds-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px; margin-bottom: 20px; }
+  .ds-metrics .m { background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; text-align: center; }
+  .ds-metrics .m .n { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -.5px;
+    font-family: ui-monospace, monospace; line-height: 1.1; }
+  .ds-metrics .m .l { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase;
+    font-weight: 700; margin-top: 4px; }
+  .ds-features { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .ds-features h5 { margin: 0 0 10px; font-size: 11px; font-weight: 800; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--text-dim); }
+  .ds-features ul { margin: 0; padding-left: 20px; }
+  .ds-features li { font-size: 13px; color: var(--text); line-height: 1.7; padding: 2px 0; }
+  .ds-features li code { background: var(--bg-sub); padding: 1px 6px; border-radius: 3px;
+    font-family: ui-monospace, monospace; font-size: 11px; color: var(--accent-strong); }
+
+  /* Learning cycle 다이어그램 (가로) */
+  .cycle-diagram { display: grid; grid-template-columns: repeat(4, 1fr) ; gap: 0;
+    align-items: stretch; }
+  @media (max-width: 1100px) { .cycle-diagram { grid-template-columns: 1fr; } }
+  .cycle-step { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; position: relative; }
+  .cycle-step .step-n { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; color: var(--accent-strong);
+    text-transform: uppercase; margin-bottom: 6px; }
+  .cycle-step h5 { margin: 0 0 8px; font-size: 14px; font-weight: 800; letter-spacing: -.2px; }
+  .cycle-step p { margin: 0; font-size: 12px; color: var(--text-sub); line-height: 1.55; }
+  .cycle-step::after { content: '→'; position: absolute; right: -14px; top: 50%; transform: translateY(-50%);
+    color: var(--text-dim); font-size: 18px; z-index: 1; background: var(--bg); padding: 2px 4px;
+    line-height: 1; }
+  .cycle-step:last-child::after { display: none; }
+  @media (max-width: 1100px) {
+    .cycle-step::after { content: '↓'; right: 50%; top: auto; bottom: -16px; transform: translateX(50%); }
+  }
+
+  /* Rationale 리스트 */
+  .rationale { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px; list-style: none; margin: 0; }
+  .rationale li { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+    color: var(--text); line-height: 1.7; }
+  .rationale li:last-child { border-bottom: none; }
+  .rationale li b { color: var(--accent-strong); font-weight: 800; }
+
+  /* Phase 3 (차년도) 박스 */
+  .future-box { background: var(--bg-sub); border: 1px dashed var(--border-strong);
+    border-radius: 12px; padding: 20px 22px; }
+  .future-box h4 { margin: 0 0 10px; font-size: 14px; font-weight: 800; color: var(--text-sub); }
+  .future-box p { margin: 6px 0; font-size: 13px; color: var(--text-sub); line-height: 1.7; }
+  .future-box b { color: var(--text); }
+
   /* R3-3 / MEDIA-3 — 시각자료 섹션 헤더 + hero + 하드웨어 */
   .section-head { display: flex; align-items: baseline; margin: 24px 0 12px; gap: 12px; }
   .section-head h3 { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.2px; }
@@ -578,6 +680,7 @@
     <div class="nav">
       <a class="nav-item active" data-route="home"><span class="ico">📊</span> Overview</a>
       <a class="nav-item" data-route="apps"><span class="ico">🗓</span> Phase 로드맵 <span class="count" id="cnt-apps">6</span></a>
+      <a class="nav-item" data-route="tech"><span class="ico">🎓</span> 기술 가이드</a>
       <a class="nav-item" data-route="videos"><span class="ico">🎥</span> 시뮬 영상 <span class="count" id="cnt-videos">0</span></a>
       <a class="nav-item" data-route="daily"><span class="ico">📅</span> 활동 타임라인 <span class="count" id="cnt-daily">0</span></a>
       <a class="nav-item" data-route="magazines"><span class="ico">📋</span> 보고용 자료 <span class="count" id="cnt-magazines">0</span></a>
@@ -737,6 +840,155 @@
           <div class="panel-head"><h3>결정 기록</h3><div class="right" id="decisions-right">—</div></div>
           <div id="report-decisions"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- TECH GUIDE -->
+    <div class="view hidden" id="view-tech">
+      <div class="home-hero">
+        <h1>🎓 기술 가이드</h1>
+        <div class="sub">이 프로젝트가 어떤 기술을 어떻게 쓰는지 — 비전공자도 이해하도록 정리</div>
+      </div>
+
+      <!-- 1. 한 줄 결론 -->
+      <div class="tech-summary">
+        <p>정비현장의 PCB 작업을 로봇에 가르치는 프로젝트입니다. <b>가상 환경(시뮬)에서 200번 시연 데이터를 자동으로 만들고</b> → <b>AI가 그 시연을 흉내내는 법을 학습</b>하고 → <b>학습된 모델을 실제 로봇팔에 옮기는</b> 흐름입니다.</p>
+      </div>
+
+      <!-- 2. 전체 흐름 플로우차트 -->
+      <div class="section-head"><h3>전체 흐름 (6 단계)</h3><div class="right" id="tech-progress">—</div></div>
+      <div class="flow-chart" id="flow-chart"></div>
+
+      <!-- 3. 사용 기술 카드 -->
+      <div class="section-head"><h3>사용 기술 — 무엇을, 왜, 어떻게</h3><div class="right">5가지 핵심</div></div>
+      <div class="tech-grid">
+        <div class="tech-card">
+          <div class="tc-head">
+            <h4>MuJoCo 3.8</h4>
+            <span class="role">가상 로봇팔 시뮬 엔진</span>
+            <span class="tc-license">Apache 2.0</span>
+          </div>
+          <section class="why">
+            <h5>왜 선택?</h5>
+            <p>처음엔 NVIDIA Isaac Lab 검토 → Mac Mini M5 (ARM64) 미지원으로 불가 판정 (2026-05-01 결정 변경). MuJoCo 는 Apple Silicon 네이티브 + <code>pip install mujoco</code> 한 줄 설치 + Apache 2.0 오픈소스. 학습 알고리즘 검증에 충분히 가벼움.</p>
+          </section>
+          <section class="how">
+            <h5>어떻게 사용?</h5>
+            <p>SO-ARM101 MJCF 모델을 import → 헤드리스 렌더링으로 천장 카메라 영상 + 6축 관절 상태 수집. <code>sim_pick_place.py</code> 가 IK(역기구학) 로 큐브 위치 잡고 Pick-Place 동작 자동 생성. <code>sim_data_collector.py</code> 가 큐브 위치 ±20mm 랜덤 변동으로 200 에피소드 합성.</p>
+          </section>
+        </div>
+
+        <div class="tech-card">
+          <div class="tc-head">
+            <h4>SO-ARM101</h4>
+            <span class="role">오픈소스 6-DoF 로봇팔</span>
+            <span class="tc-license">CC-BY-SA</span>
+          </div>
+          <section class="why">
+            <h5>왜 선택?</h5>
+            <p>TheRobotStudio 오픈소스 (BOM·STL·MJCF 공개) + HuggingFace LeRobot 공식 지원. 가격 적당 (≈ $500/대) 하고 Leader + Follower 페어로 사람이 직접 시연 (텔레오퍼레이션) 도 가능. 차후 PCB 작업처럼 정밀 시연이 필요할 때 데이터 수집 옵션 확보됨.</p>
+          </section>
+          <section class="how">
+            <h5>어떻게 사용?</h5>
+            <p>MJCF 모델 (<code>so101_new_calib.xml</code>) 로 시뮬과 실기 동일 캘리브레이션 유지. 6 관절: shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll, gripper. 실기 서보는 Feetech STS3215 (12V/7.4V) — 7월부터 실기 검증 (Phase 2).</p>
+          </section>
+        </div>
+
+        <div class="tech-card">
+          <div class="tc-head">
+            <h4>HuggingFace LeRobot</h4>
+            <span class="role">로봇 학습 프레임워크</span>
+            <span class="tc-license">Apache 2.0</span>
+          </div>
+          <section class="why">
+            <h5>왜 선택?</h5>
+            <p>데이터 포맷 (LeRobot Dataset) + 학습 알고리즘 (ACT / Diffusion Policy / π0) + 추론까지 end-to-end. 산업/연구 표준화 중. SO-ARM101 공식 지원, HuggingFace Hub 데이터셋 공유 가능 (선택). 자체 구현 대비 검증된 코드베이스.</p>
+          </section>
+          <section class="how">
+            <h5>어떻게 사용?</h5>
+            <p>200 에피소드 데이터를 LeRobot Dataset v3.0 포맷 (<code>local/cop-pickplace</code>, root=<code>data/episodes/</code>) 로 저장. parquet (관절 상태) + mp4 (카메라 영상) 분리 저장. 이 데이터셋이 그대로 ACT 학습 입력.</p>
+          </section>
+        </div>
+
+        <div class="tech-card">
+          <div class="tc-head">
+            <h4>ACT</h4>
+            <span class="role">Action Chunking Transformer (모방학습)</span>
+            <span class="tc-license">2023, MIT</span>
+          </div>
+          <section class="why">
+            <h5>왜 선택?</h5>
+            <p>Diffusion Policy (DP) 대비 가볍고 빠름 → 1차 학습 적합. 트랜스포머가 다음 100 프레임 액션 묶음을 한 번에 예측 → 시간적 일관성 있는 동작 생성. Mac M5 에서 학습 가능. DP 비교는 9월 (Phase 4) 예정.</p>
+          </section>
+          <section class="how">
+            <h5>어떻게 사용?</h5>
+            <p><code>scripts/train_act.py</code> 가 LeRobot 의 <code>ACTConfig</code> + <code>ACTPolicy</code> 호출. 입력 = 천장 카메라 + 6축 관절 (관측 n_obs_steps 과거 프레임). 출력 = 6축 액션 시퀀스 (chunk_size=100 미래 프레임). epoch 100, batch 8, 백그라운드 학습. 2026-06-15 (W3) 시작 예정.</p>
+          </section>
+        </div>
+
+        <div class="tech-card">
+          <div class="tc-head">
+            <h4>모방학습 (Imitation Learning)</h4>
+            <span class="role">학습 방식 — "보고 따라하기"</span>
+          </div>
+          <section class="why">
+            <h5>왜 선택?</h5>
+            <p>강화학습 (Reinforcement Learning) 은 시행착오로 학습 → 실기 로봇 파손 위험 + 데이터 효율 낮음. PCB 작업처럼 "정확한 시연이 가능한" 작업은 모방학습이 적합. 시연 데이터 200건이면 1차 알고리즘 검증 충분.</p>
+          </section>
+          <section class="how">
+            <h5>어떻게 사용?</h5>
+            <p>시뮬 IK 가 "정답" 액션을 자동 생성 → 그 액션과 동시 카메라 관측을 짝지어 200 에피소드 저장 → ACT 모델이 "이 영상이 보일 때 이렇게 움직여라" 매핑 학습. 차년도 (Phase 3+) 에 강화학습 추가하여 시뮬에 없는 상황 대응력 보강 예정.</p>
+          </section>
+        </div>
+      </div>
+
+      <!-- 4. 데이터셋 메타 -->
+      <div class="section-head"><h3>현재 학습 데이터셋</h3><div class="right">Phase 1 W1-2 진행 증거</div></div>
+      <div class="dataset-stats" id="dataset-stats"></div>
+
+      <!-- 5. 학습 1 사이클 -->
+      <div class="section-head"><h3>AI 학습 1 사이클 — 어떻게 흉내내는가</h3><div class="right">관측 → 모델 → 액션 → 반복</div></div>
+      <div class="cycle-diagram">
+        <div class="cycle-step">
+          <div class="step-n">Step 1 — 관측</div>
+          <h5>Input: 영상 + 관절 위치</h5>
+          <p>천장 카메라 RGB 영상 (480×640) + 현재 6축 관절 위치 (qpos). 과거 <code>n_obs_steps</code> 프레임 분량 묶음.</p>
+        </div>
+        <div class="cycle-step">
+          <div class="step-n">Step 2 — ACT 모델</div>
+          <h5>Transformer 추론</h5>
+          <p>관측을 임베딩 → 트랜스포머 인코더-디코더 → "이 영상에서 다음 100 프레임 어떻게 움직일까?" 예측.</p>
+        </div>
+        <div class="cycle-step">
+          <div class="step-n">Step 3 — 액션</div>
+          <h5>Output: 6축 액션 시퀀스</h5>
+          <p>다음 chunk_size 프레임의 6축 ctrl 명령. 시뮬에서는 MuJoCo actuator 에 전달, 실기에서는 STS3215 서보에 전달.</p>
+        </div>
+        <div class="cycle-step">
+          <div class="step-n">Step 4 — 실행</div>
+          <h5>로봇이 액션 실행</h5>
+          <p>로봇이 액션을 실행 → 새 관측 (영상 + 관절 변화) → Step 1 로 돌아가 반복. 큐브가 그리퍼 안에 잡힐 때까지.</p>
+        </div>
+      </div>
+
+      <!-- 6. 의사결정 근거 -->
+      <div class="section-head"><h3>왜 이렇게 진행하나 — 의사결정 근거</h3></div>
+      <ul class="rationale">
+        <li><b>왜 시뮬 합성 데이터?</b> 실기 로봇 24시간 가동 비용 큼. 시뮬은 일주일에 수백 에피소드 자동 합성 가능 → 데이터 비용 ↓, 알고리즘 검증 가속. 7월부터 실기 텔레오퍼레이션 데이터 추가 예정.</li>
+        <li><b>왜 MuJoCo (Isaac Lab 아님)?</b> Mac Mini M5 (ARM64) 에서 Isaac Lab 미지원 (2026-05-01 결정 변경). MuJoCo 는 네이티브 + 즉시 설치. Isaac Lab 은 차년도 GPU 서버 도입 시 RL 학습용으로 전환.</li>
+        <li><b>왜 텔레오퍼 안 함 (시뮬만)?</b> 사람 시연은 정확하지만 시간/노동 비용 큼. IK 기반 시뮬 합성으로 빠르게 200ep 확보 → 1차 학습. 시뮬에 없는 변수 (조명, 마찰, 노이즈) 는 Domain Randomization 으로 보강.</li>
+        <li><b>왜 ACT (Diffusion Policy 아님)?</b> DP 보다 가볍고 빠름 → Mac M5 에서 학습 가능. 트랜스포머가 시간 일관성 있는 chunk 단위 액션 예측 → 안정적. 정확도 부족 시 9월 (Phase 4) 에 DP 비교/전환.</li>
+        <li><b>왜 Pick-Place 부터?</b> 가장 단순한 정밀 작업. 성공하면 PCB 부품 픽업 → RS232 결선 (HHT 단자 꽂기) 까지 단계 확장. 정비현장 핵심 반복 작업 자동화가 최종 목표.</li>
+        <li><b>왜 Sim-to-Real 단계 분리?</b> 시뮬 학습 결과를 실기에 옮길 때 "현실 격차" (Sim-to-Real gap) 존재. 7월 (Phase 2) 에 시뮬 모델을 실기 50 에피소드로 측정 → 격차 식별 → Domain Randomization / Fine-tuning 으로 좁힘.</li>
+      </ul>
+
+      <!-- 7. 차년도 계획 -->
+      <div class="section-head"><h3>차년도 (Phase 3+) 계획</h3><div class="right">2027~</div></div>
+      <div class="future-box">
+        <p><b>강화학습 도입</b> — 모방학습으로 부족한 상황 대응력을 RL 로 보강. Isaac Lab + LeIsaac (NVIDIA) 로 전환, GPU 병렬 환경으로 대규모 학습. 인프라: AWS g5.2xlarge (≈ $1.21/hr) 또는 별도 GPU 서버.</p>
+        <p><b>GR00T N1.5 파인튜닝</b> — NVIDIA 의 VLA (Vision-Language-Action) 모델. 시뮬 데이터 → GR00T 파인튜닝 → 실기 배포 파이프라인. <code>--no-tune_diffusion_model</code> 플래그로 24GB VRAM 절약.</p>
+        <p><b>최종 배포 타겟</b> — NVIDIA Orin Nano Super (학습 불가, 추론 전용). 학습된 정책을 ONNX/TensorRT 로 최적화 → 임베디드 배포.</p>
+        <p><b>확장 옵션</b> — <b>LeKiwi</b> (이동체 매니퓰레이터) 또는 <b>XLeRobot</b> (확장형 모바일 로봇). PCB 작업 자동화 성공 시 정비현장 내 이동 작업으로 확장.</p>
       </div>
     </div>
 
@@ -1006,7 +1258,7 @@ async function refreshFromApi(silent = false) {
     const fresh = await res.json();
     window.DATA = fresh; D = fresh; REPO_URL = fresh.meta.repo_url || '';
     initCounts();
-    renderProposals(); renderDaily(); renderMagazines(); renderApps(); renderVideos();
+    renderProposals(); renderDaily(); renderMagazines(); renderApps(); renderVideos(); renderTech();
     renderBlockers(); renderSamples(); renderDecisions(); renderHome();
     if (currentRoute === 'bookmarks') renderBookmarks();
     drawAllCharts();
@@ -1102,10 +1354,10 @@ function setTheme(mode) {
 })();
 
 /* ====== ROUTING ====== */
-const ROUTES = ['home', 'apps', 'videos', 'proposals', 'daily', 'magazines',
+const ROUTES = ['home', 'apps', 'tech', 'videos', 'proposals', 'daily', 'magazines',
                 'blockers', 'samples', 'decisions',
                 'bookmarks', 'analytics', 'about', 'guide'];
-const ROUTE_LABEL = { home: 'Overview', apps: 'Phase 로드맵', videos: '시뮬 영상', proposals: '시뮬 작업',
+const ROUTE_LABEL = { home: 'Overview', apps: 'Phase 로드맵', tech: '기술 가이드', videos: '시뮬 영상', proposals: '시뮬 작업',
   daily: '활동 타임라인', magazines: '보고용 자료',
   blockers: '외부 의존 차단', samples: '샘플 코드 상태', decisions: '결정',
   bookmarks: '북마크', analytics: '분석', about: '사이트 설명', guide: '사용가이드' };
@@ -1140,6 +1392,7 @@ function setRoute(r) {
   document.getElementById('crumbs').innerHTML = `<strong>${ROUTE_LABEL[r]}</strong>`;
   if (r === 'bookmarks') renderBookmarks();
   if (r === 'apps') renderApps();
+  if (r === 'tech') renderTech();
   if (r === 'videos') renderVideos();
   if (r === 'blockers') renderBlockers();
   if (r === 'samples') renderSamples();
@@ -1498,6 +1751,78 @@ function renderApps() {
         ${weeks ? `<div class="weeks">${weeks}</div>` : ''}
       </div>`;
   }).join('');
+}
+
+/* ====== Tech Guide view (GUIDE) ====== */
+function renderTech() {
+  // Phase status 매핑: 시뮬 셋업 → 시연 합성 → ACT 학습 → 시뮬 검증 → Sim2Real → PCB 자동화
+  const phases = D.phases || [];
+  const phaseByMonth = {};
+  phases.forEach(p => { phaseByMonth[p.month] = p; });
+  // 6 step 매핑: phase month → status
+  const FLOW = [
+    { idx: '①', month: '2026-05', title: '가상 로봇팔 셋업',           detail: 'MuJoCo 3.8 + SO-ARM101 MJCF · 카메라/관절 캘리브레이션' },
+    { idx: '②', month: '2026-06', title: '시뮬 시연 데이터 합성',      detail: 'IK 기반 Pick-Place 200 에피소드 / 12,400 프레임 · LeRobot Dataset v3.0' },
+    { idx: '③', month: '2026-06', title: 'ACT 학습 — 모방학습',          detail: 'LeRobot ACT (Transformer) · 200 ep 학습 · 2026-06-15 시작 예정' },
+    { idx: '④', month: '2026-07', title: '시뮬 검증',                   detail: '학습된 모델이 시뮬에서 큐브 잘 집는가 (성공률 측정)' },
+    { idx: '⑤', month: '2026-08', title: '실기 적용 — Sim2Real',        detail: '시뮬 모델을 실기 로봇팔에 옮김 · Domain Randomization 으로 격차 좁힘' },
+    { idx: '⑥', month: '2026-10', title: 'PCB 작업 자동화 (1차 완성)', detail: 'Pick & Place 70% · RS232 결선 부분 성공 40%' },
+  ];
+  const STATUS_TAG = { '완료': 'DONE', '진행': '진행 중', '예정': '예정' };
+  const wrap = document.getElementById('flow-chart');
+  if (wrap) {
+    wrap.innerHTML = FLOW.map((f, i) => {
+      const p = phaseByMonth[f.month];
+      const status = p ? p.status : '예정';
+      const cls = status === '완료' ? 'done' : (status === '진행' ? 'current' : 'plan');
+      return `
+        ${i > 0 ? '<div class="flow-arrow">↓</div>' : ''}
+        <div class="flow-step ${cls}">
+          <div class="idx">${f.idx}</div>
+          <div class="body">
+            <b>${escapeHtml(f.title)}</b>
+            <small>${escapeHtml(f.detail)}</small>
+          </div>
+          <span class="tag">${STATUS_TAG[status]}</span>
+        </div>`;
+    }).join('');
+  }
+  // 진행률 라벨
+  const done = phases.filter(p => p.status === '완료').length;
+  const active = phases.filter(p => p.status === '진행').length;
+  const tpEl = document.getElementById('tech-progress');
+  if (tpEl) tpEl.textContent = `완료 ${done} · 진행 ${active} · 예정 ${6 - done - active}`;
+
+  // 데이터셋 메타 카드 — meta.dataset_episodes / meta.dataset_frames 또는 폴백
+  const meta = D.meta || {};
+  const stats = D.stats || {};
+  // 데이터셋 영상에서 메타 추출 (이미 build.py 가 emit)
+  const datasetVideo = (D.videos || []).find(v => v.kind === 'dataset');
+  const ep = datasetVideo?.episode_count || 200;
+  const frames = datasetVideo?.frame_count_total || 12400;
+  const fps = 30;
+  const dsEl = document.getElementById('dataset-stats');
+  if (dsEl) {
+    dsEl.innerHTML = `
+      <div class="ds-metrics">
+        <div class="m"><div class="n">${ep.toLocaleString()}</div><div class="l">에피소드</div></div>
+        <div class="m"><div class="n">${frames.toLocaleString()}</div><div class="l">총 프레임</div></div>
+        <div class="m"><div class="n">${fps}</div><div class="l">FPS</div></div>
+        <div class="m"><div class="n">6</div><div class="l">DoF (관절)</div></div>
+        <div class="m"><div class="n">640×480</div><div class="l">카메라 해상도</div></div>
+        <div class="m"><div class="n">v3.0</div><div class="l">LeRobot 포맷</div></div>
+      </div>
+      <div class="ds-features">
+        <h5>각 프레임에 저장된 것 (학습 입력/타겟)</h5>
+        <ul>
+          <li><code>observation.images.top</code> — 천장 카메라 RGB 영상 (480×640×3)</li>
+          <li><code>observation.state</code> — 6축 관절 위치 <span style="color:var(--text-dim)">(qpos, radian)</span></li>
+          <li><code>action</code> — 6축 제어 신호 <span style="color:var(--text-dim)">(ctrl, 모델이 학습할 정답)</span></li>
+          <li><code>timestamp</code> — 프레임 시각 <span style="color:var(--text-dim)">(30 fps 기준 ≈ 33ms 간격)</span></li>
+        </ul>
+      </div>
+    `;
+  }
 }
 
 /* ====== Videos view (R3-3) ====== */
@@ -2150,6 +2475,7 @@ renderDaily();
 renderMagazines();
 renderApps();
 renderVideos();
+renderTech();
 renderBlockers();
 renderSamples();
 renderDecisions();
