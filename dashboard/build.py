@@ -32,15 +32,61 @@ DATA_MARKER = "/*__DATA__*/"
 
 KST = timezone(timedelta(hours=9))
 
-# Phase 메타 — PHASE_ROADMAP 보다 안정적인 hard-coded label (월별 매핑은 README/PHASE_ROADMAP 의 사실)
+# Phase 메타 — 기술 라벨(name) + 비즈니스 라벨(business_label) + outcome(이게 완료되면)
+# + report_label(보고서 매핑). PHASE_ROADMAP.md 의 보고용 트랙 매핑 표를 코드로 반영.
 PHASE_META: list[dict] = [
-    {"id": "phase0", "name": "Phase 0 — 시뮬 환경 셋업",      "month": "2026-05", "weeks": 4},
-    {"id": "phase1", "name": "Phase 1 — 사전학습",            "month": "2026-06", "weeks": 4},
-    {"id": "phase2", "name": "Phase 2 — Sim2Real 검증",       "month": "2026-07", "weeks": 4},
-    {"id": "phase3", "name": "Phase 3 — PCB 조정",            "month": "2026-08", "weeks": 4},
-    {"id": "phase4", "name": "Phase 4 — RS232 HHT 결선",      "month": "2026-09", "weeks": 4},
-    {"id": "phase5", "name": "Phase 5 — 통합 시연",           "month": "2026-10", "weeks": 4},
+    {
+        "id": "phase0", "name": "Phase 0 — 시뮬 환경 셋업", "month": "2026-05", "weeks": 4,
+        "business_label": "5월: 실기 없이 학습할 수 있는 환경 구축",
+        "outcome": "실기 로봇 없이도 학습 데이터 합성 가능. 1주일 200 에피소드 자동 생성으로 ACT 학습 사전 검증.",
+        "report_label": "하드웨어 조립, 환경 구축",
+    },
+    {
+        "id": "phase1", "name": "Phase 1 — 사전학습", "month": "2026-06", "weeks": 4,
+        "business_label": "6월: AI 모델 사전학습",
+        "outcome": "시뮬 환경에서 모방학습(ACT) 모델 1차 학습. 실기 적용 전 알고리즘 안정성 검증.",
+        "report_label": "텔레오퍼레이션 검증",
+    },
+    {
+        "id": "phase2", "name": "Phase 2 — Sim2Real 검증", "month": "2026-07", "weeks": 4,
+        "business_label": "7월: 실기 검증 (시뮬↔실기)",
+        "outcome": "시뮬 학습 모델이 실제 로봇팔에서도 작동하는지 측정. 실기 50 에피소드 수집.",
+        "report_label": "데이터 50 에피소드",
+    },
+    {
+        "id": "phase3", "name": "Phase 3 — PCB 조정", "month": "2026-08", "weeks": 4,
+        "business_label": "8월: PCB 부품 픽앤플레이스",
+        "outcome": "실제 PCB 부품 픽앤플레이스 학습. 정비현장 자동화 가능성 입증.",
+        "report_label": "ACT 학습",
+    },
+    {
+        "id": "phase4", "name": "Phase 4 — RS232 HHT 결선", "month": "2026-09", "weeks": 4,
+        "business_label": "9월: RS232 통신 학습",
+        "outcome": "RS232 직렬통신 결선 자동화. DP(Diffusion Policy) 비교로 안정성 확보.",
+        "report_label": "DP 비교",
+    },
+    {
+        "id": "phase5", "name": "Phase 5 — 통합 시연", "month": "2026-10", "weeks": 4,
+        "business_label": "10월: 사내 시연",
+        "outcome": "PCB 70% / RS232 40% 성공률 달성 → 차년도 본격 사업화 결정.",
+        "report_label": "시연",
+    },
 ]
+
+# 프로젝트 비전 — 대시보드 히어로에 표시
+PROJECT_VISION = {
+    "title": "2026-10 사내 시연",
+    "subtitle": "PCB 픽앤플레이스 자동화 — 정비현장 첫걸음",
+    "demo_date": "2026-10-31",
+    "start_date": "2026-05-01",
+    "targets": [
+        {"label": "PCB 픽앤플레이스 성공률", "target": "70%"},
+        {"label": "RS232 HHT 결선 부분성공", "target": "40%"},
+    ],
+}
+
+# Obsidian 월별 활동보고서 위치
+OBSIDIAN_REPORT_DIR = Path.home() / "Documents" / "second-brain" / "03 Areas" / "회사문서" / "CoP_PhysicalAI"
 
 # 카테고리 자동 추론 — 본문 키워드 매칭 (대소문자 무시).
 CATEGORY_RULES: list[tuple[str, list[str]]] = [
@@ -216,6 +262,10 @@ def build_phase_roadmap() -> tuple[list[dict], str]:
             "progress": round(progress, 3),
             "done": done_all, "total": total_all,
             "status": status,
+            # 비전공자용 이중 라벨 (R2)
+            "business_label": meta["business_label"] if meta else "",
+            "outcome": meta["outcome"] if meta else "",
+            "report_label": meta["report_label"] if meta else "",
         })
     return phases, current_label
 
@@ -498,6 +548,227 @@ def build_decisions() -> list[dict]:
 # 통계 (메뉴 12 — 분석)
 # ─────────────────────────────────────────────────────────────────────────────
 
+# ─────────────────────────────────────────────────────────────────────────────
+# R2: 비즈니스 KPI / 월별 보고서 / 영상 / 활동 타임라인
+# ─────────────────────────────────────────────────────────────────────────────
+
+def build_business_kpi(phases: list[dict]) -> dict:
+    """프로젝트 비전 + D-day + 목표 달성률 + 위험 신호.
+
+    관리자 보고용 — 한 화면에 "어디까지 왔고 어디로 가는가" 표시.
+    """
+    today = datetime.now(KST).date()
+    try:
+        demo = datetime.strptime(PROJECT_VISION["demo_date"], "%Y-%m-%d").date()
+        start = datetime.strptime(PROJECT_VISION["start_date"], "%Y-%m-%d").date()
+    except ValueError:
+        demo = today
+        start = today
+    d_day = (demo - today).days
+    span = max((demo - start).days, 1)
+    elapsed_days = max(0, (today - start).days)
+    time_elapsed = min(elapsed_days / span, 1.0)
+
+    # 목표 달성률: phase 별 progress 의 단순 평균 (6개월 균등 가중).
+    # 항목 합계 방식은 미래 phase 의 detail 부재로 편향됨 (Phase 0/1 만 detail 있음).
+    # 평균 방식: Phase 0=100%, Phase 1=20%, Phase 2-5=0% → 20% (시간 경과와 비교 가능).
+    phase_progresses = [p.get("progress", 0.0) for p in phases]
+    target_progress = (sum(phase_progresses) / len(phase_progresses)) if phase_progresses else 0.0
+
+    # 현재 진행 중 phase + 다음 미완료 항목 3개
+    current = next((p for p in phases if p.get("status") == "진행"), None)
+    next_actions: list[str] = []
+    if current:
+        for w in current.get("weeks", []):
+            for it in w.get("items", []):
+                if not it.get("checked"):
+                    next_actions.append(it.get("task", "")[:120])
+                    if len(next_actions) >= 3:
+                        break
+            if len(next_actions) >= 3:
+                break
+
+    return {
+        **PROJECT_VISION,
+        "d_day": d_day,
+        "elapsed_days": elapsed_days,
+        "time_elapsed": round(time_elapsed, 3),
+        "target_progress": round(target_progress, 3),
+        "current_phase_id": current.get("id") if current else "",
+        "current_phase_label": current.get("name") if current else "",
+        "current_phase_business": current.get("business_label") if current else "",
+        "next_actions": next_actions,
+        # 진척 vs 일정 비교: 시간 X% 지났는데 목표 Y% 달성 → 격차 표시
+        "progress_vs_time_gap": round(target_progress - time_elapsed, 3),
+    }
+
+
+def build_monthly_reports() -> list[dict]:
+    """Obsidian 03 Areas/회사문서/CoP_PhysicalAI/CoP_*_활동보고서.md 풀 임베드."""
+    if not OBSIDIAN_REPORT_DIR.exists():
+        return []
+    out: list[dict] = []
+    for f in sorted(OBSIDIAN_REPORT_DIR.glob("CoP_PhysicalAI_*_활동보고서*.md")):
+        text = read_text(f, limit=40_000)
+        if not text:
+            continue
+        m = re.search(r"(\d{4}-\d{2})", f.name)
+        month = m.group(1) if m else f.stem
+        # 버전 suffix (예: _20260427) 구별
+        version_m = re.search(r"_(\d{8})\.md$", f.name)
+        version = version_m.group(1) if version_m else ""
+        out.append({
+            "id": make_id("report", f.name),
+            "month": month,
+            "version": version,
+            "title": first_h1(text) or f.stem,
+            "filename": f.name,
+            "excerpt": excerpt(text, 400),
+            "body_md": text,  # 풀 마크다운 (JS 가 lightweight render)
+            "path": str(f),
+            "size_bytes": len(text),
+        })
+    return out
+
+
+# 비전공자용 영상 설명 — 파일명 키워드 기반
+_VIDEO_DESCRIPTIONS = [
+    (("6dof", "6-dof"),     "6축 로봇팔의 기본 움직임 시뮬레이션"),
+    (("pick_place", "pick-place", "pickplace"),  "큐브 픽앤플레이스 — 로봇이 물체를 집어서 옮기는 동작"),
+    (("camera",),           "시뮬 환경 내 카메라 동작 검증"),
+    (("headless",),         "헤드리스 모드 비디오 (UI 없이 백그라운드 렌더)"),
+    (("data_collect", "data-collect"),  "학습용 데이터 수집 — 한 에피소드 기록"),
+    (("teleop",),           "텔레오퍼레이션 — 사람이 조종하는 로봇팔 시연"),
+    (("연결", "connect"),   "하드웨어 연결 검증"),
+]
+
+
+def _describe_video(filename: str) -> str:
+    n = filename.lower()
+    for keys, desc in _VIDEO_DESCRIPTIONS:
+        if any(k in n for k in keys):
+            return desc
+    return "시뮬레이션 결과 영상"
+
+
+def build_videos() -> list[dict]:
+    """research/simulation/video/*.mp4 + 키 프레임 PNG. 관리자 보고용 시각 자산.
+
+    각 영상에 비전공자용 한 줄 설명 자동 첨부.
+    """
+    video_dir = REPO_ROOT / "research" / "simulation" / "video"
+    if not video_dir.exists():
+        return []
+    # 첫 키 프레임 (있다면 모든 영상의 poster 로 공통 사용)
+    first_frame = next(iter(sorted(video_dir.glob("overhead_frame_0000.png"))), None)
+    poster_default = str(first_frame.relative_to(REPO_ROOT)) if first_frame else None
+
+    out: list[dict] = []
+    for mp4 in sorted(video_dir.glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True):
+        try:
+            st = mp4.stat()
+        except OSError:
+            continue
+        out.append({
+            "id": make_id("video", mp4.name),
+            "filename": mp4.name,
+            "path": str(mp4.relative_to(REPO_ROOT)),
+            "kind": ("pick-place" if "pick" in mp4.name.lower()
+                     else "6dof" if "6dof" in mp4.name.lower()
+                     else "sim"),
+            "size_bytes": st.st_size,
+            "modified": datetime.fromtimestamp(st.st_mtime, KST).isoformat(timespec="seconds"),
+            "poster": poster_default,
+            "description": _describe_video(mp4.name),  # 비전공자용 한 줄
+        })
+
+    # 오버헤드 프레임 carousel 정보 추가 (별도 묶음으로)
+    overhead_frames = sorted(video_dir.glob("overhead_frame_*.png"))
+    if overhead_frames:
+        out.append({
+            "id": make_id("frames", "overhead"),
+            "filename": "overhead_frame_sequence",
+            "path": str(video_dir.relative_to(REPO_ROOT)),
+            "kind": "frame-sequence",
+            "size_bytes": sum(p.stat().st_size for p in overhead_frames),
+            "frame_count": len(overhead_frames),
+            "frames": [str(p.relative_to(REPO_ROOT)) for p in overhead_frames[:30]],
+            "description": "오버헤드 카메라 시점 — 30장 프레임 시퀀스 (시뮬 동작 결과)",
+        })
+
+    return out
+
+
+def build_activity_timeline(daily: list[dict], sim_tasks: list[dict], days: int = 60) -> list[dict]:
+    """git log + research-log + sim_tasks 를 날짜별로 묶음.
+
+    같은 날의 자동 cron commit (시뮬/로그/히스토리) 가 3건+ 중첩되는 패턴을
+    한 카드로 통합. self-heal 커밋은 별도 카운트 (작은 인디케이터).
+    """
+    today = datetime.now(KST).date()
+    cutoff = today - timedelta(days=days)
+    log_out = run(
+        ["git", "log", f"--since={cutoff.isoformat()}",
+         "--pretty=format:%ad|%s|%h", "--date=short"],
+        cwd=REPO_ROOT, timeout=15,
+    )
+    by_date: dict[str, dict] = {}
+    for line in log_out.splitlines():
+        parts = line.split("|", 2)
+        if len(parts) < 3:
+            continue
+        date, msg, sha = parts
+        bucket = by_date.setdefault(date, {
+            "commits": [], "self_heal_count": 0,
+            "categories": set(),
+        })
+        if "self-heal" in msg.lower() or "자가치유" in msg:
+            bucket["self_heal_count"] += 1
+            continue
+        bucket["commits"].append({"msg": msg[:120], "sha": sha})
+        # 카테고리 추출 — 메시지의 [태그] 패턴
+        cm = re.search(r"\[([^\]]+)\]", msg)
+        if cm:
+            bucket["categories"].add(cm.group(1))
+
+    daily_by_date = {d["date"]: d for d in daily if d.get("date")}
+    sim_by_date: dict[str, list[dict]] = {}
+    for t in sim_tasks:
+        if t.get("date"):
+            sim_by_date.setdefault(t["date"], []).append(t)
+
+    timeline: list[dict] = []
+    for date in sorted(by_date.keys(), reverse=True):
+        info = by_date[date]
+        d = daily_by_date.get(date, {})
+        sims = sim_by_date.get(date, [])
+        # 비즈니스 라벨: 카테고리 → 한국어 친화 변환
+        cat_labels = []
+        for c in info["categories"]:
+            if "시뮬" in c: cat_labels.append("시뮬 작업")
+            elif "로그" in c: cat_labels.append("테스트·메트릭")
+            elif "히스토리" in c: cat_labels.append("문서 갱신")
+            elif "주간정리" in c: cat_labels.append("주간 정리")
+            elif "보고서" in c or "메일" in c: cat_labels.append("보고")
+            elif "결정" in c: cat_labels.append("아키텍처 결정")
+            else: cat_labels.append(c)
+        cat_labels = sorted(set(cat_labels))
+
+        timeline.append({
+            "date": date,
+            "commit_count": len(info["commits"]),
+            "self_heal_count": info["self_heal_count"],
+            "categories": cat_labels,
+            "summary": " · ".join(cat_labels) if cat_labels else "기타",
+            "commits": info["commits"][:8],  # 너무 길지 않게
+            "sim_task_titles": [t.get("title", "")[:80] for t in sims[:3]],
+            "phase_label": d.get("phase_label", ""),
+            "scripts_run": d.get("scripts", [])[:5],
+            "self_heal_actions": d.get("self_heal_actions", [])[:3],
+        })
+    return timeline
+
+
 def _build_chart_stats(
     sim_tasks: list[dict], daily: list[dict], phases: list[dict],
     category_counts: dict,
@@ -631,19 +902,30 @@ def build_real_data() -> dict:
     stats = compute_stats(sim_tasks, daily, blockers)
     # Hdel template 의 차트 함수 호환 키 보강 (heatmap/appbar/donut/trend/catChart/hot)
     stats.update(_build_chart_stats(sim_tasks, daily, phases, stats.get("category_distribution", {})))
+
+    # R2: 비즈니스 KPI / 월별 보고서 / 영상 / 활동 타임라인
+    business_kpi = build_business_kpi(phases)
+    monthly_reports = build_monthly_reports()
+    videos = build_videos()
+    activity_timeline = build_activity_timeline(daily, sim_tasks)
+
     data = {
         "meta": build_meta(current_phase),
-        "phases": phases,
+        "vision": PROJECT_VISION,           # 정적 비전 정보
+        "business_kpi": business_kpi,        # R2 신규
+        "phases": phases,                    # 각 phase 에 business_label / outcome / report_label 포함
         "sim_tasks": sim_tasks,
         "daily": daily,
         "evidence": evidence,
         "blockers": blockers,
         "samples": samples,
         "decisions": decisions,
+        "monthly_reports": monthly_reports,  # R2: Obsidian 풀 임베드
+        "videos": videos,                    # R2: 시각 자산
+        "activity_timeline": activity_timeline,  # R2: 날짜별 그룹
         "stats": stats,
     }
-    # Hdel template.html 호환 alias — 기존 render* 함수가 새 키 모르므로 같은 데이터를 옛 키로도 노출.
-    # CoP 만의 신규 데이터 (blockers/samples/decisions) 는 별도 render 함수로 처리.
+    # Hdel template.html 호환 alias (기존 render* 함수가 새 키 모르므로)
     data["proposals"] = sim_tasks
     data["apps"] = phases
     data["magazines"] = evidence
