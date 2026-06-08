@@ -66,16 +66,16 @@ PHASE_META: list[dict] = [
         "report_label": "DP 비교",
     },
     {
-        "id": "phase5", "name": "Phase 5 — 통합 시연", "month": "2026-10", "weeks": 4,
-        "business_label": "10월: 사내 시연",
-        "outcome": "PCB 70% / RS232 40% 성공률 달성 → 차년도 본격 사업화 결정.",
-        "report_label": "시연",
+        "id": "phase5", "name": "Phase 5 — 1차 기능 완성", "month": "2026-10", "weeks": 4,
+        "business_label": "10월: 1차 기능 완성",
+        "outcome": "PCB 70% / RS232 40% 성공률 달성. 차년도 사업화 검토 자료로 사용.",
+        "report_label": "기능 완성",
     },
 ]
 
 # 프로젝트 비전 — 대시보드 히어로에 표시
 PROJECT_VISION = {
-    "title": "2026-10 사내 시연",
+    "title": "2026-10 기능 완성 목표",
     "subtitle": "PCB 픽앤플레이스 자동화 — 정비현장 첫걸음",
     "demo_date": "2026-10-31",
     "start_date": "2026-05-01",

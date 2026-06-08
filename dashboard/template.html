@@ -220,14 +220,22 @@
   .report-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 10px; margin-bottom: 22px; }
   .rp-card { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px;
-    padding: 12px 14px; cursor: pointer; transition: border-color .12s; }
+    padding: 12px 14px; cursor: pointer; transition: border-color .12s; position: relative; }
   .rp-card:hover { border-color: var(--border-strong); }
   .rp-card.on { border-color: var(--accent); background: var(--accent-soft); }
+  .rp-card.is-plan { background: var(--bg); opacity: .72; border-style: dashed; }
+  .rp-card.is-plan:hover { opacity: 1; }
+  .rp-card.is-active { border-color: #2563eb; }
   .rp-card .m { font-size: 11px; color: var(--text-dim); letter-spacing: 1.4px;
     text-transform: uppercase; font-weight: 800; }
   .rp-card.on .m { color: var(--accent-strong); }
   .rp-card .t { font-size: 13px; font-weight: 700; color: var(--text); margin-top: 4px; line-height: 1.4; }
   .rp-card .s { font-size: 10px; color: var(--text-dim); margin-top: 4px; font-family: ui-monospace, monospace; }
+  .rp-card .rp-badge { display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: 1px;
+    padding: 2px 6px; border-radius: 4px; margin-top: 6px; }
+  .rp-card .rp-badge.done   { background: rgba(34,197,94,.14); color: #16a34a; }
+  .rp-card .rp-badge.active { background: rgba(37,99,235,.14); color: #2563eb; }
+  .rp-card .rp-badge.plan   { background: var(--bg-elev); color: var(--text-dim); border: 1px dashed var(--border-strong); }
 
   .report-body { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px;
     padding: 24px 28px; min-height: 200px; }
@@ -589,7 +597,7 @@
           <div class="targets" id="vh-targets"></div>
         </div>
         <div class="vh-dday">
-          <div class="l">사내 시연까지</div>
+          <div class="l">기능 완성까지</div>
           <div class="n" id="vh-dday">—</div>
           <div class="d" id="vh-demo-date">—</div>
         </div>
@@ -733,7 +741,7 @@
     <div class="view hidden" id="view-apps">
       <div class="home-hero">
         <h1>6개월 여정</h1>
-        <div class="sub">실기 없이 학습할 수 있는 환경 구축 → 사내 시연. 각 단계의 비즈니스 결과와 주차별 진행률.</div>
+        <div class="sub">실기 없이 학습할 수 있는 환경 구축 → 10월 1차 기능 완성. 각 단계의 비즈니스 결과와 주차별 진행률.</div>
       </div>
       <div class="cards" id="apps-cards" style="grid-template-columns: 1fr; gap: 18px;"></div>
     </div>
@@ -811,7 +819,7 @@
           <li><b>Phase 2</b> (7월) — Sim2Real 검증 (실기 50ep 수집 + 시뮬↔실기 비교)</li>
           <li><b>Phase 3</b> (8월) — PCB 조정 (실제 PCB 픽앤플레이스 학습)</li>
           <li><b>Phase 4</b> (9월) — RS232 HHT 결선 (DP 비교 + 하드웨어 통신)</li>
-          <li><b>Phase 5</b> (10월) — 통합 시연 (사내 발표, PCB 70% / RS232 부분성공 40%)</li>
+          <li><b>Phase 5</b> (10월) — 1차 기능 완성 (PCB 70% / RS232 부분성공 40%)</li>
         </ul>
 
         <h2>일일 의사결정 흐름</h2>
@@ -1432,8 +1440,10 @@ function renderApps() {
     }).join('');
 
     const monthReports = reportsByMonth[p.month] || [];
-    const reportLink = monthReports.length
-      ? `<span class="report-link" onclick="setRoute('magazines')">📄 ${p.month} 활동보고서 ${monthReports.length}건 →</span>`
+    // 4월 v1/v2 처럼 같은 월에 여러 건이면 가장 최신 (build.py 가 mtime 순) 한 건 선택
+    const targetReport = monthReports[monthReports.length - 1];
+    const reportLink = targetReport
+      ? `<span class="report-link" onclick="openReport('${escapeHtml(targetReport.id)}')">📄 ${p.month} 활동보고서 ${monthReports.length}건 →</span>`
       : '';
     const reportLabel = p.report_label
       ? `<span style="color:var(--text-dim);">📋 ${escapeHtml(p.report_label)}</span>`
@@ -1572,14 +1582,24 @@ function renderMagazines() {
     picker.innerHTML = '<div class="empty" style="grid-column:1/-1">아직 활동보고서가 없습니다.</div>';
     return;
   }
-  // 가장 최근 (= last) 자동 선택
-  if (!SELECTED_REPORT_ID && reports.length) SELECTED_REPORT_ID = reports[reports.length - 1].id;
+  // 자동 펼침 X — 사용자가 카드를 클릭해야 본문 표시. 미리 작성된 미래 목표가 "현재" 처럼 노출되는 것 방지.
+  const phasesByMonth = {};
+  (D.phases || []).forEach(p => { phasesByMonth[p.month] = p; });
+
   picker.innerHTML = reports.map(r => {
     const isOn = r.id === SELECTED_REPORT_ID;
     const vlabel = r.version ? ` v${r.version}` : '';
-    return `<div class="rp-card ${isOn ? 'on' : ''}" data-rid="${escapeHtml(r.id)}" onclick="selectReport('${escapeHtml(r.id)}')">
+    const phase = phasesByMonth[r.month];
+    const status = phase ? phase.status : null;
+    const sCls = status === '완료' ? 'is-done' : (status === '진행' ? 'is-active' : (status === '예정' ? 'is-plan' : ''));
+    const sBadge = status === '진행' ? '<span class="rp-badge active">진행 중</span>'
+      : status === '예정' ? '<span class="rp-badge plan">예정 목표 (수정 보완 필요)</span>'
+      : status === '완료' ? '<span class="rp-badge done">완료</span>'
+      : '';
+    return `<div class="rp-card ${sCls} ${isOn ? 'on' : ''}" data-rid="${escapeHtml(r.id)}" onclick="selectReport('${escapeHtml(r.id)}')">
       <div class="m">${escapeHtml(r.month || '')}${vlabel}</div>
       <div class="t">활동보고서</div>
+      ${sBadge}
       <div class="s">${(r.size_bytes || 0).toLocaleString()}B</div>
     </div>`;
   }).join('');
@@ -1593,20 +1613,35 @@ function selectReport(id) {
   document.querySelectorAll('.rp-card').forEach(el => el.classList.toggle('on', el.dataset.rid === id));
   renderReportBody();
 }
+function openReport(id) {
+  setRoute('magazines');
+  selectReport(id);
+  document.getElementById('report-body')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 function renderReportBody() {
   const body = document.getElementById('report-body');
   if (!body) return;
   const r = (D.monthly_reports || []).find(x => x.id === SELECTED_REPORT_ID);
   if (!r) {
-    body.innerHTML = '<div class="empty">선택된 보고서 없음.</div>';
+    body.innerHTML = '<div class="empty">위 카드를 클릭하면 본문이 펼쳐집니다.</div>';
     return;
   }
+  const phasesByMonth = {};
+  (D.phases || []).forEach(p => { phasesByMonth[p.month] = p; });
+  const phase = phasesByMonth[r.month];
+  const status = phase ? phase.status : null;
+  const notice = status === '예정'
+    ? `<div style="background:var(--bg-elev); border:1px dashed var(--border-strong); border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:12px; color:var(--text-sub); line-height:1.55;">
+        <b style="color:var(--text);">예정 목표 보고서</b> · 이 보고서는 진행 전 작성된 목표 초안입니다. 해당 월 진행 후 실제 결과로 수정·보완 필요.
+      </div>`
+    : '';
   body.innerHTML = `
     <div class="rh-head">
       <span class="month">${escapeHtml(r.month || '')}${r.version ? ' v' + r.version : ''}</span>
       <span class="title">${escapeHtml(r.title || '')}</span>
       <span class="path">${escapeHtml((r.path || '').split('/').slice(-2).join('/'))}</span>
     </div>
+    ${notice}
     <div class="md-body">${renderMarkdown(r.body_md || '')}</div>
   `;
 }
@@ -1780,7 +1815,7 @@ function renderHome() {
   const gapClass = gap >= -0.05 ? 'is-accent' : '';
   document.getElementById('kpi-row').innerHTML = `
     <div class="kpi is-accent">
-      <div class="l">시연까지</div>
+      <div class="l">완성까지</div>
       <div class="n">D-${kpi.d_day != null ? kpi.d_day : '?'}</div>
       <div class="d">${escapeHtml(v.demo_date || '')}</div>
     </div>
