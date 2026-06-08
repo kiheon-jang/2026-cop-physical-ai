@@ -136,6 +136,81 @@
   [data-theme="dark"] .hm-cell.l3 { background: rgba(0,179,119,.62); }
   [data-theme="dark"] .hm-cell.l4 { background: var(--accent); }
 
+  /* R3 — Vision hero (Overview) */
+  .vision-hero { background: linear-gradient(135deg, var(--accent-soft), var(--bg-sub));
+    border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px;
+    display: grid; grid-template-columns: 1fr auto; gap: 18px; margin-bottom: 20px; }
+  .vh-left .title { font-size: 22px; font-weight: 800; letter-spacing: -.4px; margin: 0; color: var(--text); }
+  .vh-left .sub { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
+  .vh-left .targets { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+  .vh-left .targets span { font-size: 11px; color: var(--text-sub); background: var(--bg);
+    padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .vh-left .targets b { color: var(--text); font-weight: 700; margin-left: 4px; }
+  .vh-dday { background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 18px; text-align: center; min-width: 130px; display: flex; flex-direction: column; justify-content: center; }
+  .vh-dday .l { font-size: 10px; color: var(--text-dim); letter-spacing: 1.6px; text-transform: uppercase; font-weight: 700; }
+  .vh-dday .n { font-size: 32px; font-weight: 800; color: var(--action); letter-spacing: -1px; line-height: 1.1; }
+  .vh-dday .d { font-size: 11px; color: var(--text-dim); margin-top: 2px; font-family: ui-monospace, monospace; }
+  .vh-progress { grid-column: 1 / -1; }
+  .vh-progress .bar { height: 14px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden; position: relative; }
+  .vh-progress .bar .fill { height: 100%; background: var(--accent); border-radius: 7px; transition: width .4s; }
+  .vh-progress .bar .time-mark { position: absolute; top: -3px; bottom: -3px; width: 2px;
+    background: var(--text); opacity: .55; border-radius: 1px; }
+  .vh-progress .legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 11px;
+    color: var(--text-dim); margin-top: 8px; }
+  .vh-progress .legend b { color: var(--text); font-weight: 700; }
+  .vh-progress .legend .gap-ok { color: var(--accent-strong); font-weight: 700; }
+  .vh-progress .legend .gap-warn { color: var(--action); font-weight: 700; }
+
+  /* R3 — Gantt 6개월 */
+  .gantt { display: flex; flex-direction: column; gap: 8px; }
+  .gantt-row { display: grid; grid-template-columns: 180px 1fr 56px; gap: 14px;
+    align-items: center; font-size: 12px; }
+  .gantt-row .lbl { color: var(--text-sub); line-height: 1.35; min-width: 0; }
+  .gantt-row .lbl b { display: block; color: var(--text); font-weight: 700; font-size: 12px; }
+  .gantt-row .lbl small { font-size: 10px; color: var(--text-dim); }
+  .gantt-row .track { height: 22px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 11px; position: relative; overflow: hidden; }
+  .gantt-row .fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 10px; }
+  .gantt-row .pct { font-size: 11px; color: var(--text-sub); font-family: ui-monospace, monospace;
+    text-align: right; }
+
+  /* R3 — Next actions */
+  .next-actions { display: flex; flex-direction: column; gap: 8px; }
+  .next-actions .a { display: flex; gap: 12px; padding: 10px 12px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 8px; font-size: 13px; align-items: flex-start; }
+  .next-actions .a .n { font-weight: 800; color: var(--accent-strong); flex: 0 0 20px; font-family: ui-monospace, monospace; }
+  .next-actions .a .t { flex: 1; color: var(--text-sub); line-height: 1.55; }
+
+  /* R3 — Phase v2 카드 */
+  .phase-card-v2 { background: var(--bg-sub); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 24px; }
+  .phase-card-v2.is-done { border-left: 4px solid #22c55e; }
+  .phase-card-v2.is-active { border-left: 4px solid #2563eb; }
+  .phase-card-v2.is-plan { border-left: 4px solid #94a3b8; }
+  .phase-card-v2 .pc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .phase-card-v2 .biz-label { font-size: 18px; font-weight: 800; letter-spacing: -.3px; line-height: 1.35; }
+  .phase-card-v2 .tech-label { font-size: 11px; color: var(--text-dim); margin-top: 4px;
+    letter-spacing: .3px; font-family: ui-monospace, monospace; }
+  .phase-card-v2 .status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px;
+    border-radius: 999px; white-space: nowrap; }
+  .phase-card-v2.is-done .status-badge { background: rgba(34,197,94,.14); color: #16a34a; }
+  .phase-card-v2.is-active .status-badge { background: rgba(37,99,235,.14); color: #2563eb; }
+  .phase-card-v2.is-plan .status-badge { background: var(--bg); color: var(--text-dim); border: 1px solid var(--border); }
+  .phase-card-v2 .outcome { background: var(--accent-soft); border-radius: 10px; padding: 12px 14px;
+    margin: 14px 0; font-size: 13px; color: var(--accent-strong); line-height: 1.55; }
+  .phase-card-v2 .outcome b { display: block; font-size: 10px; letter-spacing: 1.6px;
+    text-transform: uppercase; margin-bottom: 4px; opacity: .8; font-weight: 800; }
+  .phase-card-v2 .progress-main { height: 10px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden; margin-top: 4px; }
+  .phase-card-v2 .progress-main .pf { height: 100%; border-radius: 5px; }
+  .phase-card-v2 .pc-meta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+    font-size: 12px; color: var(--text-sub); margin-top: 10px; }
+  .phase-card-v2 .report-link { font-size: 12px; color: var(--accent-strong); cursor: pointer; font-weight: 700; }
+  .phase-card-v2 .report-link:hover { text-decoration: underline; }
+  .phase-card-v2 .weeks { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+
   /* Proposals */
   .toolbar2 { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
   .chip { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border);
@@ -390,21 +465,38 @@
       <span class="kbd">/</span>
     </div>
 
-    <!-- HOME -->
+    <!-- HOME (R3 — Overview) -->
     <div class="view" id="view-home">
-      <div class="home-hero">
-        <h1>현재 단계</h1>
-        <div class="sub" id="home-sub">—</div>
+      <div class="vision-hero" id="vision-hero">
+        <div class="vh-left">
+          <h1 class="title" id="vh-title">—</h1>
+          <div class="sub" id="vh-sub">—</div>
+          <div class="targets" id="vh-targets"></div>
+        </div>
+        <div class="vh-dday">
+          <div class="l">사내 시연까지</div>
+          <div class="n" id="vh-dday">—</div>
+          <div class="d" id="vh-demo-date">—</div>
+        </div>
+        <div class="vh-progress">
+          <div class="bar">
+            <div class="fill" id="vh-fill" style="width:0%"></div>
+            <div class="time-mark" id="vh-time-mark" style="left:0%"></div>
+          </div>
+          <div class="legend" id="vh-legend"></div>
+        </div>
       </div>
+
       <div class="kpi-row" id="kpi-row"></div>
+
       <div class="grid-2">
         <div class="panel">
-          <div class="panel-head"><h3>이번 주 시뮬 작업</h3>
-            <div class="link" onclick="setRoute('proposals')">모두 보기 →</div></div>
-          <div class="hot-list" id="hot-list"></div>
+          <div class="panel-head"><h3>6개월 로드맵</h3>
+            <div class="link" onclick="setRoute('apps')">자세히 →</div></div>
+          <div class="gantt" id="gantt"></div>
         </div>
         <div class="panel">
-          <div class="panel-head"><h3>지난 60일 활동</h3><div class="right">Phase × 날짜</div></div>
+          <div class="panel-head"><h3>지난 60일 활동</h3><div class="right">날짜 × 강도</div></div>
           <div class="heatmap" id="heatmap"></div>
           <div style="display:flex; align-items:center; gap:8px; margin-top:14px; font-size:11px; color:var(--text-dim)">
             적음
@@ -417,18 +509,10 @@
           </div>
         </div>
       </div>
-      <div class="grid-2" style="margin-top:20px;">
-        <div class="panel">
-          <div class="panel-head"><h3>앱별 누적 제안</h3><div class="right">전체 기간</div></div>
-          <div id="appbar"></div>
-        </div>
-        <div class="panel">
-          <div class="panel-head"><h3>그룹 분포</h3></div>
-          <div style="display:flex; align-items:center; gap:16px;">
-            <div id="donut"></div>
-            <div style="flex:1; font-size:12px; color: var(--text-sub);" id="donut-legend"></div>
-          </div>
-        </div>
+
+      <div class="panel" style="margin-top:20px;">
+        <div class="panel-head"><h3>다음 액션</h3><div class="right" id="next-actions-sub">—</div></div>
+        <div class="next-actions" id="next-actions"></div>
       </div>
     </div>
 
@@ -494,13 +578,13 @@
       <div class="mag-grid" id="mag-grid"></div>
     </div>
 
-    <!-- PHASES = apps 라우트 유지 (Phase 0~5 로드맵) -->
+    <!-- PHASES = apps 라우트 유지 (Phase 0~5 로드맵, R3 v2) -->
     <div class="view hidden" id="view-apps">
       <div class="home-hero">
-        <h1>Phase 로드맵</h1>
-        <div class="sub">Phase 0 시뮬 환경 셋업 → Phase 5 통합 시연. 주차별 체크리스트 + 진행률.</div>
+        <h1>6개월 여정</h1>
+        <div class="sub">실기 없이 학습할 수 있는 환경 구축 → 사내 시연. 각 단계의 비즈니스 결과와 주차별 진행률.</div>
       </div>
-      <div class="cards" id="apps-cards"></div>
+      <div class="cards" id="apps-cards" style="grid-template-columns: 1fr; gap: 18px;"></div>
     </div>
 
     <!-- BLOCKERS = CoP 특수 메뉴 (외부 의존 차단) -->
@@ -1143,14 +1227,24 @@ function groupClass(g) {
   return '';
 }
 function renderApps() {
-  /* CoP 용 Phase 로드맵 카드 — Hdel 의 앱 카드 자리에 phases 데이터 시각화.
-     라우트 키는 'apps' 유지 (URL/단축키 호환). */
+  /* CoP 용 Phase 로드맵 카드 v2 — business_label + outcome 박스 + 주차별 + 월별 보고서 link.
+     라우트 키는 'apps' 유지. */
   const wrap = document.getElementById('apps-cards');
   const phases = D.phases || [];
   if (!phases.length) { wrap.innerHTML = '<div class="empty" style="grid-column:1/-1">Phase 데이터 없음. build.py 갱신 필요.</div>'; return; }
-  const statusColor = (s) => s === '완료' ? '#22c55e' : (s === '진행' ? '#2563eb' : '#94a3b8');
+  wrap.style.gridTemplateColumns = '1fr';  // single column for richer cards
+
+  const reportsByMonth = {};
+  (D.monthly_reports || []).forEach(r => {
+    if (!reportsByMonth[r.month]) reportsByMonth[r.month] = [];
+    reportsByMonth[r.month].push(r);
+  });
+
   wrap.innerHTML = phases.map(p => {
     const pct = Math.round((p.progress || 0) * 100);
+    const statusClass = p.status === '완료' ? 'is-done' : (p.status === '진행' ? 'is-active' : 'is-plan');
+    const fillColor = p.status === '완료' ? '#22c55e' : (p.status === '진행' ? '#2563eb' : 'rgba(148,163,184,.5)');
+
     const weeks = (p.weeks || []).map(w => {
       const wpct = Math.round((w.progress || 0) * 100);
       const nextItem = (w.items || []).find(it => !it.checked);
@@ -1160,23 +1254,37 @@ function renderApps() {
           <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
             <b>${escapeHtml(w.week)}</b>${w.date_range ? `<span style="color:var(--text-dim);">${escapeHtml(w.date_range)}</span>` : ''}<span style="color:var(--text-sub);">${w.done}/${w.total}</span>
           </div>
-          <div style="height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
+          <div style="height:6px; background:var(--bg); border:1px solid var(--border); border-radius:3px; overflow:hidden;">
             <div style="height:100%; width:${wpct}%; background:${wColor};"></div>
           </div>
           ${nextItem ? `<div style="font-size:11px; color:var(--text-dim); margin-top:4px;">→ ${escapeHtml(nextItem.task.slice(0, 80))}</div>` : ''}
         </div>`;
     }).join('');
+
+    const monthReports = reportsByMonth[p.month] || [];
+    const reportLink = monthReports.length
+      ? `<span class="report-link" onclick="setRoute('magazines')">📄 ${p.month} 활동보고서 ${monthReports.length}건 →</span>`
+      : '';
+    const reportLabel = p.report_label
+      ? `<span style="color:var(--text-dim);">📋 ${escapeHtml(p.report_label)}</span>`
+      : '';
+
     return `
-      <div class="app-card" data-id="${p.id}" data-kind="phase">
-        <div class="ac-head">
-          <div class="ac-name">${escapeHtml(p.name)}</div>
-          <div class="ac-grp" style="color:${statusColor(p.status)}; font-weight:600;">${escapeHtml(p.status)} ${pct}%</div>
+      <div class="phase-card-v2 ${statusClass}" data-id="${p.id}" data-kind="phase">
+        <div class="pc-head">
+          <div>
+            <div class="biz-label">${escapeHtml(p.business_label || p.name)}</div>
+            <div class="tech-label">${escapeHtml(p.name)} · ${escapeHtml(p.date_range || '')} · ${p.done}/${p.total} 항목</div>
+          </div>
+          <div class="status-badge">${escapeHtml(p.status)} ${pct}%</div>
         </div>
-        <div class="ac-tagline">${escapeHtml(p.date_range || '')} · ${p.done}/${p.total} 항목 완료</div>
-        <div style="height:10px; background:var(--border); border-radius:5px; overflow:hidden; margin-top:8px;">
-          <div style="height:100%; width:${pct}%; background:${statusColor(p.status)};"></div>
+        ${p.outcome ? `<div class="outcome"><b>이게 완료되면</b>${escapeHtml(p.outcome)}</div>` : ''}
+        <div class="progress-main"><div class="pf" style="width:${pct}%; background:${fillColor};"></div></div>
+        <div class="pc-meta">
+          ${reportLabel}
+          ${reportLink}
         </div>
-        ${weeks}
+        ${weeks ? `<div class="weeks">${weeks}</div>` : ''}
       </div>`;
   }).join('');
 }
@@ -1308,54 +1416,111 @@ function renderDecisions() {
     </div>`).join('');
 }
 
-/* ====== Home ====== */
+/* ====== Home (R3 — Overview) ====== */
 function renderHome() {
-  /* CoP 용: 현재 단계 / 시뮬 작업 / 외부 의존 차단 / 북마크 */
-  const s = D.stats || {};
-  const simCount = (D.proposals || D.sim_tasks || []).length;
-  const dailyCount = (D.daily || []).length;
-  const activeBlockers = (D.blockers || []).filter(b => !b.checked).length;
-  const bmCount = Object.keys(STATE.bookmarks).length;
-  document.getElementById('kpi-row').innerHTML = `
-    <div class="kpi is-accent"><div class="l">시뮬 작업</div><div class="n">${simCount}</div><div class="d">research/simulation/</div></div>
-    <div class="kpi"><div class="l">일일 진척</div><div class="n">${dailyCount}</div><div class="d">research-log</div></div>
-    <div class="kpi"><div class="l">차단 항목</div><div class="n">${activeBlockers}</div><div class="d">외부 의존 미완</div></div>
-    <div class="kpi"><div class="l">북마크</div><div class="n">${bmCount}</div><div class="d">개인 컬렉션</div></div>
+  const v = D.vision || {};
+  const kpi = D.business_kpi || {};
+  const phases = D.phases || [];
+
+  // 1) Vision hero
+  const titleEl = document.getElementById('vh-title');
+  if (titleEl) titleEl.textContent = v.title || '—';
+  const subEl = document.getElementById('vh-sub');
+  if (subEl) subEl.textContent = v.subtitle || '';
+  const tgEl = document.getElementById('vh-targets');
+  if (tgEl) {
+    tgEl.innerHTML = (v.targets || []).map(t =>
+      `<span>${escapeHtml(t.label)}<b>${escapeHtml(t.target)}</b></span>`).join('');
+  }
+  const dEl = document.getElementById('vh-dday');
+  if (dEl) dEl.textContent = `D-${kpi.d_day != null ? kpi.d_day : '?'}`;
+  const ddateEl = document.getElementById('vh-demo-date');
+  if (ddateEl) ddateEl.textContent = v.demo_date || '';
+
+  // Progress bar: target fill + time marker
+  const pct = Math.round((kpi.target_progress || 0) * 100);
+  const tpct = Math.round((kpi.time_elapsed || 0) * 100);
+  const fillEl = document.getElementById('vh-fill');
+  if (fillEl) fillEl.style.width = pct + '%';
+  const tmEl = document.getElementById('vh-time-mark');
+  if (tmEl) tmEl.style.left = tpct + '%';
+  const gap = kpi.progress_vs_time_gap || 0;
+  const gapTxt = gap >= 0
+    ? `<span class="gap-ok">+${(gap*100).toFixed(0)}%p 앞섬</span>`
+    : `<span class="gap-warn">${(gap*100).toFixed(0)}%p 뒤짐</span>`;
+  const lgEl = document.getElementById('vh-legend');
+  if (lgEl) lgEl.innerHTML = `
+    <span>목표 달성률 <b>${pct}%</b></span>
+    <span>경과 시간 <b>${tpct}%</b></span>
+    <span>일정 대비 ${gapTxt}</span>
+    <span>현재: <b>${escapeHtml(kpi.current_phase_business || kpi.current_phase_label || '-')}</b></span>
   `;
-  // hot-list: 최근 sim_task 5개 (날짜 내림차순). build.py 가 이미 date desc 로 정렬해서 emit.
-  const items = (D.proposals || D.sim_tasks || []).slice(0, 5);
-  const hotEl = document.getElementById('hot-list');
-  hotEl.innerHTML = items.length
-    ? items.map((p, i) => {
-        const phaseTag = p.phase_id ? p.phase_id.replace('phase', 'Phase ') : (p.phase_label || '');
-        return `<div class="hot-item" data-id="${p.id}">
-          <div class="rk">${i+1}</div>
-          <div class="meta">
-            <div class="t">${escapeHtml(p.title || '')}</div>
-            <div class="m">${escapeHtml(phaseTag)}${p.category ? ' · ' + escapeHtml(p.category) : ''}${p.date ? ' · ' + p.date : ''}</div>
-          </div>
-          <div class="bm ${isBookmarked(p.id) ? 'on' : ''}" data-bm="${p.id}">${isBookmarked(p.id) ? '★' : '☆'}</div>
-        </div>`;
-      }).join('')
-    : '<div class="empty">아직 시뮬 작업 기록이 없습니다.</div>';
 
-  // home-sub: 현재 phase + 빌드 메타
-  const meta = D.meta || {};
-  document.getElementById('home-sub').textContent =
-    `${meta.current_phase || '(no active phase)'} · 빌드 ${(meta.built_at || '').slice(0, 16)}`;
+  // 2) KPI 4 (D-day · 달성률 · 이번 달 · 일정 차이)
+  const gapAbs = Math.round(Math.abs(gap) * 100);
+  const gapLabel = gap >= 0 ? `+${gapAbs}%p 앞섬` : `−${gapAbs}%p 뒤짐`;
+  const gapClass = gap >= -0.05 ? 'is-accent' : '';
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi is-accent">
+      <div class="l">시연까지</div>
+      <div class="n">D-${kpi.d_day != null ? kpi.d_day : '?'}</div>
+      <div class="d">${escapeHtml(v.demo_date || '')}</div>
+    </div>
+    <div class="kpi">
+      <div class="l">목표 달성률</div>
+      <div class="n">${pct}%</div>
+      <div class="d">Phase 평균 진행률</div>
+    </div>
+    <div class="kpi">
+      <div class="l">이번 달 마일스톤</div>
+      <div class="n" style="font-size:15px; line-height:1.35;">${escapeHtml(kpi.current_phase_business || '-')}</div>
+      <div class="d">${escapeHtml(kpi.current_phase_label || '')}</div>
+    </div>
+    <div class="kpi ${gapClass}">
+      <div class="l">일정 대비</div>
+      <div class="n" style="font-size:18px;">${gapLabel}</div>
+      <div class="d">시간 ${tpct}% vs 진척 ${pct}%</div>
+    </div>
+  `;
 
-  // donut-legend: 카테고리 분포 상위 6개 (Hdel 의 s.donut 자리에 CoP 의 stats.category_distribution 매핑)
-  const dlEl = document.getElementById('donut-legend');
-  const catDist = s.category_distribution || {};
-  const catEntries = Object.entries(catDist).sort((a, b) => b[1] - a[1]).slice(0, 6);
-  const colors = ['#22c55e', '#2563eb', '#f59e0b', '#8b5cf6', '#06b6d4', '#94a3b8'];
-  dlEl.innerHTML = catEntries.length
-    ? catEntries.map(([label, value], i) =>
-        `<div style="display:flex; align-items:center; gap:8px; margin:6px 0;">
-           <span style="width:10px;height:10px;border-radius:2px;background:${colors[i % colors.length]}"></span>
-           ${escapeHtml(label)} <b style="margin-left:auto; color: var(--text)">${value}</b>
-         </div>`).join('')
-    : '<div style="color:var(--text-dim); font-size:12px;">카테고리 데이터 없음.</div>';
+  // 3) Gantt 6개월 (Phase 0~5)
+  const gEl = document.getElementById('gantt');
+  if (gEl) {
+    const colorOf = s => s === '완료' ? '#22c55e' : (s === '진행' ? '#2563eb' : 'rgba(148,163,184,.45)');
+    gEl.innerHTML = phases.map(p => {
+      const ppct = Math.round((p.progress || 0) * 100);
+      const c = colorOf(p.status);
+      const bg = p.status === '완료'
+        ? '#22c55e'
+        : p.status === '진행'
+          ? `linear-gradient(90deg, #2563eb 0%, #2563eb ${ppct}%, rgba(37,99,235,.18) ${ppct}%, rgba(37,99,235,.18) 100%)`
+          : 'rgba(148,163,184,.18)';
+      return `<div class="gantt-row">
+        <div class="lbl">
+          <b>${escapeHtml(p.business_label || p.name)}</b>
+          <small>${escapeHtml(p.name)}</small>
+        </div>
+        <div class="track">
+          <div class="fill" style="width:100%; background:${bg};"></div>
+        </div>
+        <div class="pct" style="color:${c}; font-weight:700;">${ppct}%</div>
+      </div>`;
+    }).join('');
+  }
+
+  // 4) Next actions
+  const naEl = document.getElementById('next-actions');
+  const actions = kpi.next_actions || [];
+  if (naEl) {
+    naEl.innerHTML = actions.length
+      ? actions.map((a, i) => `<div class="a"><div class="n">${i+1}</div><div class="t">${escapeHtml(a)}</div></div>`).join('')
+      : '<div class="empty">다음 액션 데이터 없음.</div>';
+  }
+  const naSubEl = document.getElementById('next-actions-sub');
+  if (naSubEl) {
+    const meta = D.meta || {};
+    naSubEl.textContent = `${escapeHtml(kpi.current_phase_label || '')} · 빌드 ${(meta.built_at || '').slice(0, 16)}`;
+  }
 }
 
 function updateBookmarkCount() {
@@ -1501,9 +1666,7 @@ function drawCatChart() {
 
 function drawAllCharts() {
   drawHeatmap();
-  drawAppBar('appbar');
-  drawAppBar('appbar2');
-  drawDonut();
+  drawAppBar('appbar2');  // analytics view 만 (home 의 appbar/donut 은 R3 에서 제거됨)
   drawTrend();
   drawCatChart();
 }
