@@ -47,6 +47,11 @@
   .nav { display: flex; flex-direction: column; gap: 2px; margin-bottom: 20px; }
   .nav-section-title { font-size: 10px; color: var(--text-dim); letter-spacing: 2px;
     text-transform: uppercase; padding: 14px 12px 6px; font-weight: 700; }
+  .nav-toggle { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px; }
+  .nav-toggle:hover { color: var(--text-sub); }
+  .nav-toggle #tools-caret { display: inline-block; transition: transform .15s; font-size: 10px; }
+  .nav.collapsed { display: none; }
+  .nav-toggle.collapsed #tools-caret { transform: rotate(-90deg); }
   .nav-item { display: flex; align-items: center; gap: 10px;
     padding: 8px 12px; border-radius: 8px; cursor: pointer;
     font-size: 13px; color: var(--text-sub); font-weight: 500; }
@@ -210,6 +215,121 @@
   .phase-card-v2 .report-link { font-size: 12px; color: var(--accent-strong); cursor: pointer; font-weight: 700; }
   .phase-card-v2 .report-link:hover { text-decoration: underline; }
   .phase-card-v2 .weeks { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+  /* R3-5 — 보고용 자료 (Obsidian 임베드) */
+  .report-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px; margin-bottom: 22px; }
+  .rp-card { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; cursor: pointer; transition: border-color .12s; }
+  .rp-card:hover { border-color: var(--border-strong); }
+  .rp-card.on { border-color: var(--accent); background: var(--accent-soft); }
+  .rp-card .m { font-size: 11px; color: var(--text-dim); letter-spacing: 1.4px;
+    text-transform: uppercase; font-weight: 800; }
+  .rp-card.on .m { color: var(--accent-strong); }
+  .rp-card .t { font-size: 13px; font-weight: 700; color: var(--text); margin-top: 4px; line-height: 1.4; }
+  .rp-card .s { font-size: 10px; color: var(--text-dim); margin-top: 4px; font-family: ui-monospace, monospace; }
+
+  .report-body { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px 28px; min-height: 200px; }
+  .report-body .empty { padding: 40px 20px; }
+  .report-body .md-body h1, .report-body .md-body h2, .report-body .md-body h3 {
+    margin: 18px 0 8px; font-weight: 800; letter-spacing: -.2px; }
+  .report-body .md-body h1 { font-size: 22px; margin-top: 0; }
+  .report-body .md-body h2 { font-size: 17px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .report-body .md-body h3 { font-size: 14px; color: var(--text-sub); }
+  .report-body .md-body p { margin: 8px 0; font-size: 14px; line-height: 1.7; color: var(--text); }
+  .report-body .md-body ul, .report-body .md-body ol { margin: 8px 0 8px 20px; }
+  .report-body .md-body li { font-size: 14px; line-height: 1.7; color: var(--text); margin: 3px 0; }
+  .report-body .md-body code { background: var(--bg); padding: 1px 6px; border-radius: 4px;
+    font-family: ui-monospace, monospace; font-size: 12px; }
+  .report-body .md-body pre { background: var(--bg); border: 1px solid var(--border);
+    padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12px; line-height: 1.5; }
+  .report-body .md-body pre code { background: none; padding: 0; }
+  .report-body .md-body table { border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+  .report-body .md-body td, .report-body .md-body th { padding: 6px 10px; border: 1px solid var(--border); }
+  .report-body .rh-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .report-body .rh-head .month { font-size: 11px; color: var(--text-dim); letter-spacing: 1.6px;
+    text-transform: uppercase; font-weight: 800; background: var(--bg); padding: 3px 9px; border-radius: 4px; }
+  .report-body .rh-head .title { font-size: 13px; color: var(--text-sub); }
+  .report-body .rh-head .path { margin-left: auto; font-size: 10px; color: var(--text-dim);
+    font-family: ui-monospace, monospace; }
+
+  @media print {
+    .sidebar, .topbar { display: none !important; }
+    .main { background: #fff !important; color: #000 !important; }
+    .report-picker { display: none !important; }
+    .grid-2 { display: none !important; }
+    .report-body { border: none; padding: 0; }
+  }
+
+  /* R3-4 — 활동 타임라인 */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px;
+    width: 2px; background: var(--border); border-radius: 1px; }
+  .tl-row { position: relative; margin-bottom: 14px; }
+  .tl-row::before { content: ''; position: absolute; left: -22px; top: 18px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--bg); border: 2px solid var(--border); }
+  .tl-row.has-commit::before { border-color: var(--accent); background: var(--accent); }
+  .tl-row.has-heal::before { border-color: var(--action); }
+  .tl-row .tl-date { font-size: 11px; color: var(--text-dim); font-family: ui-monospace, monospace;
+    margin-bottom: 4px; font-weight: 600; letter-spacing: .3px; }
+  .tl-card { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; cursor: pointer; transition: border-color .12s; }
+  .tl-card:hover { border-color: var(--border-strong); }
+  .tl-card .tl-summary { font-size: 15px; font-weight: 700; line-height: 1.4; color: var(--text);
+    letter-spacing: -.15px; }
+  .tl-card .tl-cats { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .tl-card .tl-cats span { font-size: 10px; color: var(--text-sub); background: var(--bg);
+    border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px; }
+  .tl-card .tl-metrics { display: flex; gap: 14px; margin-top: 10px; font-size: 12px; color: var(--text-sub); }
+  .tl-card .tl-metrics .m { display: inline-flex; align-items: center; gap: 5px; }
+  .tl-card .tl-metrics .m b { color: var(--text); font-weight: 700; font-family: ui-monospace, monospace; }
+  .tl-card .tl-tasks { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-sub); line-height: 1.65; }
+  .tl-card .tl-tasks .t { padding: 3px 0; display: flex; gap: 8px; }
+  .tl-card .tl-tasks .t::before { content: '→'; color: var(--text-dim); flex: 0 0 12px; }
+  .tl-card .tl-detail { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--text-dim); line-height: 1.6; font-family: ui-monospace, monospace; }
+  .tl-card.open .tl-detail { display: block; }
+  .tl-card .tl-detail .commit-line { padding: 3px 0; word-break: break-all; }
+  .tl-card .tl-detail .commit-line b { color: var(--text-sub); font-family: ui-monospace, monospace;
+    padding: 1px 5px; background: var(--bg); border-radius: 3px; font-size: 10px; margin-right: 6px; }
+  .tl-card .tl-detail .heal-line { padding: 3px 0; color: var(--action); }
+  .tl-card .tl-detail .heal-line::before { content: '🛟 '; }
+
+  /* R3-3 — 시뮬 영상 갤러리 */
+  .video-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 24px; }
+  @media (max-width: 1100px) { .video-grid { grid-template-columns: 1fr; } }
+  .video-card { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .video-card video { width: 100%; border-radius: 8px; background: #000; display: block; max-height: 360px; object-fit: contain; }
+  .video-card .v-head { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .video-card .v-kind { font-size: 10px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;
+    background: var(--accent-soft); color: var(--accent-strong); padding: 3px 9px; border-radius: 4px; }
+  .video-card .v-size { font-size: 10px; color: var(--text-dim); font-family: ui-monospace, monospace; margin-left: auto; }
+  .video-card .v-desc { font-size: 14px; color: var(--text); font-weight: 700; line-height: 1.55; margin-top: 10px; letter-spacing: -.1px; }
+  .video-card .v-meta { font-size: 11px; color: var(--text-dim); margin-top: 6px; font-family: ui-monospace, monospace; word-break: break-all; }
+
+  .frame-strip-wrap { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .frame-strip-wrap .head { display: flex; align-items: center; margin-bottom: 12px; gap: 10px; }
+  .frame-strip-wrap .head h3 { margin: 0; font-size: 14px; font-weight: 800; }
+  .frame-strip-wrap .head .right { margin-left: auto; font-size: 11px; color: var(--text-dim); font-family: ui-monospace, monospace; }
+  .frame-strip { display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory;
+    padding: 4px 0 12px; scrollbar-width: thin; }
+  .frame-strip::-webkit-scrollbar { height: 8px; }
+  .frame-strip::-webkit-scrollbar-track { background: var(--bg); border-radius: 4px; }
+  .frame-strip::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+  .frame-strip img { height: 220px; flex: 0 0 auto; border-radius: 6px; scroll-snap-align: start;
+    border: 1px solid var(--border); background: var(--bg); cursor: zoom-in; }
+  .frame-strip-desc { font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-top: 4px; }
+
+  .video-explainer { background: var(--accent-soft); border-radius: 12px; padding: 18px 22px; margin-top: 20px;
+    border: 1px solid var(--border); }
+  .video-explainer h4 { font-size: 11px; margin: 0 0 10px; color: var(--accent-strong); font-weight: 800;
+    letter-spacing: 1.8px; text-transform: uppercase; }
+  .video-explainer p { font-size: 13px; color: var(--text); line-height: 1.7; margin: 0 0 8px; }
+  .video-explainer p:last-child { margin-bottom: 0; }
+  .video-explainer b { color: var(--accent-strong); }
 
   /* Proposals */
   .toolbar2 { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
@@ -422,30 +542,25 @@
     </div>
 
     <div class="nav">
-      <a class="nav-item active" data-route="home"><span class="ico">⊟</span> 현재 단계</a>
-      <a class="nav-item" data-route="apps"><span class="ico">▦</span> Phase 로드맵 <span class="count" id="cnt-apps">6</span></a>
-      <a class="nav-item" data-route="proposals"><span class="ico">≡</span> 시뮬 작업 <span class="count" id="cnt-proposals">0</span></a>
-      <a class="nav-item" data-route="daily"><span class="ico">⊙</span> 일일 진척 <span class="count" id="cnt-daily">0</span></a>
-      <a class="nav-item" data-route="magazines"><span class="ico">▤</span> 월간 보고용 증거 <span class="count" id="cnt-magazines">0</span></a>
+      <a class="nav-item active" data-route="home"><span class="ico">📊</span> Overview</a>
+      <a class="nav-item" data-route="apps"><span class="ico">🗓</span> Phase 로드맵 <span class="count" id="cnt-apps">6</span></a>
+      <a class="nav-item" data-route="videos"><span class="ico">🎥</span> 시뮬 영상 <span class="count" id="cnt-videos">0</span></a>
+      <a class="nav-item" data-route="daily"><span class="ico">📅</span> 활동 타임라인 <span class="count" id="cnt-daily">0</span></a>
+      <a class="nav-item" data-route="magazines"><span class="ico">📋</span> 보고용 자료 <span class="count" id="cnt-magazines">0</span></a>
     </div>
 
-    <div class="nav-section-title">CoP 특수</div>
-    <div class="nav">
-      <a class="nav-item" data-route="blockers"><span class="ico">⚠</span> 외부 의존 차단 <span class="count" id="cnt-blockers">0</span></a>
+    <div class="nav-section-title nav-toggle" id="tools-toggle" onclick="toggleTools()">
+      <span id="tools-caret">▾</span> 도구
+    </div>
+    <div class="nav" id="tools-nav">
       <a class="nav-item" data-route="samples"><span class="ico">⚙</span> 샘플 코드 상태 <span class="count" id="cnt-samples">0</span></a>
-      <a class="nav-item" data-route="decisions"><span class="ico">◈</span> 결정 <span class="count" id="cnt-decisions">0</span></a>
-    </div>
-
-    <div class="nav-section-title">가이드</div>
-    <div class="nav">
+      <a class="nav-item" data-route="analytics"><span class="ico">📈</span> 분석</a>
+      <a class="nav-item" data-route="bookmarks"><span class="ico">★</span> 북마크 <span class="count" id="cnt-bookmarks">0</span></a>
+      <a class="nav-item" data-route="proposals"><span class="ico">≡</span> 시뮬 작업 <span class="count" id="cnt-proposals">0</span></a>
+      <a class="nav-item" data-route="blockers" style="display:none"><span class="ico">⚠</span> 외부 의존 <span class="count" id="cnt-blockers">0</span></a>
+      <a class="nav-item" data-route="decisions" style="display:none"><span class="ico">◈</span> 결정 <span class="count" id="cnt-decisions">0</span></a>
       <a class="nav-item" id="nav-about" data-route="about"><span class="ico">◉</span> 사이트 설명</a>
       <a class="nav-item" data-route="guide"><span class="ico">?</span> 사용가이드</a>
-    </div>
-
-    <div class="nav-section-title">개인</div>
-    <div class="nav">
-      <a class="nav-item" data-route="bookmarks"><span class="ico">★</span> 북마크 <span class="count" id="cnt-bookmarks">0</span></a>
-      <a class="nav-item" data-route="analytics"><span class="ico">📈</span> 분석</a>
     </div>
 
     <div class="sidebar-foot">
@@ -560,22 +675,58 @@
       <div class="rows hidden" id="proposals-rows"></div>
     </div>
 
-    <!-- DAILY = 일일 진척 -->
+    <!-- DAILY = 활동 타임라인 (R3-4) -->
     <div class="view hidden" id="view-daily">
       <div class="home-hero">
-        <h1>일일 진척</h1>
-        <div class="sub" id="daily-sub">agent/research-log/ · 매일 23:30 cron 이 작성하는 그날의 시뮬 작업 + 메트릭 + 자가치유 기록</div>
+        <h1>활동 타임라인</h1>
+        <div class="sub" id="daily-sub">날짜별 시뮬 작업 · 커밋 · 자동 복구 통합. 매일 23:30 자동 갱신.</div>
       </div>
-      <div class="rows" id="daily-rows"></div>
+      <div class="timeline" id="timeline-list"></div>
     </div>
 
-    <!-- EVIDENCE = magazines 라우트 유지 (월간 보고용 증거) -->
+    <!-- REPORTS (R3-5) — Obsidian 월별 활동보고서 임베드 -->
     <div class="view hidden" id="view-magazines">
       <div class="home-hero">
-        <h1>월간 보고용 증거</h1>
-        <div class="sub" id="mag-sub">agent/report-evidence/YYYY-MM/ · 월말 보고서에 인용할 증거 후보 모음</div>
+        <h1>보고용 자료</h1>
+        <div class="sub" id="mag-sub">Obsidian 월별 활동보고서. 카드 클릭 시 본문 펼침. 인쇄(⌘P) 친화.</div>
       </div>
-      <div class="mag-grid" id="mag-grid"></div>
+      <div class="report-picker" id="report-picker"></div>
+      <div class="report-body" id="report-body">
+        <div class="empty">위 카드를 클릭하면 본문이 펼쳐집니다.</div>
+      </div>
+      <div class="grid-2" style="margin-top:24px;">
+        <div class="panel">
+          <div class="panel-head"><h3>외부 의존 (마감/담당자)</h3><div class="right" id="blockers-right">—</div></div>
+          <div id="report-blockers"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>결정 기록</h3><div class="right" id="decisions-right">—</div></div>
+          <div id="report-decisions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIDEOS (R3-3) -->
+    <div class="view hidden" id="view-videos">
+      <div class="home-hero">
+        <h1>시뮬 시각자료</h1>
+        <div class="sub" id="videos-sub">실기 로봇 없이 컴퓨터 시뮬로 만든 움직임. 실제 로봇이 학습할 데이터의 원본.</div>
+      </div>
+      <div class="video-grid" id="video-grid"></div>
+      <div class="frame-strip-wrap" id="frame-strip-wrap" style="display:none;">
+        <div class="head">
+          <h3 id="frame-strip-title">오버헤드 시점</h3>
+          <div class="right" id="frame-strip-meta">—</div>
+        </div>
+        <div class="frame-strip-desc" id="frame-strip-desc">—</div>
+        <div class="frame-strip" id="frame-strip"></div>
+      </div>
+      <div class="video-explainer">
+        <h4>이 영상이 보여주는 것</h4>
+        <p>로봇팔 모델(<b>SO-ARM101</b>)이 가상 환경에서 큐브와 PCB 부품을 집어 옮기는 모습입니다. 실제 로봇은 아직 학습 중이고, 이 시뮬에서 만들어진 동작 데이터로 모방학습 모델을 1차 학습합니다.</p>
+        <p><b>왜 중요한지</b>: 실기 로봇을 24시간 가동하지 않고도 일주일에 수백 에피소드의 학습 데이터를 자동 생성할 수 있습니다. 실기 적용 전 알고리즘 안정성을 미리 검증하는 단계.</p>
+        <p><b>다음 단계</b>: 이 시뮬에서 학습한 모델을 7월부터 실제 로봇팔에 옮겨 검증합니다 (Phase 2 실기 검증).</p>
+      </div>
     </div>
 
     <!-- PHASES = apps 라우트 유지 (Phase 0~5 로드맵, R3 v2) -->
@@ -816,7 +967,7 @@ async function refreshFromApi(silent = false) {
     const fresh = await res.json();
     window.DATA = fresh; D = fresh; REPO_URL = fresh.meta.repo_url || '';
     initCounts();
-    renderProposals(); renderDaily(); renderMagazines(); renderApps();
+    renderProposals(); renderDaily(); renderMagazines(); renderApps(); renderVideos();
     renderBlockers(); renderSamples(); renderDecisions(); renderHome();
     if (currentRoute === 'bookmarks') renderBookmarks();
     drawAllCharts();
@@ -912,13 +1063,31 @@ function setTheme(mode) {
 })();
 
 /* ====== ROUTING ====== */
-const ROUTES = ['home', 'apps', 'proposals', 'daily', 'magazines',
+const ROUTES = ['home', 'apps', 'videos', 'proposals', 'daily', 'magazines',
                 'blockers', 'samples', 'decisions',
                 'bookmarks', 'analytics', 'about', 'guide'];
-const ROUTE_LABEL = { home: '현재 단계', apps: 'Phase 로드맵', proposals: '시뮬 작업',
-  daily: '일일 진척', magazines: '월간 보고용 증거',
+const ROUTE_LABEL = { home: 'Overview', apps: 'Phase 로드맵', videos: '시뮬 영상', proposals: '시뮬 작업',
+  daily: '활동 타임라인', magazines: '보고용 자료',
   blockers: '외부 의존 차단', samples: '샘플 코드 상태', decisions: '결정',
   bookmarks: '북마크', analytics: '분석', about: '사이트 설명', guide: '사용가이드' };
+
+function toggleTools() {
+  const nav = document.getElementById('tools-nav');
+  const tog = document.getElementById('tools-toggle');
+  const collapsed = !nav.classList.contains('collapsed');
+  nav.classList.toggle('collapsed', collapsed);
+  tog.classList.toggle('collapsed', collapsed);
+  try { localStorage.setItem('cop-tools-collapsed', collapsed ? '1' : '0'); } catch (_) {}
+}
+// 초기 상태 복원 (기본: collapsed)
+(function initTools() {
+  let collapsed = true;
+  try { const v = localStorage.getItem('cop-tools-collapsed'); if (v === '0') collapsed = false; } catch (_) {}
+  if (collapsed) {
+    document.getElementById('tools-nav')?.classList.add('collapsed');
+    document.getElementById('tools-toggle')?.classList.add('collapsed');
+  }
+})();
 let currentRoute = 'home';
 
 document.querySelectorAll('.nav-item').forEach(el => {
@@ -932,6 +1101,7 @@ function setRoute(r) {
   document.getElementById('crumbs').innerHTML = `<strong>${ROUTE_LABEL[r]}</strong>`;
   if (r === 'bookmarks') renderBookmarks();
   if (r === 'apps') renderApps();
+  if (r === 'videos') renderVideos();
   if (r === 'blockers') renderBlockers();
   if (r === 'samples') renderSamples();
   if (r === 'decisions') renderDecisions();
@@ -1289,41 +1459,189 @@ function renderApps() {
   }).join('');
 }
 
-/* ====== Daily view ====== */
-function renderDaily() {
-  const rowsEl = document.getElementById('daily-rows');
-  if (!D.daily.length) { rowsEl.innerHTML = '<div class="empty">아직 일일 리서치가 없습니다.</div>'; return; }
-  rowsEl.innerHTML = D.daily.map(d => {
-    const bm = isBookmarked(d.id);
-    return `<div class="row" data-id="${d.id}">
-      <div class="col-tag">RESEARCH</div>
-      <div class="col-title">${escapeHtml(d.title)} <small>${escapeHtml((d.excerpt || '').slice(0, 80))}</small></div>
-      <div class="col-app">—</div>
-      <div class="col-cat">—</div>
-      <div class="col-date">${d.date}</div>
-      <div class="col-bm ${bm ? 'on' : ''}" data-bm="${d.id}">${bm ? '★' : '☆'}</div>
-    </div>`;
-  }).join('');
-  document.getElementById('daily-sub').textContent = `${D.daily.length}건 · 가장 최근부터`;
+/* ====== Videos view (R3-3) ====== */
+const COP_STATIC_PREFIX = '/static/cop/';
+function copStatic(p) { return COP_STATIC_PREFIX + String(p || '').replace(/^\/+/, ''); }
+function fmtBytes(n) {
+  if (!n) return '';
+  if (n < 1024) return n + 'B';
+  if (n < 1024*1024) return (n/1024).toFixed(0) + 'KB';
+  return (n/1024/1024).toFixed(1) + 'MB';
+}
+function renderVideos() {
+  const videos = D.videos || [];
+  const cntEl = document.getElementById('cnt-videos');
+  if (cntEl) cntEl.textContent = videos.length;
+  const players = videos.filter(v => v.kind !== 'frame-sequence');
+  const frameSeq = videos.find(v => v.kind === 'frame-sequence');
+  const KIND_LABEL = { 'pick-place': 'PICK & PLACE', '6dof': '6축 움직임', 'frame-sequence': 'FRAME SEQ' };
+
+  const gridEl = document.getElementById('video-grid');
+  if (gridEl) {
+    gridEl.innerHTML = players.length
+      ? players.map(v => `
+        <div class="video-card" data-id="${v.id}">
+          <video controls preload="metadata" ${v.poster ? `poster="${copStatic(v.poster)}"` : ''}>
+            <source src="${copStatic(v.path)}" type="video/mp4">
+            브라우저가 영상 재생을 지원하지 않습니다.
+          </video>
+          <div class="v-head">
+            <span class="v-kind">${escapeHtml(KIND_LABEL[v.kind] || v.kind)}</span>
+            <span class="v-size">${fmtBytes(v.size_bytes)}</span>
+          </div>
+          <div class="v-desc">${escapeHtml(v.description || '')}</div>
+          <div class="v-meta">${escapeHtml(v.path)}</div>
+        </div>
+      `).join('')
+      : '<div class="empty" style="grid-column:1/-1">아직 시뮬 영상이 없습니다.</div>';
+  }
+
+  const fsWrap = document.getElementById('frame-strip-wrap');
+  const fs = document.getElementById('frame-strip');
+  const fsMeta = document.getElementById('frame-strip-meta');
+  const fsDesc = document.getElementById('frame-strip-desc');
+  if (frameSeq && frameSeq.frames && frameSeq.frames.length && fsWrap && fs) {
+    fsWrap.style.display = '';
+    if (fsMeta) fsMeta.textContent = `${frameSeq.frame_count}장 · ${fmtBytes(frameSeq.size_bytes)}`;
+    if (fsDesc) fsDesc.textContent = frameSeq.description || '';
+    fs.innerHTML = frameSeq.frames.map((f, i) =>
+      `<img src="${copStatic(f)}" alt="frame ${i}" loading="${i < 6 ? 'eager' : 'lazy'}">`
+    ).join('');
+  } else if (fsWrap) {
+    fsWrap.style.display = 'none';
+  }
 }
 
-/* ====== Magazines view (CoP: 월간 보고용 증거) ====== */
-function renderMagazines() {
-  const grid = document.getElementById('mag-grid');
-  // CoP evidence 형식: {month, index_path, index_excerpt, weekly_summaries: [{week, path, excerpt}]}
-  const items = D.magazines || D.evidence || [];
-  if (!items.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">아직 월간 보고용 증거가 없습니다.</div>'; return; }
-  grid.innerHTML = items.map((m, i) => {
-    const cls = i % 2 === 0 ? 'dark' : 'light';
-    const weeks = (m.weekly_summaries || []).length;
-    return `<div class="mag-cover ${cls}" data-month="${escapeHtml(m.month || '')}">
-      <div class="mtop">MONTHLY · ${escapeHtml(m.month || '')}</div>
-      <div class="mtitle">월간 보고용 증거</div>
-      <div class="mbot">${weeks ? `${weeks}개 주차 요약` : 'INDEX.md'}${m.index_path ? ` · <code style="font-size:10px; opacity:.7;">${escapeHtml(m.index_path)}</code>` : ''}</div>
-      ${m.index_excerpt ? `<div style="margin-top:10px; font-size:11px; opacity:.85; line-height:1.4;">${escapeHtml(m.index_excerpt.slice(0, 140))}</div>` : ''}
+/* ====== Daily view → 활동 타임라인 (R3-4) ====== */
+function renderDaily() {
+  const tl = D.activity_timeline || [];
+  const wrap = document.getElementById('timeline-list');
+  const subEl = document.getElementById('daily-sub');
+  const cntEl = document.getElementById('cnt-daily');
+  if (cntEl) cntEl.textContent = tl.length;
+  if (!wrap) return;
+  if (!tl.length) {
+    wrap.innerHTML = '<div class="empty">아직 활동 기록이 없습니다.</div>';
+    if (subEl) subEl.textContent = '데이터 없음';
+    return;
+  }
+  const totalCommits = tl.reduce((a, x) => a + (x.commit_count || 0), 0);
+  const totalHeals = tl.reduce((a, x) => a + (x.self_heal_count || 0), 0);
+  if (subEl) subEl.textContent = `${tl.length}일 · 커밋 ${totalCommits}회 · 자동 복구 ${totalHeals}회 (시스템이 일시 장애를 스스로 해결)`;
+
+  wrap.innerHTML = tl.map(d => {
+    const classes = ['tl-row'];
+    if (d.commit_count) classes.push('has-commit');
+    if (d.self_heal_count) classes.push('has-heal');
+    const cats = (d.categories || []).map(c => `<span>${escapeHtml(c)}</span>`).join('');
+    const tasks = (d.sim_task_titles || []).slice(0, 3)
+      .map(t => `<div class="t">${escapeHtml(t)}</div>`).join('');
+    const metrics = [];
+    if (d.commit_count) metrics.push(`<span class="m">커밋 <b>${d.commit_count}</b></span>`);
+    if (d.self_heal_count) metrics.push(`<span class="m">🛟 자동 복구 <b>${d.self_heal_count}</b></span>`);
+    if ((d.scripts_run || []).length) metrics.push(`<span class="m">스크립트 실행 <b>${d.scripts_run.length}</b></span>`);
+    const commitDetail = (d.commits || []).map(c =>
+      `<div class="commit-line"><b>${escapeHtml(c.sha || '')}</b>${escapeHtml(c.msg || '')}</div>`).join('');
+    const healDetail = (d.self_heal_actions || []).map(h =>
+      `<div class="heal-line">${escapeHtml(String(h).slice(0, 240))}</div>`).join('');
+    return `<div class="${classes.join(' ')}" data-date="${escapeHtml(d.date)}">
+      <div class="tl-date">${escapeHtml(d.date)}</div>
+      <div class="tl-card" onclick="this.classList.toggle('open')">
+        <div class="tl-summary">${escapeHtml(d.summary || '활동')}</div>
+        ${cats ? `<div class="tl-cats">${cats}</div>` : ''}
+        ${metrics.length ? `<div class="tl-metrics">${metrics.join('')}</div>` : ''}
+        ${tasks ? `<div class="tl-tasks">${tasks}</div>` : ''}
+        ${(commitDetail || healDetail) ? `<div class="tl-detail">${commitDetail}${healDetail}</div>` : ''}
+      </div>
     </div>`;
   }).join('');
-  document.getElementById('mag-sub').textContent = `${D.magazines.length}건 · 최신순`;
+}
+
+/* ====== Reports view (R3-5 — Obsidian 월별 활동보고서) ====== */
+let SELECTED_REPORT_ID = null;
+function renderMagazines() {
+  const reports = D.monthly_reports || [];
+  const cntEl = document.getElementById('cnt-magazines');
+  if (cntEl) cntEl.textContent = reports.length;
+  const subEl = document.getElementById('mag-sub');
+  if (subEl) subEl.textContent = `Obsidian 월별 활동보고서 ${reports.length}건 · 카드 클릭 시 본문 펼침. 인쇄(⌘P) 친화.`;
+
+  const picker = document.getElementById('report-picker');
+  if (!picker) return;
+  if (!reports.length) {
+    picker.innerHTML = '<div class="empty" style="grid-column:1/-1">아직 활동보고서가 없습니다.</div>';
+    return;
+  }
+  // 가장 최근 (= last) 자동 선택
+  if (!SELECTED_REPORT_ID && reports.length) SELECTED_REPORT_ID = reports[reports.length - 1].id;
+  picker.innerHTML = reports.map(r => {
+    const isOn = r.id === SELECTED_REPORT_ID;
+    const vlabel = r.version ? ` v${r.version}` : '';
+    return `<div class="rp-card ${isOn ? 'on' : ''}" data-rid="${escapeHtml(r.id)}" onclick="selectReport('${escapeHtml(r.id)}')">
+      <div class="m">${escapeHtml(r.month || '')}${vlabel}</div>
+      <div class="t">활동보고서</div>
+      <div class="s">${(r.size_bytes || 0).toLocaleString()}B</div>
+    </div>`;
+  }).join('');
+
+  renderReportBody();
+  renderReportBlockers();
+  renderReportDecisions();
+}
+function selectReport(id) {
+  SELECTED_REPORT_ID = id;
+  document.querySelectorAll('.rp-card').forEach(el => el.classList.toggle('on', el.dataset.rid === id));
+  renderReportBody();
+}
+function renderReportBody() {
+  const body = document.getElementById('report-body');
+  if (!body) return;
+  const r = (D.monthly_reports || []).find(x => x.id === SELECTED_REPORT_ID);
+  if (!r) {
+    body.innerHTML = '<div class="empty">선택된 보고서 없음.</div>';
+    return;
+  }
+  body.innerHTML = `
+    <div class="rh-head">
+      <span class="month">${escapeHtml(r.month || '')}${r.version ? ' v' + r.version : ''}</span>
+      <span class="title">${escapeHtml(r.title || '')}</span>
+      <span class="path">${escapeHtml((r.path || '').split('/').slice(-2).join('/'))}</span>
+    </div>
+    <div class="md-body">${renderMarkdown(r.body_md || '')}</div>
+  `;
+}
+function renderReportBlockers() {
+  const wrap = document.getElementById('report-blockers');
+  if (!wrap) return;
+  const items = D.blockers || [];
+  const active = items.filter(b => !b.checked);
+  const right = document.getElementById('blockers-right');
+  if (right) right.textContent = `미해결 ${active.length}/${items.length}`;
+  if (!items.length) { wrap.innerHTML = '<div class="empty" style="padding:20px;">외부 의존 없음.</div>'; return; }
+  wrap.innerHTML = items.slice(0, 6).map(b => `
+    <div style="display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); align-items:flex-start;">
+      <div style="font-size:14px;">${b.checked ? '✅' : '⏳'}</div>
+      <div style="flex:1; min-width:0;">
+        <div style="font-weight:600; font-size:13px;">${escapeHtml(b.title || '')}</div>
+        <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">
+          ${escapeHtml(b.owner || '미지정')}${b.deadline ? ` · ${escapeHtml(b.deadline)}` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+function renderReportDecisions() {
+  const wrap = document.getElementById('report-decisions');
+  if (!wrap) return;
+  const items = D.decisions || [];
+  const right = document.getElementById('decisions-right');
+  if (right) right.textContent = `${items.length}건`;
+  if (!items.length) { wrap.innerHTML = '<div class="empty" style="padding:20px;">결정 기록 없음.</div>'; return; }
+  wrap.innerHTML = items.slice(0, 6).map(d => `
+    <div style="padding:8px 0; border-bottom:1px solid var(--border);">
+      <div style="font-weight:600; font-size:13px;">${escapeHtml(d.title || '')}</div>
+      <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">${escapeHtml(d.date || '')}</div>
+      ${d.excerpt ? `<div style="font-size:12px; color:var(--text-sub); margin-top:4px; line-height:1.5;">${escapeHtml(d.excerpt.slice(0, 140))}</div>` : ''}
+    </div>`).join('');
 }
 
 /* ====== Bookmarks view ====== */
@@ -1707,6 +2025,7 @@ renderProposals();
 renderDaily();
 renderMagazines();
 renderApps();
+renderVideos();
 renderBlockers();
 renderSamples();
 renderDecisions();
