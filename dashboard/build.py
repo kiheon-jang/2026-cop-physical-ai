@@ -659,50 +659,132 @@ def _describe_video(filename: str) -> str:
 
 
 def build_videos() -> list[dict]:
-    """research/simulation/video/*.mp4 + 키 프레임 PNG. 관리자 보고용 시각 자산.
+    """모든 시각 자산 통합 — 학습 데이터셋 영상 (hero) + 시뮬 영상 + frame 시퀀스.
 
-    각 영상에 비전공자용 한 줄 설명 자동 첨부.
+    노출 순서:
+      1) data/episodes/videos/.../file-000.mp4 — 200 ep 학습 데이터셋 (가장 강력한 진행 증거)
+      2) research/simulation/video/*.mp4 — pick_place / 6dof 시나리오 시뮬
+      3) overhead_frame_sequence (30장)
+      4) gripper_frame_sequence (30장)
     """
     video_dir = REPO_ROOT / "research" / "simulation" / "video"
-    if not video_dir.exists():
-        return []
+    out: list[dict] = []
+
     # 첫 키 프레임 (있다면 모든 영상의 poster 로 공통 사용)
-    first_frame = next(iter(sorted(video_dir.glob("overhead_frame_0000.png"))), None)
+    first_frame = next(iter(sorted(video_dir.glob("overhead_frame_0000.png"))), None) if video_dir.exists() else None
     poster_default = str(first_frame.relative_to(REPO_ROOT)) if first_frame else None
 
-    out: list[dict] = []
-    for mp4 in sorted(video_dir.glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True):
+    # 1) 학습 데이터셋 영상 — 200 에피소드 합성 결과 (있으면 가장 먼저 노출)
+    dataset_video = REPO_ROOT / "data" / "episodes" / "videos" / "observation.images.top" / "chunk-000" / "file-000.mp4"
+    if dataset_video.exists():
         try:
-            st = mp4.stat()
+            st = dataset_video.stat()
+            ep_count, frame_count = 200, 12400
+            info_json = REPO_ROOT / "data" / "episodes" / "meta" / "info.json"
+            if info_json.exists():
+                try:
+                    info = json.loads(info_json.read_text())
+                    ep_count = info.get("total_episodes", ep_count)
+                    frame_count = info.get("total_frames", frame_count)
+                except Exception:
+                    pass
+            out.append({
+                "id": make_id("video", "dataset_top"),
+                "filename": "dataset_top_camera.mp4",
+                "path": str(dataset_video.relative_to(REPO_ROOT)),
+                "kind": "dataset",
+                "size_bytes": st.st_size,
+                "modified": datetime.fromtimestamp(st.st_mtime, KST).isoformat(timespec="seconds"),
+                "poster": poster_default,
+                "description": f"학습 데이터셋 영상 — {ep_count} 에피소드 / {frame_count:,} 프레임 (천장 카메라 시점, ACT 학습 직전 단계 산출물)",
+                "preload": "none",  # 27MB — 클릭 시 로드
+                "episode_count": ep_count,
+                "frame_count_total": frame_count,
+            })
+        except OSError:
+            pass
+
+    # 2) 시뮬 영상 (research/simulation/video)
+    if video_dir.exists():
+        for mp4 in sorted(video_dir.glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True):
+            try:
+                st = mp4.stat()
+            except OSError:
+                continue
+            out.append({
+                "id": make_id("video", mp4.name),
+                "filename": mp4.name,
+                "path": str(mp4.relative_to(REPO_ROOT)),
+                "kind": ("pick-place" if "pick" in mp4.name.lower()
+                         else "6dof" if "6dof" in mp4.name.lower()
+                         else "sim"),
+                "size_bytes": st.st_size,
+                "modified": datetime.fromtimestamp(st.st_mtime, KST).isoformat(timespec="seconds"),
+                "poster": poster_default,
+                "description": _describe_video(mp4.name),  # 비전공자용 한 줄
+                "preload": "metadata",
+            })
+
+        # 3) 오버헤드 프레임 carousel
+        overhead_frames = sorted(video_dir.glob("overhead_frame_*.png"))
+        if overhead_frames:
+            out.append({
+                "id": make_id("frames", "overhead"),
+                "filename": "overhead_frame_sequence",
+                "path": str(video_dir.relative_to(REPO_ROOT)),
+                "kind": "frame-sequence",
+                "size_bytes": sum(p.stat().st_size for p in overhead_frames),
+                "frame_count": len(overhead_frames),
+                "frames": [str(p.relative_to(REPO_ROOT)) for p in overhead_frames[:30]],
+                "description": "천장 카메라 시점 — 30장 프레임 시퀀스 (시뮬 동작 결과)",
+            })
+
+        # 4) 그리퍼 프레임 carousel (그리퍼 손목 카메라 시점)
+        gripper_frames = sorted(video_dir.glob("gripper_frame_*.png"))
+        if gripper_frames:
+            out.append({
+                "id": make_id("frames", "gripper"),
+                "filename": "gripper_frame_sequence",
+                "path": str(video_dir.relative_to(REPO_ROOT)),
+                "kind": "frame-sequence",
+                "size_bytes": sum(p.stat().st_size for p in gripper_frames),
+                "frame_count": len(gripper_frames),
+                "frames": [str(p.relative_to(REPO_ROOT)) for p in gripper_frames[:30]],
+                "description": "그리퍼 손목 카메라 시점 — 30장 (학습 입력의 두 번째 카메라 시점)",
+            })
+
+    return out
+
+
+def build_hardware_photos() -> list[dict]:
+    """models/SO-ARM100/media/ 에서 핵심 하드웨어 사진 노출.
+    관리자 보고용 — "실제 진행 중인 하드웨어 시각자료"."""
+    media_dir = REPO_ROOT / "models" / "SO-ARM100" / "media"
+    if not media_dir.exists():
+        return []
+    # 핵심 사진만 큐레이션 (파일명 → 한국어 설명)
+    curation = [
+        ("Leader_And_Follower_SO100.jpg", "Leader + Follower 로봇팔 (텔레오퍼레이션 페어)"),
+        ("SO101_Leader.webp",            "SO-ARM101 Leader (조작 측)"),
+        ("SO101_Follower.webp",          "SO-ARM101 Follower (작업 측)"),
+        ("d405_mount_sample_observation.jpg", "RealSense D405 카메라 마운트 (그리퍼 시점 학습 입력)"),
+    ]
+    out: list[dict] = []
+    for fname, desc in curation:
+        f = media_dir / fname
+        if not f.exists():
+            continue
+        try:
+            st = f.stat()
         except OSError:
             continue
         out.append({
-            "id": make_id("video", mp4.name),
-            "filename": mp4.name,
-            "path": str(mp4.relative_to(REPO_ROOT)),
-            "kind": ("pick-place" if "pick" in mp4.name.lower()
-                     else "6dof" if "6dof" in mp4.name.lower()
-                     else "sim"),
+            "id": make_id("hw", fname),
+            "filename": fname,
+            "path": str(f.relative_to(REPO_ROOT)),
             "size_bytes": st.st_size,
-            "modified": datetime.fromtimestamp(st.st_mtime, KST).isoformat(timespec="seconds"),
-            "poster": poster_default,
-            "description": _describe_video(mp4.name),  # 비전공자용 한 줄
+            "description": desc,
         })
-
-    # 오버헤드 프레임 carousel 정보 추가 (별도 묶음으로)
-    overhead_frames = sorted(video_dir.glob("overhead_frame_*.png"))
-    if overhead_frames:
-        out.append({
-            "id": make_id("frames", "overhead"),
-            "filename": "overhead_frame_sequence",
-            "path": str(video_dir.relative_to(REPO_ROOT)),
-            "kind": "frame-sequence",
-            "size_bytes": sum(p.stat().st_size for p in overhead_frames),
-            "frame_count": len(overhead_frames),
-            "frames": [str(p.relative_to(REPO_ROOT)) for p in overhead_frames[:30]],
-            "description": "오버헤드 카메라 시점 — 30장 프레임 시퀀스 (시뮬 동작 결과)",
-        })
-
     return out
 
 
@@ -937,6 +1019,7 @@ def build_real_data() -> dict:
     business_kpi = build_business_kpi(phases)
     monthly_reports = build_monthly_reports()
     videos = build_videos()
+    hardware_photos = build_hardware_photos()
     activity_timeline = build_activity_timeline(daily, sim_tasks)
 
     data = {
@@ -952,6 +1035,7 @@ def build_real_data() -> dict:
         "decisions": decisions,
         "monthly_reports": monthly_reports,  # R2: Obsidian 풀 임베드
         "videos": videos,                    # R2: 시각 자산
+        "hardware_photos": hardware_photos,  # 하드웨어 시각자료
         "activity_timeline": activity_timeline,  # R2: 날짜별 그룹
         "stats": stats,
     }
