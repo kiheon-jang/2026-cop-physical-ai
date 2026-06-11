@@ -150,34 +150,51 @@
   .cop-intro .cop-text { font-size: 13px; color: var(--text-sub); line-height: 1.55; }
   .cop-intro .cop-text b { color: var(--text); font-weight: 700; }
 
-  /* R3 — Vision hero (Overview) */
+  /* R3 — Vision hero (Overview) — 재디자인 v2 */
   .vision-hero { background: linear-gradient(135deg, var(--accent-soft), var(--bg-sub));
-    border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px;
-    display: grid; grid-template-columns: 1fr auto; gap: 18px; margin-bottom: 20px; }
-  .vh-left .title { font-size: 22px; font-weight: 800; letter-spacing: -.4px; margin: 0; color: var(--text); }
-  .vh-left .sub { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
-  .vh-left .targets { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
-  .vh-left .targets span { font-size: 11px; color: var(--text-sub); background: var(--bg);
-    padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
-  .vh-left .targets .targets-label { background: var(--accent-soft); color: var(--accent-strong);
-    border-color: var(--accent); font-weight: 800; letter-spacing: .5px; }
-  .vh-left .targets b { color: var(--text); font-weight: 700; margin-left: 4px; }
-  .vh-dday { background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
-    padding: 14px 18px; text-align: center; min-width: 130px; display: flex; flex-direction: column; justify-content: center; }
-  .vh-dday .l { font-size: 10px; color: var(--text-dim); letter-spacing: 1.6px; text-transform: uppercase; font-weight: 700; }
-  .vh-dday .n { font-size: 32px; font-weight: 800; color: var(--action); letter-spacing: -1px; line-height: 1.1; }
-  .vh-dday .d { font-size: 11px; color: var(--text-dim); margin-top: 2px; font-family: ui-monospace, monospace; }
-  .vh-progress { grid-column: 1 / -1; }
-  .vh-progress .bar { height: 14px; background: var(--bg); border: 1px solid var(--border);
+    border: 1px solid var(--border); border-radius: 16px; padding: 28px 32px;
+    display: grid; grid-template-columns: 1fr auto; gap: 24px; margin-bottom: 20px; }
+  .vh-left { min-width: 0; }
+  .vh-left .title { font-size: 30px; font-weight: 800; letter-spacing: -.6px; margin: 0; color: var(--text); line-height: 1.15; }
+  .vh-left .sub { font-size: 13.5px; color: var(--text-sub); margin-top: 10px; line-height: 1.55; max-width: 720px; }
+  .vh-left .sub:nth-of-type(2) { color: var(--text-dim); font-size: 12.5px; }
+  .vh-dday { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 24px; text-align: center; min-width: 160px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .vh-dday .l { font-size: 10px; color: var(--text-dim); letter-spacing: 1.8px; text-transform: uppercase; font-weight: 700; }
+  .vh-dday .n { font-size: 44px; font-weight: 800; color: var(--action); letter-spacing: -1.5px; line-height: 1; margin-top: 4px; }
+  .vh-dday .d { font-size: 11px; color: var(--text-dim); margin-top: 6px; font-family: ui-monospace, monospace; }
+
+  /* 진행률 바 — hero 안 전체 너비 */
+  .vh-progress { grid-column: 1 / -1; margin-top: 8px; }
+  .vh-progress .bar { height: 16px; background: var(--bg); border: 1px solid var(--border);
     border-radius: 8px; overflow: hidden; position: relative; }
   .vh-progress .bar .fill { height: 100%; background: var(--accent); border-radius: 7px; transition: width .4s; }
-  .vh-progress .bar .time-mark { position: absolute; top: -3px; bottom: -3px; width: 2px;
+  .vh-progress .bar .time-mark { position: absolute; top: -4px; bottom: -4px; width: 2px;
     background: var(--text); opacity: .55; border-radius: 1px; }
-  .vh-progress .legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 11px;
-    color: var(--text-dim); margin-top: 8px; }
+  .vh-progress .legend { display: flex; gap: 22px; flex-wrap: wrap; font-size: 12px;
+    color: var(--text-dim); margin-top: 10px; }
   .vh-progress .legend b { color: var(--text); font-weight: 700; }
   .vh-progress .legend .gap-ok { color: var(--accent-strong); font-weight: 700; }
   .vh-progress .legend .gap-warn { color: var(--action); font-weight: 700; }
+
+  /* 핵심 목표 — hero 와 별도 카드 영역 */
+  .targets-section { margin-bottom: 20px; }
+  .targets-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+  .targets-header h3 { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.2px; color: var(--text); }
+  .targets-header .meta { font-size: 11.5px; color: var(--text-dim); }
+  .targets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .target-card { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 22px; display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center;
+    transition: border-color .15s, box-shadow .15s; }
+  .target-card:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+  .target-card .ic { font-size: 32px; line-height: 1; }
+  .target-card .body .lbl { font-size: 13.5px; font-weight: 700; color: var(--text); letter-spacing: -.1px; }
+  .target-card .body .ctx { font-size: 11.5px; color: var(--text-dim); margin-top: 4px; line-height: 1.5; }
+  .target-card .num { text-align: right; }
+  .target-card .num .n { font-size: 34px; font-weight: 800; color: var(--accent-strong); letter-spacing: -1px; line-height: 1; }
+  .target-card .num .m { font-size: 10.5px; color: var(--text-dim); margin-top: 4px; letter-spacing: .5px; }
 
   /* R3 — Gantt 6개월 (4월 사전학습 + Phase 0~4 작업). 10월 시연 별도 */
   .gantt { display: flex; flex-direction: column; gap: 8px; }
@@ -1035,8 +1052,7 @@
         <div class="vh-left">
           <h1 class="title" id="vh-title">—</h1>
           <div class="sub" id="vh-sub">—</div>
-          <div class="sub" id="vh-sub2" style="margin-top:6px;"></div>
-          <div class="targets" id="vh-targets"></div>
+          <div class="sub" id="vh-sub2"></div>
         </div>
         <div class="vh-dday">
           <div class="l">기능 완성까지</div>
@@ -1050,6 +1066,14 @@
           </div>
           <div class="legend" id="vh-legend"></div>
         </div>
+      </div>
+
+      <div class="targets-section" id="targets-section">
+        <div class="targets-header">
+          <h3>🎯 핵심 목표</h3>
+          <span class="meta">2026-09 작업 완료 시점 평가 기준</span>
+        </div>
+        <div class="targets-grid" id="vh-targets"></div>
       </div>
 
       <div class="kpi-row" id="kpi-row"></div>
@@ -3173,12 +3197,22 @@ function renderHome() {
   const sub2El = document.getElementById('vh-sub2');
   if (sub2El) sub2El.textContent = v.subtitle_secondary || '';
   const tgEl = document.getElementById('vh-targets');
+  const tgSection = document.getElementById('targets-section');
   if (tgEl) {
     const targets = v.targets || [];
-    tgEl.innerHTML = targets.length
-      ? `<span class="targets-label">🎯 목표</span>` + targets.map(t =>
-          `<span>${escapeHtml(t.label)}<b>${escapeHtml(t.target)}</b></span>`).join('')
-      : '';
+    if (tgSection) tgSection.style.display = targets.length ? '' : 'none';
+    tgEl.innerHTML = targets.map(t => `
+      <div class="target-card">
+        <div class="ic">${escapeHtml(t.icon || '🎯')}</div>
+        <div class="body">
+          <div class="lbl">${escapeHtml(t.label || '')}</div>
+          <div class="ctx">${escapeHtml(t.context || '')}</div>
+        </div>
+        <div class="num">
+          <div class="n">${escapeHtml(t.target || '')}</div>
+          <div class="m">${escapeHtml(t.metric || '목표')}</div>
+        </div>
+      </div>`).join('');
   }
   const dEl = document.getElementById('vh-dday');
   if (dEl) dEl.textContent = `D-${kpi.d_day != null ? kpi.d_day : '?'}`;

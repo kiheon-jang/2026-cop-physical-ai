@@ -84,8 +84,20 @@ PROJECT_VISION = {
     "start_date": "2026-04-01",
     "phase_start_date": "2026-05-01",  # phase 진척률 분모 시작 (4월 = 사전학습 외부)
     "targets": [
-        {"label": "PCB 픽앤플레이스 성공률", "target": "70%"},
-        {"label": "RS232 HHT 결선 부분성공", "target": "40%"},
+        {
+            "label": "PCB 픽앤플레이스",
+            "metric": "성공률",
+            "target": "70%",
+            "context": "Phase 3 (8월) 평가 · 정비현장 자동화 가능성 입증",
+            "icon": "🔧",
+        },
+        {
+            "label": "RS232 HHT 결선",
+            "metric": "부분 성공률",
+            "target": "40%",
+            "context": "Phase 4 (9월) 평가 · 정밀 삽입 (±0.5mm)",
+            "icon": "🔌",
+        },
     ],
 }
 
