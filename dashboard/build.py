@@ -78,6 +78,7 @@ PHASE_META: list[dict] = [
 PROJECT_VISION = {
     "title": "CoP Physical AI",
     "subtitle": "Physical AI (Embodied AI 기술 내재화) 를 목표로 한 SO-ARM101 기반 모방학습·강화학습 로보틱스 기술 내재화 활동",
+    "subtitle_secondary": "로컬 Mac Mini 가 24시간 가동되며 Hermes Agent 가 cron 4건 (시뮬 환경 구축 · 테스트 · 일일 보고 · 주간 정리) 을 수동 개입 없이 자율 운영",
     "demo_date": "2026-10-31",
     "completion_date": "2026-09-30",  # 작업 완료 기준 (D-day 표시)
     "start_date": "2026-04-01",

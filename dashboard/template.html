@@ -1035,6 +1035,7 @@
         <div class="vh-left">
           <h1 class="title" id="vh-title">—</h1>
           <div class="sub" id="vh-sub">—</div>
+          <div class="sub" id="vh-sub2" style="margin-top:6px;"></div>
           <div class="targets" id="vh-targets"></div>
         </div>
         <div class="vh-dday">
@@ -3169,6 +3170,8 @@ function renderHome() {
   if (titleEl) titleEl.textContent = v.title || '—';
   const subEl = document.getElementById('vh-sub');
   if (subEl) subEl.textContent = v.subtitle || '';
+  const sub2El = document.getElementById('vh-sub2');
+  if (sub2El) sub2El.textContent = v.subtitle_secondary || '';
   const tgEl = document.getElementById('vh-targets');
   if (tgEl) {
     const targets = v.targets || [];
