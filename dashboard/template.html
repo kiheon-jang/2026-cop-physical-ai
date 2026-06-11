@@ -177,7 +177,7 @@
   .vh-progress .legend .gap-ok { color: var(--accent-strong); font-weight: 700; }
   .vh-progress .legend .gap-warn { color: var(--action); font-weight: 700; }
 
-  /* R3 — Gantt 7개월 (4월 사전학습 + Phase 0~4 + 10월 시연) */
+  /* R3 — Gantt 6개월 (4월 사전학습 + Phase 0~4 작업). 10월 시연 별도 */
   .gantt { display: flex; flex-direction: column; gap: 8px; }
   .gantt-row { display: grid; grid-template-columns: 180px 1fr 56px; gap: 14px;
     align-items: center; font-size: 12px; }
@@ -1026,9 +1026,6 @@
   </aside>
 
   <main class="main">
-    <div class="topbar">
-      <div class="crumbs" id="crumbs"><strong>현재 단계</strong></div>
-    </div>
 
     <!-- HOME (R3 — Overview) -->
     <div class="view" id="view-home">
@@ -1060,7 +1057,7 @@
 
       <div class="grid-2">
         <div class="panel">
-          <div class="panel-head"><h3>7개월 로드맵 (4월 사전학습 + Phase 0~4 + 10월 시연)</h3>
+          <div class="panel-head"><h3>6개월 로드맵 (4월 사전학습 + Phase 0~4)</h3>
             <div class="link" onclick="setRoute('apps')">자세히 →</div></div>
           <div class="gantt" id="gantt"></div>
         </div>
@@ -1146,16 +1143,6 @@
       <div class="report-picker" id="report-picker"></div>
       <div class="report-body" id="report-body">
         <div class="empty">위 카드를 클릭하면 본문이 펼쳐집니다.</div>
-      </div>
-      <div class="grid-2" style="margin-top:24px;">
-        <div class="panel">
-          <div class="panel-head"><h3>외부 의존 (마감/담당자)</h3><div class="right" id="blockers-right">—</div></div>
-          <div id="report-blockers"></div>
-        </div>
-        <div class="panel">
-          <div class="panel-head"><h3>결정 기록</h3><div class="right" id="decisions-right">—</div></div>
-          <div id="report-decisions"></div>
-        </div>
       </div>
     </div>
 
@@ -1520,7 +1507,7 @@
     <!-- PHASES = apps 라우트 유지 (Phase 0~5 로드맵, R3 v2) -->
     <div class="view hidden" id="view-apps">
       <div class="home-hero">
-        <h1>7개월 여정 (4월 사전학습 + 5~9월 작업 + 10월 시연)</h1>
+        <h1>6개월 여정 (4월 사전학습 + 5~9월 작업)</h1>
         <div class="sub">실기 없이 학습할 수 있는 환경 구축 → 9월 1차 기능 완성 (10월 시연). 각 단계의 비즈니스 결과와 주차별 진행률.</div>
       </div>
       <div class="cards" id="apps-cards" style="grid-template-columns: 1fr; gap: 18px;"></div>
@@ -1561,12 +1548,12 @@
       </div>
       <div class="doc-block">
         <h2>한 줄 요약</h2>
-        <p><b>MuJoCo 시뮬 환경에서 SO-ARM101 로봇팔의 모방학습(ACT/DP) 을 단계적으로 구축해 9월 1차 기능 완성 + 10월 PCB 픽앤플레이스 시연까지 가는 7개월 프로젝트의 진척 대시보드 (4월 사전학습 + Phase 0~4 작업 + 시연).</b></p>
+        <p><b>MuJoCo 시뮬 환경에서 SO-ARM101 로봇팔의 모방학습(ACT/DP) 을 단계적으로 구축해 9월 1차 기능 완성하는 6개월 프로젝트의 진척 대시보드 (4월 사전학습 + Phase 0~4 작업, 10월 시연 별도).</b></p>
         <p>매일 자동으로 시뮬 작업이 진행되고 (research/simulation/), 테스트 결과가 누적되며 (research-log/), 월말 보고서용 증거가 정리됩니다 (report-evidence/). 이 사이트는 그 누적된 진척을 한 페이지에서 보고, 검색하고, 외부 의존 항목과 다음 단계를 점검하는 도구입니다.</p>
 
         <h2>왜 만들었나</h2>
         <ul>
-          <li><b>가시성</b>: Phase 0~4, 7개월(180+ 시뮬 작업) 의 진척을 한눈에 — 폴더 트리로는 안 보임</li>
+          <li><b>가시성</b>: Phase 0~4, 6개월(180+ 시뮬 작업) 의 진척을 한눈에 — 폴더 트리로는 안 보임</li>
           <li><b>의존 추적</b>: 실기팀/외부 머신/사용자 수동 처리 항목을 마감일·담당자별로 → "왜 진행이 멈췄나" 즉시 확인</li>
           <li><b>증거 큐레이션</b>: 일일 진척에서 보고용 증거 후보를 자동 추출 → 월말 보고서 작성 시간 절약</li>
         </ul>
@@ -1591,7 +1578,7 @@
           <li>매일 07:00 — 아침 보고 메일 발송</li>
         </ul>
 
-        <h2>Phase 로드맵 (7개월)</h2>
+        <h2>Phase 로드맵 (6개월)</h2>
         <p>좌측 <b>Phase 로드맵</b> 메뉴에서 주차/일별 체크리스트 확인:</p>
         <ul>
           <li><b>Phase 0</b> (5월) — 시뮬 환경 셋업 (MuJoCo 설치 → SO-ARM101 import → 카메라/매핑/Pick-Place)</li>
@@ -1886,7 +1873,6 @@ function setRoute(r) {
   currentRoute = r;
   ROUTES.forEach(k => document.getElementById('view-' + k)?.classList.toggle('hidden', k !== r));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.route === r));
-  document.getElementById('crumbs').innerHTML = `<strong>${ROUTE_LABEL[r]}</strong>`;
   // 뷰 전환 시 콘텐츠 영역 스크롤 top 으로 — 이전 메뉴의 스크롤 위치가 새 메뉴에 남는 것 방지
   window.scrollTo({ top: 0, behavior: 'instant' });
   if (r === 'bookmarks') renderBookmarks();
@@ -2796,9 +2782,11 @@ function renderMagazines() {
       : status === '예정' ? '<span class="rp-badge plan">예정 목표 (수정 보완 필요)</span>'
       : status === '완료' ? '<span class="rp-badge done">완료</span>'
       : '';
+    const isDemo = r.month === '2026-10';
+    const cardTitle = isDemo ? '시연보고서' : '활동보고서';
     return `<div class="rp-card ${sCls} ${isOn ? 'on' : ''}" data-rid="${escapeHtml(r.id)}" onclick="selectReport('${escapeHtml(r.id)}')">
       <div class="m">${escapeHtml(r.month || '')}</div>
-      <div class="t">활동보고서</div>
+      <div class="t">${cardTitle}</div>
       ${sBadge}
     </div>`;
   }).join('');
@@ -3243,7 +3231,7 @@ function renderHome() {
     </div>
   `;
 
-  // 3) Gantt 7개월 (사전학습 + Phase 0~4 + 10월 시연)
+  // 3) Gantt 6개월 (사전학습 + Phase 0~4). 10월 시연은 phases 에 없음.
   const gEl = document.getElementById('gantt');
   if (gEl) {
     const colorOf = s => s === '완료' ? '#22c55e' : (s === '진행' ? '#2563eb' : 'rgba(148,163,184,.45)');
