@@ -100,16 +100,17 @@
 
 | Phase | 기간 | 시뮬레이터 | 용도 |
 |-------|------|-----------|------|
+| 사전학습 | 4월 | — | Kick-off, 하드웨어 발주, 자료 학습 (ACT/DP) |
 | Phase 0 | 5월 | **MuJoCo 3.x** | 환경 셋업, 카메라/관절 검증 |
 | Phase 1 | 6월 | **MuJoCo 3.x** | 200 에피소드 합성, ACT 사전학습 |
 | Phase 2 | 7월 | **MuJoCo + Domain Randomization** | Sim2Real 검증 |
 | Phase 3 | 8월 | **MuJoCo** | PCB 조정 시뮬 학습 |
-| Phase 4 | 9월 | **MuJoCo** | RS232 결선 정밀 시뮬 |
-| Phase 5 | 10월 | (시뮬 종료) | 실기 통합 시연 |
+| Phase 4 | 9월 | **MuJoCo** | RS232 결선 정밀 시뮬 + 1차 기능 완성 (작업 완료) |
+| 시연 | 10월 | (시뮬 종료) | 실기 통합 시연 + 사내 발표 (phase 외부) |
 | 차년도 | 2027~ | **Isaac Lab** | 대규모 RL 학습 (별도 GPU 서버) |
 
 **핵심 결정**:
-- Mac Mini M5 (16GB, Apple Silicon) 단독으로 Phase 0~5 진행 가능
+- 로컬 Mac Mini (Apple Silicon) 단독으로 Phase 0~4 진행 가능
 - 모델: TheRobotStudio SO-ARM100/101 MJCF 공식 모델
 - 실기 검증: 학습 weights git push → Orin Nano에서 실기 추론 (별도 머신)
 - Isaac Lab은 Phase 3에서 NVIDIA GPU 필수 → 차년도 별도 서버 도입 검토
@@ -136,16 +137,17 @@ python3 <스크립트>
 
 상세 가이드: [`research/simulation/PHASE_ROADMAP.md`](./research/simulation/PHASE_ROADMAP.md) "Python 가상환경 (.venv) — 절대규칙" 섹션
 
-### Phase 로드맵 (5월~10월)
+### Phase 로드맵 (4월 사전학습 + 5~9월 작업 + 10월 시연)
 
 | Phase | 기간 | 핵심 산출물 |
 |-------|------|------------|
+| **사전학습 / Kick-off** | 4월 (4주) | 하드웨어 발주 + ACT/DP 자료 학습 (phase 외부) |
 | **Phase 0** 시뮬 환경 셋업 | 5월 (4주) | MJCF + 카메라 2대 + 관절 검증 |
 | **Phase 1** 사전학습 | 6월 (4주) | 시뮬 200 ep + ACT 학습 + 실기 fine-tune |
 | **Phase 2** Sim2Real 검증 | 7월 (4주) | DR 적용 + ACT/DP 비교 |
 | **Phase 3** PCB 조정 | 8월 (4주) | PCB MJCF + 학습 + 시뮬 검증 |
-| **Phase 4** RS232 결선 | 9월 (4주) | 정밀 삽입 (±0.5mm) |
-| **Phase 5** 통합 시연 | 10월 (4주) | 사내 발표 + 영상 |
+| **Phase 4** RS232 결선 + 1차 기능 완성 | 9월 (4주) | 정밀 삽입 (±0.5mm) + 통합 모델 락 (**작업 완료**) |
+| **시연** | 10월 (4주) | 사내 발표 + 영상 (phase 외부) |
 
 상세 내역: `research/simulation/PHASE_ROADMAP.md`
 

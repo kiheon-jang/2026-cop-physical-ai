@@ -1088,7 +1088,6 @@
         <div class="chip group-chip" data-filter="group" data-value="phase2">Phase 2 <span id="g-phase2">0</span></div>
         <div class="chip group-chip" data-filter="group" data-value="phase3">Phase 3 <span id="g-phase3">0</span></div>
         <div class="chip group-chip" data-filter="group" data-value="phase4">Phase 4 <span id="g-phase4">0</span></div>
-        <div class="chip group-chip" data-filter="group" data-value="phase5">Phase 5 <span id="g-phase5">0</span></div>
         <div class="right-side">
           <select class="sort-sel" id="status-filter">
             <option value="">카테고리: 전체</option>
@@ -1511,7 +1510,7 @@
     <div class="view hidden" id="view-apps">
       <div class="home-hero">
         <h1>6개월 여정</h1>
-        <div class="sub">실기 없이 학습할 수 있는 환경 구축 → 10월 1차 기능 완성. 각 단계의 비즈니스 결과와 주차별 진행률.</div>
+        <div class="sub">실기 없이 학습할 수 있는 환경 구축 → 9월 1차 기능 완성 (10월 시연). 각 단계의 비즈니스 결과와 주차별 진행률.</div>
       </div>
       <div class="cards" id="apps-cards" style="grid-template-columns: 1fr; gap: 18px;"></div>
     </div>
@@ -1551,7 +1550,7 @@
       </div>
       <div class="doc-block">
         <h2>한 줄 요약</h2>
-        <p><b>MuJoCo 시뮬 환경에서 SO-ARM101 로봇팔의 모방학습(ACT/DP) 을 단계적으로 구축해 PCB 픽앤플레이스 시연(2026-10) 까지 가는 6개월 프로젝트의 진척 대시보드.</b></p>
+        <p><b>MuJoCo 시뮬 환경에서 SO-ARM101 로봇팔의 모방학습(ACT/DP) 을 단계적으로 구축해 9월 1차 기능 완성 + 10월 PCB 픽앤플레이스 시연까지 가는 7개월 프로젝트의 진척 대시보드 (4월 사전학습 + Phase 0~4 작업 + 시연).</b></p>
         <p>매일 자동으로 시뮬 작업이 진행되고 (research/simulation/), 테스트 결과가 누적되며 (research-log/), 월말 보고서용 증거가 정리됩니다 (report-evidence/). 이 사이트는 그 누적된 진척을 한 페이지에서 보고, 검색하고, 외부 의존 항목과 다음 단계를 점검하는 도구입니다.</p>
 
         <h2>왜 만들었나</h2>
@@ -1588,8 +1587,8 @@
           <li><b>Phase 1</b> (6월) — 사전학습 (데이터 합성 200ep → ACT 학습 → 추가 데이터/재학습)</li>
           <li><b>Phase 2</b> (7월) — Sim2Real 검증 (실기 50ep 수집 + 시뮬↔실기 비교)</li>
           <li><b>Phase 3</b> (8월) — PCB 조정 (실제 PCB 픽앤플레이스 학습)</li>
-          <li><b>Phase 4</b> (9월) — RS232 HHT 결선 (DP 비교 + 하드웨어 통신)</li>
-          <li><b>Phase 5</b> (10월) — 1차 기능 완성 (PCB 70% / RS232 부분성공 40%)</li>
+          <li><b>Phase 4</b> (9월) — RS232 HHT 결선 + 1차 기능 완성 (PCB 70% / RS232 부분성공 40%, 작업 완료)</li>
+          <li><b>시연</b> (10월) — 통합 시연 + 사내 발표 (phase 외부)</li>
         </ul>
 
         <h2>일일 의사결정 흐름</h2>
@@ -2370,7 +2369,7 @@ function renderTech() {
     { idx: '③', month: '2026-06', title: 'ACT 학습 — 모방학습',          detail: actDetail },
     { idx: '④', month: '2026-07', title: '시뮬 검증',                   detail: '학습된 모델이 시뮬에서 큐브 잘 집는가 (성공률 측정)' },
     { idx: '⑤', month: '2026-08', title: '실기 적용 — Sim2Real',        detail: '시뮬 모델을 실기 로봇팔에 옮김 · Domain Randomization 으로 격차 좁힘' },
-    { idx: '⑥', month: '2026-10', title: 'PCB 작업 자동화 (1차 완성)', detail: 'Pick & Place 70% · RS232 결선 부분 성공 40%' },
+    { idx: '⑥', month: '2026-09', title: 'PCB 작업 자동화 (1차 완성)', detail: 'Pick & Place 70% · RS232 결선 부분 성공 40% (작업 완료, 10월 시연)' },
   ];
   const STATUS_TAG = { '완료': 'DONE', '진행': '진행 중', '예정': '예정' };
   const wrap = document.getElementById('flow-chart');

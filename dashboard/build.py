@@ -34,6 +34,13 @@ KST = timezone(timedelta(hours=9))
 
 # Phase 메타 — 기술 라벨(name) + 비즈니스 라벨(business_label) + outcome(이게 완료되면)
 # + report_label(보고서 매핑). PHASE_ROADMAP.md 의 보고용 트랙 매핑 표를 코드로 반영.
+# 4월 (Kick-off / 사전학습) 은 phase 외부. 5월부터 본격 phase 진행.
+PREP_PERIOD = {
+    "month": "2026-04", "weeks": 4,
+    "label": "사전학습 / Kick-off",
+    "outcome": "CoP 발족, 하드웨어 발주, 모방학습 핵심 자료 학습 (ACT, Diffusion Policy).",
+}
+
 PHASE_META: list[dict] = [
     {
         "id": "phase0", "name": "Phase 0 — 시뮬 환경 셋업", "month": "2026-05", "weeks": 4,
@@ -60,25 +67,19 @@ PHASE_META: list[dict] = [
         "report_label": "ACT 학습",
     },
     {
-        "id": "phase4", "name": "Phase 4 — RS232 HHT 결선", "month": "2026-09", "weeks": 4,
-        "business_label": "9월: RS232 통신 학습",
-        "outcome": "RS232 직렬통신 결선 자동화. DP(Diffusion Policy) 비교로 안정성 확보.",
-        "report_label": "DP 비교",
-    },
-    {
-        "id": "phase5", "name": "Phase 5 — 1차 기능 완성", "month": "2026-10", "weeks": 4,
-        "business_label": "10월: 1차 기능 완성",
-        "outcome": "PCB 70% / RS232 40% 성공률 달성. 차년도 사업화 검토 자료로 사용.",
-        "report_label": "기능 완성",
+        "id": "phase4", "name": "Phase 4 — RS232 결선 / 1차 기능 완성", "month": "2026-09", "weeks": 4,
+        "business_label": "9월: RS232 통신 학습 + 작업 완료",
+        "outcome": "RS232 직렬통신 결선 자동화 + DP 비교. PCB 70% / RS232 40% 달성, 10월 시연 준비.",
+        "report_label": "DP 비교, 기능 완성",
     },
 ]
 
 # 프로젝트 비전 — 대시보드 히어로에 표시
 PROJECT_VISION = {
-    "title": "2026-10 기능 완성 목표",
+    "title": "2026-10 시연 (9월 작업 완료)",
     "subtitle": "PCB 픽앤플레이스 자동화 — 정비현장 첫걸음",
     "demo_date": "2026-10-31",
-    "start_date": "2026-05-01",
+    "start_date": "2026-04-01",
     "targets": [
         {"label": "PCB 픽앤플레이스 성공률", "target": "70%"},
         {"label": "RS232 HHT 결선 부분성공", "target": "40%"},
@@ -297,7 +298,7 @@ def build_sim_tasks() -> list[dict]:
         if pm:
             phase_id = f"phase{pm.group(1)}"
         elif date:
-            # 월별 매핑 (PHASE_META 참조): 5월=phase0, 6월=phase1, 7월=phase2, ...
+            # 월별 매핑 (PHASE_META 참조): 5월=phase0, 6월=phase1, 7월=phase2, ... (4월은 phase 외부 prep)
             month = date[:7]
             for meta in PHASE_META:
                 if meta["month"] == month:

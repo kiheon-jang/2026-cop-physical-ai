@@ -146,15 +146,16 @@ ls ~/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI/2026-05/
 | Phase | 기간 | 내용 | 상태 |
 |-------|------|------|------|
 | Phase 1 (구) | 2026-04 | 환경 구축 (조립/LeRobot/텔레오퍼레이션/카메라) | ✅ 완료 |
-| **Phase 0** (신) | 2026-05 | 시뮬 환경 셋업 (MuJoCo + SO-ARM101 MJCF) | 🔄 **진행중** |
-| **Phase 1** (신) | 2026-06 | 시뮬 사전학습 (200 ep + ACT) | ⏳ 대기 |
+| **사전학습 / Kick-off** | 2026-04 | 하드웨어 발주 + ACT/DP 자료 학습 (phase 외부) | ✅ 완료 |
+| **Phase 0** (신) | 2026-05 | 시뮬 환경 셋업 (MuJoCo + SO-ARM101 MJCF) | ✅ 완료 |
+| **Phase 1** (신) | 2026-06 | 시뮬 사전학습 (200 ep + ACT) | 🔄 **진행중** |
 | **Phase 2** (신) | 2026-07 | Sim2Real 검증 (DR + ACT/DP 비교) | ⏳ 대기 |
 | **Phase 3** (신) | 2026-08 | PCB 조정 시뮬 학습 | ⏳ 대기 |
-| **Phase 4** (신) | 2026-09 | RS232 HHT 결선 시뮬 학습 | ⏳ 대기 |
-| **Phase 5** (신) | 2026-10 | 통합 시연 + 사내 발표 | ⏳ 대기 |
+| **Phase 4** (신) | 2026-09 | RS232 HHT 결선 + 1차 기능 완성 (작업 완료) | ⏳ 대기 |
+| **시연** | 2026-10 | 통합 시연 + 사내 발표 (phase 외부) | ⏳ 대기 |
 
-> Phase 번호 체계는 2026-05-01에 재정의됨.
-> 구 Phase 1(환경구축)은 완료, 신 Phase 0~5는 시뮬 트랙.
+> Phase 번호 체계는 2026-05-01에 재정의됨. 2026-06-11에 작업 9월 완료 일정으로 단축 (Phase 5 → Phase 4 통합, 10월 = phase 외부 시연).
+> 구 Phase 1(환경구축)은 완료, 신 Phase 0~4는 시뮬 트랙.
 > 상세: [research/simulation/PHASE_ROADMAP.md](../research/simulation/PHASE_ROADMAP.md)
 
 ---
@@ -179,7 +180,7 @@ ls ~/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI/2026-05/
 | [env.md](./env.md) | Mac Mini/GitHub/이메일/하드웨어 환경 전체 |
 | [cron-jobs.md](./cron-jobs.md) | 크론 4개 페이로드 완전 서술 (Hermes) |
 | [external-dependencies.md](./external-dependencies.md) | 외부 의존 / 사용자 수동 작업 누적 |
-| [../research/simulation/PHASE_ROADMAP.md](../research/simulation/PHASE_ROADMAP.md) | Phase 0~5 단계별 로드맵 |
+| [../research/simulation/PHASE_ROADMAP.md](../research/simulation/PHASE_ROADMAP.md) | Phase 0~4 단계별 로드맵 (10월 = phase 외부 시연) |
 | [../docs/01_overview/mail-template.md](../docs/01_overview/mail-template.md) | 일일 보고 메일 형식 |
 | [../docs/01_overview/decisions-form.html](../docs/01_overview/decisions-form.html) | 팀원 기술결정 폼 |
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | 품질 기준 |
