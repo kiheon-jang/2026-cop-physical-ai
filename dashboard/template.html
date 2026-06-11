@@ -342,12 +342,23 @@
   .rf-category .rf-item .rf-item-desc { color: var(--text-sub); font-size: 12px; line-height: 1.55; margin-top: 2px; }
 
   .rf-photo-placeholder { background: var(--bg-sub); border: 2px dashed var(--border-strong);
-    border-radius: 10px; padding: 40px 20px; text-align: center; color: var(--text-dim); font-size: 13px; }
+    border-radius: 10px; padding: 40px 20px; text-align: center; color: var(--text-dim); font-size: 13px;
+    cursor: pointer; transition: border-color .12s, background .12s; }
+  .rf-photo-placeholder:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .rf-photo-placeholder.drag-over { border-color: var(--accent); background: var(--accent-soft); border-style: solid; }
   .rf-photo-placeholder .rf-photo-icon { font-size: 32px; color: var(--text-dim); opacity: .4; margin-bottom: 8px; }
   .rf-photo-placeholder b { color: var(--text-sub); display: block; margin-bottom: 4px; font-size: 14px; }
+  .rf-photo-placeholder .rf-drop-hint { color: var(--text-dim); font-size: 12px; margin-top: 6px; }
   .rf-photo-caption { font-size: 13px; color: var(--text-sub); margin-top: 10px; line-height: 1.55; font-style: italic; }
+  .rf-photo { position: relative; }
   .rf-photo img { width: 100%; max-height: 400px; object-fit: contain; border-radius: 10px;
     background: var(--bg); border: 1px solid var(--border); }
+  .rf-photo .rf-photo-clear { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.65);
+    color: #fff; border: 0; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer;
+    opacity: 0; transition: opacity .12s; }
+  .rf-photo:hover .rf-photo-clear { opacity: 1; }
+  .rf-photo .rf-photo-clear:hover { background: rgba(0,0,0,.85); }
+  .rf-photo-source { font-size: 11px; color: var(--text-dim); margin-top: 6px; text-align: right; }
 
   /* R3-5 — 보고용 자료 (Obsidian 임베드) */
   .report-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -2847,6 +2858,72 @@ function renderReportBody() {
     : `<div class="md-body">${renderMarkdown(r.body_md || '')}</div>`;
 
   body.innerHTML = head + content;
+  bindSiteImageDropzone(body);
+}
+
+// UPLOAD-3 — localStorage 기반 임시 사진 저장 (브라우저 단위)
+const SITE_IMG_KEY = (month) => `cop-site-img-${month || 'unknown'}`;
+const MAX_SITE_IMG_BYTES = 2.5 * 1024 * 1024; // 2.5MB base64 (≈ 1.8MB 원본)
+function getStoredSiteImage(month) {
+  if (!month) return '';
+  try { return localStorage.getItem(SITE_IMG_KEY(month)) || ''; } catch { return ''; }
+}
+function saveStoredSiteImage(month, dataUrl) {
+  if (!month) return false;
+  try { localStorage.setItem(SITE_IMG_KEY(month), dataUrl); return true; }
+  catch (e) { console.warn('localStorage 저장 실패:', e); return false; }
+}
+function clearStoredSiteImage(month) {
+  if (!month) return;
+  try { localStorage.removeItem(SITE_IMG_KEY(month)); } catch {}
+}
+function handleSiteImageFile(month, file, onDone) {
+  if (!file || !/^image\//.test(file.type)) {
+    alert('이미지 파일만 업로드 가능합니다.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    if (dataUrl.length > MAX_SITE_IMG_BYTES) {
+      alert(`이미지가 너무 큽니다 (${(dataUrl.length/1024/1024).toFixed(1)}MB). 2MB 이하 권장.`);
+      return;
+    }
+    if (saveStoredSiteImage(month, dataUrl)) onDone && onDone();
+    else alert('저장 실패 (localStorage 용량 부족 가능). 다른 보고서의 사진을 지우고 재시도하세요.');
+  };
+  reader.readAsDataURL(file);
+}
+function bindSiteImageDropzone(root) {
+  if (!root) return;
+  root.querySelectorAll('[data-dropzone="site-image"]').forEach(zone => {
+    const month = zone.dataset.month;
+    zone.addEventListener('click', () => {
+      const inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/*';
+      inp.onchange = () => inp.files[0] && handleSiteImageFile(month, inp.files[0], () => renderReportBody());
+      inp.click();
+    });
+    ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation(); zone.classList.add('drag-over');
+    }));
+    ['dragleave','drop'].forEach(ev => zone.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation(); zone.classList.remove('drag-over');
+    }));
+    zone.addEventListener('drop', e => {
+      const file = e.dataTransfer?.files?.[0];
+      if (file) handleSiteImageFile(month, file, () => renderReportBody());
+    });
+  });
+  root.querySelectorAll('[data-action="clear-site-image"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm('이 사진을 지우시겠습니까? (이 브라우저의 임시 저장본만 삭제됩니다)')) {
+        clearStoredSiteImage(btn.dataset.month);
+        renderReportBody();
+      }
+    });
+  });
 }
 
 function renderReportForm(f) {
@@ -2942,16 +3019,24 @@ function renderReportForm(f) {
       ${categories}
     </div>` : '';
 
-  // 5) 활동 현장 사진
+  // 5) 활동 현장 사진 — frontmatter site_image 우선, 없으면 localStorage 드롭존
+  const storedImg = getStoredSiteImage(f.month);
+  const effectiveImg = f.site_image || storedImg;
+  const isStored = !f.site_image && storedImg;
   const sitePhoto = `
     <div class="rf-block">
       <h3 class="rf-section-h">활동 현장 사진</h3>
-      ${f.site_image
-        ? `<div class="rf-photo"><img src="${escapeHtml(f.site_image)}" alt="활동 현장"></div>`
-        : `<div class="rf-photo-placeholder">
+      ${effectiveImg
+        ? `<div class="rf-photo" data-month="${escapeHtml(f.month || '')}">
+            <img src="${escapeHtml(effectiveImg)}" alt="활동 현장">
+            ${isStored ? `<button type="button" class="rf-photo-clear" data-action="clear-site-image" data-month="${escapeHtml(f.month || '')}">지우기</button>` : ''}
+            ${isStored ? `<div class="rf-photo-source">로컬 임시 저장 (이 브라우저에서만 표시)</div>` : ''}
+          </div>`
+        : `<div class="rf-photo-placeholder" data-dropzone="site-image" data-month="${escapeHtml(f.month || '')}">
             <div class="rf-photo-icon">📷</div>
-            <b>사진 자리 — 퍼블리시 후 붙여넣기</b>
-            <div>frontmatter <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:ui-monospace,monospace;font-size:11px;">site_image:</code> 필드에 이미지 경로 추가</div>
+            <b>사진 자리 — 드래그앤드롭 또는 클릭하여 업로드</b>
+            <div>이 브라우저에만 임시 저장됩니다 (localStorage). 영구 보존하려면 frontmatter <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:ui-monospace,monospace;font-size:11px;">site_image:</code> 필드에 경로 추가.</div>
+            <div class="rf-drop-hint">JPG/PNG/WebP · 최대 ~2MB 권장</div>
           </div>`}
       ${f.site_caption ? `<div class="rf-photo-caption">${escapeHtml(f.site_caption)}</div>` : ''}
     </div>`;
