@@ -265,33 +265,92 @@ def patch_slide4(slide, fm: dict):
             replace_text(sh, val)
 
 
+def resolve_site_image(site_img: str) -> Path | None:
+    """frontmatter 의 site_image 값을 로컬 파일 경로로 해석.
+
+    - 빈 값 → None
+    - '/static/cop/assets/...' → REPO_ROOT/assets/... 매핑 (hermes-mark URL prefix 제거)
+    - 'http(s)://...' → 외부 URL 이라 pptx 임베드 X → None
+    - 그 외 (로컬 상대/절대 경로) → REPO_ROOT 기준 해석
+    """
+    if not site_img:
+        return None
+    if site_img.startswith(("http://", "https://")):
+        return None  # 외부 URL — pptx 에 임베드 안 함
+    if site_img.startswith("/static/cop/"):
+        # /static/cop/assets/reports/2026-04_site.png → REPO_ROOT/assets/reports/...
+        rel = site_img[len("/static/cop/"):]
+        path = REPO_ROOT / rel
+        return path if path.exists() else None
+    # 일반 상대/절대 경로
+    path = Path(site_img) if Path(site_img).is_absolute() else REPO_ROOT / site_img.lstrip("/")
+    return path if path.exists() else None
+
+
 def patch_slide5(slide, fm: dict):
-    """활동 현장 사진. site_caption 만 동적 교체. 사진 자체는 frontmatter site_image 가 있으면 교체."""
+    """활동 현장 사진. site_caption 동적 교체 + 사진 교체 또는 placeholder 화."""
     cap = fm.get("site_caption", "")
     sh = find_by_name(slide, "Text 6")
-    if sh and cap:
-        replace_text(sh, cap)
+    if sh:
+        replace_text(sh, cap or "활동 현장 사진 — 퍼블리시 후 첨부")
 
-    # 사진 교체: site_image 가 로컬 파일이면 교체. /static/cop/... 같은 URL 은 스킵.
-    site_img = fm.get("site_image", "")
-    if site_img and not site_img.startswith(("http", "/static")):
-        img_path = REPO_ROOT / site_img.lstrip("/")
-        if img_path.exists():
-            replace_picture(slide, img_path)
+    img_path = resolve_site_image(fm.get("site_image", ""))
+    if img_path:
+        replace_picture(slide, img_path)
+    else:
+        # 사진 없으면 옛 템플릿 사진을 빈 placeholder 박스 (회색 테두리 + 안내문) 로 교체
+        clear_picture_to_placeholder(slide)
+
+
+def _largest_picture(slide):
+    pics = [s for s in slide.shapes if s.shape_type == 13]  # PICTURE
+    return max(pics, key=lambda p: (p.width or 0) * (p.height or 0)) if pics else None
 
 
 def replace_picture(slide, new_img_path: Path):
-    """첫 번째 큰 사진 (활동 현장) 을 새 이미지로 교체."""
-    # 가장 큰 picture shape 를 찾아 교체 (또는 Image 0 같은 이름)
-    pics = [s for s in slide.shapes if s.shape_type == 13]  # PICTURE
-    if not pics:
+    """첫 번째 큰 사진을 새 이미지로 교체 (위치/크기 유지)."""
+    target = _largest_picture(slide)
+    if not target:
         return
-    target = max(pics, key=lambda p: (p.width or 0) * (p.height or 0))
-    # 위치/크기 유지하면서 교체
     left, top, w, h = target.left, target.top, target.width, target.height
     sp = target._element
     sp.getparent().remove(sp)
     slide.shapes.add_picture(str(new_img_path), left, top, width=w, height=h)
+
+
+def clear_picture_to_placeholder(slide):
+    """옛 템플릿 사진을 제거하고 회색 테두리 placeholder 박스로 교체.
+
+    site_image 가 없는 보고서를 빌드할 때 이전 달 사진이 남는 버그 방지.
+    위치/크기는 원본 사진을 따라가 레이아웃이 깨지지 않음.
+    """
+    from pptx.dml.color import RGBColor
+    from pptx.enum.shapes import MSO_SHAPE
+    from pptx.util import Pt
+
+    target = _largest_picture(slide)
+    if not target:
+        return
+    left, top, w, h = target.left, target.top, target.width, target.height
+    sp = target._element
+    sp.getparent().remove(sp)
+
+    # 빈 영역 박스 (테두리만, 채움 X) + 안내 텍스트
+    box = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left, top, w, h)
+    box.fill.solid()
+    box.fill.fore_color.rgb = RGBColor(0xF6, 0xF7, 0xF9)  # 매우 옅은 회색 (배경처럼)
+    box.line.color.rgb = RGBColor(0xC8, 0xCE, 0xD6)  # 회색 테두리
+    box.line.width = Pt(1.25)
+    box.line.dash_style = 7  # DASH (점선)
+
+    tf = box.text_frame
+    tf.text = "사진 자리 — 활동 현장 사진을 여기에 첨부"
+    p = tf.paragraphs[0]
+    p.alignment = 2  # CENTER
+    for run in p.runs:
+        run.font.size = Pt(13)
+        run.font.color.rgb = RGBColor(0x94, 0xA3, 0xB8)  # 회색
+        run.font.italic = True
 
 
 # ---------- 메인 ----------
