@@ -756,6 +756,101 @@ def build_videos() -> list[dict]:
     return out
 
 
+def build_training_metrics() -> dict:
+    """ACT 학습 메트릭 reader (PROG-2).
+
+    학습이 진행되면 outputs/train/*/metrics.jsonl 에서 epoch/loss/step 읽어 차트용 emit.
+    학습 미시작 시 status="pending" 반환 → 대시보드에서 "학습 시작 대기" 노출.
+
+    metrics.jsonl 한 줄당 JSON (train_act.py 가 epoch 끝마다 append):
+      {"epoch": int, "step": int, "loss": float, "lr": float,
+       "timestamp": str, "val_loss": float?, "success_rate": float?}
+    """
+    metrics_files = list(REPO_ROOT.glob("outputs/train/*/metrics.jsonl"))
+    if not metrics_files:
+        return {
+            "status": "pending",
+            "message": "ACT 학습 시작 대기 중 (2026-06-15 Phase 1 W3 예정)",
+            "epochs": [],
+            "current_epoch": 0,
+        }
+    # 가장 최근 메트릭 파일
+    latest = max(metrics_files, key=lambda p: p.stat().st_mtime)
+    epochs: list[dict] = []
+    try:
+        with open(latest) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    epochs.append(json.loads(line))
+                except Exception:
+                    pass
+    except OSError:
+        return {
+            "status": "pending",
+            "message": "메트릭 파일 읽기 실패",
+            "epochs": [],
+            "current_epoch": 0,
+        }
+    if not epochs:
+        return {
+            "status": "pending",
+            "message": "메트릭 파일은 있으나 데이터 없음",
+            "epochs": [],
+            "current_epoch": 0,
+        }
+    # 24h 안에 새 epoch 추가됐으면 running, 아니면 paused
+    try:
+        last_ts = epochs[-1].get("timestamp", "")
+        last_dt = datetime.fromisoformat(last_ts.replace("Z", "+00:00"))
+        idle_sec = (datetime.now(KST) - last_dt.astimezone(KST)).total_seconds()
+        status = "running" if idle_sec < 86400 else "paused"
+    except Exception:
+        status = "running"
+    losses = [e["loss"] for e in epochs if isinstance(e.get("loss"), (int, float))]
+    return {
+        "status": status,
+        "epochs": epochs,
+        "current_epoch": epochs[-1].get("epoch", 0),
+        "current_step": epochs[-1].get("step", 0),
+        "current_loss": epochs[-1].get("loss"),
+        "best_loss": min(losses) if losses else None,
+        "current_lr": epochs[-1].get("lr"),
+        "job_name": latest.parent.name,
+        "metrics_path": str(latest.relative_to(REPO_ROOT)),
+    }
+
+
+def build_inference_progress() -> list[dict]:
+    """ACT 학습 진척 inference 영상 scan (PROG-2).
+
+    `research/simulation/inference_progress/*.mp4` → 시간순 list.
+    파일명 패턴 (cron 페이로드에서 생성): `inference_epoch_{NN}_{date}.mp4`
+    """
+    progress_dir = REPO_ROOT / "research" / "simulation" / "inference_progress"
+    if not progress_dir.exists():
+        return []
+    out: list[dict] = []
+    for mp4 in sorted(progress_dir.glob("*.mp4"), key=lambda p: p.stat().st_mtime):
+        try:
+            st = mp4.stat()
+        except OSError:
+            continue
+        m = re.search(r"epoch[_-]?(\d+)", mp4.stem.lower())
+        epoch = int(m.group(1)) if m else None
+        out.append({
+            "id": make_id("inference", mp4.name),
+            "filename": mp4.name,
+            "path": str(mp4.relative_to(REPO_ROOT)),
+            "epoch": epoch,
+            "size_bytes": st.st_size,
+            "modified": datetime.fromtimestamp(st.st_mtime, KST).isoformat(timespec="seconds"),
+        })
+    return out
+
+
 def build_hardware_photos() -> list[dict]:
     """models/SO-ARM100/media/ 에서 핵심 하드웨어 사진 노출.
     관리자 보고용 — "실제 진행 중인 하드웨어 시각자료"."""
@@ -1020,6 +1115,8 @@ def build_real_data() -> dict:
     monthly_reports = build_monthly_reports()
     videos = build_videos()
     hardware_photos = build_hardware_photos()
+    training_metrics = build_training_metrics()
+    inference_progress = build_inference_progress()
     activity_timeline = build_activity_timeline(daily, sim_tasks)
 
     data = {
@@ -1036,6 +1133,8 @@ def build_real_data() -> dict:
         "monthly_reports": monthly_reports,  # R2: Obsidian 풀 임베드
         "videos": videos,                    # R2: 시각 자산
         "hardware_photos": hardware_photos,  # 하드웨어 시각자료
+        "training_metrics": training_metrics,  # PROG-2: ACT 학습 메트릭
+        "inference_progress": inference_progress,  # PROG-2: 학습 진척 inference 영상
         "activity_timeline": activity_timeline,  # R2: 날짜별 그룹
         "stats": stats,
     }

@@ -315,6 +315,57 @@
   .tl-card .tl-detail .heal-line { padding: 3px 0; color: var(--action); }
   .tl-card .tl-detail .heal-line::before { content: '🛟 '; }
 
+  /* PROG — 학습 진척 (영상 갤러리 hero 아래) */
+  .training-block { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 22px; margin-bottom: 8px; }
+  .training-block.pending { background: var(--bg); border-style: dashed; }
+  .training-block .tb-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .training-block .tb-head h4 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: -.2px; }
+  .training-block .tb-head .badge { font-size: 10px; font-weight: 800; letter-spacing: 1.4px;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 4px; }
+  .training-block .tb-head .badge.running { background: rgba(37,99,235,.14); color: #2563eb; }
+  .training-block .tb-head .badge.paused { background: rgba(245,158,11,.14); color: #b45309; }
+  .training-block .tb-head .badge.pending { background: var(--bg-elev); color: var(--text-dim);
+    border: 1px dashed var(--border-strong); }
+  .training-block .tb-head .right { margin-left: auto; font-size: 11px; color: var(--text-dim);
+    font-family: ui-monospace, monospace; }
+  .training-block .tb-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px; margin: 14px 0; }
+  .training-block .tb-metrics .m { background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; }
+  .training-block .tb-metrics .m .l { font-size: 10px; color: var(--text-dim); letter-spacing: 1px;
+    text-transform: uppercase; font-weight: 700; }
+  .training-block .tb-metrics .m .v { font-size: 18px; font-weight: 800; color: var(--text);
+    letter-spacing: -.5px; font-family: ui-monospace, monospace; margin-top: 4px; line-height: 1.1; }
+  .training-block .pending-msg { font-size: 13px; color: var(--text-sub); line-height: 1.7;
+    padding: 14px 16px; background: var(--bg-sub); border-radius: 8px; }
+  .training-block .pending-msg b { color: var(--text); }
+
+  .loss-chart { background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; margin-top: 8px; }
+  .loss-chart .lc-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .loss-chart .lc-head h5 { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: -.1px; color: var(--text); }
+  .loss-chart .lc-head .right { margin-left: auto; font-size: 10px; color: var(--text-dim);
+    font-family: ui-monospace, monospace; }
+  .loss-chart svg { width: 100%; height: 140px; display: block; }
+  .loss-chart .grid { stroke: var(--border); stroke-width: 1; }
+  .loss-chart .axis-label { font-size: 9px; fill: var(--text-dim); font-family: ui-monospace, monospace; }
+  .loss-chart .line { fill: none; stroke: #2563eb; stroke-width: 2; stroke-linejoin: round; }
+  .loss-chart .point { fill: #2563eb; }
+  .loss-chart .best { fill: #22c55e; }
+
+  /* Inference progression — 영상 시간순 */
+  .inference-prog { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px; }
+  .inf-card { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden; }
+  .inf-card video { width: 100%; aspect-ratio: 4/3; background: #000; display: block; object-fit: contain; }
+  .inf-card .ic-meta { padding: 10px 12px; }
+  .inf-card .ic-meta .epoch { font-size: 11px; font-weight: 800; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--accent-strong); }
+  .inf-card .ic-meta .when { font-size: 11px; color: var(--text-dim); margin-top: 4px;
+    font-family: ui-monospace, monospace; }
+
   /* OPS — AI 자동화 운영 방법 페이지 */
   .ops-summary { background: var(--accent-soft); border: 1px solid var(--border); border-radius: 12px;
     padding: 18px 22px; margin-bottom: 22px; }
@@ -1288,6 +1339,9 @@
       <!-- 1. 학습 데이터셋 영상 (hero) -->
       <div id="dataset-hero-wrap"></div>
 
+      <!-- PROG: 학습 진척 (메트릭 차트 + inference 영상) -->
+      <div id="training-progress-wrap"></div>
+
       <!-- 2. 시뮬 영상 갤러리 -->
       <div class="section-head"><h3>시뮬 동작 영상</h3><div class="right">학습 전 단계 · IK 기반 시나리오</div></div>
       <div class="video-grid" id="video-grid"></div>
@@ -2111,6 +2165,132 @@ function renderTech() {
   }
 }
 
+/* ====== 학습 진척 (PROG — view-videos 안에 렌더) ====== */
+function renderTrainingProgress() {
+  const wrap = document.getElementById('training-progress-wrap');
+  if (!wrap) return;
+  const tm = D.training_metrics || { status: 'pending', message: 'ACT 학습 시작 대기 중', epochs: [], current_epoch: 0 };
+  const ips = D.inference_progress || [];
+
+  const blocks = [];
+
+  // (1) 학습 메트릭 카드
+  if (tm.status === 'pending') {
+    blocks.push(`
+      <div class="section-head"><h3>학습 진척 — 메트릭 + Inference 영상</h3><div class="right">ACT 학습 시작 후 자동 갱신</div></div>
+      <div class="training-block pending">
+        <div class="tb-head">
+          <h4>학습 메트릭</h4>
+          <span class="badge pending">대기 중</span>
+          <span class="right">2026-06-15 시작 예정</span>
+        </div>
+        <div class="pending-msg">
+          ${escapeHtml(tm.message || 'ACT 학습 시작 대기 중')}. 학습이 시작되면 매 epoch 마다 loss · 학습률 · 추론 영상이 이곳에 <b>자동으로 누적</b>됩니다 (cron 자동화). 별도 새로고침 필요 없음.
+        </div>
+      </div>
+    `);
+  } else {
+    const lossSvg = renderLossChart(tm.epochs);
+    const cur = tm.current_loss != null ? tm.current_loss.toFixed(4) : '—';
+    const best = tm.best_loss != null ? tm.best_loss.toFixed(4) : '—';
+    const lr = tm.current_lr != null ? tm.current_lr.toExponential(2) : '—';
+    blocks.push(`
+      <div class="section-head"><h3>학습 진척 — 메트릭 + Inference 영상</h3><div class="right">cron 자동 갱신</div></div>
+      <div class="training-block">
+        <div class="tb-head">
+          <h4>학습 메트릭 · ${escapeHtml(tm.job_name || 'act_train')}</h4>
+          <span class="badge ${tm.status}">${tm.status === 'running' ? '학습 중' : '일시중지'}</span>
+          <span class="right">${escapeHtml(tm.metrics_path || '')}</span>
+        </div>
+        <div class="tb-metrics">
+          <div class="m"><div class="l">현재 Epoch</div><div class="v">${tm.current_epoch}</div></div>
+          <div class="m"><div class="l">Step</div><div class="v">${(tm.current_step || 0).toLocaleString()}</div></div>
+          <div class="m"><div class="l">현재 Loss</div><div class="v">${cur}</div></div>
+          <div class="m"><div class="l">최저 Loss</div><div class="v" style="color:#22c55e;">${best}</div></div>
+          <div class="m"><div class="l">학습률</div><div class="v" style="font-size:13px;">${lr}</div></div>
+        </div>
+        ${lossSvg}
+      </div>
+    `);
+  }
+
+  // (2) Inference 영상 progression
+  if (ips.length) {
+    blocks.push(`
+      <div class="training-block" style="margin-top:14px;">
+        <div class="tb-head">
+          <h4>학습 진척 Inference 영상 (${ips.length}건)</h4>
+          <span class="right">시간순 · 좌측이 가장 이른 시점</span>
+        </div>
+        <div class="inference-prog">
+          ${ips.map(v => `
+            <div class="inf-card">
+              <video controls preload="none" muted>
+                <source src="${copStatic(v.path)}" type="video/mp4">
+              </video>
+              <div class="ic-meta">
+                <div class="epoch">${v.epoch != null ? `Epoch ${v.epoch}` : escapeHtml(v.filename)}</div>
+                <div class="when">${escapeHtml(v.modified || '')} · ${fmtBytes(v.size_bytes)}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `);
+  } else if (tm.status !== 'pending') {
+    // 학습 중인데 inference 영상 아직 없음
+    blocks.push(`
+      <div class="training-block pending" style="margin-top:14px;">
+        <div class="tb-head">
+          <h4>학습 진척 Inference 영상</h4>
+          <span class="badge pending">생성 대기</span>
+        </div>
+        <div class="pending-msg">
+          학습은 진행 중이나, inference 영상이 아직 생성되지 않았습니다. cron 페이로드 활성화 시 epoch 별로 누적 노출됩니다.
+        </div>
+      </div>
+    `);
+  }
+
+  wrap.innerHTML = blocks.join('');
+}
+
+function renderLossChart(epochs) {
+  if (!epochs || epochs.length < 2) {
+    return '<div style="font-size:12px; color:var(--text-dim); padding:10px;">에포크 데이터 부족 (2건 이상 필요)</div>';
+  }
+  const losses = epochs.map(e => e.loss).filter(l => typeof l === 'number');
+  if (losses.length < 2) return '';
+  const W = 760, H = 140, PAD = 28;
+  const minL = Math.min(...losses), maxL = Math.max(...losses);
+  const range = maxL - minL || 1;
+  const xs = (i) => PAD + ((W - 2*PAD) * i) / (losses.length - 1);
+  const ys = (l) => H - PAD - ((H - 2*PAD) * (l - minL)) / range;
+  const path = losses.map((l, i) => `${i === 0 ? 'M' : 'L'} ${xs(i).toFixed(1)} ${ys(l).toFixed(1)}`).join(' ');
+  const bestIdx = losses.indexOf(minL);
+  const points = losses.map((l, i) =>
+    `<circle class="${i === bestIdx ? 'best' : 'point'}" cx="${xs(i).toFixed(1)}" cy="${ys(l).toFixed(1)}" r="${i === bestIdx ? 4 : 2.5}"/>`
+  ).join('');
+  return `
+    <div class="loss-chart">
+      <div class="lc-head">
+        <h5>Loss Curve</h5>
+        <div class="right">${losses.length} epochs · max ${maxL.toFixed(3)} → min ${minL.toFixed(3)}</div>
+      </div>
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <line class="grid" x1="${PAD}" y1="${PAD}" x2="${PAD}" y2="${H-PAD}"/>
+        <line class="grid" x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}"/>
+        <text class="axis-label" x="${PAD-4}" y="${PAD+4}" text-anchor="end">${maxL.toFixed(3)}</text>
+        <text class="axis-label" x="${PAD-4}" y="${H-PAD}" text-anchor="end">${minL.toFixed(3)}</text>
+        <text class="axis-label" x="${PAD}" y="${H-PAD+12}">epoch 1</text>
+        <text class="axis-label" x="${W-PAD}" y="${H-PAD+12}" text-anchor="end">epoch ${losses.length}</text>
+        <path class="line" d="${path}"/>
+        ${points}
+      </svg>
+    </div>
+  `;
+}
+
 /* ====== Videos view (R3-3) ====== */
 const COP_STATIC_PREFIX = '/static/cop/';
 function copStatic(p) { return COP_STATIC_PREFIX + String(p || '').replace(/^\/+/, ''); }
@@ -2155,6 +2335,9 @@ function renderVideos() {
       heroWrap.innerHTML = '';
     }
   }
+
+  // 1.5) 학습 진척 (PROG) — 메트릭 차트 + inference 영상
+  renderTrainingProgress();
 
   // 2) 시뮬 영상 갤러리
   const gridEl = document.getElementById('video-grid');
