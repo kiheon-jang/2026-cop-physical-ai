@@ -198,32 +198,63 @@
   .next-actions .a .t { flex: 1; color: var(--text-sub); line-height: 1.55; }
 
   /* R3 — Phase v2 카드 */
+  /* Phase 카드 v3 — 좌측 컬러 border 제거, 톤 차분히 (PHASE-1) */
   .phase-card-v2 { background: var(--bg-sub); border: 1px solid var(--border);
-    border-radius: 14px; padding: 22px 24px; }
-  .phase-card-v2.is-done { border-left: 4px solid #22c55e; }
-  .phase-card-v2.is-active { border-left: 4px solid #2563eb; }
-  .phase-card-v2.is-plan { border-left: 4px solid #94a3b8; }
-  .phase-card-v2 .pc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-  .phase-card-v2 .biz-label { font-size: 18px; font-weight: 800; letter-spacing: -.3px; line-height: 1.35; }
-  .phase-card-v2 .tech-label { font-size: 11px; color: var(--text-dim); margin-top: 4px;
-    letter-spacing: .3px; font-family: ui-monospace, monospace; }
-  .phase-card-v2 .status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px;
-    border-radius: 999px; white-space: nowrap; }
-  .phase-card-v2.is-done .status-badge { background: rgba(34,197,94,.14); color: #16a34a; }
+    border-radius: 12px; padding: 20px 22px; }
+  .phase-card-v2.is-plan { opacity: .82; }
+  .phase-card-v2 .pc-head { display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px; margin-bottom: 12px; }
+  .phase-card-v2 .biz-label { font-size: 17px; font-weight: 800; letter-spacing: -.3px; line-height: 1.35;
+    color: var(--text); }
+  .phase-card-v2 .tech-label { font-size: 11px; color: var(--text-dim); margin-top: 3px;
+    letter-spacing: .2px; }
+  .phase-card-v2 .status-badge { font-size: 10px; font-weight: 800; letter-spacing: 1.2px;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 4px; white-space: nowrap; flex: 0 0 auto; }
+  .phase-card-v2.is-done .status-badge { background: rgba(34,197,94,.12); color: #16a34a; }
   .phase-card-v2.is-active .status-badge { background: rgba(37,99,235,.14); color: #2563eb; }
   .phase-card-v2.is-plan .status-badge { background: var(--bg); color: var(--text-dim); border: 1px solid var(--border); }
-  .phase-card-v2 .outcome { background: var(--accent-soft); border-radius: 10px; padding: 12px 14px;
-    margin: 14px 0; font-size: 13px; color: var(--accent-strong); line-height: 1.55; }
-  .phase-card-v2 .outcome b { display: block; font-size: 10px; letter-spacing: 1.6px;
-    text-transform: uppercase; margin-bottom: 4px; opacity: .8; font-weight: 800; }
-  .phase-card-v2 .progress-main { height: 10px; background: var(--bg); border: 1px solid var(--border);
-    border-radius: 6px; overflow: hidden; margin-top: 4px; }
-  .phase-card-v2 .progress-main .pf { height: 100%; border-radius: 5px; }
+
+  /* 진행률 바 + outcome — 한 줄에 묶음 */
+  .phase-card-v2 .progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .phase-card-v2 .progress-main { flex: 1; height: 8px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 5px; overflow: hidden; }
+  .phase-card-v2 .progress-main .pf { height: 100%; border-radius: 4px; }
+  .phase-card-v2 .progress-row .pct { font-size: 12px; font-weight: 700; font-family: ui-monospace, monospace;
+    color: var(--text-sub); white-space: nowrap; min-width: 64px; text-align: right; }
+  .phase-card-v2 .outcome { font-size: 13px; color: var(--text-sub); line-height: 1.6; margin: 0 0 10px;
+    padding-left: 14px; border-left: 2px solid var(--border-strong); }
+  .phase-card-v2.is-done .outcome { border-left-color: #22c55e; }
+  .phase-card-v2.is-active .outcome { border-left-color: #2563eb; }
+  .phase-card-v2 .outcome b { color: var(--text); font-weight: 700; }
+
+  /* Weeks compact — 한 줄씩 (PHASE-2) */
+  .phase-card-v2 .weeks-compact { margin: 12px 0 8px; }
+  .phase-card-v2 .wc-row { display: grid; grid-template-columns: 36px 110px 1fr auto;
+    gap: 12px; align-items: center; padding: 6px 0; font-size: 12px; color: var(--text-sub);
+    border-bottom: 1px solid var(--border); }
+  .phase-card-v2 .wc-row:last-child { border-bottom: none; }
+  .phase-card-v2 .wc-row.is-current { color: var(--text); font-weight: 600; }
+  .phase-card-v2 .wc-row.is-done { color: var(--text-dim); }
+  .phase-card-v2 .wc-row .w-label { font-weight: 700; font-family: ui-monospace, monospace;
+    color: var(--text); }
+  .phase-card-v2 .wc-row.is-done .w-label { color: var(--text-dim); }
+  .phase-card-v2 .wc-row.is-current .w-label { color: #2563eb; }
+  .phase-card-v2 .wc-row .w-date { color: var(--text-dim); font-family: ui-monospace, monospace;
+    font-size: 11px; }
+  .phase-card-v2 .wc-row .w-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .phase-card-v2 .wc-row .w-status { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+  .phase-card-v2 .wc-row.is-done .w-status { color: #16a34a; }
+  .phase-card-v2 .wc-row.is-current .w-status { color: #2563eb; font-weight: 700; }
+  .phase-card-v2 .next-up { margin-top: 8px; padding: 8px 12px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 6px; font-size: 12px; color: var(--text-sub); }
+  .phase-card-v2 .next-up b { color: var(--text); }
+
+  /* 메타 footer — 작게 */
   .phase-card-v2 .pc-meta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
-    font-size: 12px; color: var(--text-sub); margin-top: 10px; }
-  .phase-card-v2 .report-link { font-size: 12px; color: var(--accent-strong); cursor: pointer; font-weight: 700; }
+    font-size: 12px; color: var(--text-dim); margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--border); }
+  .phase-card-v2 .report-link { font-size: 12px; color: var(--accent-strong); cursor: pointer; font-weight: 600; }
   .phase-card-v2 .report-link:hover { text-decoration: underline; }
-  .phase-card-v2 .weeks { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 
   /* R3-5 — 보고용 자료 (Obsidian 임베드) */
   .report-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -2052,12 +2083,14 @@ function groupClass(g) {
   return '';
 }
 function renderApps() {
-  /* CoP 용 Phase 로드맵 카드 v2 — business_label + outcome 박스 + 주차별 + 월별 보고서 link.
-     라우트 키는 'apps' 유지. */
+  /* CoP 용 Phase 로드맵 카드 v3 — PHASE-1/2 재구성.
+     - 좌측 컬러 border 제거, status-badge + outcome 좌측 가는 줄로 대체
+     - weeks 압축: 완료/예정 한 줄씩, 현재만 강조
+     - 완료 phase 는 "결과" 톤으로 outcome 강조 */
   const wrap = document.getElementById('apps-cards');
   const phases = D.phases || [];
   if (!phases.length) { wrap.innerHTML = '<div class="empty" style="grid-column:1/-1">Phase 데이터 없음. build.py 갱신 필요.</div>'; return; }
-  wrap.style.gridTemplateColumns = '1fr';  // single column for richer cards
+  wrap.style.gridTemplateColumns = '1fr';
 
   const reportsByMonth = {};
   (D.monthly_reports || []).forEach(r => {
@@ -2065,35 +2098,68 @@ function renderApps() {
     reportsByMonth[r.month].push(r);
   });
 
+  const STATUS_LABEL = { '완료': '완료', '진행': '진행 중', '예정': '예정' };
+
   wrap.innerHTML = phases.map(p => {
     const pct = Math.round((p.progress || 0) * 100);
     const statusClass = p.status === '완료' ? 'is-done' : (p.status === '진행' ? 'is-active' : 'is-plan');
-    const fillColor = p.status === '완료' ? '#22c55e' : (p.status === '진행' ? '#2563eb' : 'rgba(148,163,184,.5)');
+    const fillColor = p.status === '완료' ? '#22c55e' : (p.status === '진행' ? '#2563eb' : 'rgba(148,163,184,.4)');
 
-    const weeks = (p.weeks || []).map(w => {
-      const wpct = Math.round((w.progress || 0) * 100);
-      const nextItem = (w.items || []).find(it => !it.checked);
-      const wColor = w.progress >= 0.999 ? '#22c55e' : (w.progress > 0 ? '#2563eb' : '#cbd5e1');
-      return `
-        <div style="margin-top:10px;">
-          <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
-            <b>${escapeHtml(w.week)}</b>${w.date_range ? `<span style="color:var(--text-dim);">${escapeHtml(w.date_range)}</span>` : ''}<span style="color:var(--text-sub);">${w.done}/${w.total}</span>
+    // Weeks 압축 — 한 줄씩
+    let weeksHtml = '';
+    let nextUpHtml = '';
+    if (p.status === '완료') {
+      // 완료: 4 weeks 결과 한 줄씩
+      weeksHtml = `<div class="weeks-compact">
+        ${(p.weeks || []).map(w => `
+          <div class="wc-row is-done">
+            <span class="w-label">${escapeHtml(w.week)}</span>
+            <span class="w-date">${escapeHtml(w.date_range || '')}</span>
+            <span class="w-name">${escapeHtml(w.name || '')}</span>
+            <span class="w-status">✓ ${w.done}/${w.total}</span>
           </div>
-          <div style="height:6px; background:var(--bg); border:1px solid var(--border); border-radius:3px; overflow:hidden;">
-            <div style="height:100%; width:${wpct}%; background:${wColor};"></div>
-          </div>
-          ${nextItem ? `<div style="font-size:11px; color:var(--text-dim); margin-top:4px;">→ ${escapeHtml(nextItem.task.slice(0, 80))}</div>` : ''}
-        </div>`;
-    }).join('');
+        `).join('')}
+      </div>`;
+    } else if (p.status === '진행') {
+      // 진행: 4 weeks 한 줄씩, 현재 W 강조
+      const currentWeekIdx = (p.weeks || []).findIndex(w => (w.progress || 0) > 0 && (w.progress || 0) < 0.999);
+      weeksHtml = `<div class="weeks-compact">
+        ${(p.weeks || []).map((w, i) => {
+          const isDone = (w.progress || 0) >= 0.999;
+          const isCurrent = i === currentWeekIdx;
+          const cls = isDone ? 'is-done' : (isCurrent ? 'is-current' : '');
+          const statusTxt = isDone ? `✓ ${w.done}/${w.total}` : (isCurrent ? `진행 ${w.done}/${w.total}` : `${w.done}/${w.total}`);
+          return `
+            <div class="wc-row ${cls}">
+              <span class="w-label">${escapeHtml(w.week)}</span>
+              <span class="w-date">${escapeHtml(w.date_range || '')}</span>
+              <span class="w-name">${escapeHtml(w.name || '')}</span>
+              <span class="w-status">${statusTxt}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>`;
+      // 다음 할 일 — 현재 또는 첫 미완 week 의 첫 미완 item
+      const targetWeek = (p.weeks || [])[currentWeekIdx] || (p.weeks || []).find(w => (w.progress || 0) < 0.999);
+      const nextItem = targetWeek ? (targetWeek.items || []).find(it => !it.checked) : null;
+      if (nextItem) {
+        nextUpHtml = `<div class="next-up"><b>다음:</b> ${escapeHtml(nextItem.task.slice(0, 140))}</div>`;
+      }
+    }
+    // 예정: weeks 숨김 (outcome 만)
 
     const monthReports = reportsByMonth[p.month] || [];
-    // 4월 v1/v2 처럼 같은 월에 여러 건이면 가장 최신 (build.py 가 mtime 순) 한 건 선택
     const targetReport = monthReports[monthReports.length - 1];
     const reportLink = targetReport
-      ? `<span class="report-link" onclick="openReport('${escapeHtml(targetReport.id)}')">📄 ${p.month} 활동보고서 ${monthReports.length}건 →</span>`
+      ? `<span class="report-link" onclick="openReport('${escapeHtml(targetReport.id)}')">${p.month} 활동보고서 →</span>`
       : '';
     const reportLabel = p.report_label
-      ? `<span style="color:var(--text-dim);">📋 ${escapeHtml(p.report_label)}</span>`
+      ? `<span>${escapeHtml(p.report_label)}</span>`
+      : '';
+
+    const outcomeLabel = p.status === '완료' ? '결과' : (p.status === '진행' ? '목표' : '예정 결과');
+    const outcomeHtml = p.outcome
+      ? `<div class="outcome"><b>${outcomeLabel}.</b> ${escapeHtml(p.outcome)}</div>`
       : '';
 
     return `
@@ -2101,17 +2167,21 @@ function renderApps() {
         <div class="pc-head">
           <div>
             <div class="biz-label">${escapeHtml(p.business_label || p.name)}</div>
-            <div class="tech-label">${escapeHtml(p.name)} · ${escapeHtml(p.date_range || '')} · ${p.done}/${p.total} 항목</div>
+            <div class="tech-label">${escapeHtml(p.name)} · ${escapeHtml(p.date_range || '')}</div>
           </div>
-          <div class="status-badge">${escapeHtml(p.status)} ${pct}%</div>
+          <div class="status-badge">${escapeHtml(STATUS_LABEL[p.status] || p.status)}</div>
         </div>
-        ${p.outcome ? `<div class="outcome"><b>이게 완료되면</b>${escapeHtml(p.outcome)}</div>` : ''}
-        <div class="progress-main"><div class="pf" style="width:${pct}%; background:${fillColor};"></div></div>
+        <div class="progress-row">
+          <div class="progress-main"><div class="pf" style="width:${pct}%; background:${fillColor};"></div></div>
+          <div class="pct">${pct}% · ${p.done}/${p.total}</div>
+        </div>
+        ${outcomeHtml}
+        ${weeksHtml}
+        ${nextUpHtml}
         <div class="pc-meta">
           ${reportLabel}
           ${reportLink}
         </div>
-        ${weeks ? `<div class="weeks">${weeks}</div>` : ''}
       </div>`;
   }).join('');
 }
