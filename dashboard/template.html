@@ -263,6 +263,10 @@
     background: transparent; cursor: pointer; font-size: 12px; font-weight: 600;
     color: var(--text-sub); font-family: inherit; }
   .report-toggle button.on { background: var(--accent); color: #fff; }
+  .report-toggle .report-pptx-dl { margin-left: 6px; padding: 6px 14px; border-radius: 6px;
+    background: var(--bg-sub); color: var(--text-sub); font-size: 12px; font-weight: 600;
+    text-decoration: none; transition: background .12s, color .12s; }
+  .report-toggle .report-pptx-dl:hover { background: var(--accent-soft); color: var(--accent); }
 
   .rf-block { background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
     padding: 22px 24px; margin-bottom: 16px; }
@@ -2848,6 +2852,7 @@ function renderReportBody() {
       <div class="report-toggle">
         <button class="${mode==='form'?'on':''}" onclick="setReportViewMode('form')">📋 폼 양식</button>
         <button class="${mode==='md'?'on':''}" onclick="setReportViewMode('md')">📝 원문 (마크다운)</button>
+        <a class="report-pptx-dl" href="/api/projects/cop-physical-ai/report-pptx?month=${escapeHtml(r.month || '')}" download>📥 pptx 다운로드</a>
       </div>
     ` : ''}
     ${notice}
