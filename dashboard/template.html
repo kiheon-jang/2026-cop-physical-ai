@@ -581,6 +581,29 @@
   .dataset-hero .caption { font-size: 12px; color: var(--text-sub); text-align: center; margin-top: 8px; }
   .dataset-hero .caption .size { color: var(--text-dim); font-family: ui-monospace, monospace; }
 
+  /* 데이터셋 영상 compact (REORG-3 — hero 강등) */
+  .dataset-compact { display: grid; grid-template-columns: 1fr 320px; gap: 18px; align-items: start;
+    background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  @media (max-width: 900px) { .dataset-compact { grid-template-columns: 1fr; } }
+  .dataset-compact .meta .stats { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px;
+    color: var(--text-sub); margin-bottom: 10px; }
+  .dataset-compact .meta .stats b { color: var(--text); font-family: ui-monospace, monospace; font-weight: 700; }
+  .dataset-compact .meta .note { font-size: 12px; color: var(--text-sub); line-height: 1.7; margin: 0; }
+  .dataset-compact video { width: 100%; border-radius: 8px; background: #000; display: block; max-height: 200px; }
+
+  /* 학습 입력 카메라 시점 — 대표 1장씩 (REORG-2) */
+  .camera-views { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media (max-width: 700px) { .camera-views { grid-template-columns: 1fr; } }
+  .cv-card { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden; display: flex; gap: 14px; align-items: center; padding: 12px; }
+  .cv-card img { width: 140px; aspect-ratio: 4/3; object-fit: cover; border-radius: 6px;
+    background: var(--bg); flex: 0 0 auto; }
+  .cv-card .cv-meta { flex: 1; min-width: 0; }
+  .cv-card .cv-label { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.4;
+    letter-spacing: -.1px; }
+  .cv-card .cv-desc { font-size: 11px; color: var(--text-sub); margin-top: 4px; line-height: 1.5;
+    font-family: ui-monospace, monospace; }
+
   .hardware-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 12px; }
   .hw-card { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px;
@@ -1329,35 +1352,35 @@
       </div>
     </div>
 
-    <!-- VIDEOS (R3-3 + MEDIA-3 확장) -->
+    <!-- VIDEOS (R3-3 + MEDIA-3 + REORG) -->
     <div class="view hidden" id="view-videos">
       <div class="home-hero">
-        <h1>시각자료</h1>
-        <div class="sub" id="videos-sub">시뮬 환경에서 만들어진 움직임 + 학습 데이터셋 + 실제 하드웨어. 지금까지 만들어진 것들.</div>
+        <h1>시각자료 · 진척 현황</h1>
+        <div class="sub" id="videos-sub">학습 진척 · 시뮬 동작 · 학습 입력 · 실제 하드웨어 · 학습 데이터셋. 진척 관점에서 정리.</div>
       </div>
 
-      <!-- 1. 학습 데이터셋 영상 (hero) -->
-      <div id="dataset-hero-wrap"></div>
+      <!-- 1. (맨 위) 이 페이지가 보여주는 것 — 컨텍스트 안내 -->
+      <div class="video-explainer">
+        <h4>이 페이지가 보여주는 것 — 진척 현황</h4>
+        <p><b>지금 단계</b>: 데이터셋 합성 완료 (Phase 1 W1-2) · ACT 학습 직전. 2026-06-15부터 ACT 학습이 시작되면 아래 "학습 진척" 섹션에 매일 새 inference 영상과 메트릭이 자동 누적됩니다.</p>
+        <p><b>유의</b>: 현재 노출된 시뮬 영상은 모두 <b>학습 전 IK(역기구학) 기반 시나리오</b>입니다. 큐브를 정확히 집지 못하는 모습은 오류가 아니라 학습 전 정상 상태입니다. 7월부터 실제 로봇팔 검증 (Phase 2).</p>
+      </div>
 
-      <!-- PROG: 학습 진척 (메트릭 차트 + inference 영상) -->
+      <!-- 2. PROG: 학습 진척 (메트릭 차트 + inference 영상) — 가장 중요 -->
       <div id="training-progress-wrap"></div>
 
-      <!-- 2. 시뮬 영상 갤러리 -->
+      <!-- 3. 시뮬 동작 영상 (pick_place, 6dof) -->
       <div class="section-head"><h3>시뮬 동작 영상</h3><div class="right">학습 전 단계 · IK 기반 시나리오</div></div>
       <div class="video-grid" id="video-grid"></div>
 
-      <!-- 3. 프레임 시퀀스 (overhead + gripper) -->
+      <!-- 4. 학습 입력 카메라 시점 (대표 이미지 1장씩, 작게) -->
       <div id="frame-strips-wrap"></div>
 
-      <!-- 4. 하드웨어 시각자료 -->
+      <!-- 5. 하드웨어 시각자료 -->
       <div id="hardware-grid-wrap"></div>
 
-      <div class="video-explainer">
-        <h4>지금 보고 있는 영상이 어떤 단계인지</h4>
-        <p><b>학습 전 단계의 시각자료</b>입니다. 시뮬 영상은 휴리스틱(IK · 역기구학) 기반 시나리오 동작이며, AI 모델이 학습한 결과가 <b>아닙니다</b>. 영상에서 큐브를 정확히 집지 못하는 모습이 보일 수 있는데, 이는 오류가 아니라 <b>학습 전 정상 상태</b>입니다.</p>
-        <p><b>현재까지 한 일</b>: 시뮬 환경 셋업 완료 (Phase 0) · <b>200 에피소드 / 12,400 프레임 학습 데이터셋 합성 완료</b> (Phase 1 W1-2). 위 데이터셋 영상이 학습에 그대로 들어갑니다.</p>
-        <p><b>다음 단계 (실제 학습)</b>: 2026-06-15 부터 ACT 학습 시작 (Phase 1 W3). 학습이 완료되면 모델의 inference 결과 영상이 별도로 추가될 예정입니다. 7월부터는 실제 로봇팔로 검증 (Phase 2).</p>
-      </div>
+      <!-- 6. 학습 데이터셋 영상 (보조 자료, 맨 아래) -->
+      <div id="dataset-hero-wrap"></div>
     </div>
 
     <!-- PHASES = apps 라우트 유지 (Phase 0~5 로드맵, R3 v2) -->
@@ -2311,25 +2334,24 @@ function renderVideos() {
   const frameSeqs = videos.filter(v => v.kind === 'frame-sequence');
   const KIND_LABEL = { 'pick-place': '시나리오', '6dof': '6축 움직임', 'sim': '시뮬', 'dataset': '학습 데이터셋' };
 
-  // 1) 학습 데이터셋 hero
+  // 1) 학습 데이터셋 영상 (강등: hero → 보조 자료 카드, 페이지 맨 아래로 이동)
   const heroWrap = document.getElementById('dataset-hero-wrap');
   if (heroWrap) {
     if (dataset) {
       heroWrap.innerHTML = `
-        <div class="dataset-hero">
-          <span class="badge">학습 데이터셋 · Phase 1 진행 증거</span>
-          <h3>${escapeHtml(dataset.episode_count || 200)} 에피소드 합성 완료 — ACT 학습 직전 데이터</h3>
-          <div class="stats">
-            <span>에피소드 <b>${(dataset.episode_count || 200).toLocaleString()}</b></span>
-            <span>총 프레임 <b>${(dataset.frame_count_total || 12400).toLocaleString()}</b></span>
-            <span>30 fps · 평균 <b>${Math.round((dataset.frame_count_total || 12400) / (dataset.episode_count || 200))}</b> frames/ep</span>
-            <span>파일 크기 <b>${fmtBytes(dataset.size_bytes)}</b></span>
+        <div class="section-head" style="margin-top:24px;"><h3>학습 데이터셋 영상 (참고 자료)</h3><div class="right">합성 1회 완료 · 갱신 없음</div></div>
+        <div class="dataset-compact">
+          <div class="meta">
+            <div class="stats">
+              <span>에피소드 <b>${(dataset.episode_count || 200).toLocaleString()}</b></span>
+              <span>총 프레임 <b>${(dataset.frame_count_total || 12400).toLocaleString()}</b></span>
+              <span>30 fps · 파일 <b>${fmtBytes(dataset.size_bytes)}</b></span>
+            </div>
+            <p class="note">200 에피소드 합성 결과를 한 영상으로 합친 천장 카메라 시점 데이터입니다. ACT 학습 입력으로 사용되며, 시각적 진척 자료는 아닙니다. ▶ 클릭 시 본체 로드.</p>
           </div>
           <video controls preload="none" ${dataset.poster ? `poster="${copStatic(dataset.poster)}"` : ''}>
             <source src="${copStatic(dataset.path)}" type="video/mp4">
-            브라우저가 영상 재생을 지원하지 않습니다.
           </video>
-          <div class="caption">▶ 클릭하면 학습 데이터 본체 (${fmtBytes(dataset.size_bytes)}) 가 로드됩니다 · 천장 카메라 시점 <span class="size">${escapeHtml(dataset.path)}</span></div>
         </div>`;
     } else {
       heroWrap.innerHTML = '';
@@ -2360,26 +2382,27 @@ function renderVideos() {
       : '<div class="empty" style="grid-column:1/-1">아직 시뮬 영상이 없습니다.</div>';
   }
 
-  // 3) 프레임 시퀀스 — overhead + gripper 등 여러 개를 나란히
+  // 3) 학습 입력 카메라 시점 — 대표 1장씩만 (30장은 거의 같은 그림이라 진척 가치 X)
   const fsWrap = document.getElementById('frame-strips-wrap');
   if (fsWrap) {
     if (frameSeqs.length) {
       fsWrap.innerHTML = `
-        <div class="section-head"><h3>학습 입력 카메라 시점</h3><div class="right">시뮬 합성 — 30 프레임씩</div></div>
-        ${frameSeqs.map(fs => `
-          <div class="frame-strip-wrap" style="margin-bottom:14px;">
-            <div class="head">
-              <h3>${escapeHtml(fs.description.split(' — ')[0] || fs.filename)}</h3>
-              <div class="right">${fs.frame_count}장 · ${fmtBytes(fs.size_bytes)}</div>
-            </div>
-            <div class="frame-strip-desc">${escapeHtml(fs.description)}</div>
-            <div class="frame-strip">
-              ${(fs.frames || []).map((f, i) =>
-                `<img src="${copStatic(f)}" alt="frame ${i}" loading="${i < 4 ? 'eager' : 'lazy'}">`
-              ).join('')}
-            </div>
-          </div>
-        `).join('')}
+        <div class="section-head"><h3>학습 입력 카메라 시점</h3><div class="right">ACT 모델의 시각 입력 채널</div></div>
+        <div class="camera-views">
+          ${frameSeqs.map(fs => {
+            const first = (fs.frames || [])[0];
+            const label = fs.description.split(' — ')[0] || fs.filename;
+            return first ? `
+              <div class="cv-card">
+                <img src="${copStatic(first)}" alt="${escapeHtml(label)}" loading="lazy">
+                <div class="cv-meta">
+                  <div class="cv-label">${escapeHtml(label)}</div>
+                  <div class="cv-desc">대표 1 프레임 · 480×640 RGB · ACT 학습 입력</div>
+                </div>
+              </div>
+            ` : '';
+          }).join('')}
+        </div>
       `;
     } else {
       fsWrap.innerHTML = '';
