@@ -1052,18 +1052,30 @@ def _build_chart_stats(
     """
     today = datetime.now(KST).date()
 
-    # heatmap: 최근 60일 일별 활동 카운트 (sim_task + daily). [int, ...].
+    # heatmap: 최근 60일 일별 활동 강도 + 주요 항목 (tooltip 용).
+    # 형식: [{date, count, level, items: [title, ...]}], items 비면 tooltip 안 뜸.
     heatmap = []
-    by_date: dict[str, int] = {}
+    by_date_items: dict[str, list[str]] = {}
     for t in sim_tasks:
         if t.get("date"):
-            by_date[t["date"]] = by_date.get(t["date"], 0) + 1
+            ttl = (t.get("title") or "").strip()
+            if ttl:
+                by_date_items.setdefault(t["date"], []).append(ttl)
     for r in daily:
         if r.get("date"):
-            by_date[r["date"]] = by_date.get(r["date"], 0) + 1
+            ttl = (r.get("title") or "").strip()
+            if ttl:
+                by_date_items.setdefault(r["date"], []).append(ttl)
     for i in range(60):
         d = (today - timedelta(days=59 - i)).isoformat()
-        heatmap.append(min(by_date.get(d, 0), 4))
+        items = by_date_items.get(d, [])
+        count = len(items)
+        heatmap.append({
+            "date": d,
+            "count": count,
+            "level": min(count, 4),
+            "items": items[:3],  # 최대 3개 (tooltip 길이 제한)
+        })
 
     # appbar: phase 별 (n=완료, d=미완료). drawAppBar 는 a.name / a.n / a.d 사용.
     appbar = []

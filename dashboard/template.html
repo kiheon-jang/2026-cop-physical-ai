@@ -3286,8 +3286,18 @@ function drawHeatmap() {
   const data = (D.stats && D.stats.heatmap) || [];
   if (!data.length) { root.innerHTML = '<div class="empty" style="padding:30px">데이터 없음</div>'; return; }
   root.innerHTML = data.map(v => {
-    const lvl = v === 0 ? '' : `l${Math.min(v, 4)}`;
-    return `<div class="hm-cell ${lvl}"></div>`;
+    // v 가 {date,count,level,items} 객체이거나 옛 int 형식이거나 — 둘 다 호환
+    if (typeof v === 'number') {
+      const lvl = v === 0 ? '' : `l${Math.min(v, 4)}`;
+      return `<div class="hm-cell ${lvl}"></div>`;
+    }
+    const lvl = (v.level || 0) === 0 ? '' : `l${v.level}`;
+    // items 가 있을 때만 native title (tooltip). 없으면 hover 시 아무것도 안 뜸.
+    const tip = (v.items && v.items.length)
+      ? `${v.date} · ${v.count}건\n${v.items.map(s => '• ' + s).join('\n')}`
+      : '';
+    const titleAttr = tip ? ` title="${escapeHtml(tip)}"` : '';
+    return `<div class="hm-cell ${lvl}"${titleAttr}></div>`;
   }).join('');
 }
 
