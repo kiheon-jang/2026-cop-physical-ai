@@ -89,14 +89,14 @@ PROJECT_VISION = {
             "metric": "성공률",
             "target": "70%",
             "context": "Phase 3 (8월) 평가 · 정비현장 자동화 가능성 입증",
-            "icon": "🔧",
+            "icon": "wrench",
         },
         {
             "label": "RS232 HHT 결선",
             "metric": "부분 성공률",
             "target": "40%",
             "context": "Phase 4 (9월) 평가 · 정밀 삽입 (±0.5mm)",
-            "icon": "🔌",
+            "icon": "plug",
         },
     ],
 }
@@ -1272,7 +1272,9 @@ def main() -> int:
     parser.add_argument("--open", dest="open_after", action="store_true", help="빌드 후 브라우저로 열기")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help=f"HTML 출력 경로 (기본: {DEFAULT_OUT})")
     parser.add_argument("--json", dest="emit_json", action="store_true",
-                        help=f"data.json 도 함께 출력 (기본 경로: {DEFAULT_JSON_OUT})")
+                        help=f"(deprecated: 기본 동작) data.json 도 함께 출력 (기본 경로: {DEFAULT_JSON_OUT})")
+    parser.add_argument("--no-json", dest="no_json", action="store_true",
+                        help="data.json 출력 생략 (HTML 만 빌드). 기본은 HTML + JSON 둘 다.")
     parser.add_argument("--json-only", action="store_true",
                         help="HTML 생략, data.json 만 출력 (template.html 없는 단계에 권장)")
     parser.add_argument("--json-out", type=Path, default=DEFAULT_JSON_OUT,
@@ -1285,7 +1287,8 @@ def main() -> int:
     n_phases = len(data["phases"])
     n_blockers = len(data["blockers"])
 
-    emit_json = args.emit_json or args.json_only
+    # default: HTML + JSON 둘 다. --no-json 또는 --json-only 로 한쪽만.
+    emit_json = (not args.no_json) or args.emit_json or args.json_only
     emit_html = not args.json_only
 
     summary: list[str] = []

@@ -150,47 +150,103 @@
   .cop-intro .cop-text { font-size: 13px; color: var(--text-sub); line-height: 1.55; }
   .cop-intro .cop-text b { color: var(--text); font-weight: 700; }
 
-  /* R3 — Vision hero (Overview) — 재디자인 v3 */
-  .vision-hero { background: linear-gradient(135deg, var(--accent-soft), var(--bg-sub));
-    border: 1px solid var(--border); border-radius: 16px; padding: 32px 36px;
-    display: grid; grid-template-columns: 1fr auto; gap: 28px; margin-bottom: 20px; }
-  .vh-left { min-width: 0; }
-  .vh-left .title { font-size: 32px; font-weight: 800; letter-spacing: -.7px; margin: 0; color: var(--text); line-height: 1.15; }
-  .vh-left .sub-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; max-width: 760px; }
-  .vh-left .sub-row { display: flex; gap: 10px; align-items: flex-start;
-    padding: 10px 14px; background: var(--bg); border: 1px solid var(--border);
-    border-radius: 10px; font-size: 13px; color: var(--text); line-height: 1.55; }
-  .vh-left .sub-row .ic { font-size: 16px; line-height: 1.4; flex: 0 0 auto; }
+  /* 공통 — SVG 아이콘 (lucide 스타일, stroke based) */
+  .icon { width: 1em; height: 1em; flex-shrink: 0; stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; }
+  .icon-lg { width: 28px; height: 28px; stroke-width: 1.75; }
+  .icon-xl { width: 36px; height: 36px; stroke-width: 1.6; }
+  .nav-item .icon { width: 16px; height: 16px; margin-right: 8px; }
+  .status-ic { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
+  .status-ic .icon { width: 16px; height: 16px; stroke-width: 2.5; }
+  .status-ic.done { color: var(--accent-strong); }
+  .status-ic.pending { color: var(--text-dim); }
+  .status-ic.warn { color: var(--action); }
+  .ss-done .icon, .ss-basic .icon, .ss-prog .icon, .ss-plan .icon {
+    width: 13px; height: 13px; vertical-align: -1px; margin-right: 3px; }
+  .ss-done { color: var(--accent-strong); } .ss-basic { color: #16a34a; }
+  .ss-prog { color: #f59e0b; } .ss-plan { color: var(--text-dim); }
+  .theme-toggle button .icon { width: 14px; height: 14px; margin-right: 4px; }
+  .report-toggle button .icon, .report-toggle .report-pptx-dl .icon {
+    width: 13px; height: 13px; margin-right: 5px; vertical-align: -1px; }
+  .rf-photo-icon .icon { width: 32px; height: 32px; }
+  .sheet-close .icon { width: 16px; height: 16px; }
+
+  /* 커스텀 tooltip — heatmap 등 즉시 표시 */
+  .custom-tooltip { position: fixed; z-index: 9999; pointer-events: none;
+    background: var(--text); color: var(--bg); padding: 10px 14px; border-radius: 8px;
+    font-size: 12px; line-height: 1.5; max-width: 320px;
+    opacity: 0; transform: translateY(-4px); transition: opacity .12s, transform .12s;
+    box-shadow: 0 4px 24px rgba(0,0,0,.18); }
+  .custom-tooltip.on { opacity: 1; transform: translateY(0); }
+  .custom-tooltip .ct-date { font-weight: 700; margin-bottom: 6px;
+    font-family: ui-monospace, monospace; font-size: 11.5px; }
+  .custom-tooltip .ct-count { color: rgba(255,255,255,.6); font-weight: 600; margin-left: 6px; }
+  .custom-tooltip .ct-list { margin: 0; padding-left: 16px; }
+  .custom-tooltip .ct-list li { margin-top: 2px; }
+  [data-theme="dark"] .custom-tooltip { background: var(--bg-elev); color: var(--text);
+    border: 1px solid var(--border-strong); }
+
+  /* R3 — Vision hero (Overview) — 재디자인 v4 (세련) */
+  .vision-hero { position: relative; overflow: hidden;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 18px;
+    padding: 36px 40px; display: grid; grid-template-columns: 1fr auto; gap: 32px; margin-bottom: 24px; }
+  .vision-hero::before { content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 0%, var(--accent-soft) 0%, transparent 55%);
+    opacity: .85; pointer-events: none; }
+  .vision-hero > * { position: relative; z-index: 1; }
+  .vh-left { min-width: 0; display: flex; flex-direction: column; }
+  .vh-left .eyebrow { display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--accent-strong); margin-bottom: 10px; }
+  .vh-left .eyebrow .icon { width: 14px; height: 14px; }
+  .vh-left .title { font-size: 34px; font-weight: 800; letter-spacing: -.8px; margin: 0; color: var(--text); line-height: 1.1; }
+  .vh-left .sub-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; max-width: 760px; }
+  .vh-left .sub-row { display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 14px; background: var(--bg-sub); border: 1px solid transparent;
+    border-left: 3px solid var(--accent); border-radius: 8px;
+    font-size: 13px; color: var(--text); line-height: 1.55; transition: background .15s; }
+  .vh-left .sub-row:hover { background: var(--bg-elev); }
+  .vh-left .sub-row .icon { width: 18px; height: 18px; color: var(--accent-strong); margin-top: 2px; }
   .vh-left .sub-row .tx { flex: 1; min-width: 0; }
   .vh-left .sub-row .tx b { color: var(--text); font-weight: 700; }
-  .vh-dday { background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
-    padding: 20px 26px; text-align: center; min-width: 170px;
+  .vh-dday { background: var(--text); color: var(--bg); border-radius: 16px;
+    padding: 22px 28px; text-align: center; min-width: 180px;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04); }
-  .vh-dday .l { font-size: 10px; color: var(--text-dim); letter-spacing: 1.8px; text-transform: uppercase; font-weight: 700; }
-  .vh-dday .n { font-size: 48px; font-weight: 800; color: var(--action); letter-spacing: -1.5px; line-height: 1; margin-top: 4px; }
-  .vh-dday .d { font-size: 11px; color: var(--text-dim); margin-top: 6px; font-family: ui-monospace, monospace; }
+    box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+  .vh-dday .l { display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; color: rgba(255,255,255,.55); letter-spacing: 1.6px; text-transform: uppercase; font-weight: 700; }
+  .vh-dday .l .icon { width: 12px; height: 12px; }
+  .vh-dday .n { font-size: 52px; font-weight: 800; color: var(--bg); letter-spacing: -2px; line-height: 1; margin-top: 6px; }
+  .vh-dday .d { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 8px; font-family: ui-monospace, monospace; }
+  [data-theme="dark"] .vh-dday { background: var(--accent); color: #0a0e14; box-shadow: 0 4px 24px rgba(0,179,119,.3); }
+  [data-theme="dark"] .vh-dday .l, [data-theme="dark"] .vh-dday .d { color: rgba(10,14,20,.55); }
+  [data-theme="dark"] .vh-dday .n { color: #0a0e14; }
 
   /* 진행률 바 — 진척 vs 시간 dual 라벨 + 그라데이션 */
-  .vh-progress { grid-column: 1 / -1; margin-top: 8px; background: var(--bg);
+  .vh-progress { grid-column: 1 / -1; margin-top: 12px; background: var(--bg-sub);
     border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; }
-  .vh-progress .top { display: flex; justify-content: space-between; align-items: baseline;
-    margin-bottom: 10px; gap: 16px; flex-wrap: wrap; }
-  .vh-progress .top .l { font-size: 11px; color: var(--text-dim); letter-spacing: 1.4px; text-transform: uppercase; font-weight: 700; }
-  .vh-progress .top .r { display: flex; gap: 24px; font-size: 12px; color: var(--text-sub); }
-  .vh-progress .top .r b { color: var(--text); font-weight: 800; font-size: 14px; margin-left: 4px; }
+  .vh-progress .top { display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px; gap: 16px; flex-wrap: wrap; }
+  .vh-progress .top .l { display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--text-dim); letter-spacing: 1.4px; text-transform: uppercase; font-weight: 700; }
+  .vh-progress .top .l .icon { width: 14px; height: 14px; }
+  .vh-progress .top .r { display: flex; gap: 20px; font-size: 12px; color: var(--text-sub); align-items: baseline; }
+  .vh-progress .top .r b { color: var(--text); font-weight: 800; font-size: 16px; margin-left: 6px; }
   .vh-progress .top .r .gap-ok b { color: var(--accent-strong); }
   .vh-progress .top .r .gap-warn b { color: var(--action); }
-  .vh-progress .bar { height: 22px; background: var(--bg-sub); border: 1px solid var(--border);
+  .vh-progress .bar { height: 18px; background: var(--bg); border: 1px solid var(--border);
     border-radius: 10px; overflow: hidden; position: relative; }
   .vh-progress .bar .fill { height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent-strong));
-    border-radius: 10px 0 0 10px; transition: width .4s; box-shadow: inset 0 -2px 0 rgba(0,0,0,.06); }
-  .vh-progress .bar .time-mark { position: absolute; top: -6px; bottom: -6px; width: 3px;
-    background: var(--text); border-radius: 2px; box-shadow: 0 0 0 2px var(--bg); }
-  .vh-progress .bar .time-mark::after { content: '⌃'; position: absolute; bottom: -18px;
-    left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text); }
-  .vh-progress .scale { display: flex; justify-content: space-between; margin-top: 8px;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-strong) 100%);
+    border-radius: 10px 0 0 10px; transition: width .4s;
+    position: relative; overflow: hidden; }
+  .vh-progress .bar .fill::after { content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+    transform: translateX(-100%); animation: shimmer 3s ease-in-out infinite; }
+  @keyframes shimmer { 50%, 100% { transform: translateX(100%); } }
+  .vh-progress .bar .time-mark { position: absolute; top: -5px; bottom: -5px; width: 2px;
+    background: var(--text); border-radius: 1px; box-shadow: 0 0 0 3px var(--bg-sub); }
+  .vh-progress .scale { display: flex; justify-content: space-between; margin-top: 10px;
     font-size: 10px; color: var(--text-dim); font-family: ui-monospace, monospace; letter-spacing: .5px; }
 
   /* 핵심 목표 — hero 와 별도 카드 영역 */
@@ -203,7 +259,8 @@
     padding: 20px 22px; display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center;
     transition: border-color .15s, box-shadow .15s; }
   .target-card:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(0,0,0,.04); }
-  .target-card .ic { font-size: 32px; line-height: 1; }
+  .target-card .ic { color: var(--accent-strong); display: flex; align-items: center; justify-content: center; }
+  .target-card .ic .icon { width: 32px; height: 32px; }
   .target-card .body .lbl { font-size: 13.5px; font-weight: 700; color: var(--text); letter-spacing: -.1px; }
   .target-card .body .ctx { font-size: 11.5px; color: var(--text-dim); margin-top: 4px; line-height: 1.5; }
   .target-card .num { text-align: right; }
@@ -485,7 +542,11 @@
   .tl-card .tl-detail .commit-line b { color: var(--text-sub); font-family: ui-monospace, monospace;
     padding: 1px 5px; background: var(--bg); border-radius: 3px; font-size: 10px; margin-right: 6px; }
   .tl-card .tl-detail .heal-line { padding: 3px 0; color: var(--action); }
-  .tl-card .tl-detail .heal-line::before { content: '🛟 '; }
+  .tl-card .tl-detail .heal-line { padding-left: 18px; position: relative; }
+  .tl-card .tl-detail .heal-line::before { content: ''; position: absolute; left: 2px; top: 6px;
+    width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .heal-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); vertical-align: 1px; margin: 0 2px; }
 
   /* PROG — 학습 진척 (영상 갤러리 hero 아래) */
   .training-block { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 12px;
@@ -1027,33 +1088,33 @@
     </div>
 
     <div class="nav">
-      <a class="nav-item active" data-route="home"><span class="ico">📊</span> Overview</a>
-      <a class="nav-item" data-route="tech"><span class="ico">🎓</span> CoP 리뷰</a>
-      <a class="nav-item" data-route="ops"><span class="ico">🤖</span> AI 자동화 운영</a>
-      <a class="nav-item" data-route="apps"><span class="ico">🗓</span> Phase 로드맵 <span class="count" id="cnt-apps">6</span></a>
-      <a class="nav-item" data-route="videos"><span class="ico">🎥</span> 시뮬 영상 <span class="count" id="cnt-videos">0</span></a>
-      <a class="nav-item" data-route="daily"><span class="ico">📅</span> 활동 타임라인 <span class="count" id="cnt-daily">0</span></a>
-      <a class="nav-item" data-route="magazines"><span class="ico">📋</span> 보고용 자료 <span class="count" id="cnt-magazines">0</span></a>
+      <a class="nav-item active" data-route="home" data-icon="dashboard"> Overview</a>
+      <a class="nav-item" data-route="tech" data-icon="bookOpen"> CoP 리뷰</a>
+      <a class="nav-item" data-route="ops" data-icon="bot"> AI 자동화 운영</a>
+      <a class="nav-item" data-route="apps" data-icon="calendar"> Phase 로드맵 <span class="count" id="cnt-apps">6</span></a>
+      <a class="nav-item" data-route="videos" data-icon="video"> 시뮬 영상 <span class="count" id="cnt-videos">0</span></a>
+      <a class="nav-item" data-route="daily" data-icon="activity"> 활동 타임라인 <span class="count" id="cnt-daily">0</span></a>
+      <a class="nav-item" data-route="magazines" data-icon="clipboard"> 보고용 자료 <span class="count" id="cnt-magazines">0</span></a>
     </div>
 
     <div class="nav-section-title nav-toggle" id="tools-toggle" onclick="toggleTools()">
       <span id="tools-caret">▾</span> 도구
     </div>
     <div class="nav" id="tools-nav">
-      <a class="nav-item" data-route="samples"><span class="ico">⚙</span> 샘플 코드 상태 <span class="count" id="cnt-samples">0</span></a>
-      <a class="nav-item" data-route="analytics"><span class="ico">📈</span> 분석</a>
-      <a class="nav-item" data-route="bookmarks"><span class="ico">★</span> 북마크 <span class="count" id="cnt-bookmarks">0</span></a>
-      <a class="nav-item" data-route="proposals"><span class="ico">≡</span> 시뮬 작업 <span class="count" id="cnt-proposals">0</span></a>
-      <a class="nav-item" data-route="blockers" style="display:none"><span class="ico">⚠</span> 외부 의존 <span class="count" id="cnt-blockers">0</span></a>
-      <a class="nav-item" data-route="decisions" style="display:none"><span class="ico">◈</span> 결정 <span class="count" id="cnt-decisions">0</span></a>
-      <a class="nav-item" id="nav-about" data-route="about"><span class="ico">◉</span> 사이트 설명</a>
-      <a class="nav-item" data-route="guide"><span class="ico">?</span> 사용가이드</a>
+      <a class="nav-item" data-route="samples" data-icon="code"> 샘플 코드 상태 <span class="count" id="cnt-samples">0</span></a>
+      <a class="nav-item" data-route="analytics" data-icon="barChart"> 분석</a>
+      <a class="nav-item" data-route="bookmarks" data-icon="star"> 북마크 <span class="count" id="cnt-bookmarks">0</span></a>
+      <a class="nav-item" data-route="proposals" data-icon="fileText"> 시뮬 작업 <span class="count" id="cnt-proposals">0</span></a>
+      <a class="nav-item" data-route="blockers" style="display:none" data-icon="alert"> 외부 의존 <span class="count" id="cnt-blockers">0</span></a>
+      <a class="nav-item" data-route="decisions" style="display:none" data-icon="bookmark"> 결정 <span class="count" id="cnt-decisions">0</span></a>
+      <a class="nav-item" id="nav-about" data-route="about" data-icon="globe"> 사이트 설명</a>
+      <a class="nav-item" data-route="guide" data-icon="bookOpen"> 사용가이드</a>
     </div>
 
     <div class="sidebar-foot">
       <div class="theme-toggle">
-        <button id="th-light" class="active" onclick="setTheme('light')">☀ Light</button>
-        <button id="th-dark" onclick="setTheme('dark')">☾ Dark</button>
+        <button id="th-light" class="active" onclick="setTheme('light')" data-icon="sun"> Light</button>
+        <button id="th-dark" onclick="setTheme('dark')" data-icon="moon"> Dark</button>
       </div>
     </div>
   </aside>
@@ -1064,20 +1125,21 @@
     <div class="view" id="view-home">
       <div class="vision-hero" id="vision-hero">
         <div class="vh-left">
+          <div class="eyebrow" data-icon="target" data-icon-after> CoP PHYSICAL AI</div>
           <h1 class="title" id="vh-title">—</h1>
           <div class="sub-list">
-            <div class="sub-row"><span class="ic">📋</span><span class="tx" id="vh-sub">—</span></div>
-            <div class="sub-row"><span class="ic">🤖</span><span class="tx" id="vh-sub2"></span></div>
+            <div class="sub-row" data-icon="clipboard"><span class="tx" id="vh-sub">—</span></div>
+            <div class="sub-row" data-icon="bot"><span class="tx" id="vh-sub2"></span></div>
           </div>
         </div>
         <div class="vh-dday">
-          <div class="l">기능 완성까지</div>
+          <div class="l" data-icon="clock" data-icon-after> 기능 완성까지</div>
           <div class="n" id="vh-dday">—</div>
           <div class="d" id="vh-demo-date">—</div>
         </div>
         <div class="vh-progress">
           <div class="top">
-            <div class="l">진행률</div>
+            <div class="l" data-icon="trendingUp" data-icon-after> 진행률</div>
             <div class="r" id="vh-progress-stats"></div>
           </div>
           <div class="bar">
@@ -1092,7 +1154,7 @@
 
       <div class="targets-section" id="targets-section">
         <div class="targets-header">
-          <h3>🎯 핵심 목표</h3>
+          <h3 data-icon="target" data-icon-after> 핵심 목표</h3>
           <span class="meta">2026-09 작업 완료 시점 평가 기준</span>
         </div>
         <div class="targets-grid" id="vh-targets"></div>
@@ -1188,7 +1250,7 @@
     <!-- OPS — AI 자동화 운영 방법 -->
     <div class="view hidden" id="view-ops">
       <div class="home-hero">
-        <h1>🤖 AI 자동화 운영 방법</h1>
+        <h1 data-icon="bot" data-icon-after> AI 자동화 운영 방법</h1>
         <div class="sub">수동 개입 없이 자율 운영되는 구조 — 로컬 Mac Mini 에서 Hermes AI 에이전트가 정해진 시각에 시뮬·테스트·보고를 자동 실행합니다.</div>
       </div>
 
@@ -1200,7 +1262,7 @@
       <!-- 2. 시스템 구성도 (트리) -->
       <div class="section-head"><h3>시스템 구성</h3><div class="right">단일 로컬 머신 운영</div></div>
       <div class="ops-tree">
-        <div class="root">💻 Mac Mini (24/7 가동)</div>
+        <div class="root" data-icon="monitor" data-icon-after> Mac Mini (24/7 가동)</div>
         <div class="branch">├─ <b>Hermes Agent</b><span class="desc">로컬 AI 에이전트 · Gemini 2.5 Flash 백엔드 (무료)</span></div>
         <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 1 · 매일 23:00</span><span class="desc">시뮬 환경 단계별 구축 (MuJoCo)</span></div>
         <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 2 · 매일 23:30</span><span class="desc">시뮬 테스트 + 메트릭 수집</span></div>
@@ -1297,7 +1359,7 @@
           <div class="f"><div class="l">권한</div><div class="v">gh CLI · git · file system · Python venv</div></div>
         </div>
         <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border); font-size:12px; color:var(--text-sub); line-height:1.7;">
-          <b style="color:var(--text)">자가치유 (Self-heal)</b> — 매 cron 작업 끝에 실패/차단 항목을 자동 기록. 예: Claude API rate limit · sandbox 권한 차단 · 파일 누락. <code>chore(self-heal)</code> commit 으로 남고, 다음 cron 에서 자동 재시도. 활동 타임라인의 🛟 아이콘이 자가치유 발생 일수.
+          <b style="color:var(--text)">자가치유 (Self-heal)</b> — 매 cron 작업 끝에 실패/차단 항목을 자동 기록. 예: Claude API rate limit · sandbox 권한 차단 · 파일 누락. <code>chore(self-heal)</code> commit 으로 남고, 다음 cron 에서 자동 재시도. 활동 타임라인의 <i class="heal-dot" aria-hidden="true"></i> 표시가 자가치유 발생 일수.
         </div>
       </div>
 
@@ -1323,7 +1385,7 @@
           <div class="step">git push</div>
         </div>
         <div class="row">
-          <div class="step start">📁 파일 변경</div>
+          <div class="step start" data-icon="folder" data-icon-after> 파일 변경</div>
           <span class="arrow">→</span>
           <div class="step">hermes-mark chokidar</div>
           <span class="arrow">→</span>
@@ -1331,16 +1393,16 @@
           <span class="arrow">→</span>
           <div class="step">WebSocket 푸시</div>
           <span class="arrow">→</span>
-          <div class="step end">🌐 브라우저 라이브 갱신</div>
+          <div class="step end" data-icon="globe" data-icon-after> 브라우저 라이브 갱신</div>
         </div>
         <div class="row">
-          <div class="step start">📝 Obsidian 월별 보고서</div>
+          <div class="step start" data-icon="edit" data-icon-after> Obsidian 월별 보고서</div>
           <span class="arrow">→</span>
           <div class="step"><code>build.py</code> 읽음</div>
           <span class="arrow">→</span>
           <div class="step">renderMarkdown</div>
           <span class="arrow">→</span>
-          <div class="step end">📋 보고용 자료 메뉴 임베드</div>
+          <div class="step end" data-icon="clipboard" data-icon-after> 보고용 자료 메뉴 임베드</div>
         </div>
       </div>
 
@@ -1366,7 +1428,7 @@
     <!-- TECH GUIDE -->
     <div class="view hidden" id="view-tech">
       <div class="home-hero">
-        <h1>🎓 CoP 리뷰</h1>
+        <h1 data-icon="bookOpen" data-icon-after> CoP 리뷰</h1>
         <div class="sub">사용 기술, 학습 방법, 의사결정 근거를 한 페이지에 정리했습니다.</div>
       </div>
 
@@ -1734,11 +1796,11 @@
       <div class="meta" id="sheet-meta">—</div>
       <h2 id="sheet-title">—</h2>
     </div>
-    <button class="btn sheet-close" onclick="closeSheet()">✕</button>
+    <button class="btn sheet-close" onclick="closeSheet()" aria-label="닫기" data-icon="close"></button>
   </div>
   <div class="sheet-body" id="sheet-body">—</div>
   <div class="sheet-actions">
-    <button class="btn" id="sheet-bm-btn" onclick="toggleSheetBookmark()">★ 북마크</button>
+    <button class="btn" id="sheet-bm-btn" onclick="toggleSheetBookmark()"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 북마크</button>
     <button class="btn action" onclick="toggleMemo()">메모</button>
     <a class="btn primary" id="sheet-source" target="_blank" style="margin-left:auto">소스 파일 →</a>
   </div>
@@ -1877,6 +1939,50 @@ function setTheme(mode) {
 })();
 
 /* ====== ROUTING ====== */
+/* ====== Icons (lucide-style, stroke-based) ====== */
+const ICONS = {
+  // Navigation
+  dashboard: '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>',
+  bookOpen: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  bot: '<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/>',
+  calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  video: '<path d="m22 8-6 4 6 4V8z"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
+  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  clipboard: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/>',
+  code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+  barChart: '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  alert: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+  moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  // Hero / KPI / Targets
+  target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  trendingUp: '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+  cpu: '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/>',
+  fileText: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>',
+  wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  plug: '<path d="M9 2v6M15 2v6M6 8h12v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8zM10 16v6M14 16v6"/>',
+  // Misc
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  camera: '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+  close: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  check: '<polyline points="20 6 9 17 4 12"/>',
+  circle: '<circle cx="12" cy="12" r="9"/>',
+  hourglass: '<path d="M5 22h14M5 2h14M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22M17 2v4.172a2 2 0 0 1-.586 1.414L12 12 7.586 7.586A2 2 0 0 1 7 6.172V2"/>',
+  lifeBuoy: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/>',
+  monitor: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+  folder: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+  globe: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>',
+  bookmark: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+};
+function icon(name, cls = '') {
+  const path = ICONS[name] || '';
+  return `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+}
+
 const ROUTES = ['home', 'tech', 'ops', 'apps', 'videos', 'proposals', 'daily', 'magazines',
                 'blockers', 'samples', 'decisions',
                 'bookmarks', 'analytics', 'about', 'guide'];
@@ -2116,7 +2222,7 @@ function closeSheet() {
 function updateSheetBmLabel() {
   if (!sheetItem) return;
   const on = isBookmarked(sheetItem.item.id);
-  document.getElementById('sheet-bm-btn').textContent = on ? '★ 북마크 해제' : '☆ 북마크';
+  document.getElementById('sheet-bm-btn').innerHTML = (on ? icon('star') + ' 북마크 해제' : icon('star') + ' 북마크');
 }
 function toggleSheetBookmark() {
   if (!sheetItem) return;
@@ -2169,7 +2275,7 @@ function renderProposalCard(p) {
   const bm = isBookmarked(p.id);
   const sb = statusBadge(p.id);
   return `<div class="card ${p.is_develop ? 'is-dev' : 'is-new'}" data-id="${p.id}">
-    <div class="bm-btn ${bm ? 'on' : ''}" data-bm="${p.id}">${bm ? '★' : '☆'}</div>
+    <div class="bm-btn ${bm ? 'on' : ''}" data-bm="${p.id}" aria-label="북마크">${icon('star')}</div>
     <div class="meta">
       <span class="tag ${p.is_develop ? 'dev' : 'new'}">${p.is_develop ? 'DEVELOP' : 'NEW'}</span>
       <span class="app">${escapeHtml(p.app_display)}</span>
@@ -2881,9 +2987,9 @@ function renderReportBody() {
     </div>
     ${hasForm ? `
       <div class="report-toggle">
-        <button class="${mode==='form'?'on':''}" onclick="setReportViewMode('form')">📋 폼 양식</button>
-        <button class="${mode==='md'?'on':''}" onclick="setReportViewMode('md')">📝 원문 (마크다운)</button>
-        <a class="report-pptx-dl" href="/api/projects/cop-physical-ai/report-pptx?month=${escapeHtml(r.month || '')}" download>📥 pptx 다운로드</a>
+        <button class="${mode==='form'?'on':''}" onclick="setReportViewMode('form')">${icon('clipboard')} 폼 양식</button>
+        <button class="${mode==='md'?'on':''}" onclick="setReportViewMode('md')">${icon('fileText')} 원문 (마크다운)</button>
+        <a class="report-pptx-dl" href="/api/projects/cop-physical-ai/report-pptx?month=${escapeHtml(r.month || '')}" download>${icon('download')} pptx 다운로드</a>
       </div>
     ` : ''}
     ${notice}
@@ -3069,7 +3175,7 @@ function renderReportForm(f) {
             ${isStored ? `<div class="rf-photo-source">로컬 임시 저장 (이 브라우저에서만 표시)</div>` : ''}
           </div>`
         : `<div class="rf-photo-placeholder" data-dropzone="site-image" data-month="${escapeHtml(f.month || '')}">
-            <div class="rf-photo-icon">📷</div>
+            <div class="rf-photo-icon">${icon('camera')}</div>
             <b>사진 자리 — 드래그앤드롭 또는 클릭하여 업로드</b>
             <div>이 브라우저에만 임시 저장됩니다 (localStorage). 영구 보존하려면 frontmatter <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:ui-monospace,monospace;font-size:11px;">site_image:</code> 필드에 경로 추가.</div>
             <div class="rf-drop-hint">JPG/PNG/WebP · 최대 ~2MB 권장</div>
@@ -3089,7 +3195,7 @@ function renderReportBlockers() {
   if (!items.length) { wrap.innerHTML = '<div class="empty" style="padding:20px;">외부 의존 없음.</div>'; return; }
   wrap.innerHTML = items.slice(0, 6).map(b => `
     <div style="display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); align-items:flex-start;">
-      <div style="font-size:14px;">${b.checked ? '✅' : '⏳'}</div>
+      <div class="status-ic ${b.checked ? 'done' : 'pending'}">${icon(b.checked ? 'check' : 'hourglass')}</div>
       <div style="flex:1; min-width:0;">
         <div style="font-weight:600; font-size:13px;">${escapeHtml(b.title || '')}</div>
         <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">
@@ -3150,7 +3256,7 @@ function renderBlockers() {
   if (!items.length) { rows.innerHTML = '<div class="empty">외부 의존 항목 없음.</div>'; return; }
   rows.innerHTML = items.map(b => `
     <div class="row" style="display:flex; gap:12px; align-items:flex-start; padding:10px 12px;">
-      <div style="flex:0 0 24px; font-size:18px;">${b.checked ? '✅' : '⚠️'}</div>
+      <div class="status-ic ${b.checked ? 'done' : 'warn'}">${icon(b.checked ? 'check' : 'alert')}</div>
       <div style="flex:1; min-width:0;">
         <div style="font-weight:600;">${escapeHtml(b.title || '')}</div>
         <div style="font-size:12px; color:var(--text-sub); margin-top:4px;">
@@ -3171,8 +3277,10 @@ function renderSamples() {
   const summaryHtml = Object.entries(samples.summary || {}).map(([cat, counts]) =>
     `<div class="row" style="padding:6px 12px; display:flex; gap:14px; font-size:13px;">
        <b style="flex:0 0 130px;">${escapeHtml(cat)}/</b>
-       <span>✅ 완성 ${counts[0]}</span><span>🟢 기본 ${counts[1]}</span>
-       <span>🟡 진행 ${counts[2]}</span><span>📋 계획 ${counts[3]}</span>
+       <span class="ss-done">${icon('check')} 완성 ${counts[0]}</span>
+       <span class="ss-basic">${icon('circle')} 기본 ${counts[1]}</span>
+       <span class="ss-prog">${icon('clock')} 진행 ${counts[2]}</span>
+       <span class="ss-plan">${icon('clipboard')} 계획 ${counts[3]}</span>
      </div>`).join('');
   const filesHtml = (samples.files || []).map(f =>
     `<div class="row" style="display:flex; gap:12px; padding:8px 12px; border-top:1px solid var(--border); align-items:center;">
@@ -3223,7 +3331,7 @@ function renderHome() {
     if (tgSection) tgSection.style.display = targets.length ? '' : 'none';
     tgEl.innerHTML = targets.map(t => `
       <div class="target-card">
-        <div class="ic">${escapeHtml(t.icon || '🎯')}</div>
+        <div class="ic">${icon(t.icon || 'target', 'icon-xl')}</div>
         <div class="body">
           <div class="lbl">${escapeHtml(t.label || '')}</div>
           <div class="ctx">${escapeHtml(t.context || '')}</div>
@@ -3333,20 +3441,29 @@ function drawHeatmap() {
   if (!root) return;
   const data = (D.stats && D.stats.heatmap) || [];
   if (!data.length) { root.innerHTML = '<div class="empty" style="padding:30px">데이터 없음</div>'; return; }
-  root.innerHTML = data.map(v => {
-    // v 가 {date,count,level,items} 객체이거나 옛 int 형식이거나 — 둘 다 호환
+  // 각 셀에 데이터 JSON 으로 저장 (커스텀 tooltip 용). int 형식 호환.
+  root.innerHTML = data.map((v, i) => {
     if (typeof v === 'number') {
       const lvl = v === 0 ? '' : `l${Math.min(v, 4)}`;
       return `<div class="hm-cell ${lvl}"></div>`;
     }
     const lvl = (v.level || 0) === 0 ? '' : `l${v.level}`;
-    // items 가 있을 때만 native title (tooltip). 없으면 hover 시 아무것도 안 뜸.
-    const tip = (v.items && v.items.length)
-      ? `${v.date} · ${v.count}건\n${v.items.map(s => '• ' + s).join('\n')}`
-      : '';
-    const titleAttr = tip ? ` title="${escapeHtml(tip)}"` : '';
-    return `<div class="hm-cell ${lvl}"${titleAttr}></div>`;
+    const hasItems = v.items && v.items.length;
+    return `<div class="hm-cell ${lvl}${hasItems ? ' has-tip' : ''}" data-hmi="${i}"></div>`;
   }).join('');
+  // 즉시 표시되는 커스텀 tooltip (native title 의 1-2초 delay 제거)
+  root.querySelectorAll('.hm-cell.has-tip').forEach(cell => {
+    cell.addEventListener('mouseenter', () => {
+      const v = data[+cell.dataset.hmi];
+      if (!v || !v.items) return;
+      const html = `
+        <div class="ct-date">${escapeHtml(v.date)} <span class="ct-count">${v.count}건</span></div>
+        <ul class="ct-list">${v.items.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+      `;
+      showTooltip(cell, html);
+    });
+    cell.addEventListener('mouseleave', hideTooltip);
+  });
 }
 
 function drawAppBar(target) {
@@ -3489,6 +3606,45 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeSheet();
 });
 
+/* ====== Icon mount (data-icon attr → SVG prepend/append) ====== */
+function mountIcons(root) {
+  root = root || document;
+  root.querySelectorAll('[data-icon]:not([data-icon-mounted])').forEach(el => {
+    const name = el.dataset.icon;
+    const after = el.hasAttribute('data-icon-after') || el.dataset.iconAfter !== undefined;
+    const svg = icon(name);
+    if (after) el.insertAdjacentHTML('afterbegin', svg);
+    else el.insertAdjacentHTML('afterbegin', svg);
+    el.setAttribute('data-icon-mounted', '');
+  });
+}
+
+/* ====== Custom tooltip (heatmap, future hover) ====== */
+let __tooltipEl = null;
+function ensureTooltip() {
+  if (__tooltipEl) return __tooltipEl;
+  __tooltipEl = document.createElement('div');
+  __tooltipEl.className = 'custom-tooltip';
+  document.body.appendChild(__tooltipEl);
+  return __tooltipEl;
+}
+function showTooltip(target, html) {
+  const tt = ensureTooltip();
+  tt.innerHTML = html;
+  tt.classList.add('on');
+  const r = target.getBoundingClientRect();
+  const ttR = tt.getBoundingClientRect();
+  let left = r.left + r.width / 2 - ttR.width / 2;
+  left = Math.max(8, Math.min(window.innerWidth - ttR.width - 8, left));
+  let top = r.top - ttR.height - 10;
+  if (top < 8) top = r.bottom + 10;  // 위 공간 없으면 아래로
+  tt.style.left = left + 'px';
+  tt.style.top = top + 'px';
+}
+function hideTooltip() {
+  if (__tooltipEl) __tooltipEl.classList.remove('on');
+}
+
 /* ====== Init ====== */
 function initCounts() {
   document.getElementById('cnt-proposals').textContent = D.proposals.length;
@@ -3500,6 +3656,7 @@ function initCounts() {
 }
 
 initCounts();
+mountIcons();
 applyAboutVisibility();
 renderProposals();
 renderDaily();
