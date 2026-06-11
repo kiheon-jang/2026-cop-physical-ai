@@ -1822,17 +1822,17 @@ function trainingStartTextOrStatus() {
   return '학습 시작 대기 (시작 일정은 Phase 로드맵 참조)';
 }
 function currentPhaseHint() {
-  // explainer "지금 단계" 동적 텍스트
+  // explainer "지금 단계" 동적 텍스트 (라벨은 외부에서 붙임 → 본문만 반환)
   const kpi = D.business_kpi || {};
   const s = getTrainingStatus();
   const phaseBiz = kpi.current_phase_business || kpi.current_phase_label || '진행 중';
   if (s === 'running') {
-    return `지금 단계: ${phaseBiz}. ACT 학습이 진행 중이며, 매 epoch 마다 새 inference 영상과 메트릭이 아래 "학습 진척" 섹션에 자동 누적됩니다.`;
+    return `${phaseBiz}. ACT 학습이 진행 중이며, 매 epoch 마다 새 inference 영상과 메트릭이 아래 "학습 진척" 섹션에 자동 누적됩니다.`;
   }
   if (s === 'paused') {
-    return `지금 단계: ${phaseBiz}. ACT 학습이 일시 중지 상태입니다. 최신 메트릭은 아래 "학습 진척" 섹션 참조.`;
+    return `${phaseBiz}. ACT 학습이 일시 중지 상태입니다. 최신 메트릭은 아래 "학습 진척" 섹션 참조.`;
   }
-  return `지금 단계: ${phaseBiz}. ACT 학습이 시작되면 아래 "학습 진척" 섹션에 매일 새 inference 영상과 메트릭이 자동 누적됩니다.`;
+  return `${phaseBiz}. ACT 학습이 시작되면 아래 "학습 진척" 섹션에 매일 새 inference 영상과 메트릭이 자동 누적됩니다.`;
 }
 function simVideoCaveat() {
   // explainer "유의" — 학습 시작 후엔 컨텍스트 전환
@@ -2519,12 +2519,11 @@ function renderVideos() {
     }
   }
 
-  // 0) Explainer 박스 동적 채움 (DYN-2)
+  // 0) Explainer 박스 동적 채움 (DYN-2) — 라벨은 대시, 본문 콜론 그대로
   const explNow = document.getElementById('video-explainer-now');
-  if (explNow) explNow.innerHTML = `<b>지금 단계</b>: ${escapeHtml(currentPhaseHint().replace(/^지금 단계: /, ''))}`;
+  if (explNow) explNow.innerHTML = `<b>지금 단계</b> — ${escapeHtml(currentPhaseHint())}`;
   const explCav = document.getElementById('video-explainer-caveat');
   if (explCav) {
-    // Phase 2 (7월) 상태에 따라 두 번째 문장 동적
     const phase2Status = phaseStatusByMonth('2026-07');
     let phase2Note;
     if (phase2Status === '완료') {
@@ -2534,7 +2533,7 @@ function renderVideos() {
     } else {
       phase2Note = '실기 로봇팔 검증은 Phase 2 (7월) 예정.';
     }
-    explCav.innerHTML = `<b>유의</b>: ${simVideoCaveat()} ${phase2Note}`;
+    explCav.innerHTML = `<b>유의</b> — ${simVideoCaveat()} ${phase2Note}`;
   }
 
   // 1.5) 학습 진척 (PROG) — 메트릭 차트 + inference 영상
