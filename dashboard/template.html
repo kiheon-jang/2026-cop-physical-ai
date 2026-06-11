@@ -256,6 +256,99 @@
   .phase-card-v2 .report-link { font-size: 12px; color: var(--accent-strong); cursor: pointer; font-weight: 600; }
   .phase-card-v2 .report-link:hover { text-decoration: underline; }
 
+  /* FORM-3/4 — 보고서 폼 양식 (pptx 형식) */
+  .report-toggle { display: inline-flex; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 3px; gap: 2px; margin-bottom: 14px; }
+  .report-toggle button { border: none; padding: 6px 14px; border-radius: 6px;
+    background: transparent; cursor: pointer; font-size: 12px; font-weight: 600;
+    color: var(--text-sub); font-family: inherit; }
+  .report-toggle button.on { background: var(--accent); color: #fff; }
+
+  .rf-block { background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 22px 24px; margin-bottom: 16px; }
+  .rf-block.cover { background: linear-gradient(135deg, var(--accent-soft), var(--bg-sub)); }
+
+  .rf-cover .rf-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11px;
+    color: var(--text-dim); margin-bottom: 8px; letter-spacing: .3px; }
+  .rf-cover .rf-meta .rf-badge { background: var(--accent); color: #fff; padding: 2px 8px;
+    border-radius: 4px; font-weight: 800; }
+  .rf-cover h2 { margin: 0 0 4px; font-size: 24px; font-weight: 800; letter-spacing: -.6px; color: var(--text); }
+  .rf-cover .rf-sub { font-size: 13px; color: var(--text-sub); line-height: 1.6; margin-bottom: 16px; }
+
+  .rf-status { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 14px; }
+  .rf-status .rf-state-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+  .rf-status .rf-state-label { font-size: 11px; font-weight: 800; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--text-dim); }
+  .rf-status .rf-state-text { font-size: 14px; font-weight: 700; color: var(--text); flex: 1; min-width: 0; }
+  .rf-status .rf-pct { font-size: 22px; font-weight: 800; color: var(--accent-strong);
+    font-family: ui-monospace, monospace; letter-spacing: -.5px; }
+  .rf-status .rf-progress { height: 8px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 5px; overflow: hidden; margin: 8px 0; }
+  .rf-status .rf-progress .pf { height: 100%; background: var(--accent); border-radius: 4px; }
+  .rf-status .rf-weeks-label { font-size: 11px; color: var(--text-dim); font-family: ui-monospace, monospace; }
+  .rf-status .rf-detail { font-size: 13px; color: var(--text-sub); line-height: 1.65; margin-top: 8px; }
+
+  .rf-achievements { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .rf-ach { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .rf-ach .rf-ach-title { font-size: 11px; font-weight: 800; color: var(--accent-strong);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .rf-ach .rf-ach-value { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.5; }
+
+  .rf-section-h { font-size: 16px; font-weight: 800; letter-spacing: -.2px; margin: 0 0 14px; color: var(--text); }
+  .rf-section-h::before { content: '▌'; color: var(--accent); margin-right: 8px; }
+
+  .rf-overview-table { width: 100%; border-collapse: collapse; }
+  .rf-overview-table tr td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .rf-overview-table tr td:first-child { width: 130px; font-weight: 700; color: var(--text-dim);
+    font-size: 11px; letter-spacing: 1px; text-transform: uppercase; vertical-align: top; }
+  .rf-overview-table tr td:last-child { color: var(--text); line-height: 1.55; }
+  .rf-overview-table tr:last-child td { border-bottom: none; }
+
+  .rf-activity-summary { font-size: 13px; color: var(--text-sub); line-height: 1.7;
+    padding-left: 14px; border-left: 3px solid var(--accent); margin-bottom: 14px; }
+  .rf-activity-summary b { color: var(--text); }
+  .rf-final-goal { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px;
+    font-size: 13px; color: var(--accent-strong); margin-bottom: 14px; }
+  .rf-final-goal b { font-weight: 800; }
+
+  .rf-weeks-table { width: 100%; border-collapse: collapse; }
+  .rf-weeks-table th, .rf-weeks-table td { padding: 9px 12px; font-size: 12px;
+    border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+  .rf-weeks-table th { background: var(--bg-sub); font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text-dim); font-size: 10px; }
+  .rf-weeks-table td:first-child { font-weight: 700; color: var(--text); white-space: nowrap; width: 70px; }
+  .rf-weeks-table td:nth-child(2) { color: var(--text-dim); font-family: ui-monospace, monospace;
+    white-space: nowrap; width: 130px; font-size: 11px; }
+  .rf-weeks-table td:last-child { color: var(--text-sub); line-height: 1.55; }
+  .rf-weeks-table tr:last-child td { border-bottom: none; }
+
+  .rf-next-period { font-size: 12px; color: var(--text-dim); margin-bottom: 14px;
+    font-family: ui-monospace, monospace; }
+  .rf-category { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 10px; }
+  .rf-category .rf-cat-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .rf-category .rf-cat-label { font-size: 14px; font-weight: 700; color: var(--text); }
+  .rf-category .rf-cat-state { font-size: 10px; font-weight: 800; letter-spacing: 1.2px;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 3px; margin-left: auto; }
+  .rf-category .rf-cat-state.예정 { background: var(--bg); color: var(--text-dim); border: 1px solid var(--border); }
+  .rf-category .rf-cat-state.진행중 { background: rgba(37,99,235,.14); color: #2563eb; }
+  .rf-category .rf-cat-state.완료 { background: rgba(34,197,94,.14); color: #16a34a; }
+  .rf-category .rf-items { display: flex; flex-direction: column; gap: 8px; }
+  .rf-category .rf-item { font-size: 13px; color: var(--text); line-height: 1.55; padding-left: 14px; position: relative; }
+  .rf-category .rf-item::before { content: '·'; position: absolute; left: 0; top: 0;
+    color: var(--accent); font-weight: 800; font-size: 18px; line-height: 1; }
+  .rf-category .rf-item b { font-weight: 700; }
+  .rf-category .rf-item .rf-item-desc { color: var(--text-sub); font-size: 12px; line-height: 1.55; margin-top: 2px; }
+
+  .rf-photo-placeholder { background: var(--bg-sub); border: 2px dashed var(--border-strong);
+    border-radius: 10px; padding: 40px 20px; text-align: center; color: var(--text-dim); font-size: 13px; }
+  .rf-photo-placeholder .rf-photo-icon { font-size: 32px; color: var(--text-dim); opacity: .4; margin-bottom: 8px; }
+  .rf-photo-placeholder b { color: var(--text-sub); display: block; margin-bottom: 4px; font-size: 14px; }
+  .rf-photo-caption { font-size: 13px; color: var(--text-sub); margin-top: 10px; line-height: 1.55; font-style: italic; }
+  .rf-photo img { width: 100%; max-height: 400px; object-fit: contain; border-radius: 10px;
+    background: var(--bg); border: 1px solid var(--border); }
+
   /* R3-5 — 보고용 자료 (Obsidian 임베드) */
   .report-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 10px; margin-bottom: 22px; }
@@ -2706,6 +2799,11 @@ function openReport(id) {
   selectReport(id);
   document.getElementById('report-body')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+let REPORT_VIEW_MODE = 'form';  // 'form' | 'md'
+function setReportViewMode(mode) {
+  REPORT_VIEW_MODE = mode;
+  renderReportBody();
+}
 function renderReportBody() {
   const body = document.getElementById('report-body');
   if (!body) return;
@@ -2723,15 +2821,143 @@ function renderReportBody() {
         <b style="color:var(--text);">예정 목표 보고서</b> · 이 보고서는 진행 전 작성된 목표 초안입니다. 해당 월 진행 후 실제 결과로 수정·보완 필요.
       </div>`
     : '';
-  body.innerHTML = `
+
+  // 폼 데이터가 충분히 있는지 확인 (status 또는 weeks 또는 achievements 가 있어야 폼 모드)
+  const form = r.form || {};
+  const hasForm = !!(form.status || (form.weeks && form.weeks.length) || (form.achievements && form.achievements.length));
+  const mode = hasForm ? REPORT_VIEW_MODE : 'md';
+
+  // 헤더 + 토글
+  const head = `
     <div class="rh-head">
       <span class="month">${escapeHtml(r.month || '')}</span>
       <span class="title">${escapeHtml(r.title || '')}</span>
       <span class="path">${escapeHtml((r.path || '').split('/').slice(-2).join('/'))}</span>
     </div>
+    ${hasForm ? `
+      <div class="report-toggle">
+        <button class="${mode==='form'?'on':''}" onclick="setReportViewMode('form')">📋 폼 양식</button>
+        <button class="${mode==='md'?'on':''}" onclick="setReportViewMode('md')">📝 원문 (마크다운)</button>
+      </div>
+    ` : ''}
     ${notice}
-    <div class="md-body">${renderMarkdown(r.body_md || '')}</div>
   `;
+
+  const content = (mode === 'form' && hasForm)
+    ? renderReportForm(form)
+    : `<div class="md-body">${renderMarkdown(r.body_md || '')}</div>`;
+
+  body.innerHTML = head + content;
+}
+
+function renderReportForm(f) {
+  // 1) 표지 + 활동현황 + 주요 성과
+  const status = f.status || {};
+  const ovw = f.overview || {};
+  const pct = status.progress_pct != null ? status.progress_pct : 0;
+  const monthNum = (f.month || '').slice(-2).replace(/^0/, '');
+  const achievements = (f.achievements || []).map(a => `
+    <div class="rf-ach">
+      <div class="rf-ach-title">${escapeHtml(a.title || '')}</div>
+      <div class="rf-ach-value">${escapeHtml(a.value || '')}</div>
+    </div>`).join('');
+  const cover = `
+    <div class="rf-block cover rf-cover">
+      <div class="rf-meta">
+        <span class="rf-badge">${escapeHtml(monthNum || f.month || '')}월</span>
+        <span>보고 기간: ${escapeHtml(f.period || '')}</span>
+        <span>${escapeHtml(f.report_round || '')}</span>
+      </div>
+      <h2>${escapeHtml(f.title || '')} — ${escapeHtml(monthNum || '')}월</h2>
+      ${f.subtitle ? `<div class="rf-sub">${escapeHtml(f.subtitle)}</div>` : ''}
+      <div class="rf-status">
+        <div class="rf-state-row">
+          <span class="rf-state-label">활동 현황</span>
+          <span class="rf-state-text">${escapeHtml(status.state || '—')}</span>
+          <span class="rf-pct">${pct}%</span>
+        </div>
+        <div class="rf-progress"><div class="pf" style="width:${pct}%"></div></div>
+        <div class="rf-weeks-label">${escapeHtml(status.progress_weeks || '')}</div>
+        ${status.detail ? `<div class="rf-detail">${escapeHtml(status.detail)}</div>` : ''}
+      </div>
+      ${achievements ? `
+        <h3 class="rf-section-h" style="margin-top:6px;">주요 성과</h3>
+        <div class="rf-achievements">${achievements}</div>
+      ` : ''}
+    </div>`;
+
+  // 2) CoP 개요 표
+  const overview = `
+    <div class="rf-block">
+      <h3 class="rf-section-h">CoP 개요</h3>
+      <table class="rf-overview-table">
+        <tr><td>CoP 명칭</td><td>${escapeHtml(ovw.cop_name || f.title || '')}</td></tr>
+        <tr><td>보고 기간</td><td>${escapeHtml(f.period || '')}</td></tr>
+        <tr><td>보고 회차</td><td>${escapeHtml(f.report_round || '')}</td></tr>
+        <tr><td>활동 주제</td><td>${escapeHtml(ovw.activity_topic || '')}</td></tr>
+        <tr><td>최종 목표</td><td>${escapeHtml(ovw.final_goal || '')}</td></tr>
+      </table>
+    </div>`;
+
+  // 3) N월 활동 및 성과
+  const weeksRows = (f.weeks || []).map(w => `
+    <tr>
+      <td>${escapeHtml(w.week || '')}</td>
+      <td>${escapeHtml(w.date || '')}</td>
+      <td>${escapeHtml(w.content || '')}</td>
+    </tr>`).join('');
+  const activity = `
+    <div class="rf-block">
+      <h3 class="rf-section-h">${escapeHtml(monthNum || '')}월 활동 및 성과</h3>
+      ${f.activity_summary ? `<div class="rf-activity-summary">${escapeHtml(f.activity_summary)}</div>` : ''}
+      ${ovw.final_goal ? `<div class="rf-final-goal"><b>최종 목표.</b> ${escapeHtml(ovw.final_goal)}</div>` : ''}
+      ${weeksRows ? `
+        <table class="rf-weeks-table">
+          <thead><tr><th>주차</th><th>일자</th><th>활동 내용</th></tr></thead>
+          <tbody>${weeksRows}</tbody>
+        </table>
+      ` : ''}
+    </div>`;
+
+  // 4) 차월 계획
+  const nm = f.next_month || {};
+  const categories = (nm.categories || []).map(c => {
+    const items = (c.items || []).map(it => `
+      <div class="rf-item">
+        <b>${escapeHtml(it.title || '')}</b>
+        ${it.desc ? `<div class="rf-item-desc">${escapeHtml(it.desc)}</div>` : ''}
+      </div>`).join('');
+    return `
+      <div class="rf-category">
+        <div class="rf-cat-head">
+          <span class="rf-cat-label">${escapeHtml(c.label || '')}</span>
+          <span class="rf-cat-state ${escapeHtml(c.state || '예정')}">${escapeHtml(c.state || '예정')}</span>
+        </div>
+        <div class="rf-items">${items}</div>
+      </div>`;
+  }).join('');
+  const nextPlan = nm.title ? `
+    <div class="rf-block">
+      <h3 class="rf-section-h">${escapeHtml(nm.title)}</h3>
+      ${nm.period ? `<div class="rf-next-period">계획 기간: ${escapeHtml(nm.period)}</div>` : ''}
+      ${categories}
+    </div>` : '';
+
+  // 5) 활동 현장 사진
+  const sitePhoto = `
+    <div class="rf-block">
+      <h3 class="rf-section-h">활동 현장 사진</h3>
+      ${f.site_image
+        ? `<div class="rf-photo"><img src="${escapeHtml(f.site_image)}" alt="활동 현장"></div>`
+        : `<div class="rf-photo-placeholder">
+            <div class="rf-photo-icon">📷</div>
+            <b>사진 자리 — 퍼블리시 후 붙여넣기</b>
+            <div>frontmatter <code style="background:var(--bg);padding:1px 5px;border-radius:3px;font-family:ui-monospace,monospace;font-size:11px;">site_image:</code> 필드에 이미지 경로 추가</div>
+          </div>`}
+      ${f.site_caption ? `<div class="rf-photo-caption">${escapeHtml(f.site_caption)}</div>` : ''}
+    </div>`;
+
+  return cover + overview + activity + nextPlan + sitePhoto;
 }
 function renderReportBlockers() {
   const wrap = document.getElementById('report-blockers');

@@ -603,10 +603,52 @@ def build_business_kpi(phases: list[dict]) -> dict:
     }
 
 
+def _parse_frontmatter(text: str) -> tuple[dict, str]:
+    """YAML frontmatter 파서 — PyYAML 사용 (3rd-party 의존성 1개 추가).
+
+    형식:
+      ---
+      <yaml content>
+      ---
+      <body>
+
+    반환: (frontmatter_dict, body_without_frontmatter)
+    프론트매터 없으면 ({}, text). 파싱 실패 시 raw text 그대로 반환.
+    """
+    if not text.startswith("---\n"):
+        return {}, text
+    end = text.find("\n---", 4)
+    if end < 0:
+        return {}, text
+    raw = text[4:end]
+    body = text[end + 4:].lstrip("\n")
+    try:
+        import yaml
+        from datetime import date, datetime as _dt
+        data = yaml.safe_load(raw)
+        if not isinstance(data, dict):
+            return {}, body
+        # date/datetime → ISO string (JSON 직렬화 안전화)
+        def _norm(v):
+            if isinstance(v, (date, _dt)):
+                return v.isoformat()
+            if isinstance(v, dict):
+                return {k: _norm(vv) for k, vv in v.items()}
+            if isinstance(v, list):
+                return [_norm(x) for x in v]
+            return v
+        return _norm(data), body
+    except Exception:
+        return {}, body
+
+
 def build_monthly_reports() -> list[dict]:
     """Obsidian 03 Areas/회사문서/CoP_PhysicalAI/CoP_*_활동보고서.md 풀 임베드.
 
     같은 month 에 여러 파일 (예: 4월 v1 + v20260427) 있으면 mtime 최신 1건만 노출.
+
+    FORM-1: YAML frontmatter 있으면 form 필드로 emit (대시보드 폼 양식 렌더용).
+    frontmatter 없으면 form=None, 기존 body_md 만 노출 (마크다운 fallback).
     """
     if not OBSIDIAN_REPORT_DIR.exists():
         return []
@@ -624,13 +666,15 @@ def build_monthly_reports() -> list[dict]:
         text = read_text(f, limit=40_000)
         if not text:
             continue
+        form, body = _parse_frontmatter(text)
         out.append({
             "id": make_id("report", f.name),
             "month": month,
-            "title": first_h1(text) or f.stem,
+            "title": first_h1(body or text) or f.stem,
             "filename": f.name,
-            "excerpt": excerpt(text, 400),
-            "body_md": text,  # 풀 마크다운 (JS 가 lightweight render)
+            "excerpt": excerpt(body or text, 400),
+            "body_md": body or text,  # frontmatter 제외한 본문 (없으면 전체)
+            "form": form if form else None,  # FORM-1: 폼 양식 데이터
             "path": str(f),
             "size_bytes": len(text),
         })
