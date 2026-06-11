@@ -78,7 +78,7 @@ PHASE_META: list[dict] = [
 PROJECT_VISION = {
     "title": "CoP Physical AI",
     "subtitle": "SO-ARM101 로봇팔 + MuJoCo 시뮬 기반 PCB 픽앤플레이스 모방학습 (Embodied AI 내재화)",
-    "subtitle_secondary": "로컬 Mac Mini 24시간 가동 + Hermes Agent cron 4건 자율 운영 (수동 개입 없음)",
+    "subtitle_secondary": "AI 자동화 운영 — 매일 23시 시뮬 빌드 · 23시 30분 학습 테스트 · 07시 일일 보고 · 일요 주간 정리",
     "demo_date": "2026-10-31",
     "completion_date": "2026-09-30",  # 작업 완료 기준 (D-day 표시)
     "start_date": "2026-04-01",
