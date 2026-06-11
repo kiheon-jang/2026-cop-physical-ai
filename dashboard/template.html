@@ -186,41 +186,35 @@
   [data-theme="dark"] .custom-tooltip { background: var(--bg-elev); color: var(--text);
     border: 1px solid var(--border-strong); }
 
-  /* R3 — Vision hero (Overview) — 재디자인 v4 (세련) */
+  /* R3 — Vision hero (Overview) — 재디자인 v5 (타이포 강조, 박스 제거) */
   .vision-hero { position: relative; overflow: hidden;
     background: var(--bg); border: 1px solid var(--border); border-radius: 18px;
-    padding: 36px 40px; display: grid; grid-template-columns: 1fr auto; gap: 32px; margin-bottom: 24px; }
+    padding: 34px 38px; display: grid; grid-template-columns: 1fr auto; gap: 28px; margin-bottom: 24px; }
   .vision-hero::before { content: ''; position: absolute; inset: 0;
-    background: radial-gradient(circle at 20% 0%, var(--accent-soft) 0%, transparent 55%);
-    opacity: .85; pointer-events: none; }
+    background: radial-gradient(circle at 15% -10%, var(--accent-soft) 0%, transparent 50%);
+    opacity: .75; pointer-events: none; }
   .vision-hero > * { position: relative; z-index: 1; }
   .vh-left { min-width: 0; display: flex; flex-direction: column; }
-  .vh-left .eyebrow { display: inline-flex; align-items: center; gap: 6px;
-    font-size: 10.5px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase;
-    color: var(--accent-strong); margin-bottom: 10px; }
-  .vh-left .eyebrow .icon { width: 14px; height: 14px; }
-  .vh-left .title { font-size: 34px; font-weight: 800; letter-spacing: -.8px; margin: 0; color: var(--text); line-height: 1.1; }
-  .vh-left .sub-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; max-width: 760px; }
+  .vh-left .title { font-size: 32px; font-weight: 800; letter-spacing: -.7px; margin: 0; color: var(--text); line-height: 1.15; }
+  .vh-left .sub-list { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; max-width: 740px; }
   .vh-left .sub-row { display: flex; gap: 12px; align-items: flex-start;
-    padding: 12px 14px; background: var(--bg-sub); border: 1px solid transparent;
-    border-left: 3px solid var(--accent); border-radius: 8px;
-    font-size: 13px; color: var(--text); line-height: 1.55; transition: background .15s; }
-  .vh-left .sub-row:hover { background: var(--bg-elev); }
-  .vh-left .sub-row .icon { width: 18px; height: 18px; color: var(--accent-strong); margin-top: 2px; }
+    font-size: 14px; color: var(--text-sub); line-height: 1.65; }
+  .vh-left .sub-row .icon { width: 18px; height: 18px; color: var(--accent-strong);
+    margin-top: 3px; flex: 0 0 18px; }
   .vh-left .sub-row .tx { flex: 1; min-width: 0; }
+  .vh-left .sub-row.primary { font-size: 15px; color: var(--text); font-weight: 500; }
+  .vh-left .sub-row.primary .icon { color: var(--accent); }
   .vh-left .sub-row .tx b { color: var(--text); font-weight: 700; }
-  .vh-dday { background: var(--text); color: var(--bg); border-radius: 16px;
-    padding: 22px 28px; text-align: center; min-width: 180px;
+  .vh-dday { background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: #fff; border-radius: 14px; padding: 16px 22px; text-align: center; min-width: 150px;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+    box-shadow: 0 6px 20px rgba(0,136,80,.22); }
   .vh-dday .l { display: inline-flex; align-items: center; gap: 5px;
-    font-size: 10px; color: rgba(255,255,255,.55); letter-spacing: 1.6px; text-transform: uppercase; font-weight: 700; }
+    font-size: 10px; color: rgba(255,255,255,.85); letter-spacing: 1.4px; text-transform: uppercase; font-weight: 700; }
   .vh-dday .l .icon { width: 12px; height: 12px; }
-  .vh-dday .n { font-size: 52px; font-weight: 800; color: var(--bg); letter-spacing: -2px; line-height: 1; margin-top: 6px; }
-  .vh-dday .d { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 8px; font-family: ui-monospace, monospace; }
-  [data-theme="dark"] .vh-dday { background: var(--accent); color: #0a0e14; box-shadow: 0 4px 24px rgba(0,179,119,.3); }
-  [data-theme="dark"] .vh-dday .l, [data-theme="dark"] .vh-dday .d { color: rgba(10,14,20,.55); }
-  [data-theme="dark"] .vh-dday .n { color: #0a0e14; }
+  .vh-dday .n { font-size: 36px; font-weight: 800; color: #fff; letter-spacing: -1.2px; line-height: 1; margin-top: 6px; }
+  .vh-dday .d { font-size: 10.5px; color: rgba(255,255,255,.82); margin-top: 6px; font-family: ui-monospace, monospace; }
+  [data-theme="dark"] .vh-dday { box-shadow: 0 6px 24px rgba(0,179,119,.35); }
 
   /* 진행률 바 — 진척 vs 시간 dual 라벨 + 그라데이션 */
   .vh-progress { grid-column: 1 / -1; margin-top: 12px; background: var(--bg-sub);
@@ -1125,10 +1119,9 @@
     <div class="view" id="view-home">
       <div class="vision-hero" id="vision-hero">
         <div class="vh-left">
-          <div class="eyebrow" data-icon="target" data-icon-after> CoP PHYSICAL AI</div>
           <h1 class="title" id="vh-title">—</h1>
           <div class="sub-list">
-            <div class="sub-row" data-icon="clipboard"><span class="tx" id="vh-sub">—</span></div>
+            <div class="sub-row primary" data-icon="clipboard"><span class="tx" id="vh-sub">—</span></div>
             <div class="sub-row" data-icon="bot"><span class="tx" id="vh-sub2"></span></div>
           </div>
         </div>
