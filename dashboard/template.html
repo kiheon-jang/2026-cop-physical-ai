@@ -1182,7 +1182,7 @@
           <span class="arrow">→</span>
           <div class="step"><code>data/episodes/</code> (LeRobot Dataset)</div>
           <span class="arrow">→</span>
-          <div class="step">ACT 학습 <span style="color:var(--text-dim);font-weight:400">(6/15~)</span></div>
+          <div class="step">ACT 학습 <span style="color:var(--text-dim);font-weight:400" id="ops-act-status">(시작 대기)</span></div>
         </div>
         <div class="row">
           <div class="step start">⏰ Hermes cron (23:30)</div>
@@ -1281,7 +1281,7 @@
           </section>
           <section class="how">
             <h5>어떻게 사용?</h5>
-            <p>MJCF 모델 (<code>so101_new_calib.xml</code>) 로 시뮬과 실기 동일 캘리브레이션 유지. 6 관절: shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll, gripper. 실기 서보는 Feetech STS3215 (12V/7.4V) — 7월부터 실기 검증 (Phase 2).</p>
+            <p>MJCF 모델 (<code>so101_new_calib.xml</code>) 로 시뮬과 실기 동일 캘리브레이션 유지. 6 관절: shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll, gripper. 실기 서보는 Feetech STS3215 (12V/7.4V). <span id="phase2-status-text">실기 검증은 Phase 2 (7월) 예정</span>.</p>
           </section>
         </div>
 
@@ -1313,7 +1313,7 @@
           </section>
           <section class="how">
             <h5>어떻게 사용?</h5>
-            <p><code>scripts/train_act.py</code> 가 LeRobot 의 <code>ACTConfig</code> + <code>ACTPolicy</code> 호출. 입력 = 천장 카메라 + 6축 관절 (관측 n_obs_steps 과거 프레임). 출력 = 6축 액션 시퀀스 (chunk_size=100 미래 프레임). epoch 100, batch 8, 백그라운드 학습. 2026-06-15 (W3) 시작 예정.</p>
+            <p><code>scripts/train_act.py</code> 가 LeRobot 의 <code>ACTConfig</code> + <code>ACTPolicy</code> 호출. 입력 = 천장 카메라 + 6축 관절 (관측 n_obs_steps 과거 프레임). 출력 = 6축 액션 시퀀스 (chunk_size=100 미래 프레임). epoch 100, batch 8, 백그라운드 학습. <span id="act-status-text">학습 시작 대기</span>.</p>
           </section>
         </div>
 
@@ -1334,7 +1334,7 @@
       </div>
 
       <!-- 4. 데이터셋 메타 -->
-      <div class="section-head"><h3>현재 학습 데이터셋</h3><div class="right">Phase 1 W1-2 진행 증거</div></div>
+      <div class="section-head"><h3>현재 학습 데이터셋</h3><div class="right" id="dataset-context-label">—</div></div>
       <div class="dataset-stats" id="dataset-stats"></div>
 
       <!-- 5. 학습 1 사이클 -->
@@ -1363,7 +1363,7 @@
       </div>
 
       <!-- 6. 의사결정 근거 -->
-      <div class="section-head"><h3>왜 이렇게 진행하나 — 의사결정 근거</h3></div>
+      <div class="section-head"><h3>왜 이렇게 진행하나 — 의사결정 근거</h3><div class="right">기획 시점 2026-05 기준 · 현황은 Phase 로드맵 참조</div></div>
       <ul class="rationale">
         <li><b>왜 시뮬 합성 데이터?</b> 실기 로봇 24시간 가동 비용 큼. 시뮬은 일주일에 수백 에피소드 자동 합성 가능 → 데이터 비용 ↓, 알고리즘 검증 가속. 7월부터 실기 텔레오퍼레이션 데이터 추가 예정.</li>
         <li><b>왜 MuJoCo (Isaac Lab 아님)?</b> Mac Mini (Apple Silicon ARM64) 에서 Isaac Lab 미지원 (2026-05-01 결정 변경). MuJoCo 는 네이티브 + 즉시 설치. Isaac Lab 은 차년도 GPU 서버 도입 시 RL 학습용으로 전환.</li>
@@ -1390,11 +1390,11 @@
         <div class="sub" id="videos-sub">학습 진척 · 시뮬 동작 · 학습 입력 · 실제 하드웨어 · 학습 데이터셋. 진척 관점에서 정리.</div>
       </div>
 
-      <!-- 1. (맨 위) 이 페이지가 보여주는 것 — 컨텍스트 안내 -->
+      <!-- 1. (맨 위) 이 페이지가 보여주는 것 — 컨텍스트 안내 (동적 DYN-2) -->
       <div class="video-explainer">
         <h4>이 페이지가 보여주는 것 — 진척 현황</h4>
-        <p><b>지금 단계</b>: 데이터셋 합성 완료 (Phase 1 W1-2) · ACT 학습 직전. 2026-06-15부터 ACT 학습이 시작되면 아래 "학습 진척" 섹션에 매일 새 inference 영상과 메트릭이 자동 누적됩니다.</p>
-        <p><b>유의</b>: 현재 노출된 시뮬 영상은 모두 <b>학습 전 IK(역기구학) 기반 시나리오</b>입니다. 큐브를 정확히 집지 못하는 모습은 오류가 아니라 학습 전 정상 상태입니다. 7월부터 실제 로봇팔 검증 (Phase 2).</p>
+        <p id="video-explainer-now">—</p>
+        <p id="video-explainer-caveat">—</p>
       </div>
 
       <!-- 2. PROG: 학습 진척 (메트릭 차트 + inference 영상) — 가장 중요 -->
@@ -1787,11 +1787,69 @@ function setRoute(r) {
   if (r === 'bookmarks') renderBookmarks();
   if (r === 'apps') renderApps();
   if (r === 'tech') renderTech();
+  if (r === 'ops') renderOps();
   if (r === 'videos') renderVideos();
   if (r === 'blockers') renderBlockers();
   if (r === 'samples') renderSamples();
   if (r === 'decisions') renderDecisions();
   setTimeout(drawAllCharts, 0);
+}
+
+/* ====== 동적 텍스트 helper (DYN) — Phase/training 상태 기반 ====== */
+function getTrainingStatus() {
+  const tm = D.training_metrics || {};
+  return tm.status || 'pending';  // pending | running | paused
+}
+function trainingStatusLabel() {
+  const s = getTrainingStatus();
+  if (s === 'running') return '학습 진행 중';
+  if (s === 'paused') return '학습 일시 중지';
+  return '학습 시작 대기';
+}
+function trainingStatusShort() {
+  const s = getTrainingStatus();
+  const tm = D.training_metrics || {};
+  if (s === 'running') return `진행 중 · epoch ${tm.current_epoch || '?'}`;
+  if (s === 'paused') return `일시 중지 (epoch ${tm.current_epoch || '?'})`;
+  return '시작 대기';
+}
+function trainingStartTextOrStatus() {
+  // ACT 카드 마지막 문장: 시작 전엔 "곧 시작", 진행 중엔 "진행 중", 완료 시 "완료"
+  const s = getTrainingStatus();
+  const tm = D.training_metrics || {};
+  if (s === 'running') return `현재 학습 진행 중 (epoch ${tm.current_epoch || '?'}, loss ${tm.current_loss != null ? tm.current_loss.toFixed(4) : '?'})`;
+  if (s === 'paused') return `학습 일시 중지 (epoch ${tm.current_epoch || '?'})`;
+  return '학습 시작 대기 (시작 일정은 Phase 로드맵 참조)';
+}
+function currentPhaseHint() {
+  // explainer "지금 단계" 동적 텍스트
+  const kpi = D.business_kpi || {};
+  const s = getTrainingStatus();
+  const phaseBiz = kpi.current_phase_business || kpi.current_phase_label || '진행 중';
+  if (s === 'running') {
+    return `지금 단계: ${phaseBiz}. ACT 학습이 진행 중이며, 매 epoch 마다 새 inference 영상과 메트릭이 아래 "학습 진척" 섹션에 자동 누적됩니다.`;
+  }
+  if (s === 'paused') {
+    return `지금 단계: ${phaseBiz}. ACT 학습이 일시 중지 상태입니다. 최신 메트릭은 아래 "학습 진척" 섹션 참조.`;
+  }
+  return `지금 단계: ${phaseBiz}. ACT 학습이 시작되면 아래 "학습 진척" 섹션에 매일 새 inference 영상과 메트릭이 자동 누적됩니다.`;
+}
+function simVideoCaveat() {
+  // explainer "유의" — 학습 시작 후엔 컨텍스트 전환
+  const s = getTrainingStatus();
+  if (s === 'running' || s === 'paused') {
+    return `현재 시뮬 동작 영상은 학습 입력 데이터 시각자료입니다. <b>학습된 모델의 inference 결과</b>는 위 "학습 진척" 섹션에서 확인하세요.`;
+  }
+  return `현재 노출된 시뮬 영상은 모두 <b>학습 전 IK(역기구학) 기반 시나리오</b>입니다. 큐브를 정확히 집지 못하는 모습은 오류가 아니라 학습 전 정상 상태입니다.`;
+}
+function phaseStatusByMonth(month) {
+  const p = (D.phases || []).find(x => x.month === month);
+  return p ? p.status : null;
+}
+function currentPhaseDatasetLabel() {
+  // CoP 리뷰 "현재 학습 데이터셋" 헤더의 우측 컨텍스트
+  const kpi = D.business_kpi || {};
+  return kpi.current_phase_label ? `${kpi.current_phase_label} 진행 증거` : '데이터 합성 완료';
 }
 
 /* ====== Markdown rendering (lightweight) ====== */
@@ -2186,6 +2244,18 @@ function renderApps() {
   }).join('');
 }
 
+/* ====== AI 자동화 운영 (OPS) — 정적 view 의 동적 텍스트 채움 (DYN-4) ====== */
+function renderOps() {
+  const actEl = document.getElementById('ops-act-status');
+  if (actEl) {
+    const s = getTrainingStatus();
+    const tm = D.training_metrics || {};
+    if (s === 'running') actEl.textContent = `(진행 중 · epoch ${tm.current_epoch || '?'})`;
+    else if (s === 'paused') actEl.textContent = `(일시 중지 · epoch ${tm.current_epoch || '?'})`;
+    else actEl.textContent = '(시작 대기)';
+  }
+}
+
 /* ====== Tech Guide view (GUIDE) ====== */
 function renderTech() {
   // Phase status 매핑: 시뮬 셋업 → 시연 합성 → ACT 학습 → 시뮬 검증 → Sim2Real → PCB 자동화
@@ -2193,10 +2263,18 @@ function renderTech() {
   const phaseByMonth = {};
   phases.forEach(p => { phaseByMonth[p.month] = p; });
   // 6 step 매핑: phase month → status
+  // flow detail 동적 — ACT 학습 step 은 training_metrics 상태 기반
+  const actDetail = (() => {
+    const s = getTrainingStatus();
+    const tm = D.training_metrics || {};
+    if (s === 'running') return `LeRobot ACT (Transformer) · 진행 중 epoch ${tm.current_epoch || '?'}, loss ${tm.current_loss != null ? tm.current_loss.toFixed(4) : '?'}`;
+    if (s === 'paused') return `LeRobot ACT (Transformer) · 일시 중지 (epoch ${tm.current_epoch || '?'})`;
+    return 'LeRobot ACT (Transformer) · 200 ep 학습 · 시작 대기';
+  })();
   const FLOW = [
     { idx: '①', month: '2026-05', title: '가상 로봇팔 셋업',           detail: 'MuJoCo 3.8 + SO-ARM101 MJCF · 카메라/관절 캘리브레이션' },
     { idx: '②', month: '2026-06', title: '시뮬 시연 데이터 합성',      detail: 'IK 기반 Pick-Place 200 에피소드 / 12,400 프레임 · LeRobot Dataset v3.0' },
-    { idx: '③', month: '2026-06', title: 'ACT 학습 — 모방학습',          detail: 'LeRobot ACT (Transformer) · 200 ep 학습 · 2026-06-15 시작 예정' },
+    { idx: '③', month: '2026-06', title: 'ACT 학습 — 모방학습',          detail: actDetail },
     { idx: '④', month: '2026-07', title: '시뮬 검증',                   detail: '학습된 모델이 시뮬에서 큐브 잘 집는가 (성공률 측정)' },
     { idx: '⑤', month: '2026-08', title: '실기 적용 — Sim2Real',        detail: '시뮬 모델을 실기 로봇팔에 옮김 · Domain Randomization 으로 격차 좁힘' },
     { idx: '⑥', month: '2026-10', title: 'PCB 작업 자동화 (1차 완성)', detail: 'Pick & Place 70% · RS232 결선 부분 성공 40%' },
@@ -2225,6 +2303,19 @@ function renderTech() {
   const active = phases.filter(p => p.status === '진행').length;
   const tpEl = document.getElementById('tech-progress');
   if (tpEl) tpEl.textContent = `완료 ${done} · 진행 ${active} · 예정 ${6 - done - active}`;
+
+  // DYN-3: 카드 안 시간 의존 텍스트 동적 채움
+  const actStatusEl = document.getElementById('act-status-text');
+  if (actStatusEl) actStatusEl.textContent = trainingStartTextOrStatus();
+  const phase2El = document.getElementById('phase2-status-text');
+  if (phase2El) {
+    const s = phaseStatusByMonth('2026-07');
+    if (s === '완료') phase2El.textContent = '실기 검증 완료 (Phase 2)';
+    else if (s === '진행') phase2El.textContent = '실기 검증 진행 중 (Phase 2)';
+    else phase2El.textContent = '실기 검증은 Phase 2 (7월) 예정';
+  }
+  const dsCtxEl = document.getElementById('dataset-context-label');
+  if (dsCtxEl) dsCtxEl.textContent = currentPhaseDatasetLabel();
 
   // 데이터셋 메타 카드 — meta.dataset_episodes / meta.dataset_frames 또는 폴백
   const meta = D.meta || {};
@@ -2428,6 +2519,24 @@ function renderVideos() {
     }
   }
 
+  // 0) Explainer 박스 동적 채움 (DYN-2)
+  const explNow = document.getElementById('video-explainer-now');
+  if (explNow) explNow.innerHTML = `<b>지금 단계</b>: ${escapeHtml(currentPhaseHint().replace(/^지금 단계: /, ''))}`;
+  const explCav = document.getElementById('video-explainer-caveat');
+  if (explCav) {
+    // Phase 2 (7월) 상태에 따라 두 번째 문장 동적
+    const phase2Status = phaseStatusByMonth('2026-07');
+    let phase2Note;
+    if (phase2Status === '완료') {
+      phase2Note = '실기 검증 완료 (Phase 2).';
+    } else if (phase2Status === '진행') {
+      phase2Note = '실기 검증 진행 중 (Phase 2).';
+    } else {
+      phase2Note = '실기 로봇팔 검증은 Phase 2 (7월) 예정.';
+    }
+    explCav.innerHTML = `<b>유의</b>: ${simVideoCaveat()} ${phase2Note}`;
+  }
+
   // 1.5) 학습 진척 (PROG) — 메트릭 차트 + inference 영상
   renderTrainingProgress();
 
@@ -2479,12 +2588,16 @@ function renderVideos() {
     }
   }
 
-  // 4) 하드웨어 시각자료
+  // 4) 하드웨어 시각자료 (DYN-4: Phase 0 status 기반 컨텍스트 라벨)
   const hwWrap = document.getElementById('hardware-grid-wrap');
   if (hwWrap) {
+    const _ph0 = phaseStatusByMonth('2026-05');
+    const hwCtx = _ph0 === '완료' ? 'SO-ARM100/101 · Phase 0 셋업 완료'
+      : _ph0 === '진행' ? 'SO-ARM100/101 · Phase 0 셋업 진행 중'
+      : 'SO-ARM100/101';
     if (hwPhotos.length) {
       hwWrap.innerHTML = `
-        <div class="section-head"><h3>실제 하드웨어 시각자료</h3><div class="right">SO-ARM100/101 · Phase 0 셋업 완료</div></div>
+        <div class="section-head"><h3>실제 하드웨어 시각자료</h3><div class="right">${escapeHtml(hwCtx)}</div></div>
         <div class="hardware-grid">
           ${hwPhotos.map(p => `
             <div class="hw-card">
