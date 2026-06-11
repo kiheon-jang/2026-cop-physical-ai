@@ -156,9 +156,11 @@
     display: grid; grid-template-columns: 1fr auto; gap: 18px; margin-bottom: 20px; }
   .vh-left .title { font-size: 22px; font-weight: 800; letter-spacing: -.4px; margin: 0; color: var(--text); }
   .vh-left .sub { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
-  .vh-left .targets { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+  .vh-left .targets { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
   .vh-left .targets span { font-size: 11px; color: var(--text-sub); background: var(--bg);
     padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .vh-left .targets .targets-label { background: var(--accent-soft); color: var(--accent-strong);
+    border-color: var(--accent); font-weight: 800; letter-spacing: .5px; }
   .vh-left .targets b { color: var(--text); font-weight: 700; margin-left: 4px; }
   .vh-dday { background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
     padding: 14px 18px; text-align: center; min-width: 130px; display: flex; flex-direction: column; justify-content: center; }
@@ -1029,10 +1031,6 @@
 
     <!-- HOME (R3 — Overview) -->
     <div class="view" id="view-home">
-      <div class="cop-intro">
-        <span class="cop-label">CoP</span>
-        <span class="cop-text"><b>Community of Practice</b> — Physical AI 기술 내재화 사내 학습 트랙. SO-ARM101 로봇팔로 정비현장 PCB 작업 자동화를 단계적으로 학습합니다.</span>
-      </div>
       <div class="vision-hero" id="vision-hero">
         <div class="vh-left">
           <h1 class="title" id="vh-title">—</h1>
@@ -1076,10 +1074,6 @@
         </div>
       </div>
 
-      <div class="panel" style="margin-top:20px;">
-        <div class="panel-head"><h3>다음 액션</h3><div class="right" id="next-actions-sub">—</div></div>
-        <div class="next-actions" id="next-actions"></div>
-      </div>
     </div>
 
     <!-- SIM TASKS (= proposals 라우트 유지) -->
@@ -3177,8 +3171,11 @@ function renderHome() {
   if (subEl) subEl.textContent = v.subtitle || '';
   const tgEl = document.getElementById('vh-targets');
   if (tgEl) {
-    tgEl.innerHTML = (v.targets || []).map(t =>
-      `<span>${escapeHtml(t.label)}<b>${escapeHtml(t.target)}</b></span>`).join('');
+    const targets = v.targets || [];
+    tgEl.innerHTML = targets.length
+      ? `<span class="targets-label">🎯 목표</span>` + targets.map(t =>
+          `<span>${escapeHtml(t.label)}<b>${escapeHtml(t.target)}</b></span>`).join('')
+      : '';
   }
   const dEl = document.getElementById('vh-dday');
   if (dEl) dEl.textContent = `D-${kpi.d_day != null ? kpi.d_day : '?'}`;

@@ -76,8 +76,8 @@ PHASE_META: list[dict] = [
 
 # 프로젝트 비전 — 대시보드 히어로에 표시
 PROJECT_VISION = {
-    "title": "2026-10 시연 (9월 작업 완료)",
-    "subtitle": "PCB 픽앤플레이스 자동화 — 정비현장 첫걸음",
+    "title": "CoP Physical AI",
+    "subtitle": "Physical AI (Embodied AI 기술 내재화) 를 목표로 한 SO-ARM101 기반 모방학습·강화학습 로보틱스 기술 내재화 활동",
     "demo_date": "2026-10-31",
     "completion_date": "2026-09-30",  # 작업 완료 기준 (D-day 표시)
     "start_date": "2026-04-01",
