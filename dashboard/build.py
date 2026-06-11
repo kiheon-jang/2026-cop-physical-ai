@@ -79,7 +79,9 @@ PROJECT_VISION = {
     "title": "2026-10 시연 (9월 작업 완료)",
     "subtitle": "PCB 픽앤플레이스 자동화 — 정비현장 첫걸음",
     "demo_date": "2026-10-31",
+    "completion_date": "2026-09-30",  # 작업 완료 기준 (D-day 표시)
     "start_date": "2026-04-01",
+    "phase_start_date": "2026-05-01",  # phase 진척률 분모 시작 (4월 = 사전학습 외부)
     "targets": [
         {"label": "PCB 픽앤플레이스 성공률", "target": "70%"},
         {"label": "RS232 HHT 결선 부분성공", "target": "40%"},
@@ -207,7 +209,21 @@ def build_phase_roadmap() -> tuple[list[dict], str]:
     phase_starts = [(m.start(), m.group(1), m.group(2), m.group(3)) for m in _PHASE_HEADING.finditer(text)]
     phase_starts.append((len(text), "_END_", "", ""))
 
-    phases: list[dict] = []
+    # 사전학습 (4월, phase 외부) — Gantt 표시 + KPI 평균에선 제외
+    phases: list[dict] = [{
+        "id": "prep",
+        "name": "사전학습 / Kick-off",
+        "date_range": "2026.04.01 ~ 2026.04.30",
+        "month": PREP_PERIOD["month"],
+        "weeks": [],
+        "progress": 1.0,
+        "done": 0, "total": 0,
+        "status": "완료",
+        "business_label": "4월: Kick-off, 하드웨어 발주",
+        "outcome": PREP_PERIOD["outcome"],
+        "report_label": "Kick-off, 하드웨어 발주",
+        "is_prep": True,
+    }]
     current_label = "(no active phase)"
     for i, (start, num, name, date_range) in enumerate(phase_starts[:-1]):
         end = phase_starts[i + 1][0]
@@ -562,18 +578,22 @@ def build_business_kpi(phases: list[dict]) -> dict:
     try:
         demo = datetime.strptime(PROJECT_VISION["demo_date"], "%Y-%m-%d").date()
         start = datetime.strptime(PROJECT_VISION["start_date"], "%Y-%m-%d").date()
-    except ValueError:
-        demo = today
-        start = today
-    d_day = (demo - today).days
-    span = max((demo - start).days, 1)
-    elapsed_days = max(0, (today - start).days)
-    time_elapsed = min(elapsed_days / span, 1.0)
+        completion = datetime.strptime(PROJECT_VISION["completion_date"], "%Y-%m-%d").date()
+        phase_start = datetime.strptime(PROJECT_VISION["phase_start_date"], "%Y-%m-%d").date()
+    except (ValueError, KeyError):
+        demo = today; start = today; completion = today; phase_start = today
+    # D-day: 기능 완성 기준 (9/30)
+    d_day = (completion - today).days
+    d_day_demo = (demo - today).days
+    # 시간 경과: phase 시작 (5/1) ~ 완료 (9/30) 기준. 4월은 사전학습이라 별도.
+    phase_span = max((completion - phase_start).days, 1)
+    phase_elapsed_days = max(0, (today - phase_start).days)
+    time_elapsed = min(phase_elapsed_days / phase_span, 1.0)
+    elapsed_days = max(0, (today - start).days)  # 사업 착수일 기준 (참고용)
 
-    # 목표 달성률: phase 별 progress 의 단순 평균 (6개월 균등 가중).
-    # 항목 합계 방식은 미래 phase 의 detail 부재로 편향됨 (Phase 0/1 만 detail 있음).
-    # 평균 방식: Phase 0=100%, Phase 1=20%, Phase 2-5=0% → 20% (시간 경과와 비교 가능).
-    phase_progresses = [p.get("progress", 0.0) for p in phases]
+    # 목표 달성률: phase 별 progress 의 단순 평균 (사전학습 prep 제외, 5개 phase 균등 가중).
+    # 분모: phase_start(5/1) ~ completion(9/30) 구간이라 prep(4월) 은 elapsed 와 phase 평균 양쪽 모두 제외 → 일관.
+    phase_progresses = [p.get("progress", 0.0) for p in phases if not p.get("is_prep")]
     target_progress = (sum(phase_progresses) / len(phase_progresses)) if phase_progresses else 0.0
 
     # 현재 진행 중 phase + 다음 미완료 항목 3개
@@ -592,7 +612,9 @@ def build_business_kpi(phases: list[dict]) -> dict:
     return {
         **PROJECT_VISION,
         "d_day": d_day,
+        "d_day_demo": d_day_demo,
         "elapsed_days": elapsed_days,
+        "phase_elapsed_days": phase_elapsed_days,
         "time_elapsed": round(time_elapsed, 3),
         "target_progress": round(target_progress, 3),
         "current_phase_id": current.get("id") if current else "",

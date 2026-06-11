@@ -177,7 +177,7 @@
   .vh-progress .legend .gap-ok { color: var(--accent-strong); font-weight: 700; }
   .vh-progress .legend .gap-warn { color: var(--action); font-weight: 700; }
 
-  /* R3 — Gantt 6개월 */
+  /* R3 — Gantt 7개월 (4월 사전학습 + Phase 0~4 + 10월 시연) */
   .gantt { display: flex; flex-direction: column; gap: 8px; }
   .gantt-row { display: grid; grid-template-columns: 180px 1fr 56px; gap: 14px;
     align-items: center; font-size: 12px; }
@@ -1028,10 +1028,6 @@
   <main class="main">
     <div class="topbar">
       <div class="crumbs" id="crumbs"><strong>현재 단계</strong></div>
-      <div class="search">
-        <input id="q" placeholder="검색 (제목, Phase, 카테고리…)" />
-      </div>
-      <span class="kbd">/</span>
     </div>
 
     <!-- HOME (R3 — Overview) -->
@@ -1064,7 +1060,7 @@
 
       <div class="grid-2">
         <div class="panel">
-          <div class="panel-head"><h3>6개월 로드맵</h3>
+          <div class="panel-head"><h3>7개월 로드맵 (4월 사전학습 + Phase 0~4 + 10월 시연)</h3>
             <div class="link" onclick="setRoute('apps')">자세히 →</div></div>
           <div class="gantt" id="gantt"></div>
         </div>
@@ -1524,7 +1520,7 @@
     <!-- PHASES = apps 라우트 유지 (Phase 0~5 로드맵, R3 v2) -->
     <div class="view hidden" id="view-apps">
       <div class="home-hero">
-        <h1>6개월 여정</h1>
+        <h1>7개월 여정 (4월 사전학습 + 5~9월 작업 + 10월 시연)</h1>
         <div class="sub">실기 없이 학습할 수 있는 환경 구축 → 9월 1차 기능 완성 (10월 시연). 각 단계의 비즈니스 결과와 주차별 진행률.</div>
       </div>
       <div class="cards" id="apps-cards" style="grid-template-columns: 1fr; gap: 18px;"></div>
@@ -1570,7 +1566,7 @@
 
         <h2>왜 만들었나</h2>
         <ul>
-          <li><b>가시성</b>: Phase 0~5, 6개월(180+ 시뮬 작업) 의 진척을 한눈에 — 폴더 트리로는 안 보임</li>
+          <li><b>가시성</b>: Phase 0~4, 7개월(180+ 시뮬 작업) 의 진척을 한눈에 — 폴더 트리로는 안 보임</li>
           <li><b>의존 추적</b>: 실기팀/외부 머신/사용자 수동 처리 항목을 마감일·담당자별로 → "왜 진행이 멈췄나" 즉시 확인</li>
           <li><b>증거 큐레이션</b>: 일일 진척에서 보고용 증거 후보를 자동 추출 → 월말 보고서 작성 시간 절약</li>
         </ul>
@@ -1595,7 +1591,7 @@
           <li>매일 07:00 — 아침 보고 메일 발송</li>
         </ul>
 
-        <h2>Phase 로드맵 (6개월)</h2>
+        <h2>Phase 로드맵 (7개월)</h2>
         <p>좌측 <b>Phase 로드맵</b> 메뉴에서 주차/일별 체크리스트 확인:</p>
         <ul>
           <li><b>Phase 0</b> (5월) — 시뮬 환경 셋업 (MuJoCo 설치 → SO-ARM101 import → 카메라/매핑/Pick-Place)</li>
@@ -1891,6 +1887,8 @@ function setRoute(r) {
   ROUTES.forEach(k => document.getElementById('view-' + k)?.classList.toggle('hidden', k !== r));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.route === r));
   document.getElementById('crumbs').innerHTML = `<strong>${ROUTE_LABEL[r]}</strong>`;
+  // 뷰 전환 시 콘텐츠 영역 스크롤 top 으로 — 이전 메뉴의 스크롤 위치가 새 메뉴에 남는 것 방지
+  window.scrollTo({ top: 0, behavior: 'instant' });
   if (r === 'bookmarks') renderBookmarks();
   if (r === 'apps') renderApps();
   if (r === 'tech') renderTech();
@@ -2779,9 +2777,15 @@ function renderMagazines() {
     picker.innerHTML = '<div class="empty" style="grid-column:1/-1">아직 활동보고서가 없습니다.</div>';
     return;
   }
-  // 자동 펼침 X — 사용자가 카드를 클릭해야 본문 표시. 미리 작성된 미래 목표가 "현재" 처럼 노출되는 것 방지.
+  // 디폴트: 진행 중인 월 자동 선택. status==='진행' 보고서 우선, 없으면 가장 최근 완료된 보고서.
+  // 예정(미래) 보고서는 자동 선택 X — 미리 작성된 목표가 "현재" 처럼 보이는 것 방지.
   const phasesByMonth = {};
   (D.phases || []).forEach(p => { phasesByMonth[p.month] = p; });
+  if (!SELECTED_REPORT_ID) {
+    const inProgress = reports.find(r => phasesByMonth[r.month]?.status === '진행');
+    const lastDone = [...reports].reverse().find(r => phasesByMonth[r.month]?.status === '완료');
+    SELECTED_REPORT_ID = (inProgress || lastDone || null)?.id || null;
+  }
 
   picker.innerHTML = reports.map(r => {
     const isOn = r.id === SELECTED_REPORT_ID;
@@ -3191,7 +3195,7 @@ function renderHome() {
   const dEl = document.getElementById('vh-dday');
   if (dEl) dEl.textContent = `D-${kpi.d_day != null ? kpi.d_day : '?'}`;
   const ddateEl = document.getElementById('vh-demo-date');
-  if (ddateEl) ddateEl.textContent = v.demo_date || '';
+  if (ddateEl) ddateEl.textContent = kpi.completion_date || v.completion_date || '';
 
   // Progress bar: target fill + time marker
   const pct = Math.round((kpi.target_progress || 0) * 100);
@@ -3202,8 +3206,8 @@ function renderHome() {
   if (tmEl) tmEl.style.left = tpct + '%';
   const gap = kpi.progress_vs_time_gap || 0;
   const gapTxt = gap >= 0
-    ? `<span class="gap-ok">+${(gap*100).toFixed(0)}%p 앞섬</span>`
-    : `<span class="gap-warn">${(gap*100).toFixed(0)}%p 뒤짐</span>`;
+    ? `<span class="gap-ok">+${(gap*100).toFixed(0)}%p 선행</span>`
+    : `<span class="gap-warn">${(gap*100).toFixed(0)}%p 지연</span>`;
   const lgEl = document.getElementById('vh-legend');
   if (lgEl) lgEl.innerHTML = `
     <span>목표 달성률 <b>${pct}%</b></span>
@@ -3214,13 +3218,13 @@ function renderHome() {
 
   // 2) KPI 4 (D-day · 달성률 · 이번 달 · 일정 차이)
   const gapAbs = Math.round(Math.abs(gap) * 100);
-  const gapLabel = gap >= 0 ? `+${gapAbs}%p 앞섬` : `−${gapAbs}%p 뒤짐`;
+  const gapLabel = gap >= 0 ? `+${gapAbs}%p 선행` : `−${gapAbs}%p 지연`;
   const gapClass = gap >= -0.05 ? 'is-accent' : '';
   document.getElementById('kpi-row').innerHTML = `
     <div class="kpi is-accent">
       <div class="l">완성까지</div>
       <div class="n">D-${kpi.d_day != null ? kpi.d_day : '?'}</div>
-      <div class="d">${escapeHtml(v.demo_date || '')}</div>
+      <div class="d">${escapeHtml(kpi.completion_date || v.completion_date || '')} (9월 작업 완료)</div>
     </div>
     <div class="kpi">
       <div class="l">목표 달성률</div>
@@ -3239,7 +3243,7 @@ function renderHome() {
     </div>
   `;
 
-  // 3) Gantt 6개월 (Phase 0~5)
+  // 3) Gantt 7개월 (사전학습 + Phase 0~4 + 10월 시연)
   const gEl = document.getElementById('gantt');
   if (gEl) {
     const colorOf = s => s === '완료' ? '#22c55e' : (s === '진행' ? '#2563eb' : 'rgba(148,163,184,.45)');
@@ -3427,13 +3431,6 @@ function drawAllCharts() {
   drawCatChart();
 }
 
-/* ====== Search ====== */
-document.getElementById('q').addEventListener('input', e => {
-  searchQuery = e.target.value.trim();
-  if (currentRoute !== 'proposals') setRoute('proposals');
-  renderProposals();
-});
-
 /* ====== Keyboard ====== */
 document.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -3443,7 +3440,6 @@ document.addEventListener('keydown', (e) => {
   }
   const map = { '1':'home','2':'apps','3':'proposals','4':'daily','5':'magazines','6':'bookmarks','7':'analytics' };
   if (map[e.key]) setRoute(map[e.key]);
-  if (e.key === '/') { e.preventDefault(); document.getElementById('q').focus(); }
   if (e.key === 'Escape') closeSheet();
 });
 
