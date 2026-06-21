@@ -23,3 +23,41 @@
 - `sim_data_collector.py` 데이터셋 메타정보: `/Volumes/MARK_DATA/dev/2026-cop-physical-ai/data/episodes/meta/info.json`
 - `sim_data_collector.py` 데이터셋 파일: `/Volumes/MARK_DATA/dev/2026-cop-physical-ai/data/episodes/data/chunk-000/file-000.parquet`
 
+## 2026-06-07
+- `sim_pick_place.py` 성공/실패 JSON stdout 보고 추가 (`research/simulation/2026-06-07_pick-place-success-reporting.md`)
+- 데이터셋 현황 확인 (filesystem 기반): `/Volumes/MARK_DATA/dev/2026-cop-physical-ai/data/episodes/meta/info.json` (200 ep / 12400 frames / 30fps) — Phase 1 W1-2 합성 완료 상태
+- 23:30 nightly sim-test: 런타임 실행 sandbox 차단으로 메트릭 미수집 (`agent/research-log/2026-06-07.md` 자가치유 기록)
+
+## 2026-06-08
+- Phase 1 W3 사전 작업: `scripts/train_act.py::load_dataset()` 플레이스홀더 → 실제 구현 교체 (`research/simulation/2026-06-08_train-act-load-dataset.md`)
+- 23:30 nightly sim-test (2회차): `.venv/bin/python3` 및 Obsidian `cp` sandbox 차단 — 런타임 메트릭 미수집. `git` 명령은 동작 확인 (1차 기록 정정). 파일시스템 증거: `data/episodes/meta/info.json` 200 ep / 12400 frames 유지 (`agent/research-log/2026-06-08.md`)
+
+## 2026-06-09
+- Phase 1 W3 사전 작업: `scripts/train_act.py::build_model()` 플레이스홀더 → 실제 구현 + lerobot import 경로 수정 (`research/simulation/2026-06-09_train-act-build-model.md`) → 6월 보고서 [2.사전학습] 섹션 후보.
+- 23:30 nightly sim-test (3회차): `.venv/bin/python3` sandbox 차단 지속 — 런타임 메트릭 미수집. 파일시스템 증거: `data/episodes/meta/info.json` 200 ep / 12400 frames 유지 (`agent/research-log/2026-06-09.md`)
+
+## 2026-06-10
+- Phase 1 W3 사전 작업: `scripts/train_act.py::train()` 루프 placeholder → 본 구현 + `_save_checkpoint()` + `argparse`(`--smoke`/`--epochs`) (`research/simulation/2026-06-10_train-act-train-loop.md`) → 6월 보고서 [2.사전학습] 섹션 W3 진입 사전 준비 증거.
+- 23:30 nightly sim-test (4회차): `.venv/bin/python3` sandbox 차단 지속 (4일 연속) — 런타임 메트릭 미수집. 파일시스템 증거: `data/episodes/meta/info.json` 200 ep / 12400 frames / so101 유지 (`agent/research-log/2026-06-10.md`)
+
+## 2026-06-11
+- Phase 1 W3 사전 작업: `scripts/train_act.py` smoke 경로 점검 — 경로 정정 + `resolve_device()` + `--device {cpu,cuda,mps}` + `logs/act_train_metrics.jsonl` JSONL append + DataLoader pin_memory 조건부 (`research/simulation/2026-06-11_train-act-smoke-path.md`) → 6월 보고서 [2.사전학습] 섹션 W3 진입 사전 준비 증거.
+- 23:30 nightly sim-test (5회차): `.venv/bin/python3` sandbox 차단 지속 (5일 연속) — 런타임 메트릭 미수집. 파일시스템 증거: `data/episodes/meta/info.json` 200 ep / 12400 frames / so101 유지 (`agent/research-log/2026-06-11.md`)
+
+## 2026-06-14
+- Phase 1 W3 사전 준비 D4: `scripts/check_act_train.sh` 신규 — ACT 학습 진행률 결정론적 status 출력 (pid 살아있음 / ckpt 진행률 / 로그 신선도 / 표준 tail 블록 / exit code 0·1·2·3 의미론). `start_act_train.sh` 의 짝. 6월 보고서 [2.사전학습] W3 일일 운영 절차 증거 (`research/simulation/2026-06-14_check-act-train-status.md`).
+- 23:30 nightly sim-test (8회차): `.venv/bin/python3` 및 `bash` sandbox 차단 지속 (8일 연속) — 런타임 메트릭 미수집. 23:00 산출물(check_act_train.sh + 동일 일자 doc) 파일시스템 존재 확인 (`agent/research-log/2026-06-14.md`)
+- 23:30 nightly sim-test (9회차, 4회차 블록): `.venv/bin/python3` / `bash scripts/check_act_train.sh` sandbox 차단 지속 (9일 연속) — 런타임 메트릭 미수집. `logs/` 부재로 학습 미시작 상태 간접 확인 (`agent/research-log/2026-06-14.md` 4회차 블록)
+
+## 2026-06-15
+- Phase 1 W3 D1: ACT smoke + nohup 학습 시작 시도 — `chmod +x` / `.venv/bin/python3 scripts/train_act.py --smoke` / `bash scripts/check_act_train.sh` 본 회차 모두 sandbox 거절 (10일 연속). 정적 점검 (3축 글로브 패턴 정합) 통과만 (`research/simulation/2026-06-15_act-w3-d1-smoke-attempt.md`). PHASE_ROADMAP W3 첫 두 항목 `[ ]` 유지. 사용자 수동 절차 통과 시점에 익일 nightly 가 `check_act_train.sh` status 블록 capture 예정 (`agent/research-log/2026-06-15.md`)
+
+## 2026-06-16
+- Phase 1 W3 D2: ACT 학습 status 점검 — `logs/`/`checkpoints/` 미존재, `start_act_train.sh`/`check_act_train.sh` 실행비트 미부착 정적 확인. `chmod` / `.venv/bin/python3` / Obsidian `cp` sandbox 거절 (15일+1 연속). 사용자 수동 절차 6/15 기준 미시행 그대로 (`research/simulation/2026-06-16_act-w3-d2-status-check.md`). 23:30 nightly sim-test (11회차): 동일 sandbox 패턴, 23:00 회차 정적 점검 결과가 본 일자 최종 상태 (`agent/research-log/2026-06-16.md`)
+
+## 2026-06-19
+- Phase 1 W3 D5: ACT 학습 status 점검 — `logs/`/`checkpoints/` 미존재 그대로, scripts/ 6/14 이후 변경 없음. 사용자 수동 절차 미시행 (`research/simulation/2026-06-19_act-w3-d5-status-check.md`). 23:30 nightly sim-test (13회차): 우선순위 시뮬 4종 실행 `.venv/bin/python3` sandbox 거절 19일 연속 — 런타임 메트릭 0건. 파일시스템 증거 `data/episodes/meta/info.json` 200 ep / 12400 frames / so101 유지 (`agent/research-log/2026-06-19.md`)
+
+## 2026-06-21
+- Phase 1 W3 D7 (마지막일): ACT 학습 status 최종 점검 — `logs/`/`checkpoints/` 미존재 그대로, `start_act_train.sh`/`check_act_train.sh` 실행비트 미부착 22일 연속. W3 종료일에도 ACT 학습 미시작 → W4 진입 시 ACT 학습 완료 대기 상태 (`research/simulation/2026-06-21_act-w3-d7-final.md`). 23:30 nightly sim-test (15회차): `.venv/bin/python3` sandbox 거절 22일 연속 — 런타임 메트릭 0건. Obsidian `cp` 차단 22일 연속 (`agent/research-log/2026-06-21.md`). → 6월 보고서 [2.사전학습] W3 7일 연속 status 점검 시퀀스 + W3 종료 시점 증거.
+

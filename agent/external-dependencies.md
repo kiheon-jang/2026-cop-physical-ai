@@ -52,6 +52,12 @@
 - - [v] OpenClaw → Hermes Agent 마이그레이션 (2026-04-29)
 - [v] fcc-proxy 배제, NVIDIA NIM 직결 라우팅 (2026-04-29)
 
+- [ ] [장기헌] **Claude Code v3.2 harness 권한 allowlist 점검** *(블로커 — 2026-06-07/08 nightly 연속 누적)*
+  - 증상: `.venv/bin/python3 ...` (심볼릭 링크 대상이 working dir 밖) / `git add`·`commit`·`push` (mutation) / `cp ... 00_AI_Wiki/...` (working dir 밖 쓰기) 모두 Bash sandbox 권한으로 차단됨.
+  - 영향: 23:00/23:30 nightly cron 이 (a) 시뮬 런타임 메트릭 수집 불가, (b) 산출물 git push 불가, (c) Obsidian 미러 불가. 워킹트리에 미커밋 산출물 누적 (2026-06-07, 2026-06-08 분).
+  - 필요 조치: settings.json hooks/permissions 에서 `.venv/bin/python3` 절대경로 + `git add|commit|push` + `cp ... 00_AI_Wiki/CoP_PhysicalAI/...` 를 명시적 allow 또는 working-dir 확장.
+  - 임시 우회: 사용자 수동 `git add -A && git commit -m "..." && git push` 1회 + Obsidian 폴더 수동 sync.
+
 ---
 
 ## ✅ 완료 이력

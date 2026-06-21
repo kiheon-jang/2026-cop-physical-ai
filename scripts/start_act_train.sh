@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# ACT 학습 시작 wrapper (Phase 1 W3 D1, 6/15 이후 사용).
+#
+# 역할:
+#   1) .venv 절대경로 python 강제
+#   2) PYTORCH_ENABLE_MPS_FALLBACK=1 명시 (M5 MPS 미지원 op → CPU fallback)
+#   3) checkpoints/act/epoch_*/ 디렉터리 중 mtime 최신 → --resume-from 자동 부착
+#      (train_act.py 는 HF save_pretrained 형식의 *디렉터리* 로 저장)
+#   4) nohup 백그라운드 실행 + logs/act_train.pid 기록 + logs/act_train.log tee
+#   5) 이미 실행 중인 pid 발견 시 즉시 중단 (이중 실행 방지)
+#
+# 사용:
+#   scripts/start_act_train.sh                 # config 기본 epoch
+#   scripts/start_act_train.sh --epochs 100    # 100 epoch
+#   scripts/start_act_train.sh --smoke         # 1 epoch / 2 step smoke
+#
+# 종료 후:
+#   tail -f logs/act_train.log
+#   kill "$(cat logs/act_train.pid)"   # 중단
+
+set -euo pipefail
+
+ROOT="/Volumes/MARK_DATA/dev/2026-cop-physical-ai"
+PY="${ROOT}/.venv/bin/python3"
+TRAIN_SCRIPT="${ROOT}/scripts/train_act.py"
+CKPT_DIR="${ROOT}/checkpoints/act"
+LOG_DIR="${ROOT}/logs"
+PID_FILE="${LOG_DIR}/act_train.pid"
+LOG_FILE="${LOG_DIR}/act_train.log"
+
+mkdir -p "${LOG_DIR}" "${CKPT_DIR}"
+
+if [[ ! -x "${PY}" ]]; then
+  echo "[start_act_train] .venv python 없음: ${PY}" >&2
+  exit 1
+fi
+
+if [[ -f "${PID_FILE}" ]]; then
+  OLD_PID="$(cat "${PID_FILE}")"
+  if [[ -n "${OLD_PID}" ]] && kill -0 "${OLD_PID}" 2>/dev/null; then
+    echo "[start_act_train] 이미 실행 중 (pid=${OLD_PID}). 중단 후 재실행 필요." >&2
+    exit 2
+  fi
+  rm -f "${PID_FILE}"
+fi
+
+# 최신 체크포인트 자동 탐색.
+# train_act.py::_save_checkpoint 는 epoch_NNNN/ 디렉터리(HF save_pretrained) 로 저장.
+# 사용자가 --resume-from 을 명시했거나 --no-resume(wrapper 전용 플래그)을 넘기면 자동 탐색 생략.
+RESUME_ARG=()
+SKIP_AUTO_RESUME=0
+for arg in "$@"; do
+  case "${arg}" in
+    --resume-from|--resume-from=*|--no-resume) SKIP_AUTO_RESUME=1 ;;
+  esac
+done
+
+if [[ "${SKIP_AUTO_RESUME}" -eq 0 ]]; then
+  LATEST_CKPT="$(ls -dt "${CKPT_DIR}"/epoch_*/ 2>/dev/null | head -n 1 || true)"
+  LATEST_CKPT="${LATEST_CKPT%/}"
+  if [[ -n "${LATEST_CKPT}" && -d "${LATEST_CKPT}" ]]; then
+    RESUME_ARG=(--resume-from "${LATEST_CKPT}")
+    echo "[start_act_train] resume: ${LATEST_CKPT}"
+  else
+    echo "[start_act_train] resume 없음 (cold start)"
+  fi
+else
+  echo "[start_act_train] 사용자 인자에 --resume-from/--no-resume 존재 — 자동 탐색 생략"
+fi
+
+# --no-resume 은 wrapper 전용 플래그 → train_act.py 에는 전달하지 않는다.
+FILTERED_ARGS=()
+for arg in "$@"; do
+  [[ "${arg}" == "--no-resume" ]] || FILTERED_ARGS+=("${arg}")
+done
+
+export PYTORCH_ENABLE_MPS_FALLBACK=1
+
+cd "${ROOT}"
+
+nohup "${PY}" "${TRAIN_SCRIPT}" "${RESUME_ARG[@]+"${RESUME_ARG[@]}"}" "${FILTERED_ARGS[@]+"${FILTERED_ARGS[@]}"}" \
+  >> "${LOG_FILE}" 2>&1 &
+
+NEW_PID=$!
+echo "${NEW_PID}" > "${PID_FILE}"
+echo "[start_act_train] 시작 pid=${NEW_PID} log=${LOG_FILE} args=$*"

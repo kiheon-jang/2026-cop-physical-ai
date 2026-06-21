@@ -2,6 +2,7 @@ import mujoco
 import numpy as np
 import time
 import os
+import json
 import imageio
 
 # MJCF 파일 경로
@@ -54,11 +55,21 @@ def set_gripper_state(state):
     else: # 닫힘
         data.ctrl[gripper_actuator_id] = model.actuator_ctrlrange[gripper_actuator_id, 1]
 
+# 성공 기준 (PHASE_ROADMAP W4 5/22~24):
+#   - 그리퍼가 큐브 ±5mm 접근 (approach_ok)
+#   - 큐브를 Z+50mm 이상 들어올림 (lift_ok)
+APPROACH_THRESHOLD_M = 0.005
+LIFT_THRESHOLD_M = 0.050
+
 # 픽-앤-플레이스 시나리오
 def pick_and_place_scenario():
     frames = []
     duration = 5  # 시뮬레이션 시간 (초)
     framerate = 60 # 프레임레이트
+    approach_ok = False
+    lift_ok = False
+    min_approach_dist = float('inf')
+    max_lift_height = 0.0
 
     # 초기 관절 위치 (로봇을 준비 상태로)
     initial_qpos = np.array([0, 0, 0, 0, 0]) # 예시: 어깨 팬, 리프트, 팔꿈치 플렉스, 손목 플렉스, 손목 롤
@@ -88,9 +99,15 @@ def pick_and_place_scenario():
             # 그리퍼의 Z 위치를 큐브 위로 조정
             gripper_pos = data.site_xpos[model.site('gripperframe').id] # 그리퍼 끝단의 site
             target_pos = cube_initial_pos + np.array([0, 0, 0.08]) # 큐브 위로 8cm
-            
+
+            dist = float(np.linalg.norm(gripper_pos - target_pos))
+            if dist < min_approach_dist:
+                min_approach_dist = dist
+            if dist <= APPROACH_THRESHOLD_M:
+                approach_ok = True
+
             # 그리퍼의 현재 위치가 목표 위치에 근접했는지 확인
-            if np.linalg.norm(gripper_pos - target_pos) > 0.005: # 5mm 이내
+            if dist > APPROACH_THRESHOLD_M: # 5mm 이내
                 # 관절 제어를 통해 그리퍼를 목표 위치로 이동 (간단한 예시)
                 # 실제 로봇 제어에서는 역기구학(IK) 필요
                 data.ctrl[model.actuator('shoulder_lift').id] -= 0.001
@@ -108,8 +125,11 @@ def pick_and_place_scenario():
             data.ctrl[model.actuator('elbow_flex').id] -= 0.001
             
             # 큐브가 Z+50mm 이상 올라갔는지 확인
-            if data.body('cube').xpos[2] > cube_initial_pos[2] + 0.05: # 초기 Z 위치 + 50mm
-                pass # 성공
+            lift_height = float(data.body('cube').xpos[2] - cube_initial_pos[2])
+            if lift_height > max_lift_height:
+                max_lift_height = lift_height
+            if lift_height >= LIFT_THRESHOLD_M:
+                lift_ok = True
 
         # 5. 큐브 놓기 (대략적인 위치)
         else:
@@ -122,5 +142,20 @@ def pick_and_place_scenario():
         imageio.mimsave(VIDEO_PATH, frames, fps=framerate)
         print(f"Pick-Place demo video saved to: {VIDEO_PATH}")
 
-pick_and_place_scenario()
+    success = approach_ok and lift_ok
+    result = {
+        "status": "success" if success else "fail",
+        "approach_ok": approach_ok,
+        "lift_ok": lift_ok,
+        "min_approach_dist_m": min_approach_dist if min_approach_dist != float('inf') else None,
+        "max_lift_height_m": max_lift_height,
+        "approach_threshold_m": APPROACH_THRESHOLD_M,
+        "lift_threshold_m": LIFT_THRESHOLD_M,
+        "video_path": VIDEO_PATH,
+    }
+    print(json.dumps(result, ensure_ascii=False))
+    return success
+
+ok = pick_and_place_scenario()
 renderer.close()
+raise SystemExit(0 if ok else 1)
