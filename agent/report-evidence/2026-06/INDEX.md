@@ -59,5 +59,6 @@
 - Phase 1 W3 D5: ACT 학습 status 점검 — `logs/`/`checkpoints/` 미존재 그대로, scripts/ 6/14 이후 변경 없음. 사용자 수동 절차 미시행 (`research/simulation/2026-06-19_act-w3-d5-status-check.md`). 23:30 nightly sim-test (13회차): 우선순위 시뮬 4종 실행 `.venv/bin/python3` sandbox 거절 19일 연속 — 런타임 메트릭 0건. 파일시스템 증거 `data/episodes/meta/info.json` 200 ep / 12400 frames / so101 유지 (`agent/research-log/2026-06-19.md`)
 
 ## 2026-06-21
-- Phase 1 W3 D7 (마지막일): ACT 학습 status 최종 점검 — `logs/`/`checkpoints/` 미존재 그대로, `start_act_train.sh`/`check_act_train.sh` 실행비트 미부착 22일 연속. W3 종료일에도 ACT 학습 미시작 → W4 진입 시 ACT 학습 완료 대기 상태 (`research/simulation/2026-06-21_act-w3-d7-final.md`). 23:30 nightly sim-test (15회차): `.venv/bin/python3` sandbox 거절 22일 연속 — 런타임 메트릭 0건. Obsidian `cp` 차단 22일 연속 (`agent/research-log/2026-06-21.md`). → 6월 보고서 [2.사전학습] W3 7일 연속 status 점검 시퀀스 + W3 종료 시점 증거.
+- Phase 1 W3 D7 (마지막일): ACT 학습 진행 확인 — sandbox 차단 해소(commit `6e5f7d5`) + 런타임 버그 3건 수정(commit `98be446`) 후 학습 가동 중. PID 40835 alive, epoch 28→29/100, loss 0.0032 단조 감소. 체크포인트 `checkpoints/act/epoch_0009/`, `epoch_0019/` 자동 저장. 완료 예상 6/22 22~23시 (`research/simulation/2026-06-21_act-w3-d7-training-progress.md`). → 6월 보고서 [2.사전학습] W3 ACT 학습 진행 증거.
+- 23:30 nightly sim-test (16회차, v3.2): sandbox 해소 후 첫 정상 회차. 우선순위 3종 정상 실행 (sim_camera_verification 3/3, sim_headless_6dof_video 2/2, sim_pick_place 3/3 스크립트 실행 / 0/3 pick 목표 — 미학습 결정적 데모로 known). sim_data_collector 학습 CPU 경합 회피로 skip. 산출 비디오 갱신: `research/simulation/video/sim_6dof_animation.mp4`, `pick_place_demo.mp4` (`agent/research-log/2026-06-21.md` 23:30 회차 블록).
 
