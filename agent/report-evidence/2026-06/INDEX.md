@@ -62,3 +62,6 @@
 - Phase 1 W3 D7 (마지막일): ACT 학습 진행 확인 — sandbox 차단 해소(commit `6e5f7d5`) + 런타임 버그 3건 수정(commit `98be446`) 후 학습 가동 중. PID 40835 alive, epoch 28→29/100, loss 0.0032 단조 감소. 체크포인트 `checkpoints/act/epoch_0009/`, `epoch_0019/` 자동 저장. 완료 예상 6/22 22~23시 (`research/simulation/2026-06-21_act-w3-d7-training-progress.md`). → 6월 보고서 [2.사전학습] W3 ACT 학습 진행 증거.
 - 23:30 nightly sim-test (16회차, v3.2): sandbox 해소 후 첫 정상 회차. 우선순위 3종 정상 실행 (sim_camera_verification 3/3, sim_headless_6dof_video 2/2, sim_pick_place 3/3 스크립트 실행 / 0/3 pick 목표 — 미학습 결정적 데모로 known). sim_data_collector 학습 CPU 경합 회피로 skip. 산출 비디오 갱신: `research/simulation/video/sim_6dof_animation.mp4`, `pick_place_demo.mp4` (`agent/research-log/2026-06-21.md` 23:30 회차 블록).
 
+## 2026-06-22
+- Phase 1 W4 D1 (학습 모니터링): ACT 학습 PID 40835 alive, epoch 34/100 진행 (loss 0.00272 단조 감소 유지). 평균 epoch 소요 ~20.9분 → 완료 예상 6/23 00~01시. 체크포인트 `epoch_{0009,0019,0029}/` 정상 저장 (`research/simulation/2026-06-22_act-w4-d1-training-monitor.md`) → 6월 보고서 [2.사전학습] W3 학습 진행 증거.
+- 23:30 nightly sim-test (17회차, v3.2): 우선순위 3종 회귀 정상 (sim_camera_verification 5/5 mean 1.01s, sim_headless_6dof_video 5/5 mean 17.79s, sim_pick_place 스크립트 5/5 / 태스크 0/5 known). 학습 가동 중 병행 — CPU 경합 영향 없음. sim_data_collector 6/23 학습 완료 후 진입 (`agent/research-log/2026-06-22.md` 23:30 회차 블록).
