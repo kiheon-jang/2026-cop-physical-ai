@@ -128,8 +128,8 @@ uv pip install <패키지명>
 > echo $! > logs/act_train.pid
 > # 다음 날 크론 1이 pid 파일 확인 → 완료 여부 체크
 > ```
-- [ ] LeRobot ACT 학습 파이프라인 구성 (`scripts/train_act.py`)
-- [ ] nohup 백그라운드로 epoch 100 학습 실행 (완료까지 수일 소요)
+- [v] LeRobot ACT 학습 파이프라인 구성 (`scripts/train_act.py`) — 2026-06-21 commit `98be446` 런타임 버그 3건 수정 완성
+- [v] nohup 백그라운드로 epoch 100 학습 실행 (완료까지 수일 소요) — 2026-06-21 13:46 PID 40835 시작, 6/21 23:01 epoch 28/100 진행
 - [ ] 매일 크론이 `logs/act_train.log` 마지막 줄 확인 → research-log에 진행률 기록
 - [ ] 학습 완료 후 `models/act_phase1.pt` 저장 + git push
 
