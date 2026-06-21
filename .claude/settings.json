@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(gh auth:*)",
+      "Bash(python3:*)",
+      "Bash(.venv/bin/python3:*)",
+      "Bash(/Volumes/MARK_DATA/dev/2026-cop-physical-ai/.venv/bin/python3:*)",
+      "Bash(source:*)",
+      "Bash(bash scripts/start_act_train.sh:*)",
+      "Bash(bash scripts/check_act_train.sh:*)",
+      "Bash(scripts/start_act_train.sh:*)",
+      "Bash(scripts/check_act_train.sh:*)",
+      "Bash(chmod:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(export:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/markmini/.local/share/uv",
+      "/Users/markmini/.cache/torch",
+      "/Users/markmini/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI"
+    ]
+  }
+}

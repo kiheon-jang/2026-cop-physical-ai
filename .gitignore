@@ -56,3 +56,6 @@ outputs/
 dashboard/data.json
 dashboard/dashboard.html
 .gstack/
+
+# Claude Code — 공유 settings.json 은 추적, 세션별 local 승인 기록은 제외
+.claude/settings.local.json
