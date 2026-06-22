@@ -119,7 +119,7 @@ def interpolate_ctrl(current: np.ndarray, target: np.ndarray, t: float) -> np.nd
     return current + (target - current) * min(t, 1.0)
 
 
-def main():
+def main(dataset_root_arg=None, num_episodes_arg=None):
     # 1. MuJoCo 모델 로드
     if not os.path.exists(MODEL_XML_PATH):
         print(f"Error: MJCF model file not found at {MODEL_XML_PATH}")
@@ -170,9 +170,9 @@ def main():
         },
     }
 
-    dataset_root = os.path.realpath(DATASET_ROOT)
+    dataset_root = os.path.realpath(dataset_root_arg or DATASET_ROOT)
     if os.path.exists(dataset_root):
-        shutil.rmtree(dataset_root)  # 기존 데이터셋 제거 후 재생성
+        shutil.rmtree(dataset_root)  # 기존 데이터셋 제거 후 재생성 (대상 루트만)
 
     dataset = LeRobotDataset.create(
         repo_id=DATASET_REPO_ID,
@@ -184,7 +184,7 @@ def main():
         vcodec="h264",
     )
 
-    num_episodes = 200
+    num_episodes = num_episodes_arg if num_episodes_arg is not None else 200
     phase_sequence = list(PICK_PLACE_POSES.keys())
 
     for episode_idx in range(num_episodes):
@@ -243,4 +243,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    _p = argparse.ArgumentParser(description="시뮬 pick-place 에피소드 자동 수집 (LeRobot 포맷)")
+    _p.add_argument("--root", type=str, default=None,
+                    help="데이터셋 저장 루트 (기본: data/episodes). 실행 중 학습 보호용으로 별도 경로 권장 (대상 루트만 삭제 후 재생성).")
+    _p.add_argument("--episodes", type=int, default=None, help="생성 에피소드 수 (기본: 200)")
+    _a = _p.parse_args()
+    main(dataset_root_arg=_a.root, num_episodes_arg=_a.episodes)
