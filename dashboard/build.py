@@ -847,6 +847,11 @@ def build_training_metrics() -> dict:
        "timestamp": str, "val_loss": float?, "success_rate": float?}
     """
     metrics_files = list(REPO_ROOT.glob("outputs/train/*/metrics.jsonl"))
+    # train_act.py 는 logs/act_train_metrics.jsonl 에 epoch 별 메트릭을 append 한다.
+    # (config.log_dir = logs/). outputs/train/*/metrics.jsonl 와 둘 다 스캔해 최신을 사용.
+    legacy_metrics = REPO_ROOT / "logs" / "act_train_metrics.jsonl"
+    if legacy_metrics.exists():
+        metrics_files.append(legacy_metrics)
     if not metrics_files:
         return {
             "status": "pending",
