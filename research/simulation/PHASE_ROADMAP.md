@@ -130,8 +130,8 @@ uv pip install <패키지명>
 > ```
 - [v] LeRobot ACT 학습 파이프라인 구성 (`scripts/train_act.py`) — 2026-06-21 commit `98be446` 런타임 버그 3건 수정 완성
 - [v] nohup 백그라운드로 epoch 100 학습 실행 (완료까지 수일 소요) — 2026-06-21 13:46 PID 40835 시작, 6/21 23:01 epoch 28/100 진행
-- [ ] 매일 크론이 `logs/act_train.log` 마지막 줄 확인 → research-log에 진행률 기록
-- [ ] 학습 완료 후 `models/act_phase1.pt` 저장 + git push
+- [v] 매일 크론이 `logs/act_train.log` 마지막 줄 확인 → research-log에 진행률 기록 — 6/21, 6/22 완료
+- [v] 학습 완료 후 `models/act_phase1.pt` 저장 — 6/22 22:27 학습 종료 (100 epoch, 32.7h, final loss 0.0012). `checkpoints/act/epoch_0099/model.safetensors` → `models/act_phase1.pt` 복사. *git push는 .gitignore + 320MB 한도로 제외* (config.json만 커밋)
 
 ### W4 (6/22 ~ 6/30) — 파이프라인 검증 완료 + 시뮬 grasp 정상화 착수
 
