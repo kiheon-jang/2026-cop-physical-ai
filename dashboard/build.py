@@ -23,11 +23,14 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import site_docs  # dashboard/ 는 python3 실행 시 sys.path[0]
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DASHBOARD_DIR = REPO_ROOT / "dashboard"
 TEMPLATE_PATH = DASHBOARD_DIR / "template.html"
 DEFAULT_OUT = DASHBOARD_DIR / "dashboard.html"
 DEFAULT_JSON_OUT = DASHBOARD_DIR / "data.json"
+CONTENT_DIR = DASHBOARD_DIR / "content"
 DATA_MARKER = "/*__DATA__*/"
 
 KST = timezone(timedelta(hours=9))
@@ -1234,6 +1237,7 @@ def build_real_data() -> dict:
         "inference_progress": inference_progress,  # PROG-2: 학습 진척 inference 영상
         "activity_timeline": activity_timeline,  # R2: 날짜별 그룹
         "stats": stats,
+        "docs": site_docs.build_site_docs(CONTENT_DIR, REPO_ROOT, "CoP Physical AI"),
     }
     # Hdel template.html 호환 alias (기존 render* 함수가 새 키 모르므로)
     data["proposals"] = sim_tasks
