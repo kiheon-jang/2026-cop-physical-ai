@@ -65,3 +65,5 @@
 ## 2026-06-22
 - Phase 1 W4 D1 (학습 모니터링): ACT 학습 PID 40835 alive, epoch 34/100 진행 (loss 0.00272 단조 감소 유지). 평균 epoch 소요 ~20.9분 → 완료 예상 6/23 00~01시. 체크포인트 `epoch_{0009,0019,0029}/` 정상 저장 (`research/simulation/2026-06-22_act-w4-d1-training-monitor.md`) → 6월 보고서 [2.사전학습] W3 학습 진행 증거.
 - 23:30 nightly sim-test (17회차, v3.2): 우선순위 3종 회귀 정상 (sim_camera_verification 5/5 mean 1.01s, sim_headless_6dof_video 5/5 mean 17.79s, sim_pick_place 스크립트 5/5 / 태스크 0/5 known). 학습 가동 중 병행 — CPU 경합 영향 없음. sim_data_collector 6/23 학습 완료 후 진입 (`agent/research-log/2026-06-22.md` 23:30 회차 블록).
+- 23:00 회차 (v3.2): **ACT 100 epoch 학습 완료 확정** (PID 40835 종료, 32.7h, final loss 0.001202 단조 감소). `models/act_phase1.pt` 320MB 로컬 보존 (gitignored), `models/act_phase1.config.json` 커밋. PHASE_ROADMAP W3 4항목 모두 `[v]` (`research/simulation/2026-06-22_act-training-complete.md`) → 6월 보고서 [2.사전학습] **학습 완료** 핵심 증거.
+- 23:30 회차 (학습 종료 후 회귀): 학습 완료 직후 priority 3종 단독 가동 회귀 통과 (sim_camera_verification 5/5, sim_headless_6dof_video 5/5, sim_pick_place 스크립트 5/5 / 태스크 0/5 결정성 동일 수치 5회 일치). sim_data_collector 보류 (W4 grasp 정상화 작업 영역, 새 expert 합의 전 수집 무의미) (`agent/research-log/2026-06-22.md` 학습 종료 후 회귀 블록).
