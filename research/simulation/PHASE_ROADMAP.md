@@ -154,8 +154,9 @@ uv pip install <패키지명>
 - [v] ACT 학습 파이프라인 가동 검증 (smoke → 100 epoch MPS 학습, loss 곡선 정상)
 - [v] rollout 추론 + Pick 성공률 측정기 구축 (`scripts/render_act_rollout.py`)
 - [v] **시뮬 grasp 근본원인 재규명 + closed-loop 해법 확보** (88%/75%, `_grasp_closedloop.py`)
-- [진행중] **closed-loop 자동수집 정상화 (← 크론 야간 무인 태스크)**:
-  closed-loop expert를 `samples/training/sim_data_collector.py`에 연결 → **성공 시연만** LeRobot 자동수집
+- [ ] **closed-loop 자동수집 정상화 (← 크론 야간 무인 태스크, 다음 실행 대상)**:
+  ✅연결완료(`sim_data_collector.py` closed-loop 교체, 스모크 yield 100%) → 크론이 할 일:
+  `.venv/bin/python samples/training/sim_data_collector.py --root data/episodes_v2 --episodes 50` (nohup) →
   (씬=scene_grasp_pads.xml, 큐브 30mm, forcerange 3.0=12V faithful, lift≥40mm 필터) →
   ACT 재학습 → `render_act_rollout.py` rollout 측정. **open-loop PICK_PLACE_POSES 폐기.**
   (50mm 큐브는 TCP/grasp z 별도 보정 필요라 미적용 — 30mm로 진행.)
