@@ -1067,6 +1067,7 @@
     .row .col-app, .row .col-date { display: none; }
   }
 </style>
+  <style>/*__DOCS_VIEWER_CSS__*/</style>
 </head>
 <body data-theme="light">
 
@@ -1633,118 +1634,14 @@
       <div class="rows" id="decisions-rows"></div>
     </div>
 
-    <!-- ABOUT — 사이트 설명 (PT 용, 숨김 가능) -->
+    <!-- ABOUT — 사이트 설명 (SP3: docs 뷰어 명세 덱) -->
     <div class="view hidden" id="view-about">
-      <div class="home-hero">
-        <h1>사이트 설명</h1>
-        <div class="sub">현대엘리베이터 모바일 앱 선행연구 — Hermes 에이전트 라이브 대시보드</div>
-      </div>
-      <div class="doc-block">
-        <h2>한 줄 요약</h2>
-        <p><b>MuJoCo 시뮬 환경에서 SO-ARM101 로봇팔의 모방학습(ACT/DP) 을 단계적으로 구축해 9월 1차 기능 완성하는 6개월 프로젝트의 진척 대시보드 (4월 사전학습 + Phase 0~4 작업, 10월 시연 별도).</b></p>
-        <p>매일 자동으로 시뮬 작업이 진행되고 (research/simulation/), 테스트 결과가 누적되며 (research-log/), 월말 보고서용 증거가 정리됩니다 (report-evidence/). 이 사이트는 그 누적된 진척을 한 페이지에서 보고, 검색하고, 외부 의존 항목과 다음 단계를 점검하는 도구입니다.</p>
-
-        <h2>왜 만들었나</h2>
-        <ul>
-          <li><b>가시성</b>: Phase 0~4, 6개월(180+ 시뮬 작업) 의 진척을 한눈에 — 폴더 트리로는 안 보임</li>
-          <li><b>의존 추적</b>: 실기팀/외부 머신/사용자 수동 처리 항목을 마감일·담당자별로 → "왜 진행이 멈췄나" 즉시 확인</li>
-          <li><b>증거 큐레이션</b>: 일일 진척에서 보고용 증거 후보를 자동 추출 → 월말 보고서 작성 시간 절약</li>
-        </ul>
-
-        <h2>아키텍처 (v3.2 패턴)</h2>
-        <pre><code>매일 23:00  Hermes cron (no_agent + Python script)
-   └── claude -p (Opus/Sonnet) = 모든 LLM 추론 + MuJoCo 코딩
-       ├── PHASE_ROADMAP.md 에서 오늘 단계 식별
-       ├── 시뮬 코드 작성/실행 (.venv/bin/python3)
-       └── research/simulation/ + research-log/ 작성
-   └── git commit + push
-매일 23:30  cop_sim_test.py (테스트 + 메트릭 + dashboard rebuild)
-   └── data.json 갱신 → 이 사이트 라이브 푸시
-매일 01:00  watcher (실패 잡 자동 재시도, 의존성 chain)
-매일 07:00  아침 보고 메일 (어제 산출물 정리)</code></pre>
-
-        <h2>4개 자동 잡 (CoP)</h2>
-        <ul>
-          <li>매일 23:00 — 시뮬 환경 구축 (PHASE_ROADMAP 의 오늘 단계 실행)</li>
-          <li>매일 23:30 — 시뮬 테스트 + 메트릭 수집 + 대시보드 rebuild</li>
-          <li>매일 01:00 — 야간 retry watchdog (실패 잡 자동 재시도)</li>
-          <li>매일 07:00 — 아침 보고 메일 발송</li>
-        </ul>
-
-        <h2>Phase 로드맵 (6개월)</h2>
-        <p>좌측 <b>Phase 로드맵</b> 메뉴에서 주차/일별 체크리스트 확인:</p>
-        <ul>
-          <li><b>Phase 0</b> (5월) — 시뮬 환경 셋업 (MuJoCo 설치 → SO-ARM101 import → 카메라/매핑/Pick-Place)</li>
-          <li><b>Phase 1</b> (6월) — 사전학습 (데이터 합성 200ep → ACT 학습 → 추가 데이터/재학습)</li>
-          <li><b>Phase 2</b> (7월) — Sim2Real 검증 (실기 50ep 수집 + 시뮬↔실기 비교)</li>
-          <li><b>Phase 3</b> (8월) — PCB 조정 (실제 PCB 픽앤플레이스 학습)</li>
-          <li><b>Phase 4</b> (9월) — RS232 HHT 결선 + 1차 기능 완성 (PCB 70% / RS232 부분성공 40%, 작업 완료)</li>
-          <li><b>시연</b> (10월) — 통합 시연 + 사내 발표 (phase 외부)</li>
-        </ul>
-
-        <h2>일일 의사결정 흐름</h2>
-        <ol>
-          <li>아침: 아침 보고 메일 + 본 대시보드 <b>현재 단계</b> 확인</li>
-          <li><b>외부 의존 차단</b> 메뉴 — 막힌 항목 / 마감 임박 / 담당자 분류</li>
-          <li>오늘 작업이 어제 산출물과 어떻게 이어지는지 <b>일일 진척</b> 카드로 확인</li>
-          <li>월말: <b>월간 보고용 증거</b> 메뉴에서 보고서 [2.X] 섹션 매핑</li>
-        </ol>
-
-        <p class="doc-actions">
-          <button class="btn" onclick="hideAboutMenu()" title="PT 이후에 사이드바에서 숨기기 — 사용가이드 페이지에서 다시 표시 가능">이 메뉴 사이드바에서 숨기기</button>
-        </p>
-      </div>
+      <div id="docs-viewer-spec" class="docs-viewer-mount"></div>
     </div>
 
-    <!-- GUIDE — 사용가이드 -->
+    <!-- GUIDE — 사용가이드 (SP3: docs 뷰어 가이드 덱) -->
     <div class="view hidden" id="view-guide">
-      <div class="home-hero">
-        <h1>사용가이드</h1>
-        <div class="sub">5분 안에 익히는 사이트 사용법</div>
-      </div>
-      <div class="doc-block">
-        <h2>1. 12개 메뉴 둘러보기</h2>
-        <ul>
-          <li><b>현재 단계</b> — 오늘의 작업 / 최근 시뮬 작업 / 60일 활동 히트맵</li>
-          <li><b>Phase 로드맵</b> — Phase 0~5 진행률 + 주차/일별 체크리스트</li>
-          <li><b>시뮬 작업</b> — research/simulation/*.md 카드 (검색·필터·정렬)</li>
-          <li><b>일일 진척</b> — agent/research-log/ 매일의 메트릭·이슈·자가치유</li>
-          <li><b>월간 보고용 증거</b> — agent/report-evidence/YYYY-MM/ 보고서 매핑</li>
-          <li><b>외부 의존 차단</b> ⭐ — 사용자 / 실기팀 / 외부 머신 수동 처리 대기 항목</li>
-          <li><b>샘플 코드 상태</b> ⭐ — samples/ 카테고리별 완성도 / 마지막 검증일</li>
-          <li><b>결정</b> ⭐ — research/decisions/ 아키텍처 결정 기록</li>
-          <li>사이트 설명 / 사용가이드 / 북마크 / 분석</li>
-        </ul>
-
-        <h2>2. 검색</h2>
-        <p>우상단 검색창에 키워드 입력 또는 <span class="kbd">/</span> 키. 제목, 본문 요약, Phase, 카테고리, 스크립트명에서 매칭.</p>
-
-        <h2>3. 필터 & 정렬</h2>
-        <p>상단 chip 으로 Phase 0~5 / 카테고리 / 진행상태 필터. 우측 드롭다운으로 최신순 / 카테고리순 / 북마크순 정렬.</p>
-
-        <h2>4. 북마크 & 메모</h2>
-        <p>카드 우상단 ☆ 클릭 → 좌측 <b>북마크</b> 메뉴에 모임. 시트에서 <b>메모</b> 버튼으로 코멘트 자동 저장. 모두 이 브라우저의 localStorage 에 저장됨.</p>
-
-        <h2>5. 다크/라이트</h2>
-        <p>좌측 하단 토글. 시스템 prefers-color-scheme 자동 감지.</p>
-
-        <h2>6. 키보드 단축키</h2>
-        <table class="doc-table">
-          <tr><td><span class="kbd">1</span>~<span class="kbd">8</span></td><td>라우트 전환 (현재단계/로드맵/시뮬작업/일일/증거/차단/샘플/결정)</td></tr>
-          <tr><td><span class="kbd">/</span></td><td>검색창 포커스</td></tr>
-          <tr><td><span class="kbd">Esc</span></td><td>시트 닫기 또는 입력창 포커스 해제</td></tr>
-        </table>
-
-        <h2>7. 라이브 갱신</h2>
-        <p>브라우저 열어두면 자동 푸시. 매일 23:30 cron 잡 끝에 data.json 이 갱신되고, hermes-mark 사이트가 chokidar 로 감지 → WebSocket 으로 새로고침 없이 도착.</p>
-
-        <h2>8. 정적 산출물</h2>
-        <p>인터넷 없는 다른 맥으로 옮길 때: <code>dashboard.html</code> 한 파일만 USB 로 옮기면 즉시 동작. data.json + dashboard.html 은 .gitignore 되어 있어 build.py 로 재생성.</p>
-
-        <p class="doc-actions" id="guide-restore-about" style="display:none;">
-          <button class="btn" onclick="showAboutMenu()">사이트 설명 메뉴 다시 표시</button>
-        </p>
-      </div>
+      <div id="docs-viewer-guide" class="docs-viewer-mount"></div>
     </div>
 
     <!-- BOOKMARKS -->
@@ -2020,6 +1917,8 @@ function setRoute(r) {
   if (r === 'blockers') renderBlockers();
   if (r === 'samples') renderSamples();
   if (r === 'decisions') renderDecisions();
+  if (r === 'about') renderDocs('spec');
+  if (r === 'guide') renderDocs('guide');
   setTimeout(drawAllCharts, 0);
 }
 
@@ -3690,6 +3589,7 @@ if (IS_LIVE) {
   refreshFromApi();
   connectLiveSocket();
 }
+/*__DOCS_VIEWER_JS__*/
 </script>
 </body>
 </html>
