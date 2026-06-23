@@ -1239,7 +1239,7 @@ def build_real_data() -> dict:
         "inference_progress": inference_progress,  # PROG-2: 학습 진척 inference 영상
         "activity_timeline": activity_timeline,  # R2: 날짜별 그룹
         "stats": stats,
-        "docs": site_docs.build_site_docs(CONTENT_DIR, REPO_ROOT, "CoP Physical AI"),
+        "docs": site_docs.build_site_docs(CONTENT_DIR, REPO_ROOT, "CoP Physical AI", proj="cop"),
     }
     # Hdel template.html 호환 alias (기존 render* 함수가 새 키 모르므로)
     data["proposals"] = sim_tasks

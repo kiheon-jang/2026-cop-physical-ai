@@ -1,0 +1,54 @@
+{
+  "home": {
+    "ui_hash": "926f432d1b447c618602394bd4f6ee80d5bf4d4fbd5d784d99e8bf11fbe7c88d",
+    "captured_at": "2026-06-23T15:33:13.708608+00:00"
+  },
+  "tech": {
+    "ui_hash": "fc3eadf292197aa6f9de05178aed2a4e9cdd46dfb6c17776c1b1810f067be78d",
+    "captured_at": "2026-06-23T15:33:14.403204+00:00"
+  },
+  "ops": {
+    "ui_hash": "58784163ce63153b8be118884f1600a171b6a846f9537cf6e30ff8d6ca4d05ae",
+    "captured_at": "2026-06-23T15:33:15.088355+00:00"
+  },
+  "apps": {
+    "ui_hash": "57e2ff7382cd4ebbb88cb913808e26671846f76935e91d044e9b41f025d3911f",
+    "captured_at": "2026-06-23T15:33:15.735519+00:00"
+  },
+  "videos": {
+    "ui_hash": "c1614b2446f04b4c202e58a9a3665dbe7262b6eb001331d05776908acf7677b9",
+    "captured_at": "2026-06-23T15:33:16.383299+00:00"
+  },
+  "daily": {
+    "ui_hash": "9f3b97af90326dabeafc4528d9fc7d28beab55a9c3b9582ecf8289fc9d12422d",
+    "captured_at": "2026-06-23T15:33:17.123978+00:00"
+  },
+  "magazines": {
+    "ui_hash": "bdd98c01535742c0ea5e50633f094eb6e1b8b593c1a79b7d8ef23c1aec88277e",
+    "captured_at": "2026-06-23T15:33:17.798225+00:00"
+  },
+  "proposals": {
+    "ui_hash": "6f29decd279cda87e5268d556fc8ce664365de30642a82bdeff9387d71d9e95f",
+    "captured_at": "2026-06-23T15:33:18.515962+00:00"
+  },
+  "blockers": {
+    "ui_hash": "ac07d2a8ca40a9d6964858ae6ff50f0b1c05df9ff36a6d8ca7f390b79a06423c",
+    "captured_at": "2026-06-23T15:33:19.143259+00:00"
+  },
+  "samples": {
+    "ui_hash": "afa389f25ad5b24332cb7ed00995e93c4c21b21056999cad7819f905537ede6d",
+    "captured_at": "2026-06-23T15:33:19.769876+00:00"
+  },
+  "decisions": {
+    "ui_hash": "78d3834bccce21a8f90574510595883f85fbb96b253f9170e8fc0b7c7e105c2c",
+    "captured_at": "2026-06-23T15:33:20.388786+00:00"
+  },
+  "bookmarks": {
+    "ui_hash": "bc44fcad255859296cc3df4d4aff7c6380bb36f0691ec774b98738c78113bcea",
+    "captured_at": "2026-06-23T15:33:21.024811+00:00"
+  },
+  "analytics": {
+    "ui_hash": "0de894f4af4b5f200c7afb0f606c6f4f2e1abfa7c222089faf22b94793873052",
+    "captured_at": "2026-06-23T15:33:21.667155+00:00"
+  }
+}

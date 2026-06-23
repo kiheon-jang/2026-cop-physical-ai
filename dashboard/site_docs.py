@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 from datetime import datetime, timezone
@@ -73,6 +74,27 @@ def _safe_int(value) -> int:
         return 0
 
 
+def _load_manifest(screenshots_dir: Path) -> dict:
+    mf = screenshots_dir / "manifest.json"
+    if mf.is_file():
+        try:
+            return json.loads(mf.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+    return {}
+
+
+def _apply_screenshot(base: dict, screenshots_dir: Path, proj: str, manifest: dict) -> dict:
+    """manifest 에서 ui_hash 채우고, PNG 존재 시 screenshot 을 /static 경로로 재작성(없으면 "")."""
+    base["ui_hash"] = manifest.get(base["id"], {}).get("ui_hash", "")
+    fname = base.get("screenshot") or ""
+    if fname and proj and (screenshots_dir / fname).is_file():
+        base["screenshot"] = f"/static/{proj}/screenshots/{fname}"
+    else:
+        base["screenshot"] = ""
+    return base
+
+
 def _slide_base(meta: dict, fp: Path, prov: dict, kind: str) -> dict:
     return {
         "id": meta.get("id", fp.stem),
@@ -87,9 +109,11 @@ def _slide_base(meta: dict, fp: Path, prov: dict, kind: str) -> dict:
     }
 
 
-def build_site_docs(content_dir, repo_root, site_title: str = "") -> dict:
+def build_site_docs(content_dir, repo_root, site_title: str = "", proj: str = "") -> dict:
     content_dir = Path(content_dir)
     repo_root = Path(repo_root)
+    screenshots_dir = content_dir.parent / "screenshots"   # hdel/cop: dashboard/screenshots
+    manifest = _load_manifest(screenshots_dir)
     spec_slides: list[dict] = []
     guide_slides: list[dict] = []
 
@@ -98,7 +122,8 @@ def build_site_docs(content_dir, repo_root, site_title: str = "") -> dict:
         for fp in sorted(pages_dir.glob("*.md")):
             meta, body = parse_frontmatter(fp.read_text(encoding="utf-8"))
             sections = split_doc_sections(body)
-            base = _slide_base(meta, fp, git_provenance(repo_root, fp), "page")
+            base = _apply_screenshot(_slide_base(meta, fp, git_provenance(repo_root, fp), "page"),
+                                     screenshots_dir, proj, manifest)
             spec_slides.append({**base, "body_md": sections["spec"]})
             guide_slides.append({**base, "body_md": sections["guide"]})
 
@@ -106,7 +131,8 @@ def build_site_docs(content_dir, repo_root, site_title: str = "") -> dict:
     if system_dir.is_dir():
         for fp in sorted(system_dir.glob("*.md")):
             meta, body = parse_frontmatter(fp.read_text(encoding="utf-8"))
-            base = _slide_base(meta, fp, git_provenance(repo_root, fp), "system")
+            base = _apply_screenshot(_slide_base(meta, fp, git_provenance(repo_root, fp), "system"),
+                                     screenshots_dir, proj, manifest)
             slide = {**base, "body_md": body.strip()}
             (guide_slides if meta.get("doc") == "guide" else spec_slides).append(slide)
 
