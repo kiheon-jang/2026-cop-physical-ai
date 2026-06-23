@@ -1767,7 +1767,6 @@ STATE.bookmarks = STATE.bookmarks || {};
 STATE.memos = STATE.memos || {};
 STATE.statuses = STATE.statuses || {};
 STATE.theme = STATE.theme || null;
-STATE.hideAbout = STATE.hideAbout ?? false;
 
 const STATUS_META = {
   review:  { label: '검토중', cls: 'st-review' },
@@ -1794,24 +1793,6 @@ function setStatus(id, status) {
   if (status && STATUS_META[status]) STATE.statuses[id] = status;
   else delete STATE.statuses[id];
   saveState(STATE);
-}
-
-/* ====== About 메뉴 표시 토글 (PT 이후 숨김 가능) ====== */
-function applyAboutVisibility() {
-  const nav = document.getElementById('nav-about');
-  const restore = document.getElementById('guide-restore-about');
-  if (nav) nav.classList.toggle('hidden', STATE.hideAbout);
-  if (restore) restore.style.display = STATE.hideAbout ? '' : 'none';
-}
-function hideAboutMenu() {
-  STATE.hideAbout = true; saveState(STATE);
-  applyAboutVisibility();
-  setRoute('guide');
-}
-function showAboutMenu() {
-  STATE.hideAbout = false; saveState(STATE);
-  applyAboutVisibility();
-  setRoute('about');
 }
 
 /* ====== THEME ====== */
@@ -3572,7 +3553,6 @@ function initCounts() {
 
 initCounts();
 mountIcons();
-applyAboutVisibility();
 renderProposals();
 renderDaily();
 renderMagazines();

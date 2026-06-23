@@ -9,6 +9,7 @@
 .docs-viewer__title { flex: 1; min-width: 0; font-size: 16px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .docs-viewer__chip { flex: 0 0 auto; margin-left: auto; font-size: 12px; padding: 3px 10px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-strong); font-weight: 600; }
 .docs-viewer__stage { display: flex; flex-direction: column; gap: 16px; min-height: 320px; }
+.docs-viewer__stage.is-textonly { min-height: 0; }
 .docs-viewer__shot { width: 100%; max-height: 460px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-sub); }
 .docs-viewer__shot.is-hidden { display: none; }
 .docs-viewer__body { color: var(--text); line-height: 1.7; font-size: 14px; }
