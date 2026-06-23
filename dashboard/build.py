@@ -32,6 +32,8 @@ DEFAULT_OUT = DASHBOARD_DIR / "dashboard.html"
 DEFAULT_JSON_OUT = DASHBOARD_DIR / "data.json"
 CONTENT_DIR = DASHBOARD_DIR / "content"
 DATA_MARKER = "/*__DATA__*/"
+DOCS_VIEWER_CSS_MARKER = "/*__DOCS_VIEWER_CSS__*/"
+DOCS_VIEWER_JS_MARKER = "/*__DOCS_VIEWER_JS__*/"
 
 KST = timezone(timedelta(hours=9))
 
@@ -1266,6 +1268,10 @@ def render(data: dict, out: Path) -> Path:
         raise SystemExit(f"template 의 데이터 라인 매칭 실패. 한 줄로 유지하세요.")
     replacement = DATA_MARKER + payload + ";"
     html = re.sub(pattern, lambda _: replacement, tpl, count=1)
+    docs_css = (DASHBOARD_DIR / "docs_viewer.css").read_text(encoding="utf-8")
+    docs_js = (DASHBOARD_DIR / "docs_viewer.js").read_text(encoding="utf-8")
+    html = html.replace(DOCS_VIEWER_CSS_MARKER, docs_css)
+    html = html.replace(DOCS_VIEWER_JS_MARKER, docs_js)
     out.write_text(html, encoding="utf-8")
     return out
 
