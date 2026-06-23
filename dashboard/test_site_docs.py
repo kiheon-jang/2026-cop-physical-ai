@@ -61,7 +61,7 @@ class TestBuild(unittest.TestCase):
             self.assertEqual(ids, ["home", "arch"])  # order 1, 99
             home = docs["spec"]["slides"][0]
             self.assertEqual(home["kind"], "page")
-            self.assertEqual(home["screenshot"], "home.png")
+            self.assertEqual(home["screenshot"], "")  # SP2: no PNG/proj → "" (manifest contract)
             self.assertEqual(home["ui_hash"], "")
             self.assertEqual(home["body_md"], "홈 상세")
             self.assertIn("updated_at", home)
@@ -82,6 +82,29 @@ class TestBuild(unittest.TestCase):
         problems = site_docs.validate_docs({"spec": {"slides": []}})
         self.assertIn("missing or invalid doc: guide", problems)
 
+
+    def test_screenshot_rewrite_and_ui_hash(self):
+        import json
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            pages = root / "content" / "pages"
+            pages.mkdir(parents=True)
+            (pages / "01-x.md").write_text(
+                '---\nid: x\ntitle: X\norder: 1\nscreenshot: x.png\ncategory: 핵심\n---\n'
+                '## 기능명세\nA\n## 사용가이드\nB\n', encoding="utf-8")
+            shots = root / "screenshots"
+            shots.mkdir()
+            (shots / "manifest.json").write_text(
+                json.dumps({"x": {"ui_hash": "abc123", "captured_at": "t"}}), encoding="utf-8")
+            # PNG absent → screenshot becomes "" even though frontmatter had x.png
+            docs = site_docs.build_site_docs(root / "content", root, "T", proj="hdel")
+            s = docs["spec"]["slides"][0]
+            self.assertEqual(s["ui_hash"], "abc123")
+            self.assertEqual(s["screenshot"], "")
+            # PNG present → /static path
+            (shots / "x.png").write_bytes(b"\x89PNG")
+            docs2 = site_docs.build_site_docs(root / "content", root, "T", proj="hdel")
+            self.assertEqual(docs2["spec"]["slides"][0]["screenshot"], "/static/hdel/screenshots/x.png")
 
     def test_validate_detects_missing_contract_field(self):
         bad = {
