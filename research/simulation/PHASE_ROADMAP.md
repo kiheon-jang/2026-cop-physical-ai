@@ -143,16 +143,29 @@ uv pip install <패키지명>
 > - IK는 큐브에 **<1mm 정밀 도달** 확인 → 해법 경로 확보 (방향제어 IK + 큐브 축소 30mm)
 > - 상세: [2026-06-22_grasp-task-root-cause.md](./2026-06-22_grasp-task-root-cause.md)
 
+> 📌 **2026-06-23 갱신 (근본원인 재규명 + 해법 확보)**: 6-22 결론(공차/토크)은 **부정확**.
+> 실측·다각 검증 결과 진짜 원인 = **그리퍼 단일 회전조의 닫힘 호(arc) 스윕 + open-loop expert**:
+> - 토크(±6Nm도 실패)·개구폭(손끝 ~94mm, 50mm 들어감)·접촉모델(condim 3/4/6) 전부 반증.
+>   실물은 텔레오퍼레이션(사람 closed-loop)으로 3~5cm 물체를 바닥에서 잘 잡음 → open vs closed-loop 차이.
+> - **closed-loop expert(매 step 큐브추종 + 점진닫힘 + 재시도) 구현 → 30mm grasp 88%(FORCE6)/75%(FORCE3=12V 팔로워 실스펙). open-loop 0% → 해결.** `scripts/_grasp_closedloop.py`.
+> - pick-place는 실물 우선이 정공법(LeRobot 합의)이나 **6월 실물수집 미예정 → 6월은 sim 트랙(closed-loop 자동수집)이 메인.** sim의 결정적 가치는 Phase 3+ RS232 정밀삽입.
+> - 정정 상세: 위 root-cause 문서 상단 정정 + 메모리(grasp-rootcause / sim-strategy / data-paths).
+
 - [v] ACT 학습 파이프라인 가동 검증 (smoke → 100 epoch MPS 학습, loss 곡선 정상)
 - [v] rollout 추론 + Pick 성공률 측정기 구축 (`scripts/render_act_rollout.py`)
-- [ ] **시뮬 grasp 정상화** *(진행중 — 7월 이관 아님, Phase 2 전제조건이라 6월말~7월초 집중 처리)*:
-  IK 기반 cube-aware expert + 큐브 축소 → 정상 데이터 재생성 → 재학습 → 성공률 측정
+- [v] **시뮬 grasp 근본원인 재규명 + closed-loop 해법 확보** (88%/75%, `_grasp_closedloop.py`)
+- [진행중] **closed-loop 자동수집 정상화 (← 크론 야간 무인 태스크)**:
+  closed-loop expert를 `samples/training/sim_data_collector.py`에 연결 → **성공 시연만** LeRobot 자동수집
+  (씬=scene_grasp_pads.xml, 큐브 30mm, forcerange 3.0=12V faithful, lift≥40mm 필터) →
+  ACT 재학습 → `render_act_rollout.py` rollout 측정. **open-loop PICK_PLACE_POSES 폐기.**
+  (50mm 큐브는 TCP/grasp z 별도 보정 필요라 미적용 — 30mm로 진행.)
 - [ ] 학습 모델 Orin Nano 배포 (SSH 연결 확보 시)
 
-**Phase 1 완료 기준 (2026-06-22 재조정)**:
+**Phase 1 완료 기준 (2026-06-23 갱신)**:
 - ✅ 시뮬 사전학습 파이프라인 전 구간 가동 (데이터 합성 → ACT 학습 → 추론 → 성공률 측정)
-- 🔄 시뮬 Pick 성공률: grasp 정상화 후 측정. 당초 목표 90%는 **그리퍼/큐브 공차 정상화 + 재학습 사이클**이
-  필요하며, Phase 2(Sim2Real)의 전제조건이므로 7월로 미루지 않고 별도 집중 작업으로 선행 처리.
+- ✅ 시뮬 grasp closed-loop 해법 확보 (30mm 88%/75%)
+- 🔄 시뮬 Pick 성공률: closed-loop 자동수집 → ACT 재학습 → rollout 측정으로 확인 중.
+  실물수집은 6월 미예정 → Phase 2(7월) 일정으로. sim의 결정적 가치는 Phase 3+ 정밀삽입.
 
 ---
 
