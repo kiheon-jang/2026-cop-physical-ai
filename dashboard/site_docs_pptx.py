@@ -5,6 +5,7 @@ spec: docs/superpowers/specs/2026-06-24-site-docs-pptx-export-design.md
 """
 from __future__ import annotations
 
+import os
 import re
 
 _RUN_RE = re.compile(r"`([^`]+)`|\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\)")
@@ -142,3 +143,40 @@ def parse_markdown(md: str) -> list[dict]:
         blocks.append({"type": "code", "text": "\n".join(code_lines)})
     flush_para(); flush_list()
     return blocks or [{"type": "empty"}]
+
+
+def pick_base_pt(total_chars: int) -> int:
+    if total_chars < 500:
+        return 12
+    if total_chars < 1200:
+        return 11
+    if total_chars < 2500:
+        return 10
+    return 9
+
+
+def resolve_screenshot(value: str, screenshots_dir: str) -> str | None:
+    if not value or not screenshots_dir:
+        return None
+    name = os.path.basename(value)
+    if "." not in name:                      # no extension -> not-found (no auto .png)
+        return None
+    path = os.path.join(screenshots_dir, name)
+    return path if os.path.isfile(path) else None
+
+
+def _has_decks(o) -> bool:
+    return isinstance(o, dict) and ("spec" in o or "guide" in o)
+
+
+def load_site_docs(raw) -> dict:
+    """§3.3 우선순위: docs > top-level > 1겹 unwrap. 실패 시 ValueError."""
+    if isinstance(raw, dict) and _has_decks(raw.get("docs")):
+        return raw["docs"]
+    if _has_decks(raw):
+        return raw
+    if isinstance(raw, dict):
+        for k in ("data", "result"):
+            if _has_decks(raw.get(k)):
+                return raw[k]
+    raise ValueError("SiteDocs not found: expected {spec,guide} or {docs:{...}} top-level")

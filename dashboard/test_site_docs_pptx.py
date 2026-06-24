@@ -1,4 +1,6 @@
 # test_site_docs_pptx.py
+import os
+import tempfile
 import unittest
 import site_docs_pptx as sd
 
@@ -98,6 +100,32 @@ class TestParseTable(unittest.TestCase):
         self.assertTrue(all(len(r) == 2 for r in t["rows"]))   # extra dropped, missing padded
         self.assertEqual(sd._runs_text(t["rows"][0][0]), "x")  # first cell kept
         self.assertEqual(sd._runs_text(t["rows"][1][1]), "")   # padded empty cell
+
+
+class TestHelpers(unittest.TestCase):
+    def test_pick_base_pt_bins(self):
+        self.assertEqual(sd.pick_base_pt(100), 12)
+        self.assertEqual(sd.pick_base_pt(800), 11)
+        self.assertEqual(sd.pick_base_pt(2000), 10)
+        self.assertEqual(sd.pick_base_pt(5000), 9)
+
+    def test_resolve_screenshot_basename(self):
+        with tempfile.TemporaryDirectory() as d:
+            open(os.path.join(d, "home.png"), "wb").close()
+            self.assertEqual(sd.resolve_screenshot("/static/cop/screenshots/home.png", d),
+                             os.path.join(d, "home.png"))
+            self.assertEqual(sd.resolve_screenshot("home.png", d), os.path.join(d, "home.png"))
+            self.assertIsNone(sd.resolve_screenshot("missing.png", d))
+            self.assertIsNone(sd.resolve_screenshot("", d))
+            self.assertIsNone(sd.resolve_screenshot("noext", d))
+
+    def test_load_site_docs_precedence(self):
+        sg = {"spec": {"slides": []}, "guide": {"slides": []}}
+        self.assertEqual(sd.load_site_docs({"docs": sg})["spec"], {"slides": []})   # docs wins
+        self.assertEqual(sd.load_site_docs(sg)["guide"], {"slides": []})            # top-level
+        self.assertEqual(sd.load_site_docs({"data": sg})["spec"], {"slides": []})   # one unwrap
+        with self.assertRaises(ValueError):
+            sd.load_site_docs({"nope": 1})
 
 
 if __name__ == "__main__":
