@@ -179,5 +179,40 @@ class TestPageSlideText(unittest.TestCase):
         self.assertIn("본문 없음", all_text)
 
 
+class TestTwoColumn(unittest.TestCase):
+    OPTS = {"font": "Apple SD Gothic Neo", "mono_font": "Menlo", "title_prefix": "", "label": "cop"}
+
+    def _png(self, d, w=640, h=480):
+        from PIL import Image
+        p = os.path.join(d, "home.png")
+        Image.new("RGB", (w, h), (200, 200, 200)).save(p)
+        return p
+
+    def test_page_with_screenshot_has_picture_and_narrow_body(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._png(d)
+            slide = {"id": "home", "kind": "page", "title": "홈", "category": "핵심",
+                     "order": 1, "screenshot": "home.png", "updated_at": "2026-06-24T09:00:00+09:00",
+                     "commit": "abc", "ui_hash": "", "body_md": "본문"}
+            prs = sd._new_prs()
+            sd.add_page_slide(prs, slide, d, 12, self.OPTS)
+            sl = prs.slides[0]
+            pics = [sh for sh in sl.shapes if sh.shape_type == 13]
+            self.assertEqual(len(pics), 1)
+            self.assertAlmostEqual(pics[0].width / pics[0].height, 4 / 3, places=2)
+            self.assertGreaterEqual(pics[0].left, Inches(7.0))
+
+    def test_corrupt_png_falls_back_textonly(self):
+        with tempfile.TemporaryDirectory() as d:
+            open(os.path.join(d, "home.png"), "wb").close()    # 0-byte = corrupt
+            slide = {"id": "home", "kind": "page", "title": "홈", "category": "핵심",
+                     "order": 1, "screenshot": "home.png", "updated_at": "", "commit": "",
+                     "ui_hash": "", "body_md": "본문"}
+            prs = sd._new_prs()
+            sd.add_page_slide(prs, slide, d, 12, self.OPTS)     # must NOT raise
+            pics = [sh for sh in prs.slides[0].shapes if sh.shape_type == 13]
+            self.assertEqual(len(pics), 0)                      # no picture -> text-only
+
+
 if __name__ == "__main__":
     unittest.main()

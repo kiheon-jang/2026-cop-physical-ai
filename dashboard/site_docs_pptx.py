@@ -8,6 +8,8 @@ from __future__ import annotations
 import os
 import re
 
+from PIL import Image
+
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
@@ -327,5 +329,31 @@ def add_page_slide(prs, slide_obj, screenshots_dir, base_pt, opts, progress_mode
     has_shot = (slide_obj.get("kind") != "system"
                 and resolve_screenshot(slide_obj.get("screenshot", ""), screenshots_dir) is not None)
     body_w = _COL_BODY_W if has_shot else _FULL_W
-    # Tasks 7-8 add image + native-table flow; v1-text path renders all blocks here:
-    _render_blocks(_body_frame(slide, _MARGIN, body_w), blocks, base_pt, opts)
+    png = resolve_screenshot(slide_obj.get("screenshot", ""), screenshots_dir) if has_shot else None
+    if png:
+        try:
+            _add_screenshot(slide, png)
+        except Exception:                       # corrupt/zero-byte/unsupported -> text-only + warn
+            body_w = _FULL_W
+            emit(progress_mode, {"v": 1, "phase": "render", "status": "warn",
+                                 "note": f"screenshot skipped: {slide_obj.get('id', '')}"})
+    _render_body(slide, blocks, _MARGIN, body_w, base_pt, opts)
+
+
+def emit(progress_mode, event):
+    pass   # no-op stub; replaced by the real emitter in Task 10
+
+
+def _add_screenshot(slide, png_path):
+    with Image.open(png_path) as im:
+        iw, ih = im.size
+    box_w, box_h = Inches(_IMG_W), Inches(_BODY_H)
+    scale = min(box_w / iw, box_h / ih)
+    w, h = int(iw * scale), int(ih * scale)
+    left = Inches(_IMG_X) + (box_w - w) // 2
+    top = Inches(_BODY_TOP) + (box_h - h) // 2
+    slide.shapes.add_picture(png_path, left, top, width=w, height=h)
+
+
+def _render_body(slide, blocks, x, w, base_pt, opts):
+    _render_blocks(_body_frame(slide, x, w), blocks, base_pt, opts)
