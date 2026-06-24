@@ -52,7 +52,11 @@ class ACTTrainingConfig:
 
     # 데이터셋
     dataset_repo_id: str = "local/cop-pickplace"
-    dataset_root: str = "/Volumes/MARK_DATA/dev/2026-cop-physical-ai/data/episodes"
+    # COP_DATASET_ROOT 로 데이터 경로 오버라이드 (파이프라인 드라이버가 closed-loop data/episodes_cl 지정).
+    dataset_root: str = os.environ.get(
+        "COP_DATASET_ROOT",
+        "/Volumes/MARK_DATA/dev/2026-cop-physical-ai/data/episodes",
+    )
     camera_keys: List[str] = field(default_factory=lambda: ["top"])
     fps: int = 30
     # 영상 디코딩 백엔드. 기본 torchcodec 은 시스템 ffmpeg(libtorchcodec) 에 의존 —

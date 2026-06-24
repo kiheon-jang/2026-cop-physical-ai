@@ -16,6 +16,35 @@
 
 ---
 
+## 🔁 시뮬 파이프라인 드라이버 (2026-06-24 신규 — 핵심)
+
+야간 cron 의 본업 = **시뮬 파이프라인을 매일 한 칸씩 전진**. 이걸 LLM(self-heal) 판단에 맡기면
+"고칠 것 없음 → 침묵"으로 멈춘다(2026-06-24 실제 발생: 밤 잡 SILENT → 아침 메일 빔).
+그래서 **결정론적 드라이버**가 전진을 담당하고, LLM self-heal 은 "진짜 에러"만 보조한다.
+
+```
+scripts/cop_pipeline_advance.sh   ← 야간 cron(self-heal 스킬 §0)이 매 실행 첫 액션으로 호출
+```
+상태머신(1회 1단계, 장시간작업은 nohup 백그라운드):
+1. 수집 진행중 → 보고   2. 학습 진행중 → check_act_train.sh
+3. 데이터<50ep → `cop_start_data_collect.sh`(closed-loop 수집)
+4. 데이터 준비 & 미학습 → `start_act_train.sh`(COP_DATASET_ROOT=data/episodes_cl)
+5. 학습완료 & 미측정 → `render_act_rollout.py`
+6. 측정완료 → 수렴 판정
+
+- 네이밍: 전부 `cop_` 접두(다른 프로젝트 잡과 격리). pid/log: `logs/cop_*`.
+- 데이터: `data/episodes_cl`(closed-loop). 기존 open-loop `data/episodes` 보존.
+- 연결: `~/.hermes/skills/mark-custom/cop-physical-ai-self-heal/SKILL.md §0` 에서 호출(새 크론 잡 없음 → 충돌 0).
+- 출력 `STAGE=...` 상태블록 → research-log + 아침 메일에 append → "메일 빔" 재발 방지.
+
+> ⚠ **스케줄 검증 필요**: 본 문서(2026-05-22)는 23:00/23:30(ID 9ad85007cf27 등)으로 기록돼 있으나,
+> 2026-06-24 로그상 실제 실행 잡은 01:00(b76453176bb4)·04:30(7adc5a1b580d)로 **ID/시각 불일치**.
+> self-heal 스킬을 쓰는 잡이면 드라이버가 작동하나, 실제 스케줄/ID 재확인 권장.
+> ⚠ **후속(측정 스테이지 5)**: `render_act_rollout.py` 가 stock `scene.xml`+큐브 바닥(0.025)+forcerange 1.5 →
+> closed-loop 학습과 불일치. 측정 유효화엔 `scene_grasp_pads.xml`+큐브 0.175+forcerange 3.0 정합 필요(수집·학습 후 처리).
+
+---
+
 ## 📋 크론 1 — 시뮬 환경 단계별 구축 (MuJoCo)
 
 ```

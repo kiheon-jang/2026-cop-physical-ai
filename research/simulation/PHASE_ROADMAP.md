@@ -154,12 +154,13 @@ uv pip install <패키지명>
 - [v] ACT 학습 파이프라인 가동 검증 (smoke → 100 epoch MPS 학습, loss 곡선 정상)
 - [v] rollout 추론 + Pick 성공률 측정기 구축 (`scripts/render_act_rollout.py`)
 - [v] **시뮬 grasp 근본원인 재규명 + closed-loop 해법 확보** (88%/75%, `_grasp_closedloop.py`)
-- [ ] **closed-loop 자동수집 정상화 (← 크론 야간 무인 태스크, 다음 실행 대상)**:
-  ✅연결완료(`sim_data_collector.py` closed-loop 교체, 스모크 yield 100%) → 크론이 할 일:
-  `.venv/bin/python samples/training/sim_data_collector.py --root data/episodes_v2 --episodes 50` (nohup) →
-  (씬=scene_grasp_pads.xml, 큐브 30mm, forcerange 3.0=12V faithful, lift≥40mm 필터) →
-  ACT 재학습 → `render_act_rollout.py` rollout 측정. **open-loop PICK_PLACE_POSES 폐기.**
-  (50mm 큐브는 TCP/grasp z 별도 보정 필요라 미적용 — 30mm로 진행.)
+- [v] **closed-loop 자동수집 파이프라인 드라이버 구축** (2026-06-24):
+  결정론적 상태머신 `scripts/cop_pipeline_advance.sh` (수집→학습→측정→반복) 신규. 야간 cron
+  (self-heal 스킬 §0)이 매일 호출 → 한 칸씩 전진. LLM 판단 불필요(어제 SILENT 멈춤 방지).
+  수집기=closed-loop(`sim_data_collector.py`, 씬 scene_grasp_pads, 큐브30mm, forcerange3.0=12V, lift≥40mm 필터, 스모크 yield 100%).
+  데이터 `data/episodes_cl`, train_act 는 `COP_DATASET_ROOT` 로 읽음. 상세: `agent/cron-jobs.md`.
+- [ ] **closed-loop 자동수집 1사이클 완주** (드라이버가 진행): 50ep 수집 → ACT 재학습 → rollout 측정.
+  (50mm 큐브 미적용·30mm 진행. **측정기 정합 후속**: `render_act_rollout.py` 를 closed-loop 씬/forcerange 로 맞춰야 측정 유효 — cron-jobs.md 참조.)
 - [ ] 학습 모델 Orin Nano 배포 (SSH 연결 확보 시)
 
 **Phase 1 완료 기준 (2026-06-23 갱신)**:
