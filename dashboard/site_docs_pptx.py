@@ -29,3 +29,87 @@ def inline(text: str) -> list[dict]:
     if pos < len(text):
         out.append({"t": "text", "s": text[pos:]})
     return out or [{"t": "text", "s": ""}]
+
+
+_H_RE = re.compile(r"^(#{1,6})\s+(.+)$")
+_UL_RE = re.compile(r"^[-*]\s+(.+)$")
+_OL_RE = re.compile(r"^\d+\.\s+(.+)$")
+
+
+def _runs_text(runs: list[dict]) -> str:
+    return "".join(r["s"] for r in runs)
+
+
+def parse_markdown(md: str) -> list[dict]:
+    if not md or not md.strip():
+        return [{"type": "empty"}]
+    blocks: list[dict] = []
+    buf: list[str] = []
+    cur_list = None  # ("ulist"|"olist", [items])
+    in_code = False
+    code_lines: list[str] = []
+
+    def flush_para():
+        nonlocal buf
+        if buf:
+            # join soft-wrapped lines, then strip — mirrors viewer flushBuf's buf.join(' ').trim()
+            blocks.append({"type": "para", "runs": inline(" ".join(buf).strip())})
+            buf = []
+
+    def flush_list():
+        nonlocal cur_list
+        if cur_list:
+            blocks.append({"type": cur_list[0], "items": cur_list[1]})
+            cur_list = None
+
+    lines = md.replace("\r\n", "\n").split("\n")
+    i = 0
+    while i < len(lines):
+        raw = lines[i]
+        line = raw.rstrip()
+        if in_code:
+            if line.strip() == "```":
+                blocks.append({"type": "code", "text": "\n".join(code_lines)})
+                code_lines = []
+                in_code = False
+            else:
+                code_lines.append(raw)  # preserve leading whitespace; no inline
+            i += 1
+            continue
+        if line.strip() == "```":
+            flush_para(); flush_list(); in_code = True; i += 1; continue
+        # GFM table is handled in Task 3 (inserted here later).
+        if not line.strip():
+            flush_para(); flush_list(); i += 1; continue
+        mh = _H_RE.match(line)
+        if mh:
+            flush_para(); flush_list()
+            blocks.append({"type": "heading", "level": min(len(mh.group(1)), 3),
+                           "runs": inline(mh.group(2))})
+            i += 1; continue
+        if line.startswith("> "):
+            flush_para(); flush_list()
+            blocks.append({"type": "quote", "runs": inline(line[2:])})
+            i += 1; continue
+        mu = _UL_RE.match(line)
+        if mu:
+            flush_para()
+            if not cur_list or cur_list[0] != "ulist":
+                flush_list(); cur_list = ("ulist", [])
+            cur_list[1].append(inline(mu.group(1)))
+            i += 1; continue
+        mo = _OL_RE.match(line)
+        if mo:
+            flush_para()
+            if not cur_list or cur_list[0] != "olist":
+                flush_list(); cur_list = ("olist", [])
+            cur_list[1].append(inline(mo.group(1)))
+            i += 1; continue
+        # paragraph buffer (soft-wrap)
+        flush_list()
+        buf.append(line)
+        i += 1
+    if in_code:                         # unterminated fence auto-closes
+        blocks.append({"type": "code", "text": "\n".join(code_lines)})
+    flush_para(); flush_list()
+    return blocks or [{"type": "empty"}]

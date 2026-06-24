@@ -36,5 +36,42 @@ class TestInline(unittest.TestCase):
         self.assertEqual(sd.inline("a *b* c"), [{"t": "text", "s": "a *b* c"}])
 
 
+class TestParseBlocks(unittest.TestCase):
+    def test_heading_levels_clamped(self):
+        b = sd.parse_markdown("# A\n## B\n### C\n#### D")
+        self.assertEqual([(x["type"], x["level"]) for x in b],
+                         [("heading", 1), ("heading", 2), ("heading", 3), ("heading", 3)])
+
+    def test_paragraph_softwrap(self):
+        b = sd.parse_markdown("line one\nline two\n\nnext para")
+        self.assertEqual(b[0]["type"], "para")
+        self.assertEqual(sd._runs_text(b[0]["runs"]), "line one line two")
+        self.assertEqual(sd._runs_text(b[1]["runs"]), "next para")
+
+    def test_unordered_list_flat(self):
+        b = sd.parse_markdown("- a\n- b\n  - c")     # indented line is NOT nested
+        ul = [x for x in b if x["type"] == "ulist"][0]
+        self.assertEqual([sd._runs_text(i) for i in ul["items"]], ["a", "b"])
+        self.assertTrue(any(x["type"] == "para" and sd._runs_text(x["runs"]) == "- c" for x in b))
+
+    def test_ordered_list(self):
+        b = sd.parse_markdown("1. first\n2. second")
+        ol = [x for x in b if x["type"] == "olist"][0]
+        self.assertEqual([sd._runs_text(i) for i in ol["items"]], ["first", "second"])
+
+    def test_blockquote(self):
+        b = sd.parse_markdown("> quoted")
+        self.assertEqual(b[0]["type"], "quote")
+        self.assertEqual(sd._runs_text(b[0]["runs"]), "quoted")
+
+    def test_code_fence_raw_and_autoclose(self):
+        b = sd.parse_markdown("```\n**not bold** 한글\nmore")
+        code = [x for x in b if x["type"] == "code"][0]
+        self.assertEqual(code["text"], "**not bold** 한글\nmore")
+
+    def test_empty_body(self):
+        self.assertEqual(sd.parse_markdown("   \n\n"), [{"type": "empty"}])
+
+
 if __name__ == "__main__":
     unittest.main()
