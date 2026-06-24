@@ -161,6 +161,7 @@ uv pip install <패키지명>
   데이터 `data/episodes_cl`, train_act 는 `COP_DATASET_ROOT` 로 읽음. 상세: `agent/cron-jobs.md`.
 - [ ] **closed-loop 자동수집 1사이클 완주** (드라이버가 진행): 50ep 수집 → ACT 재학습 → rollout 측정.
   (50mm 큐브 미적용·30mm 진행. **측정기 정합 후속**: `render_act_rollout.py` 를 closed-loop 씬/forcerange 로 맞춰야 측정 유효 — cron-jobs.md 참조.)
+  - 🔄 **2026-06-24 23:00 진척**: 수집✓(`data/episodes_cl` 50ep/3350frame) → 학습중(pid 20078, epoch 64/100, loss 0.0077, ETA~02:00) → 측정대기. 측정기 정합은 commit `16d2548` 완료(2-rollout 스모크 OK). 현 `rollout_summary.json` 0%/6.4mm 는 baseline epoch_0009(open-loop) 성적이며 closed-loop 모델 측정은 학습 완료 후 드라이버가 자동 수행. 상세: `2026-06-24_closed-loop-cycle1-progress.md`.
 - [ ] 학습 모델 Orin Nano 배포 (SSH 연결 확보 시)
 
 **Phase 1 완료 기준 (2026-06-23 갱신)**:
