@@ -214,5 +214,24 @@ class TestTwoColumn(unittest.TestCase):
             self.assertEqual(len(pics), 0)                      # no picture -> text-only
 
 
+class TestNativeTable(unittest.TestCase):
+    OPTS = {"font": "Apple SD Gothic Neo", "mono_font": "Menlo", "title_prefix": "", "label": "cop"}
+
+    def test_table_block_becomes_native_table(self):
+        slide = {"id": "t", "kind": "system", "title": "표", "category": "",
+                 "order": 1, "screenshot": "", "updated_at": "2026-06-24T09:00:00+09:00",
+                 "commit": "", "ui_hash": "",
+                 "body_md": "설명 문단\n\n| 이름 | 값 |\n| --- | --- |\n| a | b |\n| c | d |"}
+        prs = sd._new_prs()
+        sd.add_page_slide(prs, slide, "", 12, self.OPTS)
+        tables = [sh for sh in prs.slides[0].shapes if sh.has_table]
+        self.assertEqual(len(tables), 1)
+        tbl = tables[0].table
+        self.assertEqual(len(tbl.rows), 3)        # header + 2 body
+        self.assertEqual(len(tbl.columns), 2)
+        self.assertEqual(tbl.cell(0, 0).text, "이름")
+        self.assertEqual(tbl.cell(2, 1).text, "d")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -312,6 +312,10 @@ def _add_footer(slide, slide_obj, opts):
     _set_run(p.add_run(), {"t": "text", "s": text}, 9, opts["font"], opts["mono_font"], color=_GRAY)
 
 
+_LINE_H = 0.26          # inches per text line at base size (heuristic)
+_CHARS_PER_IN = 7.0     # approx chars per inch of width at base size
+
+
 def _body_frame(slide, x, w):
     box = slide.shapes.add_textbox(Inches(x), Inches(_BODY_TOP), Inches(w), Inches(_BODY_H))
     tf = box.text_frame
@@ -355,5 +359,73 @@ def _add_screenshot(slide, png_path):
     slide.shapes.add_picture(png_path, left, top, width=w, height=h)
 
 
+def _estimate_text_h(blocks, width_in):
+    cpl = max(8, int(width_in * _CHARS_PER_IN))
+    lines = 0
+    for b in blocks:
+        if b["type"] == "heading":
+            lines += 1
+        elif b["type"] in ("para", "quote"):
+            lines += max(1, (len(_runs_text(b["runs"])) // cpl) + 1)
+        elif b["type"] in ("ulist", "olist"):
+            for it in b["items"]:
+                lines += max(1, (len(_runs_text(it)) // cpl) + 1)
+        elif b["type"] == "code":
+            lines += b["text"].count("\n") + 1
+        elif b["type"] == "empty":
+            lines += 1
+    return max(_LINE_H, lines * _LINE_H)
+
+
+def _add_table(slide, table_block, x, y, w):
+    header, rows = table_block["header"], table_block["rows"]
+    ncol = max(len(header), *(len(r) for r in rows)) if rows else len(header)
+    nrow = 1 + len(rows)
+    gf = slide.shapes.add_table(nrow, ncol, Inches(x), Inches(y), Inches(w), Inches(0.4 * nrow))
+    tbl = gf.table
+
+    def fill(cell, runs):
+        cell.text = ""
+        p = cell.text_frame.paragraphs[0]
+        for run in runs:
+            _set_run(p.add_run(), run, 11, "Apple SD Gothic Neo", "Menlo",
+                     bold=(isinstance(run, dict) and run["t"] == "bold"))
+
+    for c in range(ncol):
+        fill(tbl.cell(0, c), header[c] if c < len(header) else [{"t": "text", "s": ""}])
+    for r, row in enumerate(rows, 1):
+        for c in range(ncol):
+            fill(tbl.cell(r, c), row[c] if c < len(row) else [{"t": "text", "s": ""}])
+    return Inches(0.4 * nrow)
+
+
 def _render_body(slide, blocks, x, w, base_pt, opts):
-    _render_blocks(_body_frame(slide, x, w), blocks, base_pt, opts)
+    """플로우: 텍스트 블록은 텍스트 프레임에, 표는 별도 GraphicFrame. y 커서로 위→아래."""
+    y = _BODY_TOP
+    bottom = _BODY_TOP + _BODY_H
+    group: list[dict] = []
+
+    def flush_group():
+        nonlocal y
+        if not group:
+            return
+        h = min(_estimate_text_h(group, w), bottom - y)
+        if h <= 0:
+            group.clear(); return
+        box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(max(0.3, h)))
+        tf = box.text_frame
+        tf.word_wrap = True
+        tf.vertical_anchor = MSO_ANCHOR.TOP
+        _render_blocks(tf, list(group), base_pt, opts)
+        y += h
+        group.clear()
+
+    for b in blocks:
+        if b["type"] == "table":
+            flush_group()
+            if y < bottom:
+                used = _add_table(slide, b, x, y, w)
+                y += used / 914400
+        else:
+            group.append(b)
+    flush_group()
