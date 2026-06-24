@@ -8,6 +8,8 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 
 from PIL import Image
@@ -463,3 +465,33 @@ def build_deck(doc, screenshots_dir, opts, progress_mode):
         emit(progress_mode, {"v": 1, "phase": "render", "deck": opts.get("_deck", ""),
                              "done": idx, "total": len(slides)})
     return prs
+
+
+def convert_pdf(pptx_path, out_dir, progress_mode, soffice_bin="soffice"):
+    deck = os.path.splitext(os.path.basename(pptx_path))[0]
+    if not shutil.which(soffice_bin):
+        emit(progress_mode, {"v": 1, "phase": "pdf", "deck": deck, "status": "warn",
+                             "note": f"{soffice_bin} not found (install LibreOffice for PDF)"})
+        return None
+    emit(progress_mode, {"v": 1, "phase": "pdf", "deck": deck, "status": "start",
+                         "note": "first run may take ~10s"})
+    profile = f"/tmp/sd-soffice-{os.getpid()}"
+    try:
+        subprocess.run(
+            [soffice_bin, "--headless", "--convert-to", "pdf", "--outdir", out_dir,
+             f"-env:UserInstallation=file://{profile}", pptx_path],
+            check=True, capture_output=True, timeout=120,
+        )
+        pdf = os.path.join(out_dir, deck + ".pdf")
+        if os.path.isfile(pdf):
+            emit(progress_mode, {"v": 1, "phase": "pdf", "deck": deck, "status": "ok"})
+            return pdf
+        emit(progress_mode, {"v": 1, "phase": "pdf", "deck": deck, "status": "warn",
+                             "note": "soffice produced no pdf"})
+        return None
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+        emit(progress_mode, {"v": 1, "phase": "pdf", "deck": deck, "status": "warn",
+                             "note": f"soffice failed: {type(e).__name__}"})
+        return None
+    finally:
+        shutil.rmtree(profile, ignore_errors=True)

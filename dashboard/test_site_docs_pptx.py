@@ -2,6 +2,7 @@
 import io
 import json
 import os
+import shutil
 import tempfile
 import unittest
 from contextlib import redirect_stderr
@@ -266,6 +267,27 @@ class TestProgress(unittest.TestCase):
         with redirect_stderr(buf):
             sd.emit("none", {"v": 1, "phase": "done", "outputs": []})
         self.assertEqual(buf.getvalue(), "")
+
+
+class TestPdf(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("soffice"), "soffice not installed")
+    def test_convert_pdf_creates_nonempty_pdf(self):
+        with tempfile.TemporaryDirectory() as d:
+            prs = sd._new_prs()
+            sd.add_title_slide(prs, {"title": "T", "generatedAt": "", "slides": []},
+                               {"font": "Apple SD Gothic Neo", "mono_font": "Menlo",
+                                "title_prefix": "", "label": "t"})
+            pptx_path = os.path.join(d, "t.pptx")
+            prs.save(pptx_path)
+            pdf = sd.convert_pdf(pptx_path, d, "none")
+            self.assertTrue(pdf and os.path.getsize(pdf) > 0)
+            self.assertTrue(pdf.endswith(".pdf"))
+
+    def test_convert_pdf_missing_soffice_returns_none(self):
+        with tempfile.TemporaryDirectory() as d:
+            open(os.path.join(d, "x.pptx"), "wb").close()
+            self.assertIsNone(sd.convert_pdf(os.path.join(d, "x.pptx"), d, "none",
+                                             soffice_bin="definitely-not-soffice"))
 
 
 if __name__ == "__main__":
