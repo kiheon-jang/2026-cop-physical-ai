@@ -73,5 +73,32 @@ class TestParseBlocks(unittest.TestCase):
         self.assertEqual(sd.parse_markdown("   \n\n"), [{"type": "empty"}])
 
 
+class TestParseTable(unittest.TestCase):
+    def test_gfm_table(self):
+        md = "| 이름 | 값 |\n| --- | --- |\n| a | **b** |"
+        b = sd.parse_markdown(md)
+        t = [x for x in b if x["type"] == "table"][0]
+        self.assertEqual([sd._runs_text(c) for c in t["header"]], ["이름", "값"])
+        self.assertEqual(sd._runs_text(t["rows"][0][0]), "a")
+        self.assertEqual(t["rows"][0][1], [{"t": "bold", "s": "b"}])
+
+    def test_pipe_without_separator_is_paragraph(self):
+        b = sd.parse_markdown("| not | a table |\njust text")
+        self.assertFalse(any(x["type"] == "table" for x in b))
+        self.assertTrue(any(x["type"] == "para" for x in b))
+
+    def test_table_then_text(self):
+        md = "| h |\n| - |\n| x |\n\nafter"
+        b = sd.parse_markdown(md)
+        self.assertEqual([x["type"] for x in b], ["table", "para"])
+
+    def test_table_ragged_rows_normalized_to_header(self):
+        md = "| a | b |\n| - | - |\n| x | y | z |\n| only |"
+        t = [x for x in sd.parse_markdown(md) if x["type"] == "table"][0]
+        self.assertTrue(all(len(r) == 2 for r in t["rows"]))   # extra dropped, missing padded
+        self.assertEqual(sd._runs_text(t["rows"][0][0]), "x")  # first cell kept
+        self.assertEqual(sd._runs_text(t["rows"][1][1]), "")   # padded empty cell
+
+
 if __name__ == "__main__":
     unittest.main()

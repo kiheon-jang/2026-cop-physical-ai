@@ -34,6 +34,21 @@ def inline(text: str) -> list[dict]:
 _H_RE = re.compile(r"^(#{1,6})\s+(.+)$")
 _UL_RE = re.compile(r"^[-*]\s+(.+)$")
 _OL_RE = re.compile(r"^\d+\.\s+(.+)$")
+_SEP_CELL_RE = re.compile(r"^:?-+:?$")
+
+
+def _split_row(line: str) -> list[str]:
+    s = line.strip()
+    if s.startswith("|"):
+        s = s[1:]
+    if s.endswith("|"):
+        s = s[:-1]
+    return [c.strip() for c in s.split("|")]
+
+
+def _is_table_sep(line: str) -> bool:
+    cells = _split_row(line)
+    return bool(cells) and all(_SEP_CELL_RE.match(c) for c in cells)
 
 
 def _runs_text(runs: list[dict]) -> str:
@@ -78,7 +93,21 @@ def parse_markdown(md: str) -> list[dict]:
             continue
         if line.strip() == "```":
             flush_para(); flush_list(); in_code = True; i += 1; continue
-        # GFM table is handled in Task 3 (inserted here later).
+        if line.lstrip().startswith("|") and i + 1 < len(lines) and _is_table_sep(lines[i + 1]):
+            flush_para(); flush_list()
+            header = [inline(c) for c in _split_row(line)]
+            ncol = len(header)
+            rows = []
+            j = i + 2
+            while j < len(lines) and lines[j].lstrip().startswith("|"):
+                cells = _split_row(lines[j])
+                # normalize each row to header width: drop extras, pad missing (mirrors viewer)
+                rows.append([inline(cells[c]) if c < len(cells) else [{"t": "text", "s": ""}]
+                             for c in range(ncol)])
+                j += 1
+            blocks.append({"type": "table", "header": header, "rows": rows})
+            i = j
+            continue
         if not line.strip():
             flush_para(); flush_list(); i += 1; continue
         mh = _H_RE.match(line)
