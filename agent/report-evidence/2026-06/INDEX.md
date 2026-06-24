@@ -67,3 +67,8 @@
 - 23:30 nightly sim-test (17회차, v3.2): 우선순위 3종 회귀 정상 (sim_camera_verification 5/5 mean 1.01s, sim_headless_6dof_video 5/5 mean 17.79s, sim_pick_place 스크립트 5/5 / 태스크 0/5 known). 학습 가동 중 병행 — CPU 경합 영향 없음. sim_data_collector 6/23 학습 완료 후 진입 (`agent/research-log/2026-06-22.md` 23:30 회차 블록).
 - 23:00 회차 (v3.2): **ACT 100 epoch 학습 완료 확정** (PID 40835 종료, 32.7h, final loss 0.001202 단조 감소). `models/act_phase1.pt` 320MB 로컬 보존 (gitignored), `models/act_phase1.config.json` 커밋. PHASE_ROADMAP W3 4항목 모두 `[v]` (`research/simulation/2026-06-22_act-training-complete.md`) → 6월 보고서 [2.사전학습] **학습 완료** 핵심 증거.
 - 23:30 회차 (학습 종료 후 회귀): 학습 완료 직후 priority 3종 단독 가동 회귀 통과 (sim_camera_verification 5/5, sim_headless_6dof_video 5/5, sim_pick_place 스크립트 5/5 / 태스크 0/5 결정성 동일 수치 5회 일치). sim_data_collector 보류 (W4 grasp 정상화 작업 영역, 새 expert 합의 전 수집 무의미) (`agent/research-log/2026-06-22.md` 학습 종료 후 회귀 블록).
+
+## 2026-06-24
+- Phase 1 W4: closed-loop 자동수집 1사이클 진행(수집✓ 50ep/3350frame → ACT 재학습 epoch 64→69/100 진행 → 측정대기). 결정론적 드라이버 `cop_pipeline_advance.sh` 가 전진 (`research/simulation/2026-06-24_closed-loop-cycle1-progress.md`) → 6월 보고서 [2.사전학습] closed-loop 핵심 증거.
+- 23:30 nightly sim-test (v3.2): headless 우선 3종 스모크 정상 — sim_headless_6dof_video(2501 frame 6관절 비디오), sim_camera_verification(듀얼카메라 30 frame), sim_pick_place(스크립트 정상 / open-loop grasp 0%·32cm 미달 = known 결함). sim_data_collector 는 활성 파이프라인 드라이버 소유·학습 중 → 의도적 skip. 메모리 83.7%/2.8GB가용 (`agent/research-log/2026-06-24.md` 23:30 회차 블록).
+- open-loop vs closed-loop grasp 대비: `sim_pick_place.py` 0%(32cm) ↔ closed-loop 재학습(rollout 측정 학습완료 후) → 6월 보고서 [2.사전학습] open/closed-loop 대비 증거.

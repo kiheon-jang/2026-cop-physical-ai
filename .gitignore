@@ -15,6 +15,7 @@ build/
 # 에피소드 데이터 (대용량 바이너리 — git 관리 제외)
 # Phase 0~1: 로컬 저장, Phase 1부터 HuggingFace private으로 이관
 data/episodes/
+data/episodes_cl/
 data/videos/
 data/chunks/
 data/*.parquet
