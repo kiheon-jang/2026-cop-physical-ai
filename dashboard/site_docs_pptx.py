@@ -429,3 +429,16 @@ def _render_body(slide, blocks, x, w, base_pt, opts):
         else:
             group.append(b)
     flush_group()
+
+
+def build_deck(doc, screenshots_dir, opts, progress_mode):
+    slides = doc.get("slides", [])
+    total_chars = sum(len(s.get("body_md", "")) for s in slides)
+    base_pt = pick_base_pt(total_chars)
+    prs = _new_prs()
+    add_title_slide(prs, doc, opts)
+    for idx, s in enumerate(slides, 1):
+        add_page_slide(prs, s, screenshots_dir, base_pt, opts, progress_mode)
+        emit(progress_mode, {"v": 1, "phase": "render", "deck": opts.get("_deck", ""),
+                             "done": idx, "total": len(slides)})
+    return prs

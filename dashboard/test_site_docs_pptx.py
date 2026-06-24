@@ -233,5 +233,20 @@ class TestNativeTable(unittest.TestCase):
         self.assertEqual(tbl.cell(2, 1).text, "d")
 
 
+class TestBuildDeck(unittest.TestCase):
+    OPTS = {"font": "Apple SD Gothic Neo", "mono_font": "Menlo", "title_prefix": "", "label": "cop"}
+
+    def test_deck_slide_count(self):
+        doc = {"title": "기능명세서 — CoP", "generatedAt": "2026-06-24T09:00:00+09:00",
+               "slides": [
+                   {"id": "a", "kind": "page", "title": "A", "category": "핵심", "order": 1,
+                    "screenshot": "", "updated_at": "", "commit": "", "ui_hash": "", "body_md": "본문 A"},
+                   {"id": "b", "kind": "system", "title": "B", "category": "시스템", "order": 2,
+                    "screenshot": "", "updated_at": "", "commit": "", "ui_hash": "", "body_md": "본문 B"},
+               ]}
+        prs = sd.build_deck(doc, "", self.OPTS, "none")
+        self.assertEqual(len(prs.slides), 3)       # title + 2
+
+
 if __name__ == "__main__":
     unittest.main()
