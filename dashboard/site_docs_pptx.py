@@ -5,6 +5,14 @@ spec: docs/superpowers/specs/2026-06-24-site-docs-pptx-export-design.md
 """
 from __future__ import annotations
 
+try:
+    from pptx import Presentation as _Presentation  # noqa: F401
+    from PIL import Image as _Image                  # noqa: F401
+except ImportError as _e:                            # pragma: no cover
+    import sys as _sys
+    _sys.stderr.write(f"fatal: missing dependency ({_e}). Run: pip install python-pptx Pillow\n")
+    raise SystemExit(2)
+
 import json
 import os
 import re
@@ -495,3 +503,82 @@ def convert_pdf(pptx_path, out_dir, progress_mode, soffice_bin="soffice"):
         return None
     finally:
         shutil.rmtree(profile, ignore_errors=True)
+
+
+import argparse
+
+_DECK_LABEL = {"spec": "기능명세", "guide": "사용가이드"}
+
+
+def _read_raw(docs_arg):
+    if docs_arg == "-":
+        data = sys.stdin.read()
+    else:
+        with open(docs_arg, encoding="utf-8") as f:
+            data = f.read()
+    if not data.strip():
+        raise ValueError("empty --docs input")
+    return json.loads(data)
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="site-docs PPTX/PDF generator")
+    ap.add_argument("--proj", required=True)            # label only
+    ap.add_argument("--docs", required=True)
+    ap.add_argument("--screenshots-dir", default="")
+    ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--deck", choices=["both", "spec", "guide"], default="both")
+    ap.add_argument("--pdf", action="store_true")
+    ap.add_argument("--progress", choices=["human", "json", "none"], default="human")
+    ap.add_argument("--font", default="Apple SD Gothic Neo")
+    ap.add_argument("--mono-font", default="Menlo")
+    ap.add_argument("--title-prefix", default="")
+    a = ap.parse_args(argv)
+    pm = a.progress
+
+    emit(pm, {"v": 1, "phase": "load", "status": "start"})
+    try:
+        site = load_site_docs(_read_raw(a.docs))
+    except (ValueError, json.JSONDecodeError, OSError) as e:
+        sys.stderr.write(f"fatal: {e}\n")
+        return 2
+    emit(pm, {"v": 1, "phase": "load", "status": "ok"})
+
+    decks = ["spec", "guide"] if a.deck == "both" else [a.deck]
+    opts = {"font": a.font, "mono_font": a.mono_font, "title_prefix": a.title_prefix, "label": a.proj}
+    os.makedirs(a.out_dir, exist_ok=True)
+    outputs, warnings = [], []
+    if not a.screenshots_dir or not os.path.isdir(a.screenshots_dir):
+        warnings.append("screenshots-dir absent: text-only decks")
+        emit(pm, {"v": 1, "phase": "plan", "status": "warn", "note": "screenshots-dir absent: text-only"})
+    emit(pm, {"v": 1, "phase": "plan", "decks": decks, "pdf": bool(a.pdf),
+              "slideTotals": {k: len((site.get(k) or {}).get("slides", [])) for k in decks}})
+
+    for deck in decks:
+        doc = site.get(deck)
+        if not doc:
+            warnings.append(f"{deck}:missing deck")
+            emit(pm, {"v": 1, "phase": "save", "deck": deck, "status": "warn", "note": "missing deck"})
+            continue
+        opts["_deck"] = deck
+        prs = build_deck(doc, a.screenshots_dir, opts, pm)
+        pptx_path = os.path.join(a.out_dir, f"{a.proj}-{_DECK_LABEL[deck]}.pptx")
+        prs.save(pptx_path)
+        outputs.append(pptx_path)
+        emit(pm, {"v": 1, "phase": "save", "deck": deck, "status": "ok", "path": pptx_path})
+        if a.pdf:
+            pdf = convert_pdf(pptx_path, a.out_dir, pm)
+            if pdf:
+                outputs.append(pdf)
+            else:
+                warnings.append(f"pdf:{deck}:failed")
+
+    emit(pm, {"v": 1, "phase": "done", "outputs": outputs, "warnings": warnings})
+    for p in outputs:
+        sys.stdout.write(p + "\n")
+    sys.stdout.flush()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

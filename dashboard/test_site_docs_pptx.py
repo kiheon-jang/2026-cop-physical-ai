@@ -290,5 +290,44 @@ class TestPdf(unittest.TestCase):
                                              soffice_bin="definitely-not-soffice"))
 
 
+class TestMain(unittest.TestCase):
+    def _docs_json(self):
+        d = {"spec": {"title": "기능명세서 — CoP", "generatedAt": "2026-06-24T09:00:00+09:00",
+                      "slides": [{"id": "a", "kind": "system", "title": "A", "category": "",
+                                  "order": 1, "screenshot": "", "updated_at": "", "commit": "",
+                                  "ui_hash": "", "body_md": "본문"}]},
+             "guide": {"title": "사용가이드 — CoP", "generatedAt": "2026-06-24T09:00:00+09:00",
+                       "slides": [{"id": "a", "kind": "system", "title": "A", "category": "",
+                                   "order": 1, "screenshot": "", "updated_at": "", "commit": "",
+                                   "ui_hash": "", "body_md": "본문"}]}}
+        return d
+
+    def test_main_writes_two_decks_and_prints_paths(self):
+        with tempfile.TemporaryDirectory() as d:
+            jp = os.path.join(d, "data.json")
+            with open(jp, "w", encoding="utf-8") as f:
+                json.dump({"docs": self._docs_json()}, f)
+            out = os.path.join(d, "exports")
+            buf = io.StringIO()
+            from contextlib import redirect_stdout
+            with redirect_stdout(buf):
+                rc = sd.main(["--proj", "cop", "--docs", jp, "--screenshots-dir", d,
+                              "--out-dir", out, "--progress", "none"])
+            self.assertEqual(rc, 0)
+            paths = buf.getvalue().split()
+            self.assertEqual(len([p for p in paths if p.endswith(".pptx")]), 2)
+            self.assertTrue(os.path.isfile(os.path.join(out, "cop-기능명세.pptx")))
+            self.assertTrue(os.path.isfile(os.path.join(out, "cop-사용가이드.pptx")))
+
+    def test_main_bad_json_exits_2(self):
+        with tempfile.TemporaryDirectory() as d:
+            jp = os.path.join(d, "bad.json")
+            with open(jp, "w") as f:
+                f.write('{"nope": 1}')
+            rc = sd.main(["--proj", "cop", "--docs", jp, "--screenshots-dir", d,
+                          "--out-dir", d, "--progress", "none"])
+            self.assertEqual(rc, 2)
+
+
 if __name__ == "__main__":
     unittest.main()
