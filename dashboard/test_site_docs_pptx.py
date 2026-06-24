@@ -1,7 +1,10 @@
 # test_site_docs_pptx.py
+import io
+import json
 import os
 import tempfile
 import unittest
+from contextlib import redirect_stderr
 import site_docs_pptx as sd
 from pptx.util import Inches, Pt, Emu
 
@@ -246,6 +249,23 @@ class TestBuildDeck(unittest.TestCase):
                ]}
         prs = sd.build_deck(doc, "", self.OPTS, "none")
         self.assertEqual(len(prs.slides), 3)       # title + 2
+
+
+class TestProgress(unittest.TestCase):
+    def test_json_event_is_ndjson_with_version(self):
+        buf = io.StringIO()
+        with redirect_stderr(buf):
+            sd.emit("json", {"v": 1, "phase": "render", "deck": "spec", "done": 1, "total": 3})
+        line = buf.getvalue().strip()
+        obj = json.loads(line)
+        self.assertEqual(obj["v"], 1)
+        self.assertEqual(obj["phase"], "render")
+
+    def test_none_is_silent(self):
+        buf = io.StringIO()
+        with redirect_stderr(buf):
+            sd.emit("none", {"v": 1, "phase": "done", "outputs": []})
+        self.assertEqual(buf.getvalue(), "")
 
 
 if __name__ == "__main__":

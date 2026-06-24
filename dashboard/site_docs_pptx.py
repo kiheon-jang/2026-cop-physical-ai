@@ -5,8 +5,10 @@ spec: docs/superpowers/specs/2026-06-24-site-docs-pptx-export-design.md
 """
 from __future__ import annotations
 
+import json
 import os
 import re
+import sys
 
 from PIL import Image
 
@@ -345,7 +347,26 @@ def add_page_slide(prs, slide_obj, screenshots_dir, base_pt, opts, progress_mode
 
 
 def emit(progress_mode, event):
-    pass   # no-op stub; replaced by the real emitter in Task 10
+    if progress_mode == "none":
+        return
+    if progress_mode == "json":
+        sys.stderr.write(json.dumps(event, ensure_ascii=False) + "\n")
+        sys.stderr.flush()
+        return
+    # human
+    phase = event.get("phase")
+    if phase == "render":
+        msg = f"[{event.get('deck','')}] 슬라이드 {event.get('done')}/{event.get('total')} 렌더링…"
+    elif phase == "pdf" and event.get("status") == "start":
+        msg = "PDF 변환 중… (LibreOffice 첫 실행 5~15초)"
+    elif phase == "done":
+        warns = event.get("warnings") or []
+        msg = "완료" + (f" (경고 {len(warns)}건)" if warns else "")
+    else:
+        msg = None
+    if msg:
+        sys.stderr.write(msg + "\n")
+        sys.stderr.flush()
 
 
 def _add_screenshot(slide, png_path):
