@@ -34,14 +34,21 @@ scripts/cop_pipeline_advance.sh   ← 야간 cron(self-heal 스킬 §0)이 매 �
 
 - 네이밍: 전부 `cop_` 접두(다른 프로젝트 잡과 격리). pid/log: `logs/cop_*`.
 - 데이터: `data/episodes_cl`(closed-loop). 기존 open-loop `data/episodes` 보존.
-- 연결: `~/.hermes/skills/mark-custom/cop-physical-ai-self-heal/SKILL.md §0` 에서 호출(새 크론 잡 없음 → 충돌 0).
+- **연결(2026-06-24 통합)**: 23:00 CoP 작업 크론(`--no-agent`, script=`cop_sim_env.py`)이 **git_pull 직후 이 드라이버를 직접 호출**한다. Claude 위임은 그 결과 문서화/보고/self-heal 만(파이프라인 재실행 X). 별도 크론·스킬 없음 → 충돌 0.
+  검증(`cop_sim_env.py --pipeline-only`): git_pull_ok → STAGE=학습시작 → 학습 진행(loss 하강) 확인됨.
 - 출력 `STAGE=...` 상태블록 → research-log + 아침 메일에 append → "메일 빔" 재발 방지.
 
-> ⚠ **스케줄 검증 필요**: 본 문서(2026-05-22)는 23:00/23:30(ID 9ad85007cf27 등)으로 기록돼 있으나,
-> 2026-06-24 로그상 실제 실행 잡은 01:00(b76453176bb4)·04:30(7adc5a1b580d)로 **ID/시각 불일치**.
-> self-heal 스킬을 쓰는 잡이면 드라이버가 작동하나, 실제 스케줄/ID 재확인 권장.
+> **실제 CoP 크론 (라이브 jobs.json, 2026-06-24 확인)** — 본 문서의 옛 ID(9ad85007cf27 등)는 stale:
+> - `76b3cd4eb4fc` 23:00 "시뮬 환경 구축" (script `cop_sim_env.py`, --no-agent) ← 작업 본진
+> - `f88b3198c9b6` 23:30 "시뮬 테스트 + 메트릭"
+> - `b76453176bb4` 01:00 "야간 잡 실패 재시도"   · `fb6d7cb26650` 07:00 "아침 보고 메일"
+> - 04:30(7adc5a1b580d)은 **Hermes Common(타 프로젝트)** — CoP 아님.
+>
+> **"메일 빔" 진짜 원인(2026-06-24)**: cop_sim_env.py 의 `git pull` 이 로컬↔origin **분기(divergent)** 로
+> exit 1 → 매일 그 자리서 종료. **수정**: `git config pull.rebase false` + autoStash → 분기 시 자동 머지.
+>
 > ⚠ **후속(측정 스테이지 5)**: `render_act_rollout.py` 가 stock `scene.xml`+큐브 바닥(0.025)+forcerange 1.5 →
-> closed-loop 학습과 불일치. 측정 유효화엔 `scene_grasp_pads.xml`+큐브 0.175+forcerange 3.0 정합 필요(수집·학습 후 처리).
+> closed-loop 학습과 불일치. 측정 유효화엔 `scene_grasp_pads.xml`+큐브 0.175+forcerange 3.0 정합 필요(학습 후 처리).
 
 ---
 
