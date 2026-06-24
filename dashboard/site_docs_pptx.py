@@ -235,3 +235,97 @@ def _fmt_generated(iso: str) -> str:
     if len(iso) >= 16 and iso[10] == "T":
         return iso[:10] + " " + iso[11:16]
     return iso[:10] if iso else ""
+
+
+# layout geometry (inches) — see spec §5.1
+_MARGIN = 0.5
+_BODY_TOP = 1.4
+_BODY_H = 5.3
+_FULL_W = 12.333
+_COL_BODY_W = 6.6
+_IMG_X = 7.35
+_IMG_W = 5.23
+
+
+def _render_blocks(tf, blocks, base_pt, opts):
+    """텍스트성 블록(heading/para/ulist/olist/quote/code/empty)을 한 텍스트 프레임에 단락으로."""
+    first = True
+
+    def para():
+        nonlocal first
+        p = tf.paragraphs[0] if first else tf.add_paragraph()
+        first = False
+        return p
+
+    for b in blocks:
+        if b["type"] == "heading":
+            p = para()
+            for run in b["runs"]:
+                _set_run(p.add_run(), run, base_pt, opts["font"], opts["mono_font"],
+                         bold=True, pt={1: 18, 2: 15, 3: 13}[b["level"]])
+        elif b["type"] == "para":
+            p = para()
+            for run in b["runs"]:
+                _set_run(p.add_run(), run, base_pt, opts["font"], opts["mono_font"])
+        elif b["type"] in ("ulist", "olist"):
+            for idx, item in enumerate(b["items"], 1):
+                p = para()
+                prefix = "• " if b["type"] == "ulist" else f"{idx}. "
+                _set_run(p.add_run(), {"t": "text", "s": prefix}, base_pt, opts["font"], opts["mono_font"])
+                for run in item:
+                    _set_run(p.add_run(), run, base_pt, opts["font"], opts["mono_font"])
+        elif b["type"] == "quote":
+            p = para()
+            p.level = 1
+            for run in b["runs"]:
+                _set_run(p.add_run(), run, base_pt, opts["font"], opts["mono_font"], color=_GRAY)
+        elif b["type"] == "code":
+            for ln in b["text"].split("\n"):
+                p = para()
+                _set_run(p.add_run(), {"t": "code", "s": ln}, base_pt, opts["font"], opts["mono_font"])
+        elif b["type"] == "empty":
+            p = para()
+            _set_run(p.add_run(), {"t": "text", "s": "본문 없음"}, base_pt, opts["font"], opts["mono_font"], color=_GRAY)
+
+
+def _add_title_band(slide, slide_obj, opts):
+    tb = slide.shapes.add_textbox(Inches(_MARGIN), Inches(0.45), Inches(9.5), Inches(0.8))
+    p = tb.text_frame.paragraphs[0]
+    _set_run(p.add_run(), {"t": "text", "s": slide_obj.get("title", "")}, 24,
+             opts["font"], opts["mono_font"], bold=True)
+    cat = slide_obj.get("category", "")
+    if cat:
+        chip = slide.shapes.add_textbox(Inches(10.2), Inches(0.55), Inches(2.6), Inches(0.4))
+        cp = chip.text_frame.paragraphs[0]
+        cp.alignment = PP_ALIGN.RIGHT
+        _set_run(cp.add_run(), {"t": "text", "s": cat}, 11, opts["font"], opts["mono_font"], color=_GRAY)
+
+
+def _add_footer(slide, slide_obj, opts):
+    date = _fmt_generated(slide_obj.get("updated_at", ""))[:10]
+    commit = slide_obj.get("commit", "")
+    text = f"updated {date}" + (f" · {commit}" if commit else "")
+    fb = slide.shapes.add_textbox(Inches(_MARGIN), Inches(6.75), Inches(_FULL_W), Inches(0.3))
+    p = fb.text_frame.paragraphs[0]
+    _set_run(p.add_run(), {"t": "text", "s": text}, 9, opts["font"], opts["mono_font"], color=_GRAY)
+
+
+def _body_frame(slide, x, w):
+    box = slide.shapes.add_textbox(Inches(x), Inches(_BODY_TOP), Inches(w), Inches(_BODY_H))
+    tf = box.text_frame
+    tf.word_wrap = True
+    tf.vertical_anchor = MSO_ANCHOR.TOP
+    tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE   # bonus for interactive viewers
+    return tf
+
+
+def add_page_slide(prs, slide_obj, screenshots_dir, base_pt, opts, progress_mode="none"):
+    slide = _blank_slide(prs)
+    _add_title_band(slide, slide_obj, opts)
+    _add_footer(slide, slide_obj, opts)
+    blocks = parse_markdown(slide_obj.get("body_md", ""))
+    has_shot = (slide_obj.get("kind") != "system"
+                and resolve_screenshot(slide_obj.get("screenshot", ""), screenshots_dir) is not None)
+    body_w = _COL_BODY_W if has_shot else _FULL_W
+    # Tasks 7-8 add image + native-table flow; v1-text path renders all blocks here:
+    _render_blocks(_body_frame(slide, _MARGIN, body_w), blocks, base_pt, opts)

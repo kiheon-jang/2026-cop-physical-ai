@@ -152,5 +152,32 @@ class TestDeckStructure(unittest.TestCase):
                         self.assertEqual(r.font.name, "Apple SD Gothic Neo")
 
 
+class TestPageSlideText(unittest.TestCase):
+    OPTS = {"font": "Apple SD Gothic Neo", "mono_font": "Menlo", "title_prefix": "", "label": "cop"}
+
+    def _slide(self, **over):
+        s = {"id": "x", "kind": "system", "title": "아키텍처", "category": "시스템",
+             "order": 1, "screenshot": "", "updated_at": "2026-06-24T09:00:00+09:00",
+             "commit": "abc1234", "ui_hash": "", "body_md": "## 개요\n- 항목 하나\n- 항목 둘"}
+        s.update(over); return s
+
+    def test_system_slide_is_textonly_no_picture(self):
+        prs = sd._new_prs()
+        sd.add_page_slide(prs, self._slide(), "", 12, self.OPTS)
+        sl = prs.slides[0]
+        self.assertFalse(any(sh.shape_type == 13 for sh in sl.shapes))  # 13 = PICTURE
+        all_text = "\n".join(sh.text_frame.text for sh in sl.shapes if sh.has_text_frame)
+        self.assertIn("아키텍처", all_text)
+        self.assertIn("개요", all_text)
+        self.assertIn("• 항목 하나", all_text)
+        self.assertIn("abc1234", all_text)            # footer provenance
+
+    def test_empty_body_placeholder(self):
+        prs = sd._new_prs()
+        sd.add_page_slide(prs, self._slide(body_md="  "), "", 12, self.OPTS)
+        all_text = "\n".join(sh.text_frame.text for sh in prs.slides[0].shapes if sh.has_text_frame)
+        self.assertIn("본문 없음", all_text)
+
+
 if __name__ == "__main__":
     unittest.main()
