@@ -90,10 +90,12 @@ if [[ ! -f "${TRAINED_MARK}" || "$(cat "${TRAINED_MARK}" 2>/dev/null || echo x)"
   exit 0
 fi
 
-# ── 5. 학습 완료 & 이 모델 미측정 → rollout 성공률 측정 ──
-MODEL_SIG="$(sig "${MODEL}")"
-if [[ ! -f "${MEASURED_MARK}" || "$(cat "${MEASURED_MARK}" 2>/dev/null || echo x)" != "${MODEL_SIG}" ]]; then
-  echo "STAGE=측정  (학습 모델 rollout 성공률)"
+# ── 5. 학습 완료 & 이 체크포인트 미측정 → rollout 성공률 측정 ──
+# 측정 기준 = 최신 체크포인트(render_act_rollout 가 실제 사용). models/act_phase1.pt 별도저장 의존 X.
+LATEST_CKPT="$(ls -dt "${ROOT}"/checkpoints/act/epoch_*/ 2>/dev/null | head -1 | sed 's:/$::')"
+MODEL_SIG="$(sig "${LATEST_CKPT}")"
+if [[ -n "${LATEST_CKPT}" && ( ! -f "${MEASURED_MARK}" || "$(cat "${MEASURED_MARK}" 2>/dev/null || echo x)" != "${MODEL_SIG}" ) ]]; then
+  echo "STAGE=측정  (최신 체크포인트 ${LATEST_CKPT##*/} rollout 성공률, closed-loop 정합 씬)"
   if "${PY}" "${ROOT}/scripts/render_act_rollout.py" --rollouts 10 > "${ROLLOUT_LOG}" 2>&1; then
     echo "${MODEL_SIG}" > "${MEASURED_MARK}"
     grep -iE "success_rate|성공률" "${ROLLOUT_LOG}" | tail -2 || tail -2 "${ROLLOUT_LOG}"

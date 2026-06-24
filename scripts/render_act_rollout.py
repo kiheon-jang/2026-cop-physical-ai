@@ -28,15 +28,18 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path("/Volumes/MARK_DATA/dev/2026-cop-physical-ai")
-MODEL_XML = ROOT / "SO-ARM100" / "Simulation" / "SO101" / "scene.xml"
+# closed-loop 학습(scene_grasp_pads)과 1:1 정합 — 측정이 유효하려면 학습 씬/물리와 동일해야 한다.
+MODEL_XML = ROOT / "SO-ARM100" / "Simulation" / "SO101" / "scene_grasp_pads.xml"
 OUT_DIR = ROOT / "research" / "simulation" / "inference_progress"
 
-# sim_data_collector.py 와 동일한 상수
-CUBE_INITIAL_POS = np.array([0.15, 0.0, 0.025])
-RANDOM_POS_RANGE = 0.02          # ±20mm (학습 분포와 동일)
+# sim_data_collector.py(closed-loop) 와 동일한 상수
+CUBE_INITIAL_POS = np.array([0.13, 0.0, 0.175])   # 작업대 위 (table top 0.16 + half 0.015)
+RANDOM_POS_RANGE = 0.02          # ±20mm (수집 분포와 동일)
 SIM_FPS = 30
 DATA_SAMPLE_EVERY = 17           # 정책 1 액션당 물리 스텝 수 (학습 샘플링과 동일)
-LIFT_THRESHOLD_M = 0.050         # 성공: 큐브 Z+50mm 들어올림
+LIFT_THRESHOLD_M = 0.040         # 성공: 큐브 +40mm 들어올림 (수집기 성공기준과 동일)
+ARM_FORCERANGE = 3.0             # 12V STS3215 팔로워 실스펙(≈2.94Nm) — 수집과 동일 물리
+SETTLE_STEPS = 80                # 큐브를 작업대에 안착시키는 사전 스텝 (수집기와 동일)
 N_JOINTS = 6
 
 
@@ -54,14 +57,18 @@ def run_rollout(model, data, policy, renderer, cam_id, device, rng, max_frames, 
     import mujoco
 
     mujoco.mj_resetData(model, data)
-    # 큐브 초기 위치 랜덤 (학습과 동일 분포)
+    # 큐브 초기 위치 랜덤 (수집과 동일 분포)
     off = rng.uniform(-RANDOM_POS_RANGE, RANDOM_POS_RANGE, size=2)
     cube_pos = CUBE_INITIAL_POS + np.array([off[0], off[1], 0.0])
     cube_jid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "cube_joint")
     adr = model.jnt_qposadr[cube_jid]
     data.qpos[adr:adr + 3] = cube_pos
     data.qpos[adr + 3:adr + 7] = [1.0, 0.0, 0.0, 0.0]
+    data.ctrl[:5] = 0.0
+    data.ctrl[5] = 1.5               # 그리퍼 개방 (수집 초기상태와 동일)
     mujoco.mj_forward(model, data)
+    for _ in range(SETTLE_STEPS):    # 큐브 작업대 안착 (수집기와 동일 패턴)
+        mujoco.mj_step(model, data)
 
     policy.reset()
     cube_init_z = float(data.body("cube").xpos[2])
@@ -129,6 +136,8 @@ def main(argv=None):
     device = T._device_of(policy)
 
     model = mujoco.MjModel.from_xml_path(str(MODEL_XML))
+    for ai in range(5):              # 팔 5관절 forcerange = 수집과 동일 (12V faithful)
+        model.actuator_forcerange[ai] = [-ARM_FORCERANGE, ARM_FORCERANGE]
     data = mujoco.MjData(model)
     renderer = mujoco.Renderer(model, height=480, width=640)
     cam_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_CAMERA, "overhead_camera")
@@ -141,9 +150,14 @@ def main(argv=None):
     video_frames = []
     for i in range(args.rollouts):
         collect = i < args.video_rollouts
-        success, max_lift, frames = run_rollout(
-            model, data, policy, renderer, cam_id, device, rng, args.max_frames, collect
-        )
+        try:
+            success, max_lift, frames = run_rollout(
+                model, data, policy, renderer, cam_id, device, rng, args.max_frames, collect
+            )
+        except Exception as e:  # 한 rollout 실패가 전체 측정을 죽이지 않게
+            results.append({"rollout": i, "success": False, "max_lift_m": 0.0, "error": str(e)[:120]})
+            print(f"  rollout {i+1}/{args.rollouts}: ⚠ 에러 {str(e)[:80]}", flush=True)
+            continue
         results.append({"rollout": i, "success": success, "max_lift_m": round(max_lift, 4)})
         if collect:
             video_frames.extend(frames)
@@ -162,12 +176,16 @@ def main(argv=None):
     if video_frames:
         imageio.mimsave(str(video_path), video_frames, fps=SIM_FPS)
 
+    lifts_mm = sorted(r["max_lift_m"] * 1000 for r in results)
+    median_lift = lifts_mm[len(lifts_mm) // 2] if lifts_mm else 0.0
     summary = {
         "status": "ok",
         "checkpoint": str(ckpt.relative_to(ROOT)),
+        "scene": MODEL_XML.name,
         "rollouts": len(results),
         "success": n_success,
         "success_rate": round(success_rate, 3),
+        "median_lift_mm": round(median_lift, 1),
         "lift_threshold_m": LIFT_THRESHOLD_M,
         "video_path": str(video_path.relative_to(ROOT)) if video_frames else None,
         "wall_clock_sec": round(time.time() - t0, 1),
@@ -182,4 +200,13 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as e:  # 크론 측정 스테이지가 절대 안 죽게 — 에러도 JSON 으로 emit
+        print(json.dumps(
+            {"status": "error", "stage": "rollout_top_level", "message": str(e)[:200]},
+            ensure_ascii=False,
+        ))
+        sys.exit(1)
