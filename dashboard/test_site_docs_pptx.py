@@ -237,6 +237,17 @@ class TestNativeTable(unittest.TestCase):
         self.assertEqual(tbl.cell(0, 0).text, "이름")
         self.assertEqual(tbl.cell(2, 1).text, "d")
 
+    def test_table_not_dropped_when_text_overflows(self):
+        # heavy preceding text must not cause the trailing table to be silently dropped
+        big = "\n\n".join(f"문단 {i} " + "내용 " * 20 for i in range(40))
+        slide = {"id": "big", "kind": "system", "title": "큰 슬라이드", "category": "",
+                 "order": 1, "screenshot": "", "updated_at": "", "commit": "", "ui_hash": "",
+                 "body_md": big + "\n\n| 키 | 값 |\n| - | - |\n| a | b |"}
+        prs = sd._new_prs()
+        sd.add_page_slide(prs, slide, "", 9, self.OPTS)
+        tables = [sh for sh in prs.slides[0].shapes if sh.has_table]
+        self.assertEqual(len(tables), 1)   # present even though text overflowed (clip, not drop)
+
 
 class TestBuildDeck(unittest.TestCase):
     OPTS = {"font": "Apple SD Gothic Neo", "mono_font": "Menlo", "title_prefix": "", "label": "cop"}

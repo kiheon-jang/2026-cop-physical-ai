@@ -23,19 +23,21 @@ import sys
 from PIL import Image
 
 from pptx import Presentation
-from pptx.util import Inches, Pt, Emu
+from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR, MSO_AUTO_SIZE
 
 _GRAY = RGBColor(0x6B, 0x72, 0x80)
 
 _RUN_RE = re.compile(r"`([^`]+)`|\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\)")
-_SCHEME_RE = re.compile(r"^([a-z][a-z0-9+.\-]*):", re.I)
-_ALLOWED = re.compile(r"^(https?|mailto)$", re.I)
 
 
 def inline(text: str) -> list[dict]:
-    """뷰어 render-markdown.ts inline() 미러: code / **bold** / [txt](url). 이탤릭 미지원."""
+    """뷰어 render-markdown.ts inline() 미러: code / **bold** / [txt](url). 이탤릭 미지원.
+
+    단일 레벨만(중첩 강조 없음). 링크는 표시텍스트만 유지하고 URL은 버림 — PPTX는
+    비대화형이라 스킴 allowlist는 무의미(허용/비허용 모두 표시텍스트로 동일 렌더).
+    """
     out: list[dict] = []
     pos = 0
     for m in _RUN_RE.finditer(text):
@@ -121,7 +123,8 @@ def parse_markdown(md: str) -> list[dict]:
             ncol = len(header)
             rows = []
             j = i + 2
-            while j < len(lines) and lines[j].lstrip().startswith("|"):
+            while (j < len(lines) and lines[j].lstrip().startswith("|")
+                   and not _is_table_sep(lines[j])):     # a 2nd separator ends the table (viewer parity)
                 cells = _split_row(lines[j])
                 # normalize each row to header width: drop extras, pad missing (mirrors viewer)
                 rows.append([inline(cells[c]) if c < len(cells) else [{"t": "text", "s": ""}]
@@ -328,15 +331,6 @@ _LINE_H = 0.17          # inches per text line at base size (~10-11pt line heigh
 _CHARS_PER_IN = 6.2     # approx chars per inch of width (Korean glyphs run wide)
 
 
-def _body_frame(slide, x, w):
-    box = slide.shapes.add_textbox(Inches(x), Inches(_BODY_TOP), Inches(w), Inches(_BODY_H))
-    tf = box.text_frame
-    tf.word_wrap = True
-    tf.vertical_anchor = MSO_ANCHOR.TOP
-    tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE   # bonus for interactive viewers
-    return tf
-
-
 def add_page_slide(prs, slide_obj, screenshots_dir, base_pt, opts, progress_mode="none"):
     slide = _blank_slide(prs)
     _add_title_band(slide, slide_obj, opts)
@@ -366,7 +360,8 @@ def emit(progress_mode, event):
     # human
     phase = event.get("phase")
     if phase == "render":
-        msg = f"[{event.get('deck','')}] 슬라이드 {event.get('done')}/{event.get('total')} 렌더링…"
+        _dl = {"spec": "명세", "guide": "가이드"}.get(event.get("deck", ""), event.get("deck", ""))
+        msg = f"[{_dl}] 슬라이드 {event.get('done')}/{event.get('total')} 렌더링…"
     elif phase == "pdf" and event.get("status") == "start":
         msg = "PDF 변환 중… (LibreOffice 첫 실행 5~15초)"
     elif phase == "done":
@@ -387,7 +382,9 @@ def _add_screenshot(slide, png_path):
     w, h = int(iw * scale), int(ih * scale)
     left = Inches(_IMG_X) + (box_w - w) // 2
     top = Inches(_BODY_TOP) + (box_h - h) // 2
-    slide.shapes.add_picture(png_path, left, top, width=w, height=h)
+    pic = slide.shapes.add_picture(png_path, left, top, width=w, height=h)
+    pic.line.color.rgb = RGBColor(0xD0, 0xD0, 0xD0)   # thin border (spec §5.1)
+    pic.line.width = Pt(0.75)
 
 
 def _estimate_text_h(blocks, width_in):
@@ -410,7 +407,7 @@ def _estimate_text_h(blocks, width_in):
 
 def _add_table(slide, table_block, x, y, w):
     header, rows = table_block["header"], table_block["rows"]
-    ncol = max(len(header), *(len(r) for r in rows)) if rows else len(header)
+    ncol = max(1, max(len(header), *(len(r) for r in rows)) if rows else len(header))
     nrow = 1 + len(rows)
     gf = slide.shapes.add_table(nrow, ncol, Inches(x), Inches(y), Inches(w), Inches(0.4 * nrow))
     tbl = gf.table
@@ -447,6 +444,7 @@ def _render_body(slide, blocks, x, w, base_pt, opts):
         tf = box.text_frame
         tf.word_wrap = True
         tf.vertical_anchor = MSO_ANCHOR.TOP
+        tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE   # bonus for interactive viewers
         _render_blocks(tf, list(group), base_pt, opts)
         y += h
         group.clear()
@@ -454,9 +452,10 @@ def _render_body(slide, blocks, x, w, base_pt, opts):
     for b in blocks:
         if b["type"] == "table":
             flush_group()
-            if y < bottom:
-                used = _add_table(slide, b, x, y, w)
-                y += used / 914400
+            # always place the table — clip off-canvas if overflowing (recoverable in
+            # PowerPoint), never silently drop it. clamp start so it stays near the slide.
+            used = _add_table(slide, b, x, min(y, bottom), w)
+            y += used / 914400
         else:
             group.append(b)
     flush_group()
