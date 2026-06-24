@@ -8,6 +8,13 @@ from __future__ import annotations
 import os
 import re
 
+from pptx import Presentation
+from pptx.util import Inches, Pt, Emu
+from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN, MSO_ANCHOR, MSO_AUTO_SIZE
+
+_GRAY = RGBColor(0x6B, 0x72, 0x80)
+
 _RUN_RE = re.compile(r"`([^`]+)`|\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\)")
 _SCHEME_RE = re.compile(r"^([a-z][a-z0-9+.\-]*):", re.I)
 _ALLOWED = re.compile(r"^(https?|mailto)$", re.I)
@@ -180,3 +187,51 @@ def load_site_docs(raw) -> dict:
             if _has_decks(raw.get(k)):
                 return raw[k]
     raise ValueError("SiteDocs not found: expected {spec,guide} or {docs:{...}} top-level")
+
+
+def _new_prs() -> Presentation:
+    prs = Presentation()
+    prs.slide_width = Inches(13.333)
+    prs.slide_height = Inches(7.5)
+    return prs
+
+
+def _blank_slide(prs):
+    return prs.slides.add_slide(prs.slide_layouts[6])
+
+
+def _set_run(r, run, base_pt, font, mono_font, *, bold=False, pt=None, color=None):
+    r.text = run["s"] if isinstance(run, dict) else run
+    is_code = isinstance(run, dict) and run["t"] == "code"
+    is_bold = bold or (isinstance(run, dict) and run["t"] == "bold")
+    r.font.name = mono_font if is_code else font
+    r.font.size = Pt(pt if pt else base_pt)
+    r.font.bold = is_bold
+    if color is not None:
+        r.font.color.rgb = color
+
+
+def add_title_slide(prs, doc, opts):
+    slide = _blank_slide(prs)
+    n = len(doc.get("slides", []))
+    title = (opts["title_prefix"] + " " if opts["title_prefix"] else "") + doc.get("title", "")
+    tb = slide.shapes.add_textbox(Inches(0.5), Inches(2.6), Inches(12.333), Inches(1.4))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.alignment = PP_ALIGN.CENTER
+    _set_run(p.add_run(), {"t": "text", "s": title}, 32, opts["font"], opts["mono_font"], bold=True)
+    sub = slide.shapes.add_textbox(Inches(0.5), Inches(4.1), Inches(12.333), Inches(1.0))
+    stf = sub.text_frame
+    stf.word_wrap = True
+    for i, txt in enumerate((_fmt_generated(doc.get("generatedAt", "")), f"슬라이드 {n}장")):
+        para = stf.paragraphs[0] if i == 0 else stf.add_paragraph()
+        para.alignment = PP_ALIGN.CENTER
+        _set_run(para.add_run(), {"t": "text", "s": txt}, 14, opts["font"], opts["mono_font"], color=_GRAY)
+
+
+def _fmt_generated(iso: str) -> str:
+    # 'YYYY-MM-DDTHH:MM:SS+09:00' -> 'YYYY-MM-DD HH:MM' (slice the local-stamped ISO)
+    if len(iso) >= 16 and iso[10] == "T":
+        return iso[:10] + " " + iso[11:16]
+    return iso[:10] if iso else ""

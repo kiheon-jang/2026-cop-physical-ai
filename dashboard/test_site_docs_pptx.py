@@ -3,6 +3,7 @@ import os
 import tempfile
 import unittest
 import site_docs_pptx as sd
+from pptx.util import Inches, Pt, Emu
 
 
 class TestInline(unittest.TestCase):
@@ -126,6 +127,29 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(sd.load_site_docs({"data": sg})["spec"], {"slides": []})   # one unwrap
         with self.assertRaises(ValueError):
             sd.load_site_docs({"nope": 1})
+
+
+class TestDeckStructure(unittest.TestCase):
+    OPTS = {"font": "Apple SD Gothic Neo", "mono_font": "Menlo", "title_prefix": "", "label": "cop"}
+
+    def test_new_prs_is_16x9(self):
+        prs = sd._new_prs()
+        self.assertEqual(round(prs.slide_width / 914400, 3), 13.333)
+        self.assertEqual(round(prs.slide_height / 914400, 3), 7.5)
+
+    def test_title_slide_has_title_and_subtitle(self):
+        prs = sd._new_prs()
+        doc = {"title": "기능명세서 — CoP", "generatedAt": "2026-06-24T09:00:00+09:00",
+               "slides": [{"id": "a"}, {"id": "b"}]}
+        sd.add_title_slide(prs, doc, self.OPTS)
+        texts = [sh.text_frame.text for sh in prs.slides[0].shapes if sh.has_text_frame]
+        self.assertTrue(any("기능명세서 — CoP" in t for t in texts))
+        self.assertTrue(any("슬라이드 2장" in t for t in texts))   # N excludes title slide
+        for sh in prs.slides[0].shapes:
+            if sh.has_text_frame:
+                for p in sh.text_frame.paragraphs:
+                    for r in p.runs:
+                        self.assertEqual(r.font.name, "Apple SD Gothic Neo")
 
 
 if __name__ == "__main__":
