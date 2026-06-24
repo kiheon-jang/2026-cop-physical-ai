@@ -324,8 +324,8 @@ def _add_footer(slide, slide_obj, opts):
     _set_run(p.add_run(), {"t": "text", "s": text}, 9, opts["font"], opts["mono_font"], color=_GRAY)
 
 
-_LINE_H = 0.26          # inches per text line at base size (heuristic)
-_CHARS_PER_IN = 7.0     # approx chars per inch of width at base size
+_LINE_H = 0.17          # inches per text line at base size (~10-11pt line height)
+_CHARS_PER_IN = 6.2     # approx chars per inch of width (Korean glyphs run wide)
 
 
 def _body_frame(slide, x, w):

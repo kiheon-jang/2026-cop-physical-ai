@@ -3,6 +3,7 @@ import io
 import json
 import os
 import shutil
+import subprocess
 import tempfile
 import unittest
 from contextlib import redirect_stderr
@@ -327,6 +328,28 @@ class TestMain(unittest.TestCase):
             rc = sd.main(["--proj", "cop", "--docs", jp, "--screenshots-dir", d,
                           "--out-dir", d, "--progress", "none"])
             self.assertEqual(rc, 2)
+
+
+class TestIntegrationCop(unittest.TestCase):
+    DATA = "data.json"
+    SHOTS = "screenshots"
+
+    @unittest.skipUnless(os.path.isfile("data.json"), "run from cop/dashboard with built data.json")
+    def test_real_cop_build_with_pdf(self):
+        with tempfile.TemporaryDirectory() as out:
+            rc = sd.main(["--proj", "cop", "--docs", self.DATA, "--screenshots-dir", self.SHOTS,
+                          "--out-dir", out, "--pdf", "--progress", "none"])
+            self.assertEqual(rc, 0)
+            spec_pptx = os.path.join(out, "cop-기능명세.pptx")
+            self.assertTrue(os.path.isfile(spec_pptx))
+            from pptx import Presentation
+            prs = Presentation(spec_pptx)
+            self.assertTrue(any(sh.shape_type == 13 for sl in prs.slides for sh in sl.shapes))
+            spec_pdf = os.path.join(out, "cop-기능명세.pdf")
+            if shutil.which("soffice") and shutil.which("pdftotext") and os.path.isfile(spec_pdf):
+                txt = subprocess.run(["pdftotext", spec_pdf, "-"], capture_output=True,
+                                     text=True).stdout
+                self.assertRegex(txt, r"[가-힣]")     # real Hangul, not tofu/blank
 
 
 if __name__ == "__main__":
