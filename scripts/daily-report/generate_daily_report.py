@@ -73,8 +73,10 @@ def _check_upstream_failures():
             ts = job.get("last_run_at") or ""
             try:
                 ran = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
-                if ran.astimezone(KST).date() == today:
-                    continue  # Succeeded today — fine.
+                # 야간(23:00) 잡은 아침 보고(07:00) 시점엔 '어제' 실행이다.
+                # "오늘 실행"만 통과시키면 매일 아침 false-positive → 최근 30h 내 성공이면 정상.
+                if (datetime.datetime.now(KST) - ran.astimezone(KST)) < datetime.timedelta(hours=30):
+                    continue
             except ValueError:
                 pass
         tail = (job.get("last_error") or "").strip().splitlines()
