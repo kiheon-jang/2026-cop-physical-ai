@@ -47,8 +47,15 @@ scripts/cop_pipeline_advance.sh   ← 야간 cron(self-heal 스킬 §0)이 매 �
 > **"메일 빔" 진짜 원인(2026-06-24)**: cop_sim_env.py 의 `git pull` 이 로컬↔origin **분기(divergent)** 로
 > exit 1 → 매일 그 자리서 종료. **수정**: `git config pull.rebase false` + autoStash → 분기 시 자동 머지.
 >
-> ⚠ **후속(측정 스테이지 5)**: `render_act_rollout.py` 가 stock `scene.xml`+큐브 바닥(0.025)+forcerange 1.5 →
-> closed-loop 학습과 불일치. 측정 유효화엔 `scene_grasp_pads.xml`+큐브 0.175+forcerange 3.0 정합 필요(학습 후 처리).
+> **아침 메일 안 옴(2026-06-25) 2중 버그 + 수정**:
+> 1. 메일 잡(fb6d7cb26650)이 **toolset 없는 agent** 라 gemini 가 보고 스크립트를 못 돌림(tool_turns=0) → 발송 0.
+>    **수정**: `no_agent` 결정론 스크립트로 전환 — `~/.hermes/scripts/cop_daily_report.py`(git pull→generate_daily_report.py).
+>    `hermes cron edit fb6d7cb26650 --no-agent --script cop_daily_report.py`. (23:00 cop_sim_env.py 와 동일 패턴.)
+> 2. `generate_daily_report.py::_check_upstream_failures` 가 **23:00 야간잡을 "오늘 실행" 아니라고 오판**(어젯밤 실행이라)
+>    → 보고 대신 알림 발송. **수정(커밋)**: 최근 30h 내 성공이면 정상.
+> ⚠ **발송 대상**: `~/.hermes/.env` `EMAIL_TEST_MODE=false` → **3명 전체 발송**. 본인만 원하면 `true`.
+>
+> ⚠ **후속(측정 스테이지 5)**: `render_act_rollout.py` 정합은 학습 후처리(위 측정기 커밋으로 코드는 정합 완료, 실측 대기).
 
 ---
 
