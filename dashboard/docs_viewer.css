@@ -4,6 +4,9 @@
 .docs-viewer { display: flex; flex-direction: column; gap: 16px; }
 .docs-viewer__head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
 .docs-viewer__toggle { display: inline-flex; gap: 4px; background: var(--bg-sub); border-radius: 999px; padding: 3px; }
+.docs-viewer__dl { flex: 0 0 auto; border: 1px solid var(--border); background: var(--bg-sub); color: var(--text-sub); font: inherit; font-size: 12px; padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+.docs-viewer__dl:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.docs-viewer__dl:disabled { opacity: .55; cursor: default; }
 .docs-viewer__tab { border: none; background: transparent; color: var(--text-sub); font: inherit; font-size: 13px; padding: 5px 14px; border-radius: 999px; cursor: pointer; }
 .docs-viewer__tab.is-active { background: var(--accent); color: #fff; font-weight: 600; }
 .docs-viewer__title { flex: 1; min-width: 0; font-size: 16px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
