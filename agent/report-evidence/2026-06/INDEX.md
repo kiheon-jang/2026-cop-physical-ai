@@ -72,3 +72,9 @@
 - Phase 1 W4: closed-loop 자동수집 1사이클 진행(수집✓ 50ep/3350frame → ACT 재학습 epoch 64→69/100 진행 → 측정대기). 결정론적 드라이버 `cop_pipeline_advance.sh` 가 전진 (`research/simulation/2026-06-24_closed-loop-cycle1-progress.md`) → 6월 보고서 [2.사전학습] closed-loop 핵심 증거.
 - 23:30 nightly sim-test (v3.2): headless 우선 3종 스모크 정상 — sim_headless_6dof_video(2501 frame 6관절 비디오), sim_camera_verification(듀얼카메라 30 frame), sim_pick_place(스크립트 정상 / open-loop grasp 0%·32cm 미달 = known 결함). sim_data_collector 는 활성 파이프라인 드라이버 소유·학습 중 → 의도적 skip. 메모리 83.7%/2.8GB가용 (`agent/research-log/2026-06-24.md` 23:30 회차 블록).
 - open-loop vs closed-loop grasp 대비: `sim_pick_place.py` 0%(32cm) ↔ closed-loop 재학습(rollout 측정 학습완료 후) → 6월 보고서 [2.사전학습] open/closed-loop 대비 증거.
+
+## 2026-06-25
+- Phase 1 W4: **closed-loop 자동수집 1사이클 완주** — 수집 50/50(yield 91%, 3350 frame) → ACT 100 epoch(final loss 0.004564) → rollout 10중 7성공 **70%**, median lift 43.7mm. open-loop 0% → closed-loop 70% end-to-end 입증. PHASE_ROADMAP L162 `[v]` (`research/simulation/2026-06-25_closed-loop-cycle1-complete.md`) → 6월 보고서 [2.사전학습] **핵심 증거**.
+- 23:30 nightly sim-test (v3.2): 우선순위 4종 실제 실행 회귀 통과 — sim_headless_6dof_video 2/2(2501 frame, ~9.3s), sim_camera_verification 3/3(듀얼카메라 60 img, ~0.6s), sim_pick_place 2/2 스크립트(open-loop grasp 0%·32cm 미달 = known), sim_data_collector 스모크 2/2(yield 100%, lift 43.5mm, `/tmp` 격리). 디스크 검증: `episodes_cl` 50ep/3350frame, `rollout_summary.json` 70%/43.7mm 정합. 환경 mujoco 3.8.0/.venv (`agent/research-log/2026-06-25.md` 23:30 회차 블록).
+- closed-loop rollout 70%(7/10) vs open-loop `sim_pick_place.py` 0% 실측 대조 → 6월 보고서 [2.사전학습] open/closed-loop 대비 핵심 증거.
+- sim 스크립트 회귀 통과(6dof/camera/collector 100% 성공) → 6월 보고서 [2.시뮬환경] 환경 안정성 근거.
