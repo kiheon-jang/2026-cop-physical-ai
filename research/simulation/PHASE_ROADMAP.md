@@ -159,16 +159,19 @@ uv pip install <패키지명>
   (self-heal 스킬 §0)이 매일 호출 → 한 칸씩 전진. LLM 판단 불필요(어제 SILENT 멈춤 방지).
   수집기=closed-loop(`sim_data_collector.py`, 씬 scene_grasp_pads, 큐브30mm, forcerange3.0=12V, lift≥40mm 필터, 스모크 yield 100%).
   데이터 `data/episodes_cl`, train_act 는 `COP_DATASET_ROOT` 로 읽음. 상세: `agent/cron-jobs.md`.
-- [ ] **closed-loop 자동수집 1사이클 완주** (드라이버가 진행): 50ep 수집 → ACT 재학습 → rollout 측정.
+- [v] **closed-loop 자동수집 1사이클 완주** (드라이버가 진행): 50ep 수집 → ACT 재학습 → rollout 측정.
+  **완주(2026-06-25 23:00): 수집 50/50(yield 91%) → ACT 100epoch(loss 0.004564) → rollout 10중 7성공 = 성공률 70%, median lift 43.7mm.** open-loop 0% → closed-loop **70%** 로 end-to-end 입증. 상세: `2026-06-25_closed-loop-cycle1-complete.md`.
   (50mm 큐브 미적용·30mm 진행. **측정기 정합 후속**: `render_act_rollout.py` 를 closed-loop 씬/forcerange 로 맞춰야 측정 유효 — cron-jobs.md 참조.)
   - 🔄 **2026-06-24 23:00 진척**: 수집✓(`data/episodes_cl` 50ep/3350frame) → 학습중(pid 20078, epoch 64/100, loss 0.0077, ETA~02:00) → 측정대기. 측정기 정합은 commit `16d2548` 완료(2-rollout 스모크 OK). 현 `rollout_summary.json` 0%/6.4mm 는 baseline epoch_0009(open-loop) 성적이며 closed-loop 모델 측정은 학습 완료 후 드라이버가 자동 수행. 상세: `2026-06-24_closed-loop-cycle1-progress.md`.
   - 🔄 **2026-06-25 01:00 진척**: 학습중(pid 20078 alive, epoch **85/100**, loss 0.00556, MPS) → ETA ~02:20 → 측정대기. **데이터셋 정합 확정**: run2 step≈419/epoch=`episodes_cl`(로그 내 dataset_root=`data/episodes` 1550step 항목은 run1 open-loop 종료요약). **체크포인트 저장 정상**: `epoch_0079/model.safetensors` mtime 00:26(closed-loop 신선; 디렉터리 mtime 6/21~22 은 save_pretrained 덮어쓰기 특성·결함 아님). 자가치유 없음. 학습 미완이라 본 항목 `[ ]` 유지. 상세: `2026-06-25_closed-loop-cycle1-training.md`.
+  - ✅ **2026-06-25 02:17 학습완료 / 23:00 측정완료**: pid 20078 종료, epoch_0099 model.safetensors mtime 02:17(closed-loop 신선). 드라이버 측정 스테이지 `rollout_summary.json`(mtime 23:00) = 10 rollout 7성공 70%, median lift 43.7mm. 본 항목 `[v]` 클로즈.
 - [ ] 학습 모델 Orin Nano 배포 (SSH 연결 확보 시)
 
 **Phase 1 완료 기준 (2026-06-23 갱신)**:
 - ✅ 시뮬 사전학습 파이프라인 전 구간 가동 (데이터 합성 → ACT 학습 → 추론 → 성공률 측정)
 - ✅ 시뮬 grasp closed-loop 해법 확보 (30mm 88%/75%)
-- 🔄 시뮬 Pick 성공률: closed-loop 자동수집 → ACT 재학습 → rollout 측정으로 확인 중.
+- ✅ 시뮬 Pick 성공률: closed-loop 1사이클 측정 완료 = **70%(7/10, median lift 43.7mm)**.
+  open-loop 0% → closed-loop 70% 입증. (정책 70% < expert 88% 모방격차, sim 90%+ 목표는 후속 데이터증대 여지.)
   실물수집은 6월 미예정 → Phase 2(7월) 일정으로. sim의 결정적 가치는 Phase 3+ 정밀삽입.
 
 ---
