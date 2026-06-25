@@ -5,6 +5,7 @@
   var DOCS_IDX = { spec: 0, guide: 0 };                  // 덱별 인덱스(토글 위치 보존)
   var DECK_ROUTE = { spec: 'about', guide: 'guide' };    // 덱 ↔ 메뉴 라우트
   var DECK_MOUNT = { spec: 'docs-viewer-spec', guide: 'docs-viewer-guide' };
+  var DL_BUSY = { spec: false, guide: false };          // 덱별 다운로드 진행 플래그(렌더가 DOM 날려도 보존)
 
   function docsFor(deck) {
     var docs = (window.DATA && window.DATA.docs) || {};
@@ -27,6 +28,9 @@
           '<button type="button" class="docs-viewer__tab' + (deck === 'spec' ? ' is-active' : '') + '" data-deck="spec">명세</button>' +
           '<button type="button" class="docs-viewer__tab' + (deck === 'guide' ? ' is-active' : '') + '" data-deck="guide">가이드</button>' +
         '</div>' +
+        '<button type="button" class="docs-viewer__dl" data-dl' + (DL_BUSY[deck] ? ' disabled' : '') + '>' +
+          (DL_BUSY[deck] ? '…' : '⬇ PPTX') +
+        '</button>' +
         '<div class="docs-viewer__title">' + esc(s.title) + '</div>' +
         (s.category ? '<div class="docs-viewer__chip">' + esc(s.category) + '</div>' : '') +
       '</div>';
@@ -91,6 +95,36 @@
         window.setRoute(DECK_ROUTE[target]);   // 메뉴 라우트로 위임 → renderDocs(target) 호출됨
       });
     });
+    var dl = root.querySelector('[data-dl]');
+    if (dl) {
+      dl.addEventListener('click', function () {
+        if (DL_BUSY[deck]) return;
+        DL_BUSY[deck] = true;
+        renderDocs(deck);                                 // 스피너 시각(…) 반영
+        var url = '/api/projects/' + PROJECT_SLUG + '/docs-export?deck=' + deck;
+        fetch(url, { signal: AbortSignal.timeout(30000) })
+          .then(function (r) {
+            if (!r.ok) throw new Error('http ' + r.status);
+            // 파일명은 서버 content-disposition filename*(proj 라벨 기반: hdel-기능명세.pptx)을 따름.
+            // PROJECT_SLUG(=hdelmobileresearch)와 proj 라벨(=hdel)이 달라 슬러그 하드코딩은 틀림.
+            var cd = r.headers.get('content-disposition') || '';
+            var m = cd.match(/filename\*=UTF-8''([^;]+)/i);
+            var name = m ? decodeURIComponent(m[1])
+              : (PROJECT_SLUG + '-' + (deck === 'spec' ? '기능명세' : '사용가이드') + '.pptx');
+            return r.blob().then(function (blob) { return { blob: blob, name: name }; });
+          })
+          .then(function (o) {
+            var a = document.createElement('a');
+            var href = URL.createObjectURL(o.blob);
+            a.href = href;
+            a.download = o.name;
+            document.body.appendChild(a); a.click(); a.remove();
+            URL.revokeObjectURL(href);
+          })
+          .catch(function () { window.alert('다운로드 실패 — 잠시 후 다시 시도하세요.'); })
+          .finally(function () { DL_BUSY[deck] = false; renderDocs(deck); });  // 버튼 재활성화
+      });
+    }
   }
   function activeDeck() {
     var a = document.getElementById('view-about'), g = document.getElementById('view-guide');
