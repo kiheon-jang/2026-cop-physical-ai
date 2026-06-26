@@ -1,6 +1,6 @@
-/* docs_viewer.js — site-docs 슬라이드 뷰어 (hdel·cop 공유, byte-identical). SP3.
-   data.json.docs ({spec,guide}) → 레이아웃 A 슬라이드. screenshot 있으면 이미지+본문,
-   없거나 kind=system 이면 본문 승격. 토글은 setRoute 로 위임(메뉴 강조 동기화). */
+/* docs_viewer.js — site-docs 슬라이드 뷰어 (hdel·cop 공유, byte-identical). SP3 + 슬라이드 재설계.
+   data.json.docs ({spec,guide}) → 슬라이드. image_layout(top/side/split/none)에 따라 적응형
+   배치(stage--<layout>). 무이미지/none 이면 본문 전폭. 토글은 setRoute 로 위임(메뉴 강조 동기화). */
 (function () {
   var DOCS_IDX = { spec: 0, guide: 0 };                  // 덱별 인덱스(토글 위치 보존)
   var DECK_ROUTE = { spec: 'about', guide: 'guide' };    // 덱 ↔ 메뉴 라우트
@@ -34,12 +34,13 @@
         '<div class="docs-viewer__title">' + esc(s.title) + '</div>' +
         (s.category ? '<div class="docs-viewer__chip">' + esc(s.category) + '</div>' : '') +
       '</div>';
-    var hasShot = s.screenshot && s.kind !== 'system';
+    var layout = s.image_layout || 'none';
+    var hasShot = s.screenshot && layout !== 'none' && s.kind !== 'system';
     var shot = hasShot
-      ? '<img class="docs-viewer__shot" src="' + esc(s.screenshot) + '" alt="' + esc(s.title) + '" onerror="this.classList.add(\'is-hidden\')">'
+      ? '<div class="docs-viewer__shotwrap"><img class="docs-viewer__shot" src="' + esc(s.screenshot) + '" alt="' + esc(s.title) + '" onerror="this.closest(\'.docs-viewer__shotwrap\').classList.add(\'is-hidden\')"></div>'
       : '';
     var body = '<div class="docs-viewer__body">' + window.renderMarkdown(s.body_md || '') + '</div>';
-    var stage = '<div class="docs-viewer__stage' + (hasShot ? '' : ' is-textonly') + '">' + shot + body + '</div>';
+    var stage = '<div class="docs-viewer__stage docs-viewer__stage--' + (hasShot ? esc(layout) : 'none') + '">' + shot + body + '</div>';
     var ind;
     if (n <= 12) {
       var dots = '';
