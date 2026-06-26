@@ -5,6 +5,7 @@ title: "기술 구조 및 자동화 파이프라인"
 order: 91
 screenshot: ""
 ---
+<!-- slide title="레포지토리 구조" -->
 ## 레포지토리 구조 (핵심 경로)
 
 ```
@@ -30,6 +31,7 @@ screenshot: ""
     └── content/                # 기능명세·사용가이드 마크다운
 ```
 
+<!-- slide title="데이터 흐름 — 핵심 소스" -->
 ## 데이터 흐름
 
 ```
@@ -41,6 +43,10 @@ external-dependencies.md → build_blockers()   → data.blockers (view-blockers
 samples/SAMPLE_STATUS.md → build_samples()    → data.samples (view-samples)
 research/decisions/  → build_decisions()      → data.decisions (view-decisions)
 Obsidian CoP_PhysicalAI/ → build_monthly_reports() → data.monthly_reports (view-magazines)
+```
+
+<!-- slide title="데이터 흐름 — 미디어·KPI·docs" -->
+```
 research/simulation/video/ → build_videos()   → data.videos (view-videos)
 models/SO-ARM100/media/ → build_hardware_photos() → data.hardware_photos (view-videos)
 outputs/train/       → build_training_metrics() → data.training_metrics (view-videos)
@@ -52,6 +58,7 @@ dashboard/content/   → site_docs.build_site_docs() → data.docs (spec/guide �
 
 모든 경로는 `build.py` 실행 환경(로컬 Mac Mini)의 파일시스템을 직접 읽는다. `data.json` 출력 후 hermes-mark 서버가 WebSocket으로 브라우저에 푸시.
 
+<!-- slide title="자동화 스케줄 (KST)" -->
 ## 자동화 스케줄 (KST 기준)
 
 | 시각 | 작업 | 출력 파일 |
@@ -63,6 +70,7 @@ dashboard/content/   → site_docs.build_site_docs() → data.docs (spec/guide �
 
 자가치유(Self-heal): 매 cron 종료 시 실패 항목 자동 기록(`chore(self-heal)` commit) → 다음 cron에서 자동 재시도.
 
+<!-- slide title="서버·빌드 내부 구조" -->
 ## 대시보드 서버 구조
 
 hermes-mark(`/Volumes/MARK_DATA/dev/hermes-mark`):

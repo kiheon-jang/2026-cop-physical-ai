@@ -7,17 +7,20 @@ screenshot: bookmarks.png
 category: 도구
 ---
 ## 기능명세
+<!-- slide title="북마크 — 개요" -->
 
 북마크 화면(`view-bookmarks`)은 사용자가 ☆ 아이콘으로 표시한 항목들을 한 화면에 모아서 보여주는 화면이다.
 
 **헤더**
 제목: "북마크". 부제: "관심 항목을 모아 봅니다 · 이 브라우저의 localStorage 에만 저장됩니다".
 
+<!-- slide title="북마크 목록 구성" screenshot="" -->
 **북마크 목록 (bookmark-rows)**
 JavaScript가 localStorage(`bm_` 키 prefix)에서 북마크된 항목 ID를 읽어, 전체 `data.proposals`(sim_tasks)/`data.decisions`/`data.blockers` 등에서 해당 ID의 항목을 필터링해 목록을 구성. 시뮬 작업·결정·기타 어느 화면에서 북마크해도 이 화면에 통합 표시된다.
 
 각 항목에는 제목, 날짜, 카테고리, 발췌가 표시되고 클릭 시 상세 시트가 열린다.
 
+<!-- slide title="저장 방식과 데이터 출처" screenshot="" -->
 **저장 방식**
 - localStorage만 사용. 서버나 계정에 저장되지 않는다.
 - 브라우저가 달라지거나 시크릿 모드에서는 북마크가 없다.
@@ -26,12 +29,14 @@ JavaScript가 localStorage(`bm_` 키 prefix)에서 북마크된 항목 ID를 읽
 **데이터 출처**: 브라우저 localStorage(서버 데이터 없음). 항목 상세는 현재 로드된 `data.json`에서 ID 매핑.
 
 ## 사용가이드
+<!-- slide title="북마크 사용 — 개요" -->
 
 북마크는 여러 화면에서 ☆(별) 아이콘을 클릭해 표시한 항목들을 한 곳에 모아주는 화면입니다.
 
 **북마크 추가 방법**
 시뮬 작업, 결정, 외부 의존 등 어떤 화면에서도 항목 카드의 오른쪽 위에 있는 ☆ 아이콘을 클릭하면 북마크됩니다. 또는 항목을 클릭해 상세 시트를 열고 "북마크" 버튼을 눌러도 됩니다.
 
+<!-- slide title="확인과 주의사항" screenshot="" -->
 **북마크 확인**
 이 화면(북마크)에서 모든 북마크 항목을 한 번에 볼 수 있습니다. 클릭하면 상세 내용이 열립니다.
 

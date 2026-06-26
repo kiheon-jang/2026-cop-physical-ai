@@ -7,6 +7,7 @@ screenshot: samples.png
 category: 도구
 ---
 ## 기능명세
+<!-- slide title="샘플 코드 상태 — 개요" -->
 
 샘플 코드 상태 화면(`view-samples`)은 `samples/SAMPLE_STATUS.md`에 정의된 샘플 코드 파일들의 카테고리별 완성도, 마지막 검증일, 별점을 한 화면에서 확인하는 화면이다.
 
@@ -18,7 +19,9 @@ category: 도구
 
 파싱 대상: `## 카테고리/ — 설명` 헤딩 → 파이프 테이블 행(파일 | 상태 | 완성도 | 마지막검증 | 설명).
 
-각 항목 필드:
+<!-- slide title="항목 필드 상세" screenshot="" -->
+
+**각 항목 필드**
 - `path`: `카테고리/파일명` 형식 경로
 - `category`: 디렉토리 카테고리(예: `training/`, `inference/`)
 - `status` / `status_label`: 이모지 기반 상태 (✅ complete/별4 · 🟢 basic/별2 · 🟡 wip/별1 · 📋 planned/별0)
@@ -26,6 +29,8 @@ category: 도구
 - `stars`: 정수 0~4 (차트 정렬·표시용)
 - `last_verified`: 마지막 검증일
 - `description`: 설명(최대 200자)
+
+<!-- slide title="요약·출처·상호작용" screenshot="" -->
 
 **카테고리별 요약 (summary)**
 `samples.summary` 딕셔너리: `{카테고리: [complete수, basic수, wip수, planned수]}`. 행 목록 위에 카테고리별 집계 바 또는 요약 텍스트로 표시될 수 있다.
@@ -39,6 +44,7 @@ category: 도구
 **참고**: 사이드바에서 이 메뉴는 핵심 메뉴(`⭐` 표시, CoP 특수 메뉴)로 분류된다.
 
 ## 사용가이드
+<!-- slide title="샘플 코드 상태 — 개요" -->
 
 샘플 코드 상태는 이 프로젝트에서 사용하는 파이썬 스크립트 파일들이 얼마나 완성되어 있는지 카테고리별로 확인하는 화면입니다.
 
