@@ -38,6 +38,14 @@
 
 
 
+
+### 2026-06-26
+- 🛠 [시뮬] closed-loop 1사이클 완료/유지 검증·문서화 — 2026-06-27
+- 📊 [로그] 2026-06-26 시뮬 테스트 — 우선순위 4종 실행(headless/camera/collector 100%, pick_place 레거시 0%), 1사이클 70% 유지
+- Merge pull request #6 from kiheon-jang/feat/site-docs-viewer-adaptive
+- feat(site-docs): 뷰어 image_layout 적응형 레이아웃 포팅
+- Merge pull request #5 from kiheon-jang/feat/site-docs-slide-redesign
+
 ### 2026-06-25
 - 🛠 [시뮬] closed-loop 1사이클 완료/유지 — 성공률 70%(목표 90% 간극) 문서화 + 환경 무결성 재검증 — 2026-06-26
 - 📊 [로그] 2026-06-25 시뮬 테스트 — 우선 4종 회귀 통과(6dof/camera/pickplace/collector), closed-loop 1사이클 70% 디스크 검증
