@@ -168,7 +168,7 @@ class TestPageSlideText(unittest.TestCase):
 
     def test_system_slide_is_textonly_no_picture(self):
         prs = sd._new_prs()
-        sd.add_page_slide(prs, self._slide(), "", 12, self.OPTS)
+        sd.add_page_slide(prs, self._slide(), "", self.OPTS)
         sl = prs.slides[0]
         self.assertFalse(any(sh.shape_type == 13 for sh in sl.shapes))  # 13 = PICTURE
         all_text = "\n".join(sh.text_frame.text for sh in sl.shapes if sh.has_text_frame)
@@ -179,7 +179,7 @@ class TestPageSlideText(unittest.TestCase):
 
     def test_empty_body_placeholder(self):
         prs = sd._new_prs()
-        sd.add_page_slide(prs, self._slide(body_md="  "), "", 12, self.OPTS)
+        sd.add_page_slide(prs, self._slide(body_md="  "), "", self.OPTS)
         all_text = "\n".join(sh.text_frame.text for sh in prs.slides[0].shapes if sh.has_text_frame)
         self.assertIn("본문 없음", all_text)
 
@@ -193,19 +193,21 @@ class TestTwoColumn(unittest.TestCase):
         Image.new("RGB", (w, h), (200, 200, 200)).save(p)
         return p
 
-    def test_page_with_screenshot_has_picture_and_narrow_body(self):
+    def test_page_with_screenshot_has_picture_left_placed(self):
         with tempfile.TemporaryDirectory() as d:
-            self._png(d)
+            self._png(d)   # 640x480 (r=1.33) -> split layout: image on the LEFT, text right
             slide = {"id": "home", "kind": "page", "title": "홈", "category": "핵심",
-                     "order": 1, "screenshot": "home.png", "updated_at": "2026-06-24T09:00:00+09:00",
+                     "order": 1, "screenshot": "home.png", "image_layout": "split",
+                     "updated_at": "2026-06-24T09:00:00+09:00",
                      "commit": "abc", "ui_hash": "", "body_md": "본문"}
             prs = sd._new_prs()
-            sd.add_page_slide(prs, slide, d, 12, self.OPTS)
+            sd.add_page_slide(prs, slide, d, self.OPTS)
             sl = prs.slides[0]
             pics = [sh for sh in sl.shapes if sh.shape_type == 13]
             self.assertEqual(len(pics), 1)
             self.assertAlmostEqual(pics[0].width / pics[0].height, 4 / 3, places=2)
-            self.assertGreaterEqual(pics[0].left, Inches(7.0))
+            # adaptive split/side layout places the image in the LEFT region (not the old fixed right column)
+            self.assertLess(pics[0].left + pics[0].width, prs.slide_width // 2 + Inches(1))
 
     def test_corrupt_png_falls_back_textonly(self):
         with tempfile.TemporaryDirectory() as d:
@@ -214,7 +216,7 @@ class TestTwoColumn(unittest.TestCase):
                      "order": 1, "screenshot": "home.png", "updated_at": "", "commit": "",
                      "ui_hash": "", "body_md": "본문"}
             prs = sd._new_prs()
-            sd.add_page_slide(prs, slide, d, 12, self.OPTS)     # must NOT raise
+            sd.add_page_slide(prs, slide, d, self.OPTS)         # must NOT raise
             pics = [sh for sh in prs.slides[0].shapes if sh.shape_type == 13]
             self.assertEqual(len(pics), 0)                      # no picture -> text-only
 
@@ -228,7 +230,7 @@ class TestNativeTable(unittest.TestCase):
                  "commit": "", "ui_hash": "",
                  "body_md": "설명 문단\n\n| 이름 | 값 |\n| --- | --- |\n| a | b |\n| c | d |"}
         prs = sd._new_prs()
-        sd.add_page_slide(prs, slide, "", 12, self.OPTS)
+        sd.add_page_slide(prs, slide, "", self.OPTS)
         tables = [sh for sh in prs.slides[0].shapes if sh.has_table]
         self.assertEqual(len(tables), 1)
         tbl = tables[0].table
@@ -244,7 +246,7 @@ class TestNativeTable(unittest.TestCase):
                  "order": 1, "screenshot": "", "updated_at": "", "commit": "", "ui_hash": "",
                  "body_md": big + "\n\n| 키 | 값 |\n| - | - |\n| a | b |"}
         prs = sd._new_prs()
-        sd.add_page_slide(prs, slide, "", 9, self.OPTS)
+        sd.add_page_slide(prs, slide, "", self.OPTS)
         tables = [sh for sh in prs.slides[0].shapes if sh.has_table]
         self.assertEqual(len(tables), 1)   # present even though text overflowed (clip, not drop)
 
@@ -361,6 +363,47 @@ class TestIntegrationCop(unittest.TestCase):
                 txt = subprocess.run(["pdftotext", spec_pdf, "-"], capture_output=True,
                                      text=True).stdout
                 self.assertRegex(txt, r"[가-힣]")     # real Hangul, not tofu/blank
+
+
+class TestAdaptiveLayout(unittest.TestCase):
+    """슬라이드 재설계: image_layout 자동분류 + per-slide base_pt + 영역 계산."""
+
+    def test_slide_base_pt_per_slide(self):
+        self.assertEqual(sd.slide_base_pt({"body_md": "x" * 100}), 12)
+        self.assertEqual(sd.slide_base_pt({"body_md": "x" * 3000}), 9)
+
+    def test_layout_regions_top_image_above_body(self):
+        img, body = sd.layout_regions("top")
+        self.assertLess(img["top"], body["top"])
+
+    def test_layout_regions_side_image_left_of_body(self):
+        img, body = sd.layout_regions("side")
+        self.assertLess(img["left"], body["left"])
+
+    def test_layout_regions_split_wider_than_side(self):
+        # split=균형(48%)이 side=세로용(40%)보다 이미지 폭 넓음
+        self.assertGreater(sd.layout_regions("split")[0]["width"],
+                           sd.layout_regions("side")[0]["width"])
+
+    def test_layout_regions_none_has_no_image(self):
+        img, body = sd.layout_regions("none")
+        self.assertIsNone(img)
+
+    def test_slide_layout_explicit_field_wins(self):
+        self.assertEqual(sd._slide_layout({"image_layout": "side"}, None), "side")
+
+    def test_slide_layout_no_png_is_none(self):
+        self.assertEqual(sd._slide_layout({}, None), "none")
+
+    def test_slide_layout_pil_fallback_by_ratio(self):
+        from PIL import Image
+        with tempfile.TemporaryDirectory() as d:
+            wide = os.path.join(d, "wide.png"); Image.new("RGB", (1280, 720)).save(wide)   # 1.78 -> top
+            tall = os.path.join(d, "tall.png"); Image.new("RGB", (418, 628)).save(tall)    # 0.67 -> side
+            sq = os.path.join(d, "sq.png"); Image.new("RGB", (760, 594)).save(sq)          # 1.28 -> split
+            self.assertEqual(sd._slide_layout({}, wide), "top")
+            self.assertEqual(sd._slide_layout({}, tall), "side")
+            self.assertEqual(sd._slide_layout({}, sq), "split")
 
 
 if __name__ == "__main__":

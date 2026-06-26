@@ -179,6 +179,10 @@ def pick_base_pt(total_chars: int) -> int:
     return 9
 
 
+def slide_base_pt(slide_obj) -> int:
+    return pick_base_pt(len(slide_obj.get("body_md", "")))
+
+
 def resolve_screenshot(value: str, screenshots_dir: str) -> str | None:
     if not value or not screenshots_dir:
         return None
@@ -259,9 +263,23 @@ _MARGIN = 0.5
 _BODY_TOP = 1.4
 _BODY_H = 5.3
 _FULL_W = 12.333
-_COL_BODY_W = 6.6
-_IMG_X = 7.35
-_IMG_W = 5.23
+
+
+def layout_regions(layout):
+    """(img|None, body) — inches dict {left, top, width, height}. 제목밴드/푸터 제외 영역."""
+    top, h = _BODY_TOP, _BODY_H            # 1.4, 5.3
+    if layout == "none":
+        return None, {"left": _MARGIN, "top": top, "width": _FULL_W, "height": h}
+    if layout == "top":
+        img_h = h * 0.62
+        gap = 0.12
+        return ({"left": _MARGIN, "top": top, "width": _FULL_W, "height": img_h},
+                {"left": _MARGIN, "top": top + img_h + gap, "width": _FULL_W, "height": h - img_h - gap})
+    # side / split: 이미지 좌, 본문 우. split=균형, side=이미지 약간 좁게(세로 이미지)
+    img_w = _FULL_W * (0.40 if layout == "side" else 0.48)
+    gap = 0.3
+    return ({"left": _MARGIN, "top": top, "width": img_w, "height": h},
+            {"left": _MARGIN + img_w + gap, "top": top, "width": _FULL_W - img_w - gap, "height": h})
 
 
 def _render_blocks(tf, blocks, base_pt, opts):
@@ -327,27 +345,42 @@ def _add_footer(slide, slide_obj, opts):
     _set_run(p.add_run(), {"t": "text", "s": text}, 9, opts["font"], opts["mono_font"], color=_GRAY)
 
 
-_LINE_H = 0.17          # inches per text line at base size (~10-11pt line height)
-_CHARS_PER_IN = 6.2     # approx chars per inch of width (Korean glyphs run wide)
+
+def _slide_layout(slide_obj, png):
+    lay = slide_obj.get("image_layout")
+    if lay in ("top", "side", "split", "none"):
+        return lay
+    if not png:
+        return "none"
+    try:
+        with Image.open(png) as im:
+            r = im.size[0] / im.size[1]
+    except Exception:
+        return "split"
+    return "top" if r >= 1.6 else ("side" if r <= 0.95 else "split")
 
 
-def add_page_slide(prs, slide_obj, screenshots_dir, base_pt, opts, progress_mode="none"):
+def add_page_slide(prs, slide_obj, screenshots_dir, opts, progress_mode="none"):
     slide = _blank_slide(prs)
     _add_title_band(slide, slide_obj, opts)
     _add_footer(slide, slide_obj, opts)
     blocks = parse_markdown(slide_obj.get("body_md", ""))
-    has_shot = (slide_obj.get("kind") != "system"
-                and resolve_screenshot(slide_obj.get("screenshot", ""), screenshots_dir) is not None)
-    body_w = _COL_BODY_W if has_shot else _FULL_W
-    png = resolve_screenshot(slide_obj.get("screenshot", ""), screenshots_dir) if has_shot else None
-    if png:
+    pt = slide_base_pt(slide_obj)
+    png = resolve_screenshot(slide_obj.get("screenshot", ""), screenshots_dir) \
+        if slide_obj.get("kind") != "system" else None
+    layout = _slide_layout(slide_obj, png)
+    if layout == "none":
+        png = None
+    img_region, body_region = layout_regions(layout)
+    if png and img_region:
         try:
-            _add_screenshot(slide, png)
+            _place_image(slide, png, img_region)
         except Exception:                       # corrupt/zero-byte/unsupported -> text-only + warn
-            body_w = _FULL_W
+            body_region = layout_regions("none")[1]
             emit(progress_mode, {"v": 1, "phase": "render", "status": "warn",
                                  "note": f"screenshot skipped: {slide_obj.get('id', '')}"})
-    _render_body(slide, blocks, _MARGIN, body_w, base_pt, opts)
+    _render_body(slide, blocks, body_region["left"], body_region["width"], pt, opts,
+                 top=body_region["top"], avail_h=body_region["height"])
 
 
 def emit(progress_mode, event):
@@ -374,25 +407,28 @@ def emit(progress_mode, event):
         sys.stderr.flush()
 
 
-def _add_screenshot(slide, png_path):
+def _place_image(slide, png_path, region):
     with Image.open(png_path) as im:
         iw, ih = im.size
-    box_w, box_h = Inches(_IMG_W), Inches(_BODY_H)
-    scale = min(box_w / iw, box_h / ih)
-    w, h = int(iw * scale), int(ih * scale)
-    left = Inches(_IMG_X) + (box_w - w) // 2
-    top = Inches(_BODY_TOP) + (box_h - h) // 2
+    box_w, box_h = Inches(region["width"]), Inches(region["height"])
+    scale = min(box_w / iw, box_h / ih)   # scale 단위는 EMU/px (box_w=EMU, iw=px)
+    w, h = int(iw * scale), int(ih * scale)   # EMU 단위 — 픽셀 아님
+    left = Inches(region["left"]) + (box_w - w) // 2
+    top = Inches(region["top"]) + (box_h - h) // 2
     pic = slide.shapes.add_picture(png_path, left, top, width=w, height=h)
     pic.line.color.rgb = RGBColor(0xD0, 0xD0, 0xD0)   # thin border (spec §5.1)
     pic.line.width = Pt(0.75)
 
 
-def _estimate_text_h(blocks, width_in):
-    cpl = max(8, int(width_in * _CHARS_PER_IN))
-    lines = 0
+def _estimate_text_h(blocks, width_in, base_pt):
+    # 줄높이·줄당 글자수를 base_pt에 맞춰 산정(한글 글리프는 ~1em 폭). 과소추정 시
+    # 다음 블록(표 등)이 위 텍스트를 덮어써 폼이 깨짐 → 넉넉히 잡는다.
+    line_h = max(0.20, base_pt / 72.0 * 1.5)
+    cpl = max(8, int(width_in * (72.0 / max(base_pt, 1)) * 1.1))
+    lines = 0.0
     for b in blocks:
         if b["type"] == "heading":
-            lines += 1
+            lines += 1.5
         elif b["type"] in ("para", "quote"):
             lines += max(1, (len(_runs_text(b["runs"])) // cpl) + 1)
         elif b["type"] in ("ulist", "olist"):
@@ -402,7 +438,7 @@ def _estimate_text_h(blocks, width_in):
             lines += b["text"].count("\n") + 1
         elif b["type"] == "empty":
             lines += 1
-    return max(_LINE_H, lines * _LINE_H)
+    return max(line_h, lines * line_h) + 0.1   # +0.1 텍스트박스 내부 여백
 
 
 def _add_table(slide, table_block, x, y, w):
@@ -427,26 +463,50 @@ def _add_table(slide, table_block, x, y, w):
     return Inches(0.4 * nrow)
 
 
-def _render_body(slide, blocks, x, w, base_pt, opts):
-    """플로우: 텍스트 블록은 텍스트 프레임에, 표는 별도 GraphicFrame. y 커서로 위→아래."""
-    y = _BODY_TOP
-    bottom = _BODY_TOP + _BODY_H
+def _estimate_total_h(blocks, w, base_pt):
+    """본문 전체 추정 높이 — 세로 중앙 정렬용(_render_body 누적 로직 미러)."""
+    total = 0.0
+    group: list[dict] = []
+
+    def flush():
+        nonlocal total
+        if group:
+            total += max(0.3, _estimate_text_h(group, w, base_pt)) + 0.08
+            group.clear()
+
+    for b in blocks:
+        if b["type"] == "table":
+            flush()
+            total += 0.4 * (1 + len(b["rows"])) + 0.1
+        else:
+            group.append(b)
+    flush()
+    return total
+
+
+def _render_body(slide, blocks, x, w, base_pt, opts, top=_BODY_TOP, avail_h=_BODY_H):
+    """플로우: 텍스트 블록은 텍스트 프레임에, 표는 별도 GraphicFrame. y 커서로 위→아래.
+    짧은 본문은 세로 중앙 정렬(넘치면 상단부터)."""
+    bottom = top + avail_h
+    total = _estimate_total_h(blocks, w, base_pt)
+    y = top + max(0.0, (avail_h - total) / 2)
     group: list[dict] = []
 
     def flush_group():
         nonlocal y
         if not group:
             return
-        h = min(_estimate_text_h(group, w), bottom - y)
-        if h <= 0:
+        if bottom - y <= 0:
             group.clear(); return
-        box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(max(0.3, h)))
+        # 박스 높이로 y를 전진(추정값이 아니라 실제 그린 높이) — 안 그러면 다음 블록이 겹침.
+        box_h = min(max(0.3, _estimate_text_h(group, w, base_pt)), bottom - y)
+        box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(box_h))
         tf = box.text_frame
         tf.word_wrap = True
         tf.vertical_anchor = MSO_ANCHOR.TOP
         tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE   # bonus for interactive viewers
         _render_blocks(tf, list(group), base_pt, opts)
-        y += h
+        y += box_h + 0.08   # 블록 간 간격
         group.clear()
 
     for b in blocks:
@@ -455,7 +515,7 @@ def _render_body(slide, blocks, x, w, base_pt, opts):
             # always place the table — clip off-canvas if overflowing (recoverable in
             # PowerPoint), never silently drop it. clamp start so it stays near the slide.
             used = _add_table(slide, b, x, min(y, bottom), w)
-            y += used / 914400
+            y += used / 914400 + 0.1
         else:
             group.append(b)
     flush_group()
@@ -463,12 +523,10 @@ def _render_body(slide, blocks, x, w, base_pt, opts):
 
 def build_deck(doc, screenshots_dir, opts, progress_mode):
     slides = doc.get("slides", [])
-    total_chars = sum(len(s.get("body_md", "")) for s in slides)
-    base_pt = pick_base_pt(total_chars)
     prs = _new_prs()
     add_title_slide(prs, doc, opts)
     for idx, s in enumerate(slides, 1):
-        add_page_slide(prs, s, screenshots_dir, base_pt, opts, progress_mode)
+        add_page_slide(prs, s, screenshots_dir, opts, progress_mode)
         emit(progress_mode, {"v": 1, "phase": "render", "deck": opts.get("_deck", ""),
                              "done": idx, "total": len(slides)})
     return prs

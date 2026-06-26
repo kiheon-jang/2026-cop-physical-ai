@@ -1,8 +1,18 @@
+import os
+import struct
 import tempfile
 import unittest
+import zlib
 from pathlib import Path
 
 import site_docs
+
+
+def _make_png(path, w, h):
+    sig = b"\x89PNG\r\n\x1a\n"
+    ihdr = struct.pack(">II", w, h) + b"\x08\x06\x00\x00\x00"
+    chunk = struct.pack(">I", len(ihdr)) + b"IHDR" + ihdr + struct.pack(">I", zlib.crc32(b"IHDR" + ihdr))
+    Path(path).write_bytes(sig + chunk)
 
 
 class TestParse(unittest.TestCase):
@@ -114,6 +124,111 @@ class TestBuild(unittest.TestCase):
         }
         problems = site_docs.validate_docs(bad)
         self.assertTrue(any("ui_hash" in p for p in problems))
+
+
+class TestSplitMarkers(unittest.TestCase):
+    def test_pre_plus_two_markers(self):
+        s = site_docs.split_section_into_slides(
+            'a\nb\n<!-- slide title="X" -->\nc\nd\n<!-- slide title="Y" screenshot="" -->\ne')
+        self.assertEqual(len(s), 3)
+        self.assertEqual(s[0]["attrs"], {})
+        self.assertEqual(s[0]["body"], "a\nb")
+        self.assertEqual(s[1]["attrs"].get("title"), "X")
+        self.assertEqual(s[1]["body"], "c\nd")
+        self.assertEqual(s[2]["attrs"].get("screenshot"), "")
+
+    def test_no_markers_single_chunk(self):
+        s = site_docs.split_section_into_slides("just text\nno markers")
+        self.assertEqual(len(s), 1)
+        self.assertEqual(s[0]["body"], "just text\nno markers")
+
+    def test_leading_marker_no_pre(self):
+        s = site_docs.split_section_into_slides('<!-- slide title="Only" -->\nbody')
+        self.assertEqual(len(s), 1)
+        self.assertEqual(s[0]["attrs"]["title"], "Only")
+        self.assertEqual(s[0]["body"], "body")
+
+
+class TestClassifyLayout(unittest.TestCase):
+    def test_ratios(self):
+        self.assertEqual(site_docs.classify_layout((1280, 720)), "top")     # 1.78
+        self.assertEqual(site_docs.classify_layout((418, 628)), "side")     # 0.67
+        self.assertEqual(site_docs.classify_layout((760, 594)), "split")    # 1.28
+        self.assertEqual(site_docs.classify_layout(None), "none")
+
+    def test_boundaries(self):
+        self.assertEqual(site_docs.classify_layout((160, 100)), "top")      # 1.60
+        self.assertEqual(site_docs.classify_layout((95, 100)), "side")      # 0.95
+
+
+class TestReadPngSize(unittest.TestCase):
+    def test_reads_ihdr(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "x.png"); _make_png(p, 1280, 720)
+            self.assertEqual(site_docs.read_png_size(Path(p)), (1280, 720))
+
+    def test_bad_returns_none(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "bad.png"); Path(p).write_bytes(b"notpng")
+            self.assertIsNone(site_docs.read_png_size(Path(p)))
+
+
+class TestBuildSlidesMulti(unittest.TestCase):
+    BASE = {"id": "home", "kind": "page", "title": "Home", "category": "", "order": 1,
+            "updated_at": "", "commit": "", "ui_hash": ""}
+
+    def _shots(self):
+        d = tempfile.mkdtemp()
+        sdir = Path(d) / "screenshots"; sdir.mkdir()
+        _make_png(sdir / "home.png", 1280, 720)   # top
+        return sdir
+
+    def test_ids_orders_inheritance(self):
+        sdir = self._shots()
+        section = ('overview\n'
+                   '<!-- slide title="A" screenshot="" -->\n'
+                   'detail a\n'
+                   '<!-- slide title="B" -->\n'
+                   'detail b')
+        slides = site_docs._build_slides(self.BASE, section, "home.png", True, sdir, "cop")
+        self.assertEqual([s["id"] for s in slides], ["home", "home--1", "home--2"])
+        self.assertAlmostEqual(slides[1]["order"], 1.001, places=9)
+        self.assertTrue(slides[0]["screenshot"].endswith("home.png"))
+        self.assertEqual(slides[0]["image_layout"], "top")        # overview inherits page shot
+        self.assertEqual(slides[1]["screenshot"], "")             # detail screenshot="" -> none
+        self.assertEqual(slides[1]["image_layout"], "none")
+        self.assertTrue(slides[2]["screenshot"].endswith("home.png"))  # no attr -> inherits
+        self.assertEqual([s["title"] for s in slides[1:]], ["A", "B"])
+
+    def test_empty_section_no_slides(self):
+        self.assertEqual(site_docs._build_slides(self.BASE, "  \n ", "home.png", True, self._shots(), "cop"), [])
+
+    def test_system_never_screenshot(self):
+        slides = site_docs._build_slides(self.BASE, "sys body", "home.png", False, self._shots(), "cop")
+        self.assertEqual(slides[0]["screenshot"], "")
+        self.assertEqual(slides[0]["image_layout"], "none")
+
+    def test_bad_layout_attr_falls_back_to_computed(self):
+        section = '<!-- slide title="A" layout="bogus" -->\nbody'
+        slides = site_docs._build_slides(self.BASE, section, "home.png", True, self._shots(), "cop")
+        self.assertEqual(slides[0]["image_layout"], "top")        # bogus -> computed (wide png)
+
+
+class TestValidateLayout(unittest.TestCase):
+    def _slide(self, **over):
+        s = {"id": "a", "kind": "page", "title": "A", "category": "", "order": 1,
+             "screenshot": "", "updated_at": "", "commit": "", "ui_hash": "",
+             "image_layout": "none", "body_md": "ok"}
+        s.update(over); return s
+
+    def test_bad_layout_flagged(self):
+        docs = {"spec": {"slides": [self._slide(image_layout="weird")]}, "guide": {"slides": []}}
+        self.assertTrue(any("bad image_layout" in p for p in site_docs.validate_docs(docs)))
+
+    def test_too_long_flagged(self):
+        docs = {"spec": {"slides": [self._slide(image_layout="side", body_md="x" * 800)]},
+                "guide": {"slides": []}}
+        self.assertTrue(any("too long" in p for p in site_docs.validate_docs(docs)))
 
 
 if __name__ == "__main__":
