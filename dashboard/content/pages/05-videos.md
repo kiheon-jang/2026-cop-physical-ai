@@ -7,6 +7,7 @@ screenshot: videos.png
 category: 핵심
 ---
 ## 기능명세
+<!-- slide title="시각자료 — 개요" -->
 
 시각자료 화면(`view-videos`)은 학습 진척 증거, 시뮬 동작 영상, 카메라 시점 프레임, 하드웨어 사진, 학습 데이터셋 영상을 통합해 보여주는 화면이다. 진척 관점으로 구성되어 있으며, 영상/이미지는 모두 `build.py`가 레포지토리 파일을 스캔해 `data.json`에 경로를 포함시킨다.
 
@@ -14,11 +15,13 @@ category: 핵심
 - `video-explainer-now`: 현재 학습 단계 상태를 동적으로 표시 (예: "ACT 학습 시작 대기 중" 또는 학습 진행 중 상태).
 - `video-explainer-caveat`: "이 영상들은 학습 전 단계 시뮬 결과(IK 기반)이며 ACT 학습 결과 영상이 아님"이라는 주의 문구 동적 표시.
 
+<!-- slide title="학습 진척 섹션" screenshot="" -->
 **학습 진척 섹션 (training-progress-wrap)**
 학습이 시작된 경우에만 표시되는 섹션. 두 부분:
 1. **ACT 학습 메트릭 차트**: `build_training_metrics()`가 `outputs/train/*/metrics.jsonl` 또는 `logs/act_train_metrics.jsonl`에서 읽은 epoch별 loss/lr/success_rate 데이터를 SVG 선 차트로 렌더링. 현재 epoch, 현재 loss, best loss, 학습 상태(running/paused/pending) 표시.
 2. **inference 진척 영상 carousel**: `build_inference_progress()`가 `research/simulation/inference_progress/*.mp4`를 스캔. 파일명 패턴 `inference_epoch_{NN}_{date}.mp4` 기준 epoch별 정렬. 학습 없으면 이 섹션 미표시.
 
+<!-- slide title="시뮬 영상 · 카메라 시점" screenshot="" -->
 **시뮬 동작 영상 섹션 (video-grid)**
 `build_videos()`가 `research/simulation/video/*.mp4`를 스캔한 영상 카드 목록. 수정 시각 역순 정렬. 각 카드:
 - 파일명 기반 비전공자용 설명(`_VIDEO_DESCRIPTIONS` 키워드 매칭):
@@ -35,6 +38,7 @@ category: 핵심
 - 천장 카메라(overhead): 480×640 RGB, ACT 학습 주 입력
 - 그리퍼 손목 카메라(gripper): 두 번째 입력 시점
 
+<!-- slide title="하드웨어 · 데이터셋 · 상호작용" screenshot="" -->
 **하드웨어 시각자료 섹션 (hardware-grid-wrap)**
 `build_hardware_photos()`가 `models/SO-ARM100/media/`에서 4장을 큐레이션:
 - Leader_And_Follower_SO100.jpg: Leader + Follower 로봇팔 (텔레오퍼레이션 페어)
@@ -52,6 +56,7 @@ category: 핵심
 - 프레임 시퀀스: 이미지 carousel (좌우 클릭).
 
 ## 사용가이드
+<!-- slide title="사용가이드 — 개요" -->
 
 시각자료 화면은 로봇 시뮬레이션이 어떻게 진행되고 있는지를 영상과 사진으로 확인하는 화면입니다.
 
@@ -63,5 +68,6 @@ category: 핵심
 5. **하드웨어 사진** — 실제 SO-ARM101 로봇팔 사진입니다. Leader(조작 측)와 Follower(작업 측) 두 대가 있습니다.
 6. **학습 데이터셋 영상** — 맨 아래에 있으며, 200 에피소드 학습 데이터가 생성되었을 때만 표시됩니다.
 
+<!-- slide title="주의 사항" screenshot="" -->
 **주의 사항**
 시뮬 동작 영상은 AI가 학습한 결과 영상이 아닙니다. 학습 데이터를 만들기 위해 규칙 기반(IK)으로 로봇을 자동으로 움직인 영상입니다. 큐브를 잡는 데 실패하는 장면이 포함되어 있어도 정상입니다. 학습 결과 영상은 학습이 완료된 후 "학습 진척" 섹션에 따로 표시됩니다.
