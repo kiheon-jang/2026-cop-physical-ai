@@ -78,3 +78,8 @@
 - 23:30 nightly sim-test (v3.2): 우선순위 4종 실제 실행 회귀 통과 — sim_headless_6dof_video 2/2(2501 frame, ~9.3s), sim_camera_verification 3/3(듀얼카메라 60 img, ~0.6s), sim_pick_place 2/2 스크립트(open-loop grasp 0%·32cm 미달 = known), sim_data_collector 스모크 2/2(yield 100%, lift 43.5mm, `/tmp` 격리). 디스크 검증: `episodes_cl` 50ep/3350frame, `rollout_summary.json` 70%/43.7mm 정합. 환경 mujoco 3.8.0/.venv (`agent/research-log/2026-06-25.md` 23:30 회차 블록).
 - closed-loop rollout 70%(7/10) vs open-loop `sim_pick_place.py` 0% 실측 대조 → 6월 보고서 [2.사전학습] open/closed-loop 대비 핵심 증거.
 - sim 스크립트 회귀 통과(6dof/camera/collector 100% 성공) → 6월 보고서 [2.시뮬환경] 환경 안정성 근거.
+
+## 2026-06-26
+- Phase 1 W4: closed-loop 1사이클 **완료/유지** — 드라이버 STAGE=완료/유지(데이터 50ep, 성공률 0.70/목표 0.90). 마커 정합 확인, 재학습·재측정 없이 상태 유지. 디스크 검증: `episodes_cl` 50ep/3350frame, `epoch_0099` mtime 6/25 02:17, `rollout_summary.json` 70%/43.7mm 정합 (`research/simulation/2026-06-26_pipeline-hold-cycle1-70pct.md`) → 6월 보고서 [2.사전학습] 1사이클 결과 유지 증거.
+- 23:30 nightly sim-test (v3.2): 우선순위 4종 실제 실행 회귀 통과 — sim_headless_6dof_video 3/3(2501 frame, 9.3~10.0s), sim_camera_verification 3/3(듀얼카메라 30 frame, ~0.6s), sim_pick_place 3/3 스크립트(open-loop grasp 0%·32cm 미달 = known 레거시), sim_data_collector closed-loop 스모크 3/3(yield 100%, lift 42.1mm, `/tmp` 격리). 환경 mujoco 3.8.0/.venv (`agent/research-log/2026-06-26.md` 우선순위 스크립트 직접 실행 블록) → 6월 보고서 [2.시뮬환경] 환경 안정성 근거.
+- closed-loop rollout 70%(7/10) vs open-loop `sim_pick_place.py` 0%(32cm) 대조 유지 → 6월 보고서 [2.사전학습] open/closed-loop 대비 증거.
