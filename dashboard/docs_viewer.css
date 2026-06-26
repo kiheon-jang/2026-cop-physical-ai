@@ -1,5 +1,6 @@
 /* docs_viewer.css — site-docs 슬라이드 뷰어 (hdel·cop 공유, byte-identical).
-   구조만 정의 · 색은 사이트 토큰(--accent 등) 사용 → light/dark 자동. SP3. */
+   구조만 정의 · 색은 사이트 토큰(--accent 등) 사용 → light/dark 자동. SP3 + 슬라이드 재설계
+   (16:9 stage + image_layout 적응형 그리드: top/side/split/none, 본문 세로 중앙정렬). */
 .docs-viewer-mount { max-width: 920px; margin: 0 auto; }
 .docs-viewer { display: flex; flex-direction: column; gap: 16px; }
 .docs-viewer__head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
@@ -11,11 +12,21 @@
 .docs-viewer__tab.is-active { background: var(--accent); color: #fff; font-weight: 600; }
 .docs-viewer__title { flex: 1; min-width: 0; font-size: 16px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .docs-viewer__chip { flex: 0 0 auto; margin-left: auto; font-size: 12px; padding: 3px 10px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-strong); font-weight: 600; }
-.docs-viewer__stage { display: flex; flex-direction: column; gap: 16px; min-height: 320px; }
-.docs-viewer__stage.is-textonly { min-height: 0; }
-.docs-viewer__shot { width: 100%; max-height: 460px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-sub); }
+.docs-viewer__stage {
+  aspect-ratio: 16 / 9; max-height: 72vh;
+  display: grid; gap: 16px; overflow: hidden;
+}
+.docs-viewer__stage--top   { grid-template-rows: 1fr auto; }
+.docs-viewer__stage--side,
+.docs-viewer__stage--split { grid-template-columns: var(--shot-col) 1fr; grid-auto-rows: 1fr; }
+.docs-viewer__stage--side  { --shot-col: 40%; }
+.docs-viewer__stage--split { --shot-col: 48%; }
+.docs-viewer__stage--none  { grid-template-columns: 1fr; }
+.docs-viewer__shotwrap { min-width: 0; min-height: 0; display: flex; align-items: center; justify-content: center; background: var(--bg-sub); border: 1px solid var(--border); border-radius: 8px; }
+.docs-viewer__shotwrap.is-hidden { display: none; }
+.docs-viewer__shot { width: 100%; height: 100%; object-fit: contain; border: 0; background: transparent; }
 .docs-viewer__shot.is-hidden { display: none; }
-.docs-viewer__body { color: var(--text); line-height: 1.7; font-size: 14px; }
+.docs-viewer__body { min-width: 0; min-height: 0; overflow: auto; display: flex; flex-direction: column; justify-content: safe center; color: var(--text); line-height: 1.7; font-size: 14px; }
 .docs-viewer__body h1, .docs-viewer__body h2, .docs-viewer__body h3 { color: var(--text); margin: 14px 0 8px; }
 .docs-viewer__body p { margin: 0 0 10px; color: var(--text-sub); }
 .docs-viewer__body ul, .docs-viewer__body ol { margin: 0 0 10px; padding-left: 20px; color: var(--text-sub); }
