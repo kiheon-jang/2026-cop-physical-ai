@@ -165,7 +165,8 @@ uv pip install <패키지명>
   - 🔄 **2026-06-24 23:00 진척**: 수집✓(`data/episodes_cl` 50ep/3350frame) → 학습중(pid 20078, epoch 64/100, loss 0.0077, ETA~02:00) → 측정대기. 측정기 정합은 commit `16d2548` 완료(2-rollout 스모크 OK). 현 `rollout_summary.json` 0%/6.4mm 는 baseline epoch_0009(open-loop) 성적이며 closed-loop 모델 측정은 학습 완료 후 드라이버가 자동 수행. 상세: `2026-06-24_closed-loop-cycle1-progress.md`.
   - 🔄 **2026-06-25 01:00 진척**: 학습중(pid 20078 alive, epoch **85/100**, loss 0.00556, MPS) → ETA ~02:20 → 측정대기. **데이터셋 정합 확정**: run2 step≈419/epoch=`episodes_cl`(로그 내 dataset_root=`data/episodes` 1550step 항목은 run1 open-loop 종료요약). **체크포인트 저장 정상**: `epoch_0079/model.safetensors` mtime 00:26(closed-loop 신선; 디렉터리 mtime 6/21~22 은 save_pretrained 덮어쓰기 특성·결함 아님). 자가치유 없음. 학습 미완이라 본 항목 `[ ]` 유지. 상세: `2026-06-25_closed-loop-cycle1-training.md`.
   - ✅ **2026-06-25 02:17 학습완료 / 23:00 측정완료**: pid 20078 종료, epoch_0099 model.safetensors mtime 02:17(closed-loop 신선). 드라이버 측정 스테이지 `rollout_summary.json`(mtime 23:00) = 10 rollout 7성공 70%, median lift 43.7mm. 본 항목 `[v]` 클로즈.
-- [ ] 학습 모델 Orin Nano 배포 (SSH 연결 확보 시)
+  - ✅ **2026-06-26~30 완료/유지**: 드라이버 STAGE=완료/유지(마커·산출물·체크포인트 3자 정합, 회귀 없음). **6/30 = W4 dated 범위(6/22~6/30) 마지막 날 → Phase 1 W4 dated 작업 종료, 7월 Phase 2(Sim2Real) 진입.** 상세: `2026-06-30_closed-loop-cycle1-hold.md`.
+- [ ] 학습 모델 Orin Nano 배포 (SSH 연결 확보 시) — 외부 의존(장기헌 SSH) 미수신으로 Phase 2 이연
 
 **Phase 1 완료 기준 (2026-06-23 갱신)**:
 - ✅ 시뮬 사전학습 파이프라인 전 구간 가동 (데이터 합성 → ACT 학습 → 추론 → 성공률 측정)
