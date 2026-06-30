@@ -179,7 +179,9 @@ uv pip install <패키지명>
 
 ## Phase 2 — Sim2Real 검증 (2026-07, 4주)
 
-- W1: Domain Randomization (조명, 마찰, 카메라 노이즈)
+- W1 (7/1 ~ 7/7): Domain Randomization (조명, 마찰, 카메라 노이즈)
+  - [v] **7/1**: DR 기반 모듈 신규 작성 (`samples/training/sim_domain_randomization.py`) — 조명/마찰/카메라노이즈 3축 무작위화, 8샘플 self-test 적용범위 전부 정상, 샘플프레임 `research/simulation/dr_samples/`. 상세: `2026-07-01_phase2-w1-domain-randomization.md`
+  - [ ] DR 를 `sim_data_collector.py` reset 훅 + `render_act_rollout.py` 에 연결 → DR 데이터셋 합성·측정
 - W2: Zero-shot 실기 추론 → 격차 측정
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
