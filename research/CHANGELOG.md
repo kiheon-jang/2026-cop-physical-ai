@@ -41,6 +41,12 @@
 
 
 
+
+### 2026-06-30
+- 🛠 [시뮬] Phase 2 W1 Domain Randomization 기반 모듈 착수 (조명/마찰/카메라노이즈 3축, 8샘플 검증) — 2026-07-01
+- 📊 [로그] 2026-06-30 시뮬 테스트 — W4 종료일 우선순위 4종 회귀 통과(6dof/camera 100%, collector smoke 2/2 yield 100%), 운영 데이터 무손상
+- 🛠 [시뮬] closed-loop 1사이클 완료/유지 — 6/30 STAGE 문서 자가치유(stray markup 제거) — 2026-06-30
+
 ### 2026-06-28
 - 🛠 [시뮬] closed-loop 1사이클 완료/유지 검증·문서화 — 2026-06-29
 - 📊 [로그] 2026-06-28 시뮬 테스트 — 우선순위 4종 실제 실행(headless/camera 100%, collector yield 100%, 레거시 pick_place 0% 기준선), closed-loop 1사이클 완료/유지
