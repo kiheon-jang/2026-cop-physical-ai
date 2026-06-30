@@ -32,5 +32,3 @@ STAGE=완료/유지  데이터 50ep · 최종 성공률=0.7 (목표 0.90)
 - W4 dated 항목(6/22~6/30) **사실상 종료**. closed-loop 1사이클은 L162~167 이미 `[v]`.
 - 남은 W4 `[ ]` = L168 "학습 모델 Orin Nano 배포" → 외부 의존(장기헌 SSH 정보, external-dependencies 우선순위2) 미수신으로 **이연, `[ ]` 유지**.
 - **7월 Phase 2(Sim2Real)** 진입. 진입 전 sim 성공률 70%→90%+ 향상은 드라이버가 마커 리셋 / `COP_TARGET_EP` 상향 시 자동 전진(데이터 50→200ep 증대·씬 다양화 여지).
-</content>
-</invoke>
