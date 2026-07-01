@@ -1,0 +1,26 @@
+{
+  "status": "ok",
+  "checkpoint": "checkpoints/act/epoch_0099",
+  "scene": "scene_grasp_pads.xml",
+  "rollouts": 2,
+  "success": 2,
+  "success_rate": 1.0,
+  "median_lift_mm": 45.4,
+  "lift_threshold_m": 0.04,
+  "dr": true,
+  "video_path": null,
+  "wall_clock_sec": 3.8,
+  "device": "cpu",
+  "results": [
+    {
+      "rollout": 0,
+      "success": true,
+      "max_lift_m": 0.0454
+    },
+    {
+      "rollout": 1,
+      "success": true,
+      "max_lift_m": 0.0436
+    }
+  ]
+}

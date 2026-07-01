@@ -51,12 +51,20 @@ def find_latest_checkpoint() -> Path | None:
     return ckpts[-1] if ckpts else None
 
 
-def run_rollout(model, data, policy, renderer, cam_id, device, rng, max_frames, collect_frames):
+def run_rollout(model, data, policy, renderer, cam_id, device, rng, max_frames, collect_frames,
+                dr_mod=None, dr_baseline=None, dr_rng=None):
     """단일 rollout 실행. (success, max_lift_m, frames) 반환."""
     import torch
     import mujoco
 
     mujoco.mj_resetData(model, data)
+    dr_noise_std = 0.0
+    if dr_mod is not None:
+        # DR-on 측정: reset 마다 원본 복원 후 무작위화 (누적 방지). 관측 RGB 에 카메라 노이즈.
+        dr_mod.restore_baseline(model, dr_baseline)
+        applied = dr_mod.randomize_scene(model, dr_rng)
+        mujoco.mj_setConst(model, data)
+        dr_noise_std = applied["camera_noise_std"]
     # 큐브 초기 위치 랜덤 (수집과 동일 분포)
     off = rng.uniform(-RANDOM_POS_RANGE, RANDOM_POS_RANGE, size=2)
     cube_pos = CUBE_INITIAL_POS + np.array([off[0], off[1], 0.0])
@@ -78,6 +86,8 @@ def run_rollout(model, data, policy, renderer, cam_id, device, rng, max_frames, 
     for _ in range(max_frames):
         renderer.update_scene(data, camera=cam_id)
         rgb = renderer.render()[::-1, :, :].copy()      # 학습과 동일한 상하반전 보정
+        if dr_mod is not None:
+            rgb = dr_mod.apply_camera_noise(rgb, dr_noise_std, dr_rng)
         if collect_frames:
             frames.append(rgb)
 
@@ -109,6 +119,9 @@ def main(argv=None):
     p.add_argument("--device", choices=["cpu", "mps", "cuda"], default="cpu",
                    help="추론 device (기본 cpu — 학습 MPS와 경합 회피)")
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument("--dr", action="store_true",
+                   help="Domain Randomization 적용 후 측정 (조명/마찰/카메라노이즈). "
+                        "결과는 rollout_summary_dr.json 로 별도 저장 — 운영 summary 불변.")
     args = p.parse_args(argv)
 
     import torch
@@ -144,6 +157,14 @@ def main(argv=None):
     if cam_id < 0:
         cam_id = -1
 
+    # DR 모듈 로드 (opt-in). samples/training 을 path 에 추가.
+    dr_mod = dr_baseline = dr_rng = None
+    if args.dr:
+        sys.path.insert(0, str(ROOT / "samples" / "training"))
+        import sim_domain_randomization as dr_mod
+        dr_baseline = dr_mod.snapshot_baseline(model)
+        dr_rng = np.random.default_rng(args.seed)
+
     rng = np.random.default_rng(args.seed)
     t0 = time.time()
     results = []
@@ -152,7 +173,8 @@ def main(argv=None):
         collect = i < args.video_rollouts
         try:
             success, max_lift, frames = run_rollout(
-                model, data, policy, renderer, cam_id, device, rng, args.max_frames, collect
+                model, data, policy, renderer, cam_id, device, rng, args.max_frames, collect,
+                dr_mod=dr_mod, dr_baseline=dr_baseline, dr_rng=dr_rng
             )
         except Exception as e:  # 한 rollout 실패가 전체 측정을 죽이지 않게
             results.append({"rollout": i, "success": False, "max_lift_m": 0.0, "error": str(e)[:120]})
@@ -187,13 +209,15 @@ def main(argv=None):
         "success_rate": round(success_rate, 3),
         "median_lift_mm": round(median_lift, 1),
         "lift_threshold_m": LIFT_THRESHOLD_M,
+        "dr": args.dr,
         "video_path": str(video_path.relative_to(ROOT)) if video_frames else None,
         "wall_clock_sec": round(time.time() - t0, 1),
         "device": args.device,
         "results": results,
     }
-    # 요약 json (대시보드/크론이 성공률 읽기용)
-    (OUT_DIR / "rollout_summary.json").write_text(
+    # 요약 json (대시보드/크론이 성공률 읽기용). DR-on 은 별도 파일 — 운영 summary 불변.
+    summary_name = "rollout_summary_dr.json" if args.dr else "rollout_summary.json"
+    (OUT_DIR / summary_name).write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print(json.dumps(summary, ensure_ascii=False, indent=2))

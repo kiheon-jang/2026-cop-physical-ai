@@ -39,6 +39,8 @@ import os
 import random
 import shutil
 
+import sim_domain_randomization as dr  # 같은 폴더 (samples/training)
+
 np.seterr(all="ignore")
 
 try:
@@ -279,7 +281,7 @@ class GraspExpert:
 # ---------------------------------------------------------------------------
 # 수집 루프
 # ---------------------------------------------------------------------------
-def main(dataset_root_arg=None, num_episodes_arg=None):
+def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0):
     if not os.path.exists(MODEL_XML_PATH):
         print(f"Error: MJCF model file not found at {MODEL_XML_PATH}")
         return
@@ -287,6 +289,12 @@ def main(dataset_root_arg=None, num_episodes_arg=None):
     expert = GraspExpert(MODEL_XML_PATH)
     model, data = expert.m, expert.d
     num_joints = model.nu  # 6
+
+    # Domain Randomization (opt-in). 매 에피소드 reset 마다 조명/마찰 무작위화 + 카메라 노이즈.
+    # baseline 을 캐시해 friction 곱셈/light_pos 덧셈 누적을 방지한다.
+    dr_baseline = dr.snapshot_baseline(model) if use_dr else None
+    dr_rng = np.random.default_rng(dr_seed) if use_dr else None
+    dr_state = {"noise_std": 0.0}  # record() 가 참조할 현재 카메라 노이즈 std
 
     # overhead_camera (so101_grasp_calib.xml world 레벨)
     renderer = mujoco.Renderer(model, height=480, width=640)
@@ -337,6 +345,8 @@ def main(dataset_root_arg=None, num_episodes_arg=None):
         """현재 시뮬 상태 1프레임을 버퍼에 적재 (overhead RGB + qpos[:6] + ctrl[:6])."""
         renderer.update_scene(data, camera=camera_id)
         rgb = renderer.render()[::-1, :, :]  # 상하 반전 보정
+        if use_dr:
+            rgb = dr.apply_camera_noise(rgb, dr_state["noise_std"], dr_rng)
         frame_buffer.append({
             "task": "pick up red cube",
             "observation.images.top": rgb,
@@ -351,6 +361,14 @@ def main(dataset_root_arg=None, num_episodes_arg=None):
     while saved < target_episodes and attempts < max_attempts:
         attempts += 1
         frame_buffer.clear()
+
+        if use_dr:
+            # 매 에피소드 원본 복원 후 무작위화 (누적 방지). 카메라 노이즈 std 는 record() 에 전달.
+            dr.restore_baseline(model, dr_baseline)
+            applied = dr.randomize_scene(model, dr_rng)
+            mujoco.mj_setConst(model, data)  # 마찰 변경을 상수 캐시에 반영
+            dr_state["noise_std"] = applied["camera_noise_std"]
+            print(f"[DR] {applied}")
 
         off = np.array([random.uniform(-RANDOM_POS_RANGE, RANDOM_POS_RANGE),
                         random.uniform(-RANDOM_POS_RANGE, RANDOM_POS_RANGE)])
@@ -388,5 +406,9 @@ if __name__ == "__main__":
                     help="데이터셋 저장 루트 (기본: data/episodes). 대상 루트만 삭제 후 재생성.")
     _p.add_argument("--episodes", type=int, default=None,
                     help="목표 '성공' 에피소드 수 (기본: 50). 성공할 때까지 시도(max=4×목표 캡).")
+    _p.add_argument("--dr", action="store_true",
+                    help="Domain Randomization 적용(조명/마찰/카메라노이즈). 기본 off — 드라이버 파이프라인 불변.")
+    _p.add_argument("--dr-seed", type=int, default=0, help="DR 무작위 시드")
     _a = _p.parse_args()
-    main(dataset_root_arg=_a.root, num_episodes_arg=_a.episodes)
+    main(dataset_root_arg=_a.root, num_episodes_arg=_a.episodes,
+         use_dr=_a.dr, dr_seed=_a.dr_seed)

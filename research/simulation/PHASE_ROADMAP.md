@@ -182,6 +182,11 @@ uv pip install <패키지명>
 - W1 (7/1 ~ 7/7): Domain Randomization (조명, 마찰, 카메라 노이즈)
   - [v] **7/1**: DR 기반 모듈 신규 작성 (`samples/training/sim_domain_randomization.py`) — 조명/마찰/카메라노이즈 3축 무작위화, 8샘플 self-test 적용범위 전부 정상, 샘플프레임 `research/simulation/dr_samples/`. 상세: `2026-07-01_phase2-w1-domain-randomization.md`
   - [ ] DR 를 `sim_data_collector.py` reset 훅 + `render_act_rollout.py` 에 연결 → DR 데이터셋 합성·측정
+    - 🔄 **2026-07-01 야간**: **연결(배선) 완료 + 비파괴 스모크 통과**. opt-in `--dr` 플래그로 두 스크립트에
+      DR 연결(기본 off → 드라이버 파이프라인 불변). `snapshot_baseline`/`restore_baseline` 로 friction 곱셈·
+      light_pos 덧셈 누적 방지. 수집기 DR 스모크 2/2(yield 100%, friction 1.188/0.802 독립), 측정기 DR 스모크
+      2/2(→ `rollout_summary_dr.json`, 운영 summary 불변). 운영 `episodes_cl` 50ep·`rollout_summary.json` 7/10 무손상.
+      상세: `2026-07-01_phase2-w1-dr-wiring.md`. **잔여**: `--dr` 로 DR 50ep 합성→재학습→DR on/off 비교(드라이버 사이클).
 - W2: Zero-shot 실기 추론 → 격차 측정
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교

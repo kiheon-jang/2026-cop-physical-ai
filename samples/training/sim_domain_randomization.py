@@ -29,6 +29,30 @@ DR_RANGES = {
 }
 
 
+def snapshot_baseline(model):
+    """DR 적용 전 원본 배열을 캐시한다.
+
+    수집기/측정기는 model 을 한 번만 로드하고 매 reset(mj_resetData)마다 재사용한다.
+    friction 은 곱셈(*=), light_pos 는 덧셈(+=) 이라 restore 없이 매번 randomize 하면
+    누적된다 → 매 reset 마다 restore_baseline() 후 randomize_scene() 을 호출한다.
+    (self_test 는 매 샘플 모델을 새로 로드하므로 이 캐시가 필요없다.)
+    """
+    return {
+        "geom_friction": model.geom_friction.copy(),
+        "light_diffuse": model.light_diffuse.copy(),
+        "light_ambient": model.light_ambient.copy(),
+        "light_pos": model.light_pos.copy(),
+    }
+
+
+def restore_baseline(model, baseline):
+    """snapshot_baseline() 로 캐시한 원본 배열을 model 에 되돌린다 (누적 방지)."""
+    model.geom_friction[:] = baseline["geom_friction"]
+    model.light_diffuse[:] = baseline["light_diffuse"]
+    model.light_ambient[:] = baseline["light_ambient"]
+    model.light_pos[:] = baseline["light_pos"]
+
+
 def randomize_scene(model, rng):
     """model 의 조명·마찰을 in-place 무작위화하고 적용된 카메라 노이즈 std 를 반환.
 
