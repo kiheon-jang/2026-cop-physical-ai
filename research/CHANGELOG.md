@@ -42,6 +42,12 @@
 
 
 
+
+### 2026-07-01
+- 🛠 [시뮬] Phase 2 W1 — DR on/off 프록시 측정(DR-on 8/10 vs off 7/10, 정책 섭동 강건) — 2026-07-02
+- 📊 [로그] 2026-07-01 시뮬 테스트 — 우선순위 4종 회귀 실행 12/12 성공(6dof/camera 100%, collector 스모크 yield 3/3, pick_place open-loop 0% 기준선), 운영 데이터 무손상
+- 🛠 [시뮬] Phase 2 W1 — DR 를 수집기/측정기 reset 훅에 연결(opt-in --dr) — 2026-07-01
+
 ### 2026-06-30
 - 🛠 [시뮬] Phase 2 W1 Domain Randomization 기반 모듈 착수 (조명/마찰/카메라노이즈 3축, 8샘플 검증) — 2026-07-01
 - 📊 [로그] 2026-06-30 시뮬 테스트 — W4 종료일 우선순위 4종 회귀 통과(6dof/camera 100%, collector smoke 2/2 yield 100%), 운영 데이터 무손상
