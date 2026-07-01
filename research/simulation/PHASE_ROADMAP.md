@@ -187,6 +187,12 @@ uv pip install <패키지명>
       light_pos 덧셈 누적 방지. 수집기 DR 스모크 2/2(yield 100%, friction 1.188/0.802 독립), 측정기 DR 스모크
       2/2(→ `rollout_summary_dr.json`, 운영 summary 불변). 운영 `episodes_cl` 50ep·`rollout_summary.json` 7/10 무손상.
       상세: `2026-07-01_phase2-w1-dr-wiring.md`. **잔여**: `--dr` 로 DR 50ep 합성→재학습→DR on/off 비교(드라이버 사이클).
+    - 🔄 **2026-07-02**: **측정 절반 = DR on/off 프록시 비교 완료**(재학습 불필요·비파괴). 기존 epoch_0099 에
+      추론-시점 DR 적용(동일 seed 42, N=10): **DR-on 8/10=0.80 vs DR-off 7/10=0.70**(median lift 44.1 vs 43.7mm).
+      1 rollout 차 = 노이즈 → **성능 동등** → closed-loop 정책이 조명/마찰/카메라노이즈 섭동에 **강건**(긍정적 Sim2Real 신호).
+      실패 rollout 2·8 은 seed 공통 구조적 실패(DR 무관). `rollout_summary_dr.json` 만 갱신·운영 summary 7/10 불변·`episodes_cl` 무손상.
+      드라이버 STAGE=완료/유지(50ep·0.7) 재실행 없음. 상세: `2026-07-02_phase2-w1-dr-onoff-proxy.md`.
+      **본격 잔여**: DR 50ep 합성→재학습(수 시간, 드라이버 사이클).
 - W2: Zero-shot 실기 추론 → 격차 측정
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
