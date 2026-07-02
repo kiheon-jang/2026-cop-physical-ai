@@ -11,3 +11,11 @@
   - `sim_pick_place.py` legacy open-loop grasp 0/3 기준선(정상 기대치) — 실 성능은 closed-loop 70%
   - `sim_data_collector.py` closed-loop 수집 스모크 yield 3/3=100%, lift 41.5~43.2mm (임시 루트, 운영 무접촉)
 - closed-loop 정책 성공률 유지: `research/simulation/inference_progress/rollout_summary.json` 7/10=0.70, median lift 43.7mm → 7월 보고서 [진척: Phase 1→2 전환] 섹션.
+
+## 2026-07-02
+- Phase 2 W1 — **DR on/off rollout 프록시 측정**(정책 강건성): `agent/research-log/2026-07-02.md`, `research/simulation/2026-07-02_phase2-w1-dr-onoff-proxy.md` → 7월 보고서 [Sim2Real 준비 / robustness] 섹션.
+  - DR-off 0.70(7/10) vs DR-on 0.80(8/10), median lift 43.7 vs 44.1mm — 추론-시점 조명/마찰/카메라노이즈 섭동에 **성능 동등**(강건). `rollout_summary_dr.json`.
+- 23:30 nightly sim-test — 우선순위 3종 회귀 재확인: `agent/research-log/2026-07-02.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임), `sim_camera_verification.py` PASS(2카메라 30프레임 동기)
+  - `sim_pick_place.py` open-loop baseline 0/3(결정론적, min_approach 0.3228m — 기대된 기준선)
+  - 운영 데이터 무결성: `episodes_cl` 50ep/3350frame·`rollout_summary.json` 0.70 불변.
