@@ -192,6 +192,12 @@ uv pip install <패키지명>
       1 rollout 차 = 노이즈 → **성능 동등** → closed-loop 정책이 조명/마찰/카메라노이즈 섭동에 **강건**(긍정적 Sim2Real 신호).
       실패 rollout 2·8 은 seed 공통 구조적 실패(DR 무관). `rollout_summary_dr.json` 만 갱신·운영 summary 7/10 불변·`episodes_cl` 무손상.
       드라이버 STAGE=완료/유지(50ep·0.7) 재실행 없음. 상세: `2026-07-02_phase2-w1-dr-onoff-proxy.md`.
+    - 🔄 **2026-07-03**: **축별(per-axis) ablation 완료**(비파괴 프록시). `randomize_scene(axes=)` 부분집합 인자 +
+      `--dr-axes` 플래그 추가(surgical, 하위호환). 조명/마찰/카메라노이즈 **각각 단독** 측정(seed 42, N=10, epoch_0099):
+      **light 0.70 · friction 0.70 · camera 0.70 — 셋 다 실패집합 {2,5,8} 이 운영 baseline 과 완전 동일.**
+      → 어느 단일 섭동축도 grasp 를 흔들지 않음(7/2 aggregate 의 +1=rollout5 는 3축 동시에서만 나오는 임계값 노이즈).
+      **지배적 Sim2Real 섭동축 없음 · 정책 축별 강건.** 남은 실패는 섭동 아닌 특정 큐브배치(모방격차). 산출물
+      `rollout_summary_dr_{light,friction,camera}.json`, 운영 summary·`episodes_cl` 불변. 상세: `2026-07-03_phase2-w1-dr-axis-ablation.md`.
       **본격 잔여**: DR 50ep 합성→재학습(수 시간, 드라이버 사이클).
 - W2: Zero-shot 실기 추론 → 격차 측정
 - W3: 실기 fine-tune (10 에피소드)

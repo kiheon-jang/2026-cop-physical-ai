@@ -52,7 +52,7 @@ def find_latest_checkpoint() -> Path | None:
 
 
 def run_rollout(model, data, policy, renderer, cam_id, device, rng, max_frames, collect_frames,
-                dr_mod=None, dr_baseline=None, dr_rng=None):
+                dr_mod=None, dr_baseline=None, dr_rng=None, dr_axes=None):
     """단일 rollout 실행. (success, max_lift_m, frames) 반환."""
     import torch
     import mujoco
@@ -62,7 +62,7 @@ def run_rollout(model, data, policy, renderer, cam_id, device, rng, max_frames, 
     if dr_mod is not None:
         # DR-on 측정: reset 마다 원본 복원 후 무작위화 (누적 방지). 관측 RGB 에 카메라 노이즈.
         dr_mod.restore_baseline(model, dr_baseline)
-        applied = dr_mod.randomize_scene(model, dr_rng)
+        applied = dr_mod.randomize_scene(model, dr_rng, axes=dr_axes)
         mujoco.mj_setConst(model, data)
         dr_noise_std = applied["camera_noise_std"]
     # 큐브 초기 위치 랜덤 (수집과 동일 분포)
@@ -122,6 +122,9 @@ def main(argv=None):
     p.add_argument("--dr", action="store_true",
                    help="Domain Randomization 적용 후 측정 (조명/마찰/카메라노이즈). "
                         "결과는 rollout_summary_dr.json 로 별도 저장 — 운영 summary 불변.")
+    p.add_argument("--dr-axes", type=str, default="light,friction,camera",
+                   help="DR 무작위화 축 부분집합 (쉼표구분: light,friction,camera). "
+                        "부분집합이면 rollout_summary_dr_<axes>.json 로 저장 — 3축 aggregate/운영 summary 불변.")
     args = p.parse_args(argv)
 
     import torch
@@ -158,12 +161,19 @@ def main(argv=None):
         cam_id = -1
 
     # DR 모듈 로드 (opt-in). samples/training 을 path 에 추가.
-    dr_mod = dr_baseline = dr_rng = None
+    dr_mod = dr_baseline = dr_rng = dr_axes = None
     if args.dr:
         sys.path.insert(0, str(ROOT / "samples" / "training"))
         import sim_domain_randomization as dr_mod
         dr_baseline = dr_mod.snapshot_baseline(model)
         dr_rng = np.random.default_rng(args.seed)
+        dr_axes = tuple(a.strip() for a in args.dr_axes.split(",") if a.strip())
+        valid = set(dr_mod.DR_AXES)
+        bad = [a for a in dr_axes if a not in valid]
+        if bad:
+            print(json.dumps({"status": "error", "message": f"알 수 없는 DR 축: {bad} (허용: {sorted(valid)})"},
+                             ensure_ascii=False))
+            sys.exit(1)
 
     rng = np.random.default_rng(args.seed)
     t0 = time.time()
@@ -174,7 +184,7 @@ def main(argv=None):
         try:
             success, max_lift, frames = run_rollout(
                 model, data, policy, renderer, cam_id, device, rng, args.max_frames, collect,
-                dr_mod=dr_mod, dr_baseline=dr_baseline, dr_rng=dr_rng
+                dr_mod=dr_mod, dr_baseline=dr_baseline, dr_rng=dr_rng, dr_axes=dr_axes
             )
         except Exception as e:  # 한 rollout 실패가 전체 측정을 죽이지 않게
             results.append({"rollout": i, "success": False, "max_lift_m": 0.0, "error": str(e)[:120]})
@@ -210,13 +220,20 @@ def main(argv=None):
         "median_lift_mm": round(median_lift, 1),
         "lift_threshold_m": LIFT_THRESHOLD_M,
         "dr": args.dr,
+        "dr_axes": list(dr_axes) if dr_axes else None,
         "video_path": str(video_path.relative_to(ROOT)) if video_frames else None,
         "wall_clock_sec": round(time.time() - t0, 1),
         "device": args.device,
         "results": results,
     }
     # 요약 json (대시보드/크론이 성공률 읽기용). DR-on 은 별도 파일 — 운영 summary 불변.
-    summary_name = "rollout_summary_dr.json" if args.dr else "rollout_summary.json"
+    # 3축 전부 = aggregate(rollout_summary_dr.json). 부분집합 = ablation 별도 파일.
+    if not args.dr:
+        summary_name = "rollout_summary.json"
+    elif set(dr_axes) == set(dr_mod.DR_AXES):
+        summary_name = "rollout_summary_dr.json"
+    else:
+        summary_name = f"rollout_summary_dr_{'_'.join(sorted(dr_axes))}.json"
     (OUT_DIR / summary_name).write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )

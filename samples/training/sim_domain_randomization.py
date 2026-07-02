@@ -53,16 +53,23 @@ def restore_baseline(model, baseline):
     model.light_pos[:] = baseline["light_pos"]
 
 
-def randomize_scene(model, rng):
+DR_AXES = ("light", "friction", "camera")
+
+
+def randomize_scene(model, rng, axes=None):
     """model 의 조명·마찰을 in-place 무작위화하고 적용된 카메라 노이즈 std 를 반환.
 
     조명/마찰은 model 배열을 직접 수정하므로 다음 renderer.update_scene() 에 반영된다.
     카메라 노이즈는 렌더 결과에 적용해야 하므로 std 만 반환하고 apply_camera_noise() 가 사용한다.
+
+    axes: 무작위화할 축 부분집합 (기본 3축 전부). 단일 축 ablation 측정용 —
+    비활성 축은 원본값 유지(카메라 노이즈 std=0). 큐브 위치 rng 는 별도 스트림이라 불변.
     """
+    axes = DR_AXES if axes is None else axes
     applied = {}
 
     # 1. 조명 — 모든 광원의 diffuse/ambient 강도 + 위치 지터
-    if model.nlight > 0:
+    if "light" in axes and model.nlight > 0:
         diff = rng.uniform(*DR_RANGES["light_diffuse"])
         amb = rng.uniform(*DR_RANGES["light_ambient"])
         model.light_diffuse[:] = diff
@@ -74,12 +81,13 @@ def randomize_scene(model, rng):
         applied["light_ambient"] = round(float(amb), 3)
 
     # 2. 마찰 — 모든 geom 의 슬라이딩 마찰계수(col 0) 곱셈 지터
-    fscale = rng.uniform(*DR_RANGES["friction_scale"])
-    model.geom_friction[:, 0] *= fscale
-    applied["friction_scale"] = round(float(fscale), 3)
+    if "friction" in axes:
+        fscale = rng.uniform(*DR_RANGES["friction_scale"])
+        model.geom_friction[:, 0] *= fscale
+        applied["friction_scale"] = round(float(fscale), 3)
 
-    # 3. 카메라 노이즈 std (렌더 후 적용)
-    noise_std = rng.uniform(*DR_RANGES["camera_noise_std"])
+    # 3. 카메라 노이즈 std (렌더 후 적용) — 비활성 시 0
+    noise_std = rng.uniform(*DR_RANGES["camera_noise_std"]) if "camera" in axes else 0.0
     applied["camera_noise_std"] = round(float(noise_std), 3)
 
     return applied

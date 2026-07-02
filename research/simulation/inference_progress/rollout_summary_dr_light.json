@@ -1,0 +1,69 @@
+{
+  "status": "ok",
+  "checkpoint": "checkpoints/act/epoch_0099",
+  "scene": "scene_grasp_pads.xml",
+  "rollouts": 10,
+  "success": 7,
+  "success_rate": 0.7,
+  "median_lift_mm": 43.8,
+  "lift_threshold_m": 0.04,
+  "dr": true,
+  "dr_axes": [
+    "light"
+  ],
+  "video_path": null,
+  "wall_clock_sec": 18.6,
+  "device": "cpu",
+  "results": [
+    {
+      "rollout": 0,
+      "success": true,
+      "max_lift_m": 0.0437
+    },
+    {
+      "rollout": 1,
+      "success": true,
+      "max_lift_m": 0.0438
+    },
+    {
+      "rollout": 2,
+      "success": false,
+      "max_lift_m": 0.0029
+    },
+    {
+      "rollout": 3,
+      "success": true,
+      "max_lift_m": 0.0437
+    },
+    {
+      "rollout": 4,
+      "success": true,
+      "max_lift_m": 0.0451
+    },
+    {
+      "rollout": 5,
+      "success": false,
+      "max_lift_m": 0.0036
+    },
+    {
+      "rollout": 6,
+      "success": true,
+      "max_lift_m": 0.0445
+    },
+    {
+      "rollout": 7,
+      "success": true,
+      "max_lift_m": 0.0447
+    },
+    {
+      "rollout": 8,
+      "success": false,
+      "max_lift_m": 0.0044
+    },
+    {
+      "rollout": 9,
+      "success": true,
+      "max_lift_m": 0.0439
+    }
+  ]
+}
