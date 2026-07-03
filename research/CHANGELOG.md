@@ -44,6 +44,13 @@
 
 
 
+
+### 2026-07-03
+- 🛠 [시뮬] Phase 2 W1 — 실패집합 seed 강건성 검증(모방격차 가설 실증) — 2026-07-04
+- 📊 [로그] 2026-07-03 시뮬 테스트 — 우선순위 4종 실행회귀(6dof/camera PASS, pick_place open-loop 0/2, data_collector CL스모크 2/2) + episodes_cl·0.70 무결성 불변
+- 🛠 [시뮬] Phase 2 W1 — 23:00 드라이버 STAGE=완료/유지 문서화 + 축별 DR 무결성 재확인(light/friction/camera 각 0.70·실패집합 {2,5,8} 불변) — 2026-07-03
+- 📝 [히스토리] 2026-07-02 작업 기록 + README 현황 업데이트 — 2026-07-03
+
 ### 2026-07-02
 - 🛠 [시뮬] Phase 2 W1 — DR 축별 ablation(light/friction/camera 각 0.70, 실패집합 불변 → 지배 섭동축 없음·정책 축별 강건) — 2026-07-03
 - 📊 [로그] 2026-07-02 시뮬 테스트 — 우선순위 3종 회귀 재확인(6dof/camera PASS, pick_place open-loop 0/3 기준선) + DR프록시 0.70→0.80 무결성 유지
