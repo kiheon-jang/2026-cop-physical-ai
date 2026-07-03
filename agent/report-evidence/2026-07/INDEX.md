@@ -19,3 +19,12 @@
   - `sim_headless_6dof_video.py` PASS(2501프레임), `sim_camera_verification.py` PASS(2카메라 30프레임 동기)
   - `sim_pick_place.py` open-loop baseline 0/3(결정론적, min_approach 0.3228m — 기대된 기준선)
   - 운영 데이터 무결성: `episodes_cl` 50ep/3350frame·`rollout_summary.json` 0.70 불변.
+
+## 2026-07-03
+- Phase 2 W1 — **DR 축별(per-axis) ablation**(지배 섭동축 규명): `agent/research-log/2026-07-03.md`, `research/simulation/2026-07-03_phase2-w1-dr-axis-ablation.md` → 7월 보고서 [Sim2Real 준비 / robustness] 섹션.
+  - light/friction/camera 각 단독 0.70(7/10), 실패집합 {2,5,8} 운영 baseline 과 완전 동일 → **지배적 Sim2Real 섭동축 없음, 정책 축별 강건**. `rollout_summary_dr_{light,friction,camera}.json`.
+- 23:30 nightly sim-test — 우선순위 4종 실제 실행 회귀: `agent/research-log/2026-07-03.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임), `sim_camera_verification.py` PASS(2카메라 30프레임)
+  - `sim_pick_place.py` open-loop baseline 0/2(결정론적 동일, min_approach 0.3228m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 43.2~43.7mm (throwaway 루트, 운영 무접촉)
+  - 운영 데이터 무결성: `episodes_cl` 50ep/3350frame·`rollout_summary.json` 0.70 불변.
