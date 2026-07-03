@@ -198,6 +198,13 @@ uv pip install <패키지명>
       → 어느 단일 섭동축도 grasp 를 흔들지 않음(7/2 aggregate 의 +1=rollout5 는 3축 동시에서만 나오는 임계값 노이즈).
       **지배적 Sim2Real 섭동축 없음 · 정책 축별 강건.** 남은 실패는 섭동 아닌 특정 큐브배치(모방격차). 산출물
       `rollout_summary_dr_{light,friction,camera}.json`, 운영 summary·`episodes_cl` 불변. 상세: `2026-07-03_phase2-w1-dr-axis-ablation.md`.
+    - 🔄 **2026-07-04**: **실패집합 seed 강건성 검증 = 모방격차 가설 실증**(비파괴 프록시). cube-placement seed
+      3종(7/123/2026) 추가 측정(동일 epoch_0099, N=10). **실패 rollout 이 seed 마다 완전 이동**: 42→{2,5,8} ·
+      7→{9} · 123→{0,1} · 2026→{5} → 실패는 정책 고정약점이 아니라 **특정 큐브배치**(7/3 모방격차 가설 실증).
+      성공률 0.70~0.90 분포, **운영 seed42(0.70)는 비관적 끝단** · 4-seed 평균 **0.825** → 헤드라인 70%는
+      정책 실력 과소평가(공정추정 ≈0.80~0.83). 남은 gap = 섭동강건성 아닌 **큐브배치 커버리지(데이터 다양성)** 로
+      좁혀짐 → DR 50ep 재학습 정공법 확증. 운영 `rollout_summary.json` md5 복원 일치·`episodes_cl` 불변,
+      신규 `rollout_summary_seed{7,123,2026}.json` 3종만 추가. 상세: `2026-07-04_phase2-w1-seed-robustness.md`.
       **본격 잔여**: DR 50ep 합성→재학습(수 시간, 드라이버 사이클).
 - W2: Zero-shot 실기 추론 → 격차 측정
 - W3: 실기 fine-tune (10 에피소드)
