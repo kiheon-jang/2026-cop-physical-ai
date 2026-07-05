@@ -16,6 +16,7 @@ build/
 # Phase 0~1: 로컬 저장, Phase 1부터 HuggingFace private으로 이관
 data/episodes/
 data/episodes_cl/
+data/episodes_cl_dr/
 data/videos/
 data/chunks/
 data/*.parquet

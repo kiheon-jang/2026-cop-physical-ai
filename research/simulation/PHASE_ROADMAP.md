@@ -206,6 +206,13 @@ uv pip install <패키지명>
       좁혀짐 → DR 50ep 재학습 정공법 확증. 운영 `rollout_summary.json` md5 복원 일치·`episodes_cl` 불변,
       신규 `rollout_summary_seed{7,123,2026}.json` 3종만 추가. 상세: `2026-07-04_phase2-w1-seed-robustness.md`.
       **본격 잔여**: DR 50ep 합성→재학습(수 시간, 드라이버 사이클).
+    - 🔄 **2026-07-05**: **DR 50ep 합성 완료 = 본격 잔여의 첫 절반 달성**(실제 데이터, 비프록시).
+      closed-loop expert + `--dr`(조명/마찰/카메라노이즈, 매 ep reset 훅 무작위화) 로 `data/episodes_cl_dr`
+      **50ep/3350frame** 신규 합성(01:02~01:17, 성공 50/50·yield 86%·lift 40.2~45.3mm). DR 실인가 확인
+      (friction 0.757~0.89 등 ep별 변동). **격리 무결성**: 별도 데이터셋 루트라 운영 `episodes_cl`(50/3350)·
+      `rollout_summary.json`(0.70/43.7mm)·학습마커 전부 불변, 드라이버 STAGE=완료/유지(새 사이클 미트리거).
+      상세: `2026-07-05_phase2-w1-dr-dataset-synthesis.md`. **남은 절반**: `COP_DATASET_ROOT=episodes_cl_dr`
+      재학습→DR-trained rollout 비교(파이프라인 학습/측정=드라이버 담당, 마커/타겟 트리거 시).
 - W2: Zero-shot 실기 추론 → 격차 측정
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
