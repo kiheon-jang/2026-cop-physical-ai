@@ -213,6 +213,13 @@ uv pip install <패키지명>
       `rollout_summary.json`(0.70/43.7mm)·학습마커 전부 불변, 드라이버 STAGE=완료/유지(새 사이클 미트리거).
       상세: `2026-07-05_phase2-w1-dr-dataset-synthesis.md`. **남은 절반**: `COP_DATASET_ROOT=episodes_cl_dr`
       재학습→DR-trained rollout 비교(파이프라인 학습/측정=드라이버 담당, 마커/타겟 트리거 시).
+    - 🔄 **2026-07-06**: **드라이버 STAGE=완료/유지(50ep·0.7) + 무결성 전수 감사**(비파괴). 새 사이클
+      미트리거 → 수집/학습/측정 재실행 없음. 데이터·측정·마커·DR 산출물 **8종 회귀/오염 0** 확인
+      (운영 `episodes_cl` 50/3350·`episodes_cl_dr` 50/3350·`rollout_summary.json` 0.70/43.7mm md5
+      `70484a5c…` 7/4 복원값 일치·마커 6/24·6/25 불변). **관찰**: DR 재학습(잔여 절반)이 3일째
+      미트리거 — 데이터는 준비 완료됐으나 드라이버 새 사이클 조건(마커 삭제 / `COP_TARGET_EP` 상향 /
+      `COP_DATASET_ROOT=episodes_cl_dr` 전환)이 미세팅. 야간 에이전트는 하드룰상 직접 실행 안 함 →
+      **트리거 결손을 표면화**(블로커 아님). 상세: `2026-07-06_phase2-w1-dr-retrain-pending-hold.md`.
 - W2: Zero-shot 실기 추론 → 격차 측정
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
