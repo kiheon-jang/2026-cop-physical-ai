@@ -28,3 +28,12 @@
   - `sim_pick_place.py` open-loop baseline 0/2(결정론적 동일, min_approach 0.3228m — 기대 기준선)
   - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 43.2~43.7mm (throwaway 루트, 운영 무접촉)
   - 운영 데이터 무결성: `episodes_cl` 50ep/3350frame·`rollout_summary.json` 0.70 불변.
+
+## 2026-07-05
+- Phase 2 W1 — **DR 50ep 데이터셋 합성 완료**(비프록시 실데이터): `agent/research-log/2026-07-05.md`, `research/simulation/2026-07-05_phase2-w1-dr-dataset-synthesis.md` → 7월 보고서 [Sim2Real 준비 / 데이터 다양성] 섹션.
+  - `data/episodes_cl_dr` 50ep/3350frame 신규 합성, 성공 50/50·yield 86%, friction 0.757~0.89 등 ep별 DR 변동 확인. 큐브배치 커버리지 확장 트랙의 데이터 산출물 근거.
+- 23:30 nightly sim-test — 우선순위 4종 실제 실행 회귀: `agent/research-log/2026-07-05.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임), `sim_camera_verification.py` PASS(2카메라 30프레임)
+  - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 42.5mm (throwaway 루트, 실행 후 삭제, 운영 무접촉)
+  - 운영 데이터 무결성: `episodes_cl` 50ep/3350frame·`episodes_cl_dr` 50ep/3350frame·`rollout_summary.json` 0.70 불변.
