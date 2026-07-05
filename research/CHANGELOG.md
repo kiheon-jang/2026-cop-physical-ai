@@ -45,6 +45,12 @@
 
 
 
+
+### 2026-07-05
+- 🛠 [시뮬] Phase 2 W1 — DR 재학습 대기(STAGE 완료/유지 0.7) + 무결성 전수 감사 8종 회귀0 — 2026-07-06
+- 📊 [로그] 2026-07-05 시뮬 테스트 — 우선순위 4종 실행회귀(6dof/camera PASS, pick_place open-loop 0/3 baseline, data_collector CL 2/2) + episodes_cl·episodes_cl_dr·0.70 무결성 불변
+- 🛠 [시뮬] Phase 2 W1 — DR 50ep 데이터셋 합성 완료(episodes_cl_dr 50/3350, yield 86%, 운영 불변) — 2026-07-05
+
 ### 2026-07-03
 - 🛠 [시뮬] Phase 2 W1 — 실패집합 seed 강건성 검증(모방격차 가설 실증) — 2026-07-04
 - 📊 [로그] 2026-07-03 시뮬 테스트 — 우선순위 4종 실행회귀(6dof/camera PASS, pick_place open-loop 0/2, data_collector CL스모크 2/2) + episodes_cl·0.70 무결성 불변
