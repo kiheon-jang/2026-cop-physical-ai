@@ -231,6 +231,15 @@ uv pip install <패키지명>
       **치수 검증 부속**: "기기가 작아 3~5cm 못 잡나" 의심 기각(개구 94.5/70mm, 1:1 스케일,
       영상은 탑다운 1.4mm/px 착시). 단 30mm 전용 expert 상수라 50mm 는 후속 DR 축 필요.
       상세: `2026-07-06_gripper-scale-verification.md`.
+    - 🔄 **2026-07-06 야간(23:00)**: **DR 재학습 진행중(STAGE=학습중)** — 주간 트리거된 pid 74621
+      alive, `episodes_cl_dr`→`checkpoints/act_cl_dr` 100epoch, **epoch 99/100 진행중**(ETA ~22:30 대비
+      소폭 지연, epoch_0099 는 종료 시 저장). loss 0.00498 정상수렴. 드라이버는 학습 미완을 인식해
+      **stage 2.5 승격·stage 5 측정을 보류**(6/22 SILENT 멈춤 반대·설계대로). **무결성 격리 유지**: 운영
+      `rollout_summary.json` 0.70/43.7mm 불변(DR 측정 미실행)·baseline 아카이브 보존·마커 `.pending`
+      =`episodes_cl_dr:1783181837` 대기(미승격)·`episodes_cl`/`episodes_cl_dr` 각 50ep 불변. ckpt 격리
+      +마커 2단계+baseline 아카이브(주간 6 critical 수정)로 학습중에도 baseline 무손상. **다음 사이클**:
+      학습완료→마커 승격→`act_cl_dr/epoch_0099` 측정→DR-trained rollout, 이후 다중시드 공정추정 비교.
+      상세: `2026-07-06_phase2-w1-dr-retrain-inflight.md`.
 - W2: Zero-shot 실기 추론 → 격차 측정
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
