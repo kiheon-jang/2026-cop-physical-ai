@@ -1120,7 +1120,7 @@
     <!-- HOME (Overview) — 관제탑형 게이지 히어로 (executive-glance) -->
     <div class="view" id="view-home">
       <div class="cockpit" id="cockpit">
-        <!-- 좌: 성공률 반원 게이지 -->
+        <!-- 좌: 성공률 반원 게이지 + 돌파 스토리 -->
         <div class="ck-gauge" id="ck-gauge"></div>
         <!-- 우상: 3D 포스터 (클릭 → 3D 시연) -->
         <div class="ck-poster" id="ck-poster" onclick="setRoute('sim3d')" role="button" tabindex="0"></div>
@@ -1129,7 +1129,9 @@
           <div class="ck-dday" id="ck-dday"></div>
           <div class="ck-stepper" id="ck-stepper"></div>
         </div>
-        <!-- 하단 전폭: 4→9월 일정 스파크라인 -->
+        <!-- 전폭: 무인 자동화 파이프라인 루프 -->
+        <div class="ck-pipe" id="ck-pipe"></div>
+        <!-- 전폭: 4→9월 일정 스파크라인 -->
         <div class="ck-schedule" id="ck-schedule"></div>
       </div>
 
@@ -3308,6 +3310,14 @@ function renderCockpitGauge() {
          <span><i style="background:var(--border-strong)"></i>남은 과제 ${Math.round((target-sr)*100)}%p</span>
          <span><i style="width:2px;height:12px;background:var(--text);border-radius:1px"></i>목표 ${Math.round(target*100)}%</span>
        </div>
+     </div>
+     <div class="ck-break">
+       <div class="ck-break-row">
+         <div class="ck-break-item was"><div class="v">0%</div><div class="l">이전 · open-loop 시연</div></div>
+         <div class="ck-break-arrow">→</div>
+         <div class="ck-break-item now"><div class="v">${Math.round(sr*100)}%</div><div class="l">지금 · closed-loop 정책</div></div>
+       </div>
+       <div class="ck-break-cap">제어 방식 전환 한 번으로 <b>0% → ${Math.round(sr*100)}%</b> 돌파 · 다음 목표 ${Math.round(target*100)}%</div>
      </div>`;
 
   // 오프닝 애니메이션 (home 최초 1회, reduced-motion 이면 정적)
@@ -3373,6 +3383,37 @@ function renderCockpitSide() {
   }).join('');
 }
 
+function renderCockpitPipe() {
+  const el = document.getElementById('ck-pipe'); if (!el) return;
+  const live = D.pipeline_live || {};
+  const stage = live.stage || '';
+  // 스테이지 문자열 → 4단계 루프 중 현재 활성 인덱스
+  const steps = [
+    { key: '수집', ic: '📥' },
+    { key: '학습', ic: '🧠' },
+    { key: '측정', ic: '🎯' },
+    { key: '반복', ic: '↻' },
+  ];
+  let active = 1; // 기본 학습
+  if (stage.includes('수집')) active = 0;
+  else if (stage.includes('학습')) active = 1;
+  else if (stage.includes('측정')) active = 2;
+  else if (stage.includes('완료') || stage.includes('유지')) active = 3;
+  const ep = live.last_epoch ? ` · epoch ${live.last_epoch.epoch + 1}/100` : '';
+  const nodes = steps.map((s, i) => {
+    const cls = i < active ? 'done' : (i === active ? 'active' : '');
+    const node = `<div class="ck-node ${cls}"><div class="ring">${s.ic}</div><div class="nm">${s.key}</div></div>`;
+    if (i < steps.length - 1) return node + `<div class="ck-link"><i></i></div>`;
+    return node;
+  }).join('');
+  el.innerHTML = `
+    <div class="ck-pipe-head">
+      <span class="live"><span class="dot"></span>가동 중</span>
+      <span class="lbl">무인 자동화 파이프라인 — 매일 밤 스스로 1사이클 전진 · 현재 <b>${escapeHtml(stage)}</b>${ep}</span>
+    </div>
+    <div class="ck-pipe-flow">${nodes}</div>`;
+}
+
 function renderCockpitSchedule() {
   const kpi = D.business_kpi || {};
   const prog = Math.round((kpi.target_progress || 0) * 100);
@@ -3431,6 +3472,7 @@ function renderHome() {
   renderCockpitGauge();
   renderCockpitPoster();
   renderCockpitSide();
+  renderCockpitPipe();
   renderCockpitSchedule();
   renderCockpitSpectrum();
 
@@ -3769,7 +3811,7 @@ if (IS_LIVE) {
 /* ====== 관제탑 히어로 (Overview) ====== */
 .cockpit {
   display:grid; grid-template-columns: minmax(0,1.35fr) minmax(0,1fr);
-  grid-template-areas: "gauge poster" "gauge side" "sched sched";
+  grid-template-areas: "gauge poster" "gauge side" "pipe pipe" "sched sched";
   gap:16px; margin:0 0 18px; position:relative;
   background:
     radial-gradient(120% 100% at 12% -20%, var(--accent-soft) 0%, transparent 55%),
@@ -3779,6 +3821,7 @@ if (IS_LIVE) {
 .ck-gauge { grid-area:gauge; display:flex; flex-direction:column; }
 .ck-poster { grid-area:poster; }
 .ck-side { grid-area:side; display:flex; flex-direction:column; gap:12px; }
+.ck-pipe { grid-area:pipe; }
 .ck-schedule { grid-area:sched; }
 .ck-eyebrow { font-size:11px; letter-spacing:2.5px; text-transform:uppercase;
   color:var(--text-dim); font-weight:700; }
@@ -3799,6 +3842,53 @@ if (IS_LIVE) {
 .ck-gauge-legend { display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:9px; font-size:11px; }
 .ck-gauge-legend span { display:inline-flex; align-items:center; gap:5px; color:var(--text-dim); }
 .ck-gauge-legend i { width:9px; height:9px; border-radius:2px; display:inline-block; }
+
+/* 돌파 스토리 (open-loop 0% → closed-loop 70%) */
+.ck-break { margin-top:auto; padding-top:16px; }
+.ck-break-row { display:flex; align-items:stretch; gap:10px; }
+.ck-break-item { flex:1; border-radius:12px; padding:11px 14px; border:1px solid var(--border); position:relative; }
+.ck-break-item .v { font-size:30px; font-weight:800; letter-spacing:-1.5px; line-height:1; font-variant-numeric:tabular-nums; }
+.ck-break-item .l { font-size:11px; margin-top:4px; }
+.ck-break-item.was { background:var(--bg); }
+.ck-break-item.was .v { color:var(--text-dim); text-decoration:line-through; text-decoration-thickness:2px; }
+.ck-break-item.was .l { color:var(--text-dim); }
+.ck-break-item.now { background:var(--accent-soft); border-color:transparent; }
+.ck-break-item.now .v { color:var(--accent-strong); }
+.ck-break-item.now .l { color:var(--accent-strong); font-weight:600; }
+.ck-break-arrow { display:flex; align-items:center; color:var(--accent); font-size:22px; font-weight:800; }
+.ck-break-cap { font-size:11.5px; color:var(--text-dim); margin-top:9px; text-align:center; }
+.ck-break-cap b { color:var(--accent-strong); }
+
+/* 무인 자동화 파이프라인 루프 */
+.ck-pipe { border-top:1px solid var(--border); padding-top:14px; }
+.ck-pipe-head { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.ck-pipe-head .lbl { font-size:12px; color:var(--text-sub); font-weight:600; }
+.ck-pipe-head .live { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--accent-strong); font-weight:700; }
+.ck-pipe-head .live .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:ckpulse 1.8s ease-in-out infinite; }
+.ck-pipe-flow { display:flex; align-items:center; gap:0; }
+.ck-node { display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 auto; }
+.ck-node .ring { width:46px; height:46px; border-radius:50%; display:grid; place-items:center;
+  border:2px solid var(--border-strong); background:var(--bg); color:var(--text-dim);
+  font-size:18px; position:relative; transition:.2s; }
+.ck-node.done .ring { border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
+.ck-node.active .ring { border-color:var(--accent); color:var(--accent-strong); background:var(--accent-soft);
+  box-shadow:0 0 0 0 var(--accent-soft); animation:ckring 1.8s ease-out infinite; }
+.ck-node .nm { font-size:11px; color:var(--text-dim); font-weight:600; }
+.ck-node.active .nm { color:var(--text); font-weight:700; }
+.ck-node.done .nm { color:var(--accent-strong); }
+.ck-link { flex:1 1 auto; height:3px; border-radius:2px; position:relative; overflow:hidden;
+  background:var(--border); min-width:24px; margin:0 2px; margin-bottom:20px; }
+.ck-link i { position:absolute; inset:0; border-radius:2px;
+  background:linear-gradient(90deg, transparent 0%, var(--accent) 45%, var(--accent) 55%, transparent 100%);
+  background-size:60% 100%; background-repeat:no-repeat;
+  animation:ckflow 1.6s linear infinite; }
+@keyframes ckflow { 0% { background-position:-60% 0; } 100% { background-position:160% 0; } }
+@keyframes ckpulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(.8); } }
+@keyframes ckring { 0% { box-shadow:0 0 0 0 var(--accent-soft); } 70% { box-shadow:0 0 0 10px transparent; } 100% { box-shadow:0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  .ck-link i, .ck-pipe-head .live .dot, .ck-node.active .ring { animation:none; }
+  .ck-link i { background-position:50% 0; }
+}
 
 /* 포스터 카드 */
 .ck-poster { position:relative; border-radius:16px; overflow:hidden; cursor:pointer;
@@ -3865,7 +3955,7 @@ if (IS_LIVE) {
 .ck-spec-scale { display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); margin-top:6px; padding:0 8px; }
 
 @media (max-width: 900px) {
-  .cockpit { grid-template-columns:1fr; grid-template-areas: "gauge" "poster" "side" "sched"; }
+  .cockpit { grid-template-columns:1fr; grid-template-areas: "gauge" "poster" "side" "pipe" "sched"; }
   .ck-sched-scale { width:auto; }
 }
 @media (prefers-reduced-motion: reduce) {
