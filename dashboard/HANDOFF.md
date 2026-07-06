@@ -141,3 +141,19 @@ print(f'built_at: {d[\"meta\"][\"built_at\"]}')
 hermes cron pause 76b3cd4eb4fc && hermes cron pause f88b3198c9b6
 hermes cron resume 9ad85007cf27 && hermes cron resume 85d322d3b37c
 ```
+
+---
+
+## R4 (2026-07-06) — 인터랙티브 보고: 3D 리플레이 / 성과 지표
+
+새 페이지 2개 + 홈 하이라이트. 전부 **data.json 단일 경로**로 흐르므로 야간 크론 rebuild 만으로 자동 갱신.
+
+| 구성 | 소스 | 갱신 주체 |
+|---|---|---|
+| 3D 리플레이 (view-sim3d) | `web3d_chain.json`(체인+경량메시, `scripts/export_web3d.py` 1회) + `data/episodes_cl*` parquet(수집 에피소드 100개) + `inference_progress/rollout_traj_latest.json`(정책 rollout, 측정마다 갱신) | build.py `build_web3d()` |
+| 성과 지표 (view-results) | `inference_progress/rollout_summary*.json` 8종 + `history/`(측정마다 자동 축적) + `dr_samples/` 썸네일 + `logs/`(파이프라인 라이브) + 큐레이션 뉴스 | build.py `build_rollout_metrics()` 등 |
+| 학습 데이터 영상 | `assets/reports/sim/episodes_cl*.mp4` (서버모드 `/static/cop/` 재생) | 수동 복사 (데이터셋 재수집 시 갱신) |
+
+- three.js r152 UMD 가 template.html 에 인라인(자체완결 — CDN 불필요, 오프라인 동작).
+- 씬(XML) 변경 시: `.venv/bin/python3 scripts/export_web3d.py` 재실행 후 커밋.
+- 야간 훅: `~/.hermes/scripts/cop_common.py::rebuild_dashboard_data` 가 **레포 .venv python 풀빌드(HTML+JSON)** 로 전환됨 (pyarrow/PIL 필요 + 오프라인 파일 신선도).

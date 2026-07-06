@@ -1,0 +1,50 @@
+{
+  "status": "ok",
+  "checkpoint": "checkpoints/act/epoch_0099",
+  "ckpt_dir": "act",
+  "scene": "scene_grasp_pads.xml",
+  "measured_at": "2026-07-06T13:40:16",
+  "seed": 42,
+  "rollouts": 6,
+  "success": 4,
+  "success_rate": 0.667,
+  "median_lift_mm": 43.7,
+  "lift_threshold_m": 0.04,
+  "dr": false,
+  "dr_axes": null,
+  "video_path": null,
+  "wall_clock_sec": 14.8,
+  "device": "cpu",
+  "results": [
+    {
+      "rollout": 0,
+      "success": true,
+      "max_lift_m": 0.0437
+    },
+    {
+      "rollout": 1,
+      "success": true,
+      "max_lift_m": 0.0437
+    },
+    {
+      "rollout": 2,
+      "success": false,
+      "max_lift_m": 0.0037
+    },
+    {
+      "rollout": 3,
+      "success": true,
+      "max_lift_m": 0.0443
+    },
+    {
+      "rollout": 4,
+      "success": true,
+      "max_lift_m": 0.0452
+    },
+    {
+      "rollout": 5,
+      "success": false,
+      "max_lift_m": 0.0069
+    }
+  ]
+}

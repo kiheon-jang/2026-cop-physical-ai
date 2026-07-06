@@ -1184,6 +1184,259 @@ def compute_stats(sim_tasks: list[dict], daily: list[dict], blockers: list[dict]
 # meta
 # ─────────────────────────────────────────────────────────────────────────────
 
+# ─────────────────────────────────────────────────────────────────────────────
+# R4: 인터랙티브 보고 — 성과지표 / 3D 리플레이 / DR 갤러리 / 파이프라인 상태 / 뉴스
+# ─────────────────────────────────────────────────────────────────────────────
+
+INFER_DIR = REPO_ROOT / "research" / "simulation" / "inference_progress"
+LOGS_DIR = REPO_ROOT / "logs"
+
+_SUMMARY_LABELS = {
+    "rollout_summary.json": "운영 최신 (nominal · seed42)",
+    "rollout_summary_baseline_cl.json": "Baseline CL 6/25 (nominal · seed42)",
+    "rollout_summary_dr.json": "DR-on 프록시 (3축 동시)",
+    "rollout_summary_dr_camera.json": "DR ablation: camera",
+    "rollout_summary_dr_friction.json": "DR ablation: friction",
+    "rollout_summary_dr_light.json": "DR ablation: light",
+    "rollout_summary_seed7.json": "seed 7 (nominal)",
+    "rollout_summary_seed123.json": "seed 123 (nominal)",
+    "rollout_summary_seed2026.json": "seed 2026 (nominal)",
+}
+
+
+def _read_json_file(p: Path) -> dict | None:
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def build_rollout_metrics() -> dict:
+    """rollout_summary*.json 8종 + 측정 히스토리 → 성과지표 페이지 데이터.
+
+    파이프라인이 측정할 때마다 (render_act_rollout.py)
+    inference_progress/history/ 에 불변 사본이 쌓이므로 시간축 차트가 자동 성장한다.
+    """
+    comparisons: list[dict] = []
+    for f in sorted(INFER_DIR.glob("rollout_summary*.json")):
+        if "_cl_replay" in f.name:  # 리플레이 데모용 임시 측정 — 비교표 제외
+            continue
+        d = _read_json_file(f)
+        if not d or d.get("status") != "ok":
+            continue
+        comparisons.append({
+            "name": f.name,
+            "label": _SUMMARY_LABELS.get(f.name, f.stem.replace("rollout_summary_", "")),
+            "success_rate": d.get("success_rate"),
+            "success": d.get("success"),
+            "rollouts": d.get("rollouts"),
+            "median_lift_mm": d.get("median_lift_mm"),
+            "dr": d.get("dr", False),
+            "dr_axes": d.get("dr_axes"),
+            "seed": d.get("seed", 42),
+            "measured_at": d.get("measured_at"),
+            "ckpt_dir": d.get("ckpt_dir", "act"),
+            "checkpoint": d.get("checkpoint"),
+            "results": d.get("results", []),
+        })
+
+    history: list[dict] = []
+    hist_dir = INFER_DIR / "history"
+    if hist_dir.exists():
+        for f in sorted(hist_dir.glob("*.json")):
+            if f.name.endswith("_traj.json"):
+                continue
+            d = _read_json_file(f)
+            if not d:
+                continue
+            history.append({
+                "file": f.name,
+                "stamp": f.name.split("_")[0],
+                "success_rate": d.get("success_rate"),
+                "median_lift_mm": d.get("median_lift_mm"),
+                "ckpt_dir": d.get("ckpt_dir", "act"),
+                "dr": d.get("dr", False),
+                "seed": d.get("seed", 42),
+                "measured_at": d.get("measured_at"),
+            })
+
+    by_name = {c["name"]: c for c in comparisons}
+    baseline = by_name.get("rollout_summary_baseline_cl.json") or by_name.get("rollout_summary.json")
+    latest = by_name.get("rollout_summary.json")
+    seed_rates = [c["success_rate"] for c in comparisons
+                  if c["name"].startswith("rollout_summary_seed") and c["success_rate"] is not None]
+    if baseline and baseline.get("success_rate") is not None:
+        seed_rates = [baseline["success_rate"]] + seed_rates
+    fair = round(sum(seed_rates) / len(seed_rates), 3) if seed_rates else None
+    return {
+        "comparisons": comparisons,
+        "history": history,
+        "latest": latest,
+        "baseline": baseline,
+        "fair_estimate": fair,          # 4-seed 공정추정 (7/4 프로토콜)
+        "expert": {"force3": 0.75, "force6": 0.88},  # closed-loop expert 기준 (6/23 실측)
+        "target": 0.90,
+    }
+
+
+def build_web3d() -> dict:
+    """3D 리플레이 데이터 — 키네마틱 체인 + 수집 에피소드 궤적 + 정책 rollout 궤적.
+
+    chain: scripts/export_web3d.py 산출물 (씬 불변 시 재실행 불필요).
+    dataset_episodes: LeRobot parquet 의 qpos6 → base64(Float32) — 에피소드 전수.
+    policy_rollouts: 측정 스테이지가 남기는 rollout_traj_latest.json (qpos6+cube_xyz).
+    """
+    chain = _read_json_file(DASHBOARD_DIR / "web3d_chain.json")
+    policy = _read_json_file(INFER_DIR / "rollout_traj_latest.json")
+
+    import base64 as _b64
+    episodes: list[dict] = []
+    try:
+        import pyarrow.parquet as pq
+        import numpy as np
+        for src in ("episodes_cl", "episodes_cl_dr"):
+            f = REPO_ROOT / "data" / src / "data" / "chunk-000" / "file-000.parquet"
+            if not f.exists():
+                continue
+            t = pq.read_table(f, columns=["observation.state", "episode_index"])
+            states = np.array(t["observation.state"].to_pylist(), dtype=np.float32)
+            ep_idx = np.array(t["episode_index"].to_pylist())
+            for ep in sorted(set(ep_idx.tolist())):
+                qpos = states[ep_idx == ep]
+                episodes.append({
+                    "id": f"{src}-{int(ep):03d}",
+                    "source": src,
+                    "episode": int(ep),
+                    "n_frames": int(len(qpos)),
+                    "qpos_b64": _b64.b64encode(qpos.tobytes()).decode(),
+                })
+    except Exception as e:  # pyarrow 미설치/스키마 변경 — 3D 페이지는 정책 rollout 만으로도 동작
+        print(f"  [web3d] dataset episodes skip: {e}", file=sys.stderr)
+
+    return {
+        "chain": chain,
+        "policy_rollouts": policy,
+        "dataset_episodes": episodes,
+        "dataset_fps": 30,
+    }
+
+
+def build_dr_gallery() -> list[dict]:
+    """DR 샘플 프레임 8장 → 360px JPEG 썸네일 base64 (오프라인 단일파일에서도 표시)."""
+    out: list[dict] = []
+    dr_dir = REPO_ROOT / "research" / "simulation" / "dr_samples"
+    if not dr_dir.exists():
+        return out
+    try:
+        import base64 as _b64
+        import io
+        from PIL import Image
+        for png in sorted(dr_dir.glob("dr_sample_*.png")):
+            img = Image.open(png).convert("RGB")
+            w = 360
+            h = int(img.height * w / img.width)
+            img = img.resize((w, h))
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=70)
+            out.append({
+                "name": png.stem,
+                "thumb_b64": _b64.b64encode(buf.getvalue()).decode(),
+                "path": str(png.relative_to(REPO_ROOT)),
+            })
+    except Exception as e:
+        print(f"  [dr_gallery] skip: {e}", file=sys.stderr)
+    return out
+
+
+def build_pipeline_live() -> dict:
+    """야간 파이프라인 실시간 상태 — 드라이버와 동일 소스(마커/pid/metrics)를 read-only 로 요약."""
+    target_file = LOGS_DIR / "cop_dataset_target"
+    dataset = "data/episodes_cl"
+    if target_file.exists():
+        dataset = target_file.read_text().strip() or dataset
+    ds_base = dataset.rsplit("/", 1)[-1]
+
+    train_alive = False
+    pid_file = LOGS_DIR / "act_train.pid"
+    if pid_file.exists():
+        try:
+            import os as _os
+            _os.kill(int(pid_file.read_text().strip()), 0)
+            train_alive = True
+        except Exception:
+            train_alive = False
+
+    last_epoch = None
+    metrics = LOGS_DIR / "act_train_metrics.jsonl"
+    if metrics.exists():
+        try:
+            lines = metrics.read_text().strip().splitlines()
+            if lines:
+                last_epoch = json.loads(lines[-1])
+        except Exception:
+            pass
+
+    stage = "완료/유지"
+    eta_min = None
+    if train_alive and last_epoch:
+        stage = "학습중"
+        remain = max(0, 99 - int(last_epoch.get("epoch", 0)))
+        eta_min = round(remain * float(last_epoch.get("elapsed_sec", 322)) / 60)
+    elif train_alive:
+        stage = "학습중"
+    elif (LOGS_DIR / "cop_trained_on.marker.pending").exists():
+        stage = "학습종료 검증 대기"
+
+    return {
+        "dataset": ds_base,
+        "stage": stage,
+        "train_alive": train_alive,
+        "last_epoch": last_epoch,
+        "eta_min": eta_min,
+        "checked_at": datetime.now(KST).isoformat(timespec="seconds"),
+    }
+
+
+# 2026-07 기준 Physical AI 동향 (관리자 보고 인용용 — 출처/날짜 포함 큐레이션)
+PHYSICAL_AI_NEWS = [
+    {
+        "date": "2026-07-03",
+        "headline": "삼성·SK 등 영남권 최대 312조 '피지컬 AI·로봇 초혁신 벨트' 투자",
+        "detail": "삼성 60조(구미 19조 휴머노이드 로봇 양산·AI팩토리), SK 약 140조(AI 데이터센터 최대 15GW). 영남권을 'AX+로봇 기반 피지컬 AI 혁신 클러스터'로 명시.",
+        "source": "한국일보",
+        "url": "https://www.hankookilbo.com/news/article/A2026070316320002795",
+    },
+    {
+        "date": "2026-07-01",
+        "headline": "정부, 국민성장펀드 30조 중 16조를 로봇 등 피지컬 AI 6대 분야에 투입",
+        "detail": "'피지컬 AI'가 정부 공식 정책 용어로 정착. AI 제조업 대전환 기조로 AI·로봇·미래차·방산·반도체·이차전지에 올해 공급분의 절반가량 배정.",
+        "source": "파이낸셜뉴스",
+        "url": "https://www.fnnews.com/news/202607011807584120",
+    },
+    {
+        "date": "2026-03-16",
+        "headline": "NVIDIA GTC 2026 — GR00T N2 예고, Isaac Lab 3.0 공개",
+        "detail": "'시뮬 학습→실기 배포'가 업계 표준 워크플로로 정착. ABB·FANUC·KUKA·YASKAWA(합산 200만+ 로봇) 채택. 본 CoP 의 MuJoCo 시뮬→Sim2Real 트랙과 동일 방법론.",
+        "source": "NVIDIA GTC",
+        "url": "https://www.stocktitan.net/news/NVDA/nvidia-and-global-robotics-leaders-take-physical-ai-to-the-real-9qs9epaw1jrb.html",
+    },
+    {
+        "date": "2026-06",
+        "headline": "NVIDIA 공식 'SO-101 Sim-to-Real' 학습과정 공개",
+        "detail": "본 CoP 와 동일한 SO-101 저가 팔로 DR 전략→VLA 학습→시뮬/실기 평가→실데이터 co-training 을 가르치는 공식 커리큘럼. 7월 Sim2Real 계획의 레퍼런스 아키텍처.",
+        "source": "NVIDIA Learning Path",
+        "url": "https://docs.nvidia.com/learning/physical-ai/sim-to-real-so-101/latest/index.html",
+    },
+    {
+        "date": "2026-03-01",
+        "headline": "커뮤니티 재현: SO-101 + SmolVLA 파인튜닝, 실기 Pick&Place 100%",
+        "detail": "75개 데모·10시간 파인튜닝으로 SmolVLA 5/5=100% (동일조건 ACT 80%). 동일 하드웨어라 본 CoP 의 'ACT 다음 단계' 직접 벤치마크.",
+        "source": "ggando.com",
+        "url": "https://ggando.com/blog/smolvla-so101/",
+    },
+]
+
+
 def build_meta(current_phase: str) -> dict:
     head = run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO_ROOT, timeout=5).strip()
     last_commit = run(["git", "log", "-1", "--pretty=%s"], cwd=REPO_ROOT, timeout=5).strip()
@@ -1240,6 +1493,12 @@ def build_real_data() -> dict:
         "activity_timeline": activity_timeline,  # R2: 날짜별 그룹
         "stats": stats,
         "docs": site_docs.build_site_docs(CONTENT_DIR, REPO_ROOT, "CoP Physical AI", proj="cop"),
+        # R4: 인터랙티브 보고
+        "rollout_metrics": build_rollout_metrics(),  # 성공률 비교/히스토리 (측정마다 자동 성장)
+        "web3d": build_web3d(),                      # 3D 리플레이 (체인+에피소드+정책 rollout)
+        "dr_gallery": build_dr_gallery(),            # DR 샘플 썸네일
+        "pipeline_live": build_pipeline_live(),      # 파이프라인 현재 상태
+        "physical_ai_news": PHYSICAL_AI_NEWS,        # 2026-07 동향 인용
     }
     # Hdel template.html 호환 alias (기존 render* 함수가 새 키 모르므로)
     data["proposals"] = sim_tasks

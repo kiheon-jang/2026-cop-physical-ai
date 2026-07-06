@@ -240,3 +240,10 @@ git push origin main
 | 2026-04-22 | Isaac Sim 1회성 크론 추가 — 완료 후 자동 삭제됨 |
 | 2026-04-29 | OpenClaw → Hermes Agent 마이그레이션. 크론 ID 전부 변경 |
 | 2026-05-01 | **시뮬 트랙 전환**. 4개 크론 prompt 전체 재작성. 요일별 주제 순환 폐기. PHASE_ROADMAP.md 기반 단계별 점진 구축으로 전환 |
+
+## 2026-07-06 — rebuild_dashboard_data 풀빌드 전환 (R4 인터랙티브 보고)
+
+`~/.hermes/scripts/cop_common.py::rebuild_dashboard_data` 변경 (hermes 업데이트로 유실 시 재적용):
+- `["python3", build.py, "--json-only"]` → **레포 `.venv/bin/python3` 로 `build.py` 풀빌드**(HTML+JSON), cwd=`dashboard/`, timeout 60→180.
+- 사유: R4 빌더(`build_web3d`/`build_dr_gallery`)가 pyarrow/PIL(.venv 전용) 사용 + 오프라인 단일파일(dashboard.html)도 매일 신선해야 함.
+- 파이프라인 데이터셋 타겟은 `logs/cop_dataset_target` 파일 (현재 `data/episodes_cl_dr`). 마커 형식 `"<ds>:<sig>"` — 상세 `research/simulation/2026-07-06_phase2-w1-pipeline-audit-dr-retrain-trigger.md`.
