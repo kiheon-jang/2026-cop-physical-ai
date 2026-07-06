@@ -3765,6 +3765,11 @@ function sim3dBuildScene() {
   root.rotation.x = -Math.PI / 2;
   scene.add(root);
 
+  // 스케일 감각용 5cm 격자 (0.8m / 16칸). 바닥 살짝 위에 그려 z-fighting 회피.
+  const grid = new THREE.GridHelper(0.8, 16, 0x7f95ad, 0xb9c6d4);
+  grid.position.y = 0.0015;
+  scene.add(grid);
+
   // 메시 지오메트리 준비
   const geoms = {};
   Object.entries(chain.meshes).forEach(([name, m]) => {
@@ -3827,6 +3832,12 @@ function sim3dBuildScene() {
   });
   const cubeBody = chain.bodies.find(b => b.name === 'cube');
   SIM3D.cubeGroup = cubeBody ? bodyGroup[cubeBody.id] : null;
+  if (SIM3D.cubeGroup) {
+    // 파지 대상(30mm 큐브) 시각 강조 — 씬 원본은 무채색이라 받침대와 오독되기 쉬움
+    SIM3D.cubeGroup.traverse(o => {
+      if (o.isMesh) { o.material = o.material.clone(); o.material.color.set(0xd94f3d); }
+    });
+  }
 
   // 간이 오빗 컨트롤 (드래그 회전 / 휠 줌 / 시프트드래그 팬 없음 — 보고용 최소)
   const target = new THREE.Vector3(0.08, 0.2, 0.0); // (MuJoCo→Y-up 변환 후 로봇 작업영역 중심)
@@ -3850,6 +3861,10 @@ function sim3dBuildScene() {
   canvas.addEventListener('wheel', e => { e.preventDefault(); dist = Math.min(3, Math.max(0.25, dist * (1 + e.deltaY * 0.001))); applyCam(); }, { passive: false });
 
   SIM3D.renderer = renderer; SIM3D.scene = scene; SIM3D.camera = camera; SIM3D.wrap = wrap;
+  const noteEl = document.getElementById('s3-note');
+  if (noteEl) noteEl.innerHTML =
+    '격자 <b>5cm</b> · 갈색 기둥 = 받침대 <b>10×12×16cm</b>(파지 대상 아님) · ' +
+    '<span style="color:#d94f3d;font-weight:700">빨간 큐브 = 파지 대상 3cm</span> · 그리퍼 패드 개구 최대 ~7cm';
 
   function loop(t) {
     requestAnimationFrame(loop);
@@ -3893,16 +3908,32 @@ function sim3dEpisodeList() {
   return eps;
 }
 
+function sim3dCubeOpacity(a) {
+  SIM3D.cubeGroup.traverse(o => {
+    if (o.isMesh) { o.material.transparent = a < 1; o.material.opacity = a; }
+  });
+}
+
 function sim3dApplyFrame(f) {
   const ep = SIM3D.current; if (!ep) return;
   let q;
   if (ep.kind === 'policy') {
     const fr = ep.frames[Math.min(f, ep.n - 1)];
     q = fr;
-    if (SIM3D.cubeGroup) { SIM3D.cubeGroup.visible = true; SIM3D.cubeGroup.position.set(fr[6], fr[7], fr[8]); }
+    if (SIM3D.cubeGroup) {
+      SIM3D.cubeGroup.visible = true;
+      SIM3D.cubeGroup.position.set(fr[6], fr[7], fr[8]);
+      sim3dCubeOpacity(1);
+    }
   } else {
     q = ep.qpos.subarray(f * 6, f * 6 + 6);
-    if (SIM3D.cubeGroup) SIM3D.cubeGroup.visible = false; // 수집 데이터에 큐브 좌표 미기록
+    if (SIM3D.cubeGroup) {
+      // 수집 데이터에 큐브 좌표 미기록 — 숨기면 '허공을 집는' 오독이 생기므로
+      // 명목 위치(0.13,0,0.175 ±2cm 랜덤)에 반투명 고스트로 표시
+      SIM3D.cubeGroup.visible = true;
+      SIM3D.cubeGroup.position.set(0.13, 0, 0.175);
+      sim3dCubeOpacity(0.3);
+    }
   }
   SIM3D.hinges.forEach(h => {
     if (h.qposadr < 6) h.pivot.quaternion.setFromAxisAngle(h.axisV, q[h.qposadr]);
@@ -3928,7 +3959,7 @@ function sim3dSelect(id) {
     const m = ep.meta || {};
     meta.push(`체크포인트: ${m.checkpoint || '—'}`, `측정: ${m.measured_at || '—'}`, `큐브 궤적 포함 (qpos6 + cube_xyz)`);
   } else {
-    meta.push(`데이터셋: data/${ep.source}`, `closed-loop expert 성공 시연 (lift ≥ 40mm)`, `큐브 좌표는 데이터셋에 미기록 — 관절 재생`);
+    meta.push(`데이터셋: data/${ep.source}`, `closed-loop expert 성공 시연 (lift ≥ 40mm)`, `반투명 큐브 = 명목 위치(실제는 ±2cm 랜덤, 좌표 미기록) — 관절 궤적은 실데이터`);
   }
   document.getElementById('s3-meta').innerHTML = meta.map(x => `<span>${escapeHtml(x)}</span>`).join(' · ');
   sim3dApplyFrame(0); sim3dSyncScrub();

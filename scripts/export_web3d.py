@@ -100,13 +100,19 @@ def main() -> None:
     geoms = []
     for g in range(model.ngeom):
         gtype = int(model.geom_type[g])
+        # 색: geom rgba 가 기본값(0.5 회색)이고 material 이 지정돼 있으면 material rgba 사용
+        # (MuJoCo 는 material 색을 geom_rgba 에 복사하지 않는다 — 받침대 갈색 등이 소실됨)
+        rgba = [round(float(x), 3) for x in model.geom_rgba[g]]
+        matid = int(model.geom_matid[g])
+        if matid >= 0 and rgba == [0.5, 0.5, 0.5, 1.0]:
+            rgba = [round(float(x), 3) for x in model.mat_rgba[matid]]
         entry = {
             "body": int(model.geom_bodyid[g]),
             "type": {0: "plane", 2: "sphere", 3: "capsule", 5: "cylinder", 6: "box", 7: "mesh"}.get(gtype, f"t{gtype}"),
             "pos": [round(float(x), 6) for x in model.geom_pos[g]],
             "quat": [round(float(x), 6) for x in model.geom_quat[g]],
             "size": [round(float(x), 6) for x in model.geom_size[g]],
-            "rgba": [round(float(x), 3) for x in model.geom_rgba[g]],
+            "rgba": rgba,
             "group": int(model.geom_group[g]),
         }
         if gtype == mujoco.mjtGeom.mjGEOM_MESH:
