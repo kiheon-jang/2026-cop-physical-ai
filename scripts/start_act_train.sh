@@ -23,7 +23,8 @@ set -euo pipefail
 ROOT="/Volumes/MARK_DATA/dev/2026-cop-physical-ai"
 PY="${ROOT}/.venv/bin/python3"
 TRAIN_SCRIPT="${ROOT}/scripts/train_act.py"
-CKPT_DIR="${ROOT}/checkpoints/act"
+# 드라이버가 COP_CKPT_DIR 로 데이터셋별 체크포인트 디렉터리를 넘긴다 (train_act.py 도 동일 env 사용)
+CKPT_DIR="${COP_CKPT_DIR:-${ROOT}/checkpoints/act}"
 LOG_DIR="${ROOT}/logs"
 PID_FILE="${LOG_DIR}/act_train.pid"
 LOG_FILE="${LOG_DIR}/act_train.log"

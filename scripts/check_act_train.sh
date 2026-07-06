@@ -24,7 +24,8 @@ set -uo pipefail
 ROOT="/Volumes/MARK_DATA/dev/2026-cop-physical-ai"
 LOG_FILE="${ROOT}/logs/act_train.log"
 PID_FILE="${ROOT}/logs/act_train.pid"
-CKPT_DIR="${ROOT}/checkpoints/act"
+# 드라이버가 COP_CKPT_DIR 로 데이터셋별 체크포인트 디렉터리를 넘긴다
+CKPT_DIR="${COP_CKPT_DIR:-${ROOT}/checkpoints/act}"
 TAIL_N="${TAIL_N:-10}"
 STALL_SEC="${STALL_SEC:-86400}"
 

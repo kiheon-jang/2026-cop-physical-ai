@@ -17,7 +17,8 @@ set -euo pipefail
 ROOT="/Volumes/MARK_DATA/dev/2026-cop-physical-ai"
 PY="${ROOT}/.venv/bin/python3"
 COLLECTOR="${ROOT}/samples/training/sim_data_collector.py"
-DATA_DIR="${ROOT}/data/episodes_cl"
+# 드라이버가 COP_DATA_DIR 로 타겟 데이터셋을 넘긴다 (기본: 운영 episodes_cl)
+DATA_DIR="${COP_DATA_DIR:-${ROOT}/data/episodes_cl}"
 LOG_DIR="${ROOT}/logs"
 PID_FILE="${LOG_DIR}/cop_data_collect.pid"
 LOG_FILE="${LOG_DIR}/cop_data_collect.log"

@@ -91,7 +91,12 @@ class ACTTrainingConfig:
     seed: int = 42
 
     # 출력
-    checkpoint_dir: str = "/Volumes/MARK_DATA/dev/2026-cop-physical-ai/checkpoints/act"
+    # COP_CKPT_DIR 로 체크포인트 디렉터리 오버라이드 (드라이버가 데이터셋별 격리 경로 지정 —
+    # 재학습이 기존 baseline 체크포인트를 in-place 로 덮어쓰지 않게).
+    checkpoint_dir: str = os.environ.get(
+        "COP_CKPT_DIR",
+        "/Volumes/MARK_DATA/dev/2026-cop-physical-ai/checkpoints/act",
+    )
     log_dir: str = "/Volumes/MARK_DATA/dev/2026-cop-physical-ai/logs"
     log_every_n_steps: int = 10
     save_every_n_epochs: int = 10
@@ -377,6 +382,9 @@ def train(
             "kld_loss": sum_kl / step_count,
             "elapsed_sec": time.time() - epoch_start,
             "timestamp": time.time(),
+            # 런 식별자 — 여러 데이터셋 학습이 한 jsonl 에 누적되므로 구분 필수
+            "dataset": Path(config.dataset_root).name,
+            "ckpt_dir": Path(config.checkpoint_dir).name,
         }
         history.append(epoch_metric)
         print(json.dumps({"epoch_done": epoch_metric}, ensure_ascii=False), flush=True)
@@ -460,6 +468,30 @@ def main(argv: Optional[List[str]] = None) -> None:
         else:
             effective_device = args.device
             effective_workers = None
+
+        # 데이터셋 존재 검증 — 오타/미동기 경로면 LeRobot 이 빈 디렉터리를 만들고
+        # HF Hub 다운로드를 시도해 혼란스러운 실패가 되므로 여기서 명확히 차단.
+        _info = Path(config.dataset_root) / "meta" / "info.json"
+        if not _info.exists():
+            result["status"] = "error"
+            result["message"] = f"dataset_root 에 meta/info.json 없음: {config.dataset_root}"
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            sys.exit(1)
+
+        # 런 시작 배너 — 9시간 무인 학습 동안 로그만으로 어떤 데이터/체크포인트인지 검증 가능해야 함
+        print(json.dumps({
+            "train_start": {
+                "dataset_root": config.dataset_root,
+                "checkpoint_dir": config.checkpoint_dir,
+                "epochs": args.epochs if args.epochs is not None else config.num_epochs,
+                "resume_from": args.resume_from,
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            }
+        }, ensure_ascii=False), flush=True)
+        if args.resume_from:
+            print(json.dumps({
+                "warning": "resume 는 가중치만 복원 — 옵티마이저/epoch 카운터는 리셋됨 (실험 비교 시 주의)"
+            }, ensure_ascii=False), flush=True)
 
         t0 = time.time()
         dataloader = load_dataset(config, num_workers=effective_workers)

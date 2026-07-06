@@ -37,7 +37,7 @@ import mujoco
 import numpy as np
 import os
 import random
-import shutil
+import time
 
 import sim_domain_randomization as dr  # 같은 폴더 (samples/training)
 
@@ -281,7 +281,9 @@ class GraspExpert:
 # ---------------------------------------------------------------------------
 # 수집 루프
 # ---------------------------------------------------------------------------
-def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0):
+def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0, seed=None):
+    if seed is not None:
+        random.seed(seed)  # 큐브 배치 재현성 (미지정 시 기존 비결정 동작 유지)
     if not os.path.exists(MODEL_XML_PATH):
         print(f"Error: MJCF model file not found at {MODEL_XML_PATH}")
         return
@@ -323,7 +325,10 @@ def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0):
 
     dataset_root = os.path.realpath(dataset_root_arg or DATASET_ROOT)
     if os.path.exists(dataset_root):
-        shutil.rmtree(dataset_root)  # 대상 루트만 삭제 후 재생성
+        # 삭제 대신 타임스탬프 백업으로 대피 — 드라이버 오판/크래시 재시작이 운영 데이터를 파괴하지 않게
+        bak = f"{dataset_root}.bak-{time.strftime('%Y%m%d-%H%M%S')}"
+        os.rename(dataset_root, bak)
+        print(f"[백업] 기존 데이터셋 대피: {bak}")
 
     dataset = LeRobotDataset.create(
         repo_id=DATASET_REPO_ID,
@@ -409,6 +414,8 @@ if __name__ == "__main__":
     _p.add_argument("--dr", action="store_true",
                     help="Domain Randomization 적용(조명/마찰/카메라노이즈). 기본 off — 드라이버 파이프라인 불변.")
     _p.add_argument("--dr-seed", type=int, default=0, help="DR 무작위 시드")
+    _p.add_argument("--seed", type=int, default=None,
+                    help="큐브 배치 랜덤 시드 (재현성. 기본: 비결정)")
     _a = _p.parse_args()
     main(dataset_root_arg=_a.root, num_episodes_arg=_a.episodes,
-         use_dr=_a.dr, dr_seed=_a.dr_seed)
+         use_dr=_a.dr, dr_seed=_a.dr_seed, seed=_a.seed)

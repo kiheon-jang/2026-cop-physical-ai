@@ -8,10 +8,20 @@
 # 단계(우선순위 순, 1회 1단계):
 #   1) 수집 진행중   → 상태만 보고
 #   2) 학습 진행중   → check_act_train.sh 로 진행률 보고
+#   2.5) 학습 종료 확정 → pending 마커 검증(완료=승격 / 이상종료=재시도 예약)
 #   3) 데이터 부족   → cop_start_data_collect.sh (closed-loop 수집, nohup)
 #   4) 데이터 준비됨 & 이 데이터로 미학습 → start_act_train.sh (ACT 재학습, nohup)
 #   5) 학습 완료 & 이 모델 미측정 → render_act_rollout.py (성공률 측정)
 #   6) 측정 완료     → 수렴 판정 + 상태 보고
+#
+# 데이터셋 타겟: logs/cop_dataset_target 파일(한 줄, ROOT 상대경로)로 전환.
+#   예) echo "data/episodes_cl_dr" > logs/cop_dataset_target  → 다음 실행부터 DR 사이클.
+#   파일 없으면 기본 data/episodes_cl. 체크포인트는 데이터셋별 디렉터리로 격리
+#   (episodes_cl=checkpoints/act 레거시 유지, episodes_cl_dr=checkpoints/act_cl_dr)
+#   → 재학습이 기존 baseline 모델을 덮어쓰지 않는다.
+#
+# 마커 형식: "<데이터셋 basename>:<서명>" (2026-07-06 개정. 구형식=서명만 → 자동 불일치로 안전).
+# 서명: 디렉터리는 내부 파일 최신 mtime (save_pretrained 의 in-place 덮어쓰기 감지).
 #
 # 출력: "CoP 시뮬 파이프라인" 상태블록 → cron 이 research-log + 아침 메일에 그대로 append.
 # 네이밍: 모든 산출물 cop_ 접두 (다른 프로젝트 잡과 격리).
@@ -20,28 +30,53 @@ set -uo pipefail
 ROOT="/Volumes/MARK_DATA/dev/2026-cop-physical-ai"
 PY="${ROOT}/.venv/bin/python3"
 LOG_DIR="${ROOT}/logs"
-DATA_DIR="${ROOT}/data/episodes_cl"
-MODEL="${ROOT}/models/act_phase1.pt"
 
 TARGET_EP="${COP_TARGET_EP:-50}"        # 목표 성공 에피소드 수
 TARGET_RATE="${COP_TARGET_RATE:-0.90}"  # 목표 rollout 성공률
 EPOCHS="${COP_EPOCHS:-100}"
 
+# ── 데이터셋 타겟 결정 (파일 기반 — cron 은 env 를 안 넘기므로 영속 상태는 파일로) ──
+DATASET_TARGET_FILE="${LOG_DIR}/cop_dataset_target"
+if [[ -f "${DATASET_TARGET_FILE}" ]]; then
+  _T="$(head -1 "${DATASET_TARGET_FILE}" | tr -d '[:space:]')"
+  [[ "${_T}" == /* ]] || _T="${ROOT}/${_T}"
+  DATA_DIR="${_T}"
+else
+  DATA_DIR="${ROOT}/data/episodes_cl"
+fi
+DS_BASE="${DATA_DIR##*/}"
+
+# ── 체크포인트 디렉터리: 데이터셋별 격리 (episodes_cl 은 레거시 경로 유지) ──
+if [[ "${DS_BASE}" == "episodes_cl" ]]; then
+  CKPT_DIR="${ROOT}/checkpoints/act"
+else
+  CKPT_DIR="${ROOT}/checkpoints/act_${DS_BASE#episodes_}"
+fi
+
 COLLECT_PID="${LOG_DIR}/cop_data_collect.pid"
 TRAIN_PID="${LOG_DIR}/act_train.pid"
-TRAINED_MARK="${LOG_DIR}/cop_trained_on.marker"     # 학습에 쓴 데이터 서명
-MEASURED_MARK="${LOG_DIR}/cop_measured.marker"      # 측정한 모델 서명
+TRAINED_MARK="${LOG_DIR}/cop_trained_on.marker"     # 학습에 쓴 데이터 서명 ("ds:sig")
+TRAINED_PENDING="${TRAINED_MARK}.pending"           # 학습 '시작' 기록 — 완료 검증 후 승격
+MEASURED_MARK="${LOG_DIR}/cop_measured.marker"      # 측정한 모델 서명 ("ds:sig")
 ROLLOUT_LOG="${LOG_DIR}/cop_rollout.log"
+METRICS_LOG="${LOG_DIR}/act_train_metrics.jsonl"
 
 cd "${ROOT}"
 mkdir -p "${LOG_DIR}"
 
-# pid 파일이 가리키는 프로세스가 살아있나
+# pid 파일이 가리키는 프로세스가 살아있고, 커맨드가 기대 패턴과 일치하나.
+# 죽었거나 PID 재사용(다른 프로세스)이면 stale pid 파일 정리 후 실패 반환.
 pid_alive() {
-  local f="$1"
+  local f="$1" pat="${2:-}"
   [[ -f "$f" ]] || return 1
   local p; p="$(cat "$f" 2>/dev/null || true)"
-  [[ -n "$p" ]] && kill -0 "$p" 2>/dev/null
+  if [[ -z "$p" ]] || ! kill -0 "$p" 2>/dev/null; then
+    rm -f "$f"; return 1
+  fi
+  if [[ -n "$pat" ]] && ! ps -p "$p" -o command= 2>/dev/null | grep -q "$pat"; then
+    rm -f "$f"; return 1
+  fi
+  return 0
 }
 # LeRobot 데이터셋의 에피소드 수
 data_episodes() {
@@ -50,40 +85,85 @@ data_episodes() {
 try: print(json.load(open('${DATA_DIR}/meta/info.json')).get('total_episodes',0))
 except Exception: print(0)" 2>/dev/null || echo 0
 }
-# 파일 mtime (서명용)
-sig() { stat -f '%m' "$1" 2>/dev/null || echo 0; }
+# 서명: 파일=mtime, 디렉터리=내부 파일 최신 mtime (in-place 덮어쓰기 감지)
+sig() {
+  local m
+  if [[ -d "$1" ]]; then
+    m="$(find "$1" -type f -exec stat -f '%m' {} + 2>/dev/null | sort -n | tail -1)"
+  else
+    m="$(stat -f '%m' "$1" 2>/dev/null)"
+  fi
+  echo "${m:-0}"
+}
+# 학습 완료 검증: metrics jsonl 마지막 줄이 (해당 데이터셋, 마지막 epoch, pending 이후) 인가
+train_completed() {
+  local pending_mtime; pending_mtime="$(stat -f '%m' "${TRAINED_PENDING}" 2>/dev/null || echo 0)"
+  "${PY}" -c "
+import json, sys
+try:
+    last = open('${METRICS_LOG}').readlines()[-1]
+    m = json.loads(last)
+    ok = (m.get('epoch') == ${EPOCHS} - 1
+          and m.get('timestamp', 0) > ${pending_mtime}
+          and m.get('dataset', '${DS_BASE}') == '${DS_BASE}')
+    sys.exit(0 if ok else 1)
+except Exception:
+    sys.exit(1)" 2>/dev/null
+}
 
 echo "════════ 🤖 CoP Physical AI 시뮬 파이프라인 ($(date '+%Y-%m-%d %H:%M')) ════════"
+echo "타겟: 데이터=${DS_BASE}  ckpt=${CKPT_DIR#${ROOT}/}"
 
 # ── 1. 수집 진행중 ──
-if pid_alive "${COLLECT_PID}"; then
+if pid_alive "${COLLECT_PID}" "sim_data_collector"; then
   echo "STAGE=수집중  pid=$(cat "${COLLECT_PID}")  진척=$(data_episodes)/${TARGET_EP}ep"
   tail -1 "${LOG_DIR}/cop_data_collect.log" 2>/dev/null || true
   exit 0
 fi
 
 # ── 2. 학습 진행중 ──
-if pid_alive "${TRAIN_PID}"; then
+if pid_alive "${TRAIN_PID}" "train_act"; then
   echo "STAGE=학습중"
-  bash "${ROOT}/scripts/check_act_train.sh" 2>/dev/null | head -5 || true
+  COP_CKPT_DIR="${CKPT_DIR}" bash "${ROOT}/scripts/check_act_train.sh" 2>/dev/null | head -5 || true
   exit 0
+fi
+
+# ── 2.5. 학습 종료 확정 (pending 검증 → 완료면 승격, 이상종료면 재시도 예약) ──
+if [[ -f "${TRAINED_PENDING}" ]]; then
+  if train_completed; then
+    mv "${TRAINED_PENDING}" "${TRAINED_MARK}"
+    echo "학습완료 확정 (${DS_BASE}, ${EPOCHS}epoch) → 측정 단계로 진행"
+    # fall through — 같은 실행에서 stage 5 측정까지 진행
+  else
+    rm -f "${TRAINED_PENDING}"
+    echo "⚠ 학습 이상종료 감지 (${DS_BASE} — metrics 마지막 epoch 미달) → 재학습 재시도 예약"
+    tail -3 "${LOG_DIR}/act_train.log" 2>/dev/null || true
+    # fall through — stage 4 가 재학습을 다시 시작
+  fi
 fi
 
 # ── 3. 데이터 부족 → closed-loop 수집 시작 ──
 EP="$(data_episodes)"
 if [[ "${EP}" -lt "${TARGET_EP}" ]]; then
+  # 가드: info.json 이 존재하는데 0 이 나오면 일시적 읽기 실패 가능성 — 수집(=기존 데이터
+  # 대피 후 재수집) 을 시작하지 않는다 (운영 데이터셋 보호).
+  if [[ "${EP}" -eq 0 && -f "${DATA_DIR}/meta/info.json" ]]; then
+    echo "⚠ STAGE=보류  데이터 카운트 실패 의심 (info.json 존재하나 0 반환) — 수집 시작 안 함"
+    exit 0
+  fi
   echo "STAGE=수집시작  (현재 ${EP} < 목표 ${TARGET_EP}ep) — closed-loop expert"
-  bash "${ROOT}/scripts/cop_start_data_collect.sh" "${TARGET_EP}" || echo "  ⚠ 수집 시작 실패"
+  COP_DATA_DIR="${DATA_DIR}" bash "${ROOT}/scripts/cop_start_data_collect.sh" "${TARGET_EP}" || echo "  ⚠ 수집 시작 실패"
   exit 0
 fi
 
 # ── 4. 데이터 준비됨 & 이 데이터로 미학습 → ACT 재학습 ──
-DATA_SIG="$(sig "${DATA_DIR}/meta/info.json")"
+DATA_SIG="${DS_BASE}:$(sig "${DATA_DIR}/meta/info.json")"
 if [[ ! -f "${TRAINED_MARK}" || "$(cat "${TRAINED_MARK}" 2>/dev/null || echo x)" != "${DATA_SIG}" ]]; then
-  echo "STAGE=학습시작  (closed-loop 데이터 ${EP}ep 로 ACT 재학습, ${EPOCHS}epoch)"
+  echo "STAGE=학습시작  (${DS_BASE} ${EP}ep 로 ACT 재학습, ${EPOCHS}epoch → ${CKPT_DIR#${ROOT}/})"
   export COP_DATASET_ROOT="${DATA_DIR}"
+  export COP_CKPT_DIR="${CKPT_DIR}"
   if bash "${ROOT}/scripts/start_act_train.sh" --epochs "${EPOCHS}" --no-resume; then
-    echo "${DATA_SIG}" > "${TRAINED_MARK}"
+    echo "${DATA_SIG}" > "${TRAINED_PENDING}"   # 완료 검증(stage 2.5) 후 TRAINED_MARK 로 승격
   else
     echo "  ⚠ 학습 시작 실패"
   fi
@@ -91,11 +171,12 @@ if [[ ! -f "${TRAINED_MARK}" || "$(cat "${TRAINED_MARK}" 2>/dev/null || echo x)"
 fi
 
 # ── 5. 학습 완료 & 이 체크포인트 미측정 → rollout 성공률 측정 ──
-# 측정 기준 = 최신 체크포인트(render_act_rollout 가 실제 사용). models/act_phase1.pt 별도저장 의존 X.
-LATEST_CKPT="$(ls -dt "${ROOT}"/checkpoints/act/epoch_*/ 2>/dev/null | head -1 | sed 's:/$::')"
-MODEL_SIG="$(sig "${LATEST_CKPT}")"
+# 측정 기준 = 최신 체크포인트의 내부 파일 서명 (in-place 덮어쓰기도 감지).
+LATEST_CKPT="$(ls -d "${CKPT_DIR}"/epoch_*/ 2>/dev/null | sort | tail -1 | sed 's:/$::')"
+MODEL_SIG="${DS_BASE}:$(sig "${LATEST_CKPT}")"
 if [[ -n "${LATEST_CKPT}" && ( ! -f "${MEASURED_MARK}" || "$(cat "${MEASURED_MARK}" 2>/dev/null || echo x)" != "${MODEL_SIG}" ) ]]; then
   echo "STAGE=측정  (최신 체크포인트 ${LATEST_CKPT##*/} rollout 성공률, closed-loop 정합 씬)"
+  export COP_CKPT_DIR="${CKPT_DIR}"
   if "${PY}" "${ROOT}/scripts/render_act_rollout.py" --rollouts 10 > "${ROLLOUT_LOG}" 2>&1; then
     echo "${MODEL_SIG}" > "${MEASURED_MARK}"
     grep -iE "success_rate|성공률" "${ROLLOUT_LOG}" | tail -2 || tail -2 "${ROLLOUT_LOG}"
@@ -107,6 +188,6 @@ fi
 
 # ── 6. 측정 완료 → 수렴 판정 ──
 RATE="$(grep -oE '"?success_rate"?[: ]+[0-9.]+' "${ROLLOUT_LOG}" 2>/dev/null | grep -oE '[0-9.]+' | tail -1 || echo '?')"
-echo "STAGE=완료/유지  데이터 ${EP}ep · 최종 성공률=${RATE} (목표 ${TARGET_RATE})"
-echo "  한 사이클 완료. 성공률 미달이면 COP_TARGET_EP 상향 또는 데이터 재수집(마커 삭제)으로 다음 사이클 트리거."
+echo "STAGE=완료/유지  데이터 ${DS_BASE} ${EP}ep · 최종 성공률=${RATE} (목표 ${TARGET_RATE})"
+echo "  한 사이클 완료. 다음 사이클: logs/cop_dataset_target 전환 또는 데이터 재수집(마커 삭제)."
 exit 0

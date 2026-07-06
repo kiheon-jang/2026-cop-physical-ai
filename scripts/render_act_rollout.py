@@ -44,9 +44,14 @@ N_JOINTS = 6
 
 
 def find_latest_checkpoint() -> Path | None:
+    # COP_CKPT_DIR: 드라이버가 데이터셋별 체크포인트 디렉터리를 지정 (기본: 운영 checkpoints/act).
+    # 정렬은 내부 model.safetensors mtime — 디렉터리 mtime 은 save_pretrained 의
+    # in-place 덮어쓰기를 감지하지 못한다 (epoch_0099 디렉터리 6/22 vs 내부 파일 6/25 실사례).
+    ckpt_dir = Path(os.environ.get("COP_CKPT_DIR", str(ROOT / "checkpoints" / "act")))
     ckpts = sorted(
-        (ROOT / "checkpoints" / "act").glob("epoch_*/"),
-        key=lambda p: p.stat().st_mtime,
+        ckpt_dir.glob("epoch_*/"),
+        key=lambda p: (p / "model.safetensors").stat().st_mtime
+        if (p / "model.safetensors").exists() else 0.0,
     )
     return ckpts[-1] if ckpts else None
 
@@ -82,6 +87,7 @@ def run_rollout(model, data, policy, renderer, cam_id, device, rng, max_frames, 
     cube_init_z = float(data.body("cube").xpos[2])
     max_lift = 0.0
     frames = []
+    traj = []  # 정책 스텝별 (qpos6 + cube xyz) — 웹 3D 리플레이용
 
     for _ in range(max_frames):
         renderer.update_scene(data, camera=cam_id)
@@ -106,8 +112,12 @@ def run_rollout(model, data, policy, renderer, cam_id, device, rng, max_frames, 
 
         lift = float(data.body("cube").xpos[2]) - cube_init_z
         max_lift = max(max_lift, lift)
+        traj.append(
+            [round(float(q), 4) for q in data.qpos[:N_JOINTS]]
+            + [round(float(x), 4) for x in data.body("cube").xpos]
+        )
 
-    return (max_lift >= LIFT_THRESHOLD_M), max_lift, frames
+    return (max_lift >= LIFT_THRESHOLD_M), max_lift, frames, traj
 
 
 def main(argv=None):
@@ -125,6 +135,8 @@ def main(argv=None):
     p.add_argument("--dr-axes", type=str, default="light,friction,camera",
                    help="DR 무작위화 축 부분집합 (쉼표구분: light,friction,camera). "
                         "부분집합이면 rollout_summary_dr_<axes>.json 로 저장 — 3축 aggregate/운영 summary 불변.")
+    p.add_argument("--summary-suffix", type=str, default="",
+                   help="summary 파일명 접미사 (예: _seed7) — 수동 비교 측정이 운영 파일을 덮어쓰지 않게.")
     args = p.parse_args(argv)
 
     import torch
@@ -179,10 +191,11 @@ def main(argv=None):
     t0 = time.time()
     results = []
     video_frames = []
+    trajectories = []
     for i in range(args.rollouts):
         collect = i < args.video_rollouts
         try:
-            success, max_lift, frames = run_rollout(
+            success, max_lift, frames, traj = run_rollout(
                 model, data, policy, renderer, cam_id, device, rng, args.max_frames, collect,
                 dr_mod=dr_mod, dr_baseline=dr_baseline, dr_rng=dr_rng, dr_axes=dr_axes
             )
@@ -191,6 +204,8 @@ def main(argv=None):
             print(f"  rollout {i+1}/{args.rollouts}: ⚠ 에러 {str(e)[:80]}", flush=True)
             continue
         results.append({"rollout": i, "success": success, "max_lift_m": round(max_lift, 4)})
+        trajectories.append({"rollout": i, "success": success,
+                             "max_lift_m": round(max_lift, 4), "frames": traj})
         if collect:
             video_frames.extend(frames)
         print(f"  rollout {i+1}/{args.rollouts}: {'성공' if success else '실패'} (max_lift={max_lift*1000:.1f}mm)",
@@ -201,10 +216,13 @@ def main(argv=None):
     n_success = sum(r["success"] for r in results)
     success_rate = n_success / len(results) if results else 0.0
 
-    # 영상 저장 (epoch 번호 추출 → inference_epoch_NN_date.mp4)
+    # 영상 저장 — ckpt 디렉터리/DR/seed 태그 포함 (같은 날 nominal·DR 측정이 서로 덮어쓰지 않게)
     epoch_tag = ckpt.name.replace("epoch_", "")
     date_tag = time.strftime("%Y%m%d")
-    video_path = OUT_DIR / f"inference_epoch_{epoch_tag}_{date_tag}.mp4"
+    run_tag = ckpt.parent.name  # act / act_cl_dr ...
+    dr_tag = ("_dr" + ("" if set(dr_axes) == set(dr_mod.DR_AXES) else "_" + "_".join(sorted(dr_axes)))) if args.dr else ""
+    seed_tag = f"_seed{args.seed}" if args.seed != 42 else ""
+    video_path = OUT_DIR / f"inference_{run_tag}_epoch_{epoch_tag}_{date_tag}{dr_tag}{seed_tag}.mp4"
     if video_frames:
         imageio.mimsave(str(video_path), video_frames, fps=SIM_FPS)
 
@@ -213,7 +231,10 @@ def main(argv=None):
     summary = {
         "status": "ok",
         "checkpoint": str(ckpt.relative_to(ROOT)),
+        "ckpt_dir": run_tag,
         "scene": MODEL_XML.name,
+        "measured_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "seed": args.seed,
         "rollouts": len(results),
         "success": n_success,
         "success_rate": round(success_rate, 3),
@@ -229,14 +250,43 @@ def main(argv=None):
     # 요약 json (대시보드/크론이 성공률 읽기용). DR-on 은 별도 파일 — 운영 summary 불변.
     # 3축 전부 = aggregate(rollout_summary_dr.json). 부분집합 = ablation 별도 파일.
     if not args.dr:
-        summary_name = "rollout_summary.json"
+        summary_name = f"rollout_summary{args.summary_suffix}.json"
     elif set(dr_axes) == set(dr_mod.DR_AXES):
-        summary_name = "rollout_summary_dr.json"
+        summary_name = f"rollout_summary_dr{args.summary_suffix}.json"
     else:
-        summary_name = f"rollout_summary_dr_{'_'.join(sorted(dr_axes))}.json"
+        summary_name = f"rollout_summary_dr_{'_'.join(sorted(dr_axes))}{args.summary_suffix}.json"
     (OUT_DIR / summary_name).write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+
+    # 불변 히스토리 사본 + 3D 리플레이 궤적 — 측정할 때마다 축적 (사이트 성과 차트/리플레이 데이터원).
+    # 운영 summary 는 '최신' 슬롯으로 덮어써도 히스토리는 영구 보존된다.
+    hist_dir = OUT_DIR / "history"
+    hist_dir.mkdir(exist_ok=True)
+    hist_stamp = time.strftime("%Y%m%d-%H%M%S")
+    hist_base = f"{hist_stamp}_{run_tag}_{ckpt.name}{dr_tag}{seed_tag}"
+    (hist_dir / f"{hist_base}.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    traj_payload = {
+        "checkpoint": str(ckpt.relative_to(ROOT)),
+        "ckpt_dir": run_tag,
+        "measured_at": summary["measured_at"],
+        "seed": args.seed,
+        "dr": args.dr,
+        "fps": round(1.0 / (0.002 * DATA_SAMPLE_EVERY), 2),  # 궤적 1프레임 = 정책 1스텝 = 물리 17스텝×2ms ≈ 29.4fps
+        "joint_names": ["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll", "gripper"],
+        "frame_format": "qpos[0:6] + cube_xyz[6:9]",
+        "rollouts": trajectories,
+    }
+    (hist_dir / f"{hist_base}_traj.json").write_text(
+        json.dumps(traj_payload, ensure_ascii=False), encoding="utf-8"
+    )
+    if not args.dr and not args.summary_suffix:
+        # 운영(nominal) 측정의 최신 궤적 — 대시보드 3D 리플레이가 이 고정 경로를 읽는다
+        (OUT_DIR / "rollout_traj_latest.json").write_text(
+            json.dumps(traj_payload, ensure_ascii=False), encoding="utf-8"
+        )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 

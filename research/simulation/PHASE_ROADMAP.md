@@ -220,6 +220,17 @@ uv pip install <패키지명>
       미트리거 — 데이터는 준비 완료됐으나 드라이버 새 사이클 조건(마커 삭제 / `COP_TARGET_EP` 상향 /
       `COP_DATASET_ROOT=episodes_cl_dr` 전환)이 미세팅. 야간 에이전트는 하드룰상 직접 실행 안 함 →
       **트리거 결손을 표면화**(블로커 아님). 상세: `2026-07-06_phase2-w1-dr-retrain-pending-hold.md`.
+    - 🔄 **2026-07-06 주간**: **파이프라인 적대적 감사(32건 검증→19건 확정, critical 6건 수정) 후
+      DR 재학습 실제 트리거**(13:31, pid 74621). 수정 없이는 어느 경로로든 비교 실험이 깨졌음
+      (측정 스킵→옛 0.70 오보고 / 엉뚱한 데이터 재학습 / baseline 모델 파괴). 데이터셋 타겟
+      `logs/cop_dataset_target` 파일 도입, 체크포인트 격리(`checkpoints/act_cl_dr`), 마커
+      `ds:sig` 형식 + pending 승격, 측정 히스토리(`inference_progress/history/`) + 3D 리플레이
+      궤적 덤프 신설. baseline 은 `rollout_summary_baseline_cl.json` 아카이브. ETA ~22:30 →
+      23:00 크론이 완료 승격 + DR 모델 측정 예상. 이후 다중시드(7/123/2026) 공정추정 비교.
+      상세: `2026-07-06_phase2-w1-pipeline-audit-dr-retrain-trigger.md`.
+      **치수 검증 부속**: "기기가 작아 3~5cm 못 잡나" 의심 기각(개구 94.5/70mm, 1:1 스케일,
+      영상은 탑다운 1.4mm/px 착시). 단 30mm 전용 expert 상수라 50mm 는 후속 DR 축 필요.
+      상세: `2026-07-06_gripper-scale-verification.md`.
 - W2: Zero-shot 실기 추론 → 격차 측정
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
