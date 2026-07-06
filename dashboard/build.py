@@ -1417,44 +1417,13 @@ def build_pipeline_live() -> dict:
     }
 
 
-# 2026-07 기준 Physical AI 동향 (관리자 보고 인용용 — 출처/날짜 포함 큐레이션)
-PHYSICAL_AI_NEWS = [
-    {
-        "date": "2026-07-03",
-        "headline": "삼성·SK 등 영남권 최대 312조 '피지컬 AI·로봇 초혁신 벨트' 투자",
-        "detail": "삼성 60조(구미 19조 휴머노이드 로봇 양산·AI팩토리), SK 약 140조(AI 데이터센터 최대 15GW). 영남권을 'AX+로봇 기반 피지컬 AI 혁신 클러스터'로 명시.",
-        "source": "한국일보",
-        "url": "https://www.hankookilbo.com/news/article/A2026070316320002795",
-    },
-    {
-        "date": "2026-07-01",
-        "headline": "정부, 국민성장펀드 30조 중 16조를 로봇 등 피지컬 AI 6대 분야에 투입",
-        "detail": "'피지컬 AI'가 정부 공식 정책 용어로 정착. AI 제조업 대전환 기조로 AI·로봇·미래차·방산·반도체·이차전지에 올해 공급분의 절반가량 배정.",
-        "source": "파이낸셜뉴스",
-        "url": "https://www.fnnews.com/news/202607011807584120",
-    },
-    {
-        "date": "2026-03-16",
-        "headline": "NVIDIA GTC 2026 — GR00T N2 예고, Isaac Lab 3.0 공개",
-        "detail": "'시뮬 학습→실기 배포'가 업계 표준 워크플로로 정착. ABB·FANUC·KUKA·YASKAWA(합산 200만+ 로봇) 채택. 본 CoP 의 MuJoCo 시뮬→Sim2Real 트랙과 동일 방법론.",
-        "source": "NVIDIA GTC",
-        "url": "https://www.stocktitan.net/news/NVDA/nvidia-and-global-robotics-leaders-take-physical-ai-to-the-real-9qs9epaw1jrb.html",
-    },
-    {
-        "date": "2026-06",
-        "headline": "NVIDIA 공식 'SO-101 Sim-to-Real' 학습과정 공개",
-        "detail": "본 CoP 와 동일한 SO-101 저가 팔로 DR 전략→VLA 학습→시뮬/실기 평가→실데이터 co-training 을 가르치는 공식 커리큘럼. 7월 Sim2Real 계획의 레퍼런스 아키텍처.",
-        "source": "NVIDIA Learning Path",
-        "url": "https://docs.nvidia.com/learning/physical-ai/sim-to-real-so-101/latest/index.html",
-    },
-    {
-        "date": "2026-03-01",
-        "headline": "커뮤니티 재현: SO-101 + SmolVLA 파인튜닝, 실기 Pick&Place 100%",
-        "detail": "75개 데모·10시간 파인튜닝으로 SmolVLA 5/5=100% (동일조건 ACT 80%). 동일 하드웨어라 본 CoP 의 'ACT 다음 단계' 직접 벤치마크.",
-        "source": "ggando.com",
-        "url": "https://ggando.com/blog/smolvla-so101/",
-    },
-]
+def read_hero_poster() -> str:
+    """히어로 3D 포스터 (scripts/export_hero_poster.py 산출) → base64 JPEG. 없으면 빈 문자열."""
+    p = DASHBOARD_DIR / "hero_poster.txt"
+    try:
+        return p.read_text(encoding="utf-8").strip()
+    except OSError:
+        return ""
 
 
 def build_meta(current_phase: str) -> dict:
@@ -1518,8 +1487,8 @@ def build_real_data() -> dict:
         "web3d": build_web3d(),                      # 3D 리플레이 (체인+에피소드+정책 rollout)
         "dr_gallery": build_dr_gallery(),            # DR 샘플 썸네일
         "pipeline_live": build_pipeline_live(),      # 파이프라인 현재 상태
-        "physical_ai_news": PHYSICAL_AI_NEWS,        # 2026-07 동향 인용
     }
+    data["web3d"]["hero_poster_b64"] = read_hero_poster()  # 히어로 3D 포스터 인라인
     # Hdel template.html 호환 alias (기존 render* 함수가 새 키 모르므로)
     data["proposals"] = sim_tasks
     data["apps"] = phases
