@@ -107,6 +107,7 @@ def main() -> None:
         if matid >= 0 and rgba == [0.5, 0.5, 0.5, 1.0]:
             rgba = [round(float(x), 3) for x in model.mat_rgba[matid]]
         entry = {
+            "name": name(mujoco.mjtObj.mjOBJ_GEOM, g),
             "body": int(model.geom_bodyid[g]),
             "type": {0: "plane", 2: "sphere", 3: "capsule", 5: "cylinder", 6: "box", 7: "mesh"}.get(gtype, f"t{gtype}"),
             "pos": [round(float(x), 6) for x in model.geom_pos[g]],

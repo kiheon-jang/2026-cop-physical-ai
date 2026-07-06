@@ -53,6 +53,13 @@ else
   CKPT_DIR="${ROOT}/checkpoints/act_${DS_BASE#episodes_}"
 fi
 
+# ── 씬: 데이터셋에 정합 (수집·측정이 같은 씬을 쓰도록 export) ──
+case "${DS_BASE}" in
+  *floor*) COP_SCENE="${ROOT}/SO-ARM100/Simulation/SO101/scene_grasp_floor.xml" ;;
+  *)       COP_SCENE="${ROOT}/SO-ARM100/Simulation/SO101/scene_grasp_pads.xml" ;;
+esac
+export COP_SCENE
+
 COLLECT_PID="${LOG_DIR}/cop_data_collect.pid"
 TRAIN_PID="${LOG_DIR}/act_train.pid"
 TRAINED_MARK="${LOG_DIR}/cop_trained_on.marker"     # 학습에 쓴 데이터 서명 ("ds:sig")
@@ -186,8 +193,21 @@ if [[ -n "${LATEST_CKPT}" && ( ! -f "${MEASURED_MARK}" || "$(cat "${MEASURED_MAR
   exit 0
 fi
 
-# ── 6. 측정 완료 → 수렴 판정 ──
+# ── 6. 측정 완료 → 수렴 판정 (+ 예약된 다음 사이클 자동 전환) ──
 RATE="$(grep -oE '"?success_rate"?[: ]+[0-9.]+' "${ROLLOUT_LOG}" 2>/dev/null | grep -oE '[0-9.]+' | tail -1 || echo '?')"
 echo "STAGE=완료/유지  데이터 ${DS_BASE} ${EP}ep · 최종 성공률=${RATE} (목표 ${TARGET_RATE})"
-echo "  한 사이클 완료. 다음 사이클: logs/cop_dataset_target 전환 또는 데이터 재수집(마커 삭제)."
+
+# 다음 사이클 예약(cop_dataset_target.next): 현 사이클이 완주(측정까지)한 뒤에만 전환.
+# 전환 후 exec 로 1회 재평가 → 같은 실행에서 새 사이클의 첫 단계(보통 학습시작)까지 전진.
+NEXT_TARGET="${DATASET_TARGET_FILE}.next"
+if [[ -f "${NEXT_TARGET}" ]]; then
+  NEXT_DS="$(head -1 "${NEXT_TARGET}" | tr -d '[:space:]')"
+  if [[ -n "${NEXT_DS}" && "${NEXT_DS}" != "$(cat "${DATASET_TARGET_FILE}" 2>/dev/null || true)" ]]; then
+    mv "${NEXT_TARGET}" "${DATASET_TARGET_FILE}"
+    echo "  ▶ 예약된 다음 사이클로 전환: ${NEXT_DS} — 재평가 시작"
+    exec bash "$0"   # .next 소거됨 → 재귀 1회로 종결
+  fi
+  rm -f "${NEXT_TARGET}"
+fi
+echo "  한 사이클 완료. 다음 사이클: logs/cop_dataset_target(.next) 전환 또는 데이터 재수집(마커 삭제)."
 exit 0

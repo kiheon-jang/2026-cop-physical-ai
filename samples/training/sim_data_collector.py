@@ -281,14 +281,21 @@ class GraspExpert:
 # ---------------------------------------------------------------------------
 # 수집 루프
 # ---------------------------------------------------------------------------
-def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0, seed=None):
+def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0, seed=None,
+         scene_arg=None):
     if seed is not None:
         random.seed(seed)  # 큐브 배치 재현성 (미지정 시 기존 비결정 동작 유지)
-    if not os.path.exists(MODEL_XML_PATH):
-        print(f"Error: MJCF model file not found at {MODEL_XML_PATH}")
+    scene_path = scene_arg or MODEL_XML_PATH
+    if not os.path.exists(scene_path):
+        print(f"Error: MJCF model file not found at {scene_path}")
         return
+    if scene_arg and "floor" in os.path.basename(scene_arg):
+        # 바닥 씬: 받침대 없음 → 큐브를 바닥(z=HALF)에 배치
+        global TABLE_TOP
+        TABLE_TOP = 0.0
+    print(f"[씬] {scene_path}  (큐브 z={TABLE_TOP + 0.015})")
 
-    expert = GraspExpert(MODEL_XML_PATH)
+    expert = GraspExpert(scene_path)
     model, data = expert.m, expert.d
     num_joints = model.nu  # 6
 
@@ -416,6 +423,8 @@ if __name__ == "__main__":
     _p.add_argument("--dr-seed", type=int, default=0, help="DR 무작위 시드")
     _p.add_argument("--seed", type=int, default=None,
                     help="큐브 배치 랜덤 시드 (재현성. 기본: 비결정)")
+    _p.add_argument("--scene", type=str, default=None,
+                    help="씬 MJCF 경로 (기본: scene_grasp_pads.xml). *floor* 면 큐브를 바닥에 배치.")
     _a = _p.parse_args()
     main(dataset_root_arg=_a.root, num_episodes_arg=_a.episodes,
-         use_dr=_a.dr, dr_seed=_a.dr_seed, seed=_a.seed)
+         use_dr=_a.dr, dr_seed=_a.dr_seed, seed=_a.seed, scene_arg=_a.scene)

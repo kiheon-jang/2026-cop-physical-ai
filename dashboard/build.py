@@ -1305,7 +1305,7 @@ def build_web3d() -> dict:
     try:
         import pyarrow.parquet as pq
         import numpy as np
-        for src in ("episodes_cl", "episodes_cl_dr"):
+        for src in ("episodes_cl", "episodes_cl_dr", "episodes_floor"):
             f = REPO_ROOT / "data" / src / "data" / "chunk-000" / "file-000.parquet"
             if not f.exists():
                 continue

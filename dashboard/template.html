@@ -3840,8 +3840,10 @@ function sim3dBuildScene() {
     inner[j.body] = neg;
     SIM3D.hinges.push({ qposadr: j.qposadr, pivot, axisV: new THREE.Vector3().fromArray(j.axis).normalize(), name: j.name });
   });
+  SIM3D.tableMesh = null;
   chain.geoms.forEach(ge => {
     const m = geomMesh(ge); if (!m) return;
+    if (ge.name === 'table') SIM3D.tableMesh = m; // 바닥 씬 에피소드에서 숨김
     inner[ge.body].add(m);
   });
   chain.bodies.forEach(b => {
@@ -3923,7 +3925,18 @@ function sim3dBuildScene() {
 function sim3dModelLabel(ckptDir) {
   if (ckptDir === 'act') return 'baseline CL';
   if (ckptDir === 'act_cl_dr') return 'DR 재학습';
+  if (ckptDir === 'act_floor') return '바닥(받침대 없음) 재학습';
   return ckptDir || '?';
+}
+const SIM3D_DS_LABEL = {
+  episodes_cl: '📦 수집 에피소드 — closed-loop',
+  episodes_cl_dr: '📦 수집 에피소드 — DR',
+  episodes_floor: '📦 수집 에피소드 — 바닥(받침대 없음)',
+};
+function sim3dIsFloor(ep) {
+  if (!ep) return false;
+  if (ep.kind === 'policy') return !!(ep.meta && (ep.meta.scene || '').includes('floor'));
+  return ep.group === 'episodes_floor';
 }
 
 function sim3dEpisodeList() {
@@ -3945,11 +3958,14 @@ function sim3dEpisodeList() {
       success: r.success, meta: m,
     }));
   });
-  groups.push({ key: 'episodes_cl', label: '📦 수집 에피소드 — closed-loop (50)' });
-  groups.push({ key: 'episodes_cl_dr', label: '📦 수집 에피소드 — DR (50)' });
+  const srcCount = {};
+  (w.dataset_episodes || []).forEach(e => { srcCount[e.source] = (srcCount[e.source] || 0) + 1; });
+  Object.keys(srcCount).forEach(src => groups.push({
+    key: src, label: `${SIM3D_DS_LABEL[src] || '📦 ' + src} (${srcCount[src]})`,
+  }));
   (w.dataset_episodes || []).forEach(e => eps.push({
     kind: 'dataset', group: e.source, id: e.id,
-    label: `${e.source === 'episodes_cl_dr' ? 'DR' : 'CL'} ep ${String(e.episode).padStart(2, '0')} (${e.n_frames}f)`,
+    label: `${e.source.replace('episodes_', '')} ep ${String(e.episode).padStart(2, '0')} (${e.n_frames}f)`,
     qpos: b64ToF32(e.qpos_b64), n: e.n_frames, fps: w.dataset_fps || 30, success: true,
   }));
   SIM3D.groups = groups;
@@ -3986,7 +4002,7 @@ function sim3dApplyFrame(f) {
       // 수집 데이터에 큐브 좌표 미기록 — 숨기면 '허공을 집는' 오독이 생기므로
       // 명목 위치(0.13,0,0.175 ±2cm 랜덤)에 반투명 고스트로 표시
       SIM3D.cubeGroup.visible = true;
-      SIM3D.cubeGroup.position.set(0.13, 0, 0.175);
+      SIM3D.cubeGroup.position.set(0.13, 0, sim3dIsFloor(ep) ? 0.015 : 0.175);
       sim3dCubeOpacity(0.3);
     }
     if (gauge) { gauge.className = 'r4-gauge'; gauge.innerHTML = ''; }
@@ -4015,9 +4031,10 @@ function sim3dSelect(id) {
     const m = ep.meta || {};
     meta.push(`체크포인트: ${m.checkpoint || '—'}`, `측정: ${m.measured_at || '—'}`, `큐브 궤적 포함 (qpos6 + cube_xyz)`);
   } else {
-    meta.push(`데이터셋: data/${ep.source}`, `closed-loop expert 성공 시연 (lift ≥ 40mm)`, `반투명 큐브 = 명목 위치(실제는 ±2cm 랜덤, 좌표 미기록) — 관절 궤적은 실데이터`);
+    meta.push(`데이터셋: data/${ep.group}`, `closed-loop expert 성공 시연 (lift ≥ 40mm)`, `반투명 큐브 = 명목 위치(실제는 ±2cm 랜덤, 좌표 미기록) — 관절 궤적은 실데이터`);
   }
   document.getElementById('s3-meta').innerHTML = meta.map(x => `<span>${escapeHtml(x)}</span>`).join(' · ');
+  if (SIM3D.tableMesh) SIM3D.tableMesh.visible = !sim3dIsFloor(ep);
   const grp = (SIM3D.groups || []).find(g => g.key === ep.group);
   const osd = document.getElementById('s3-osd');
   if (osd) osd.innerHTML = `

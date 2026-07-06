@@ -45,7 +45,11 @@ cd "${ROOT}"
 export PYTORCH_ENABLE_MPS_FALLBACK=1
 
 # closed-loop expert로 성공 시연만 수집 (sim_data_collector.py 가 lift>=40mm 필터).
+# COP_SCENE: 드라이버가 데이터셋에 맞는 씬을 넘긴다 (기본: 수집기 내장 scene_grasp_pads).
+SCENE_ARG=()
+[[ -n "${COP_SCENE:-}" ]] && SCENE_ARG=(--scene "${COP_SCENE}")
 nohup "${PY}" "${COLLECTOR}" --root "${DATA_DIR}" --episodes "${EPISODES}" \
+  ${SCENE_ARG[@]+"${SCENE_ARG[@]}"} \
   > "${LOG_FILE}" 2>&1 &
 echo $! > "${PID_FILE}"
 echo "[cop_data_collect] 시작 pid=$(cat "${PID_FILE}") → ${DATA_DIR} (${EPISODES}ep) log=${LOG_FILE}"

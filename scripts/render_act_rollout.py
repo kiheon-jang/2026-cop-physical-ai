@@ -28,12 +28,15 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path("/Volumes/MARK_DATA/dev/2026-cop-physical-ai")
-# closed-loop 학습(scene_grasp_pads)과 1:1 정합 — 측정이 유효하려면 학습 씬/물리와 동일해야 한다.
-MODEL_XML = ROOT / "SO-ARM100" / "Simulation" / "SO101" / "scene_grasp_pads.xml"
+# closed-loop 학습 씬과 1:1 정합 — 측정이 유효하려면 학습 씬/물리와 동일해야 한다.
+# COP_SCENE: 드라이버가 데이터셋에 맞는 씬을 넘긴다 (episodes_floor → scene_grasp_floor.xml).
+MODEL_XML = Path(os.environ.get(
+    "COP_SCENE", str(ROOT / "SO-ARM100" / "Simulation" / "SO101" / "scene_grasp_pads.xml")))
 OUT_DIR = ROOT / "research" / "simulation" / "inference_progress"
 
 # sim_data_collector.py(closed-loop) 와 동일한 상수
-CUBE_INITIAL_POS = np.array([0.13, 0.0, 0.175])   # 작업대 위 (table top 0.16 + half 0.015)
+_CUBE_Z = 0.015 if "floor" in MODEL_XML.name else 0.175  # 바닥 vs 작업대(0.16)+half
+CUBE_INITIAL_POS = np.array([0.13, 0.0, _CUBE_Z])
 RANDOM_POS_RANGE = 0.02          # ±20mm (수집 분포와 동일)
 SIM_FPS = 30
 DATA_SAMPLE_EVERY = 17           # 정책 1 액션당 물리 스텝 수 (학습 샘플링과 동일)
@@ -270,6 +273,7 @@ def main(argv=None):
     )
     traj_payload = {
         "checkpoint": str(ckpt.relative_to(ROOT)),
+        "scene": MODEL_XML.name,
         "ckpt_dir": run_tag,
         "measured_at": summary["measured_at"],
         "seed": args.seed,
