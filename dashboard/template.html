@@ -1630,6 +1630,7 @@
         <canvas id="s3-canvas"></canvas>
         <div class="r4-canvas-note" id="s3-note"></div>
         <div class="r4-gauge" id="s3-gauge"></div>
+        <div class="r4-osd" id="s3-osd"></div>
       </div>
       <div class="r4-scrub">
         <input type="range" id="s3-slider" min="0" max="0" value="0" step="1">
@@ -3657,6 +3658,14 @@ if (IS_LIVE) {
 .r4-gauge b { font-size:18px; font-variant-numeric:tabular-nums; }
 .r4-gauge .th { color:var(--text-dim); }
 .r4-gauge.on { border-color:var(--hl-green, #22a06b); color:var(--hl-green, #22a06b); font-weight:700; }
+.r4-osd { display:none; position:absolute; left:18px; top:14px; pointer-events:none;
+  background:color-mix(in srgb, var(--bg) 78%, transparent); border:1px solid var(--border);
+  border-radius:12px; padding:10px 16px; max-width:60%; }
+#s3-wrap:fullscreen .r4-osd { display:block; }
+#s3-wrap:fullscreen { background:var(--bg); }
+.r4-osd .t { font-size:13px; color:var(--text-dim); margin-bottom:2px; }
+.r4-osd .e { font-size:18px; font-weight:800; color:var(--text); }
+.r4-osd .k { font-size:11px; color:var(--text-dim); margin-top:5px; }
 .r4-badge .fail { color:#dc2626; font-weight:700; font-size:12.5px; }
 .r4-canvas-wrap { position:relative; border:1px solid var(--border); border-radius:12px; overflow:hidden;
   background:linear-gradient(180deg, var(--bg-sub), var(--bg)); }
@@ -4009,6 +4018,12 @@ function sim3dSelect(id) {
     meta.push(`데이터셋: data/${ep.source}`, `closed-loop expert 성공 시연 (lift ≥ 40mm)`, `반투명 큐브 = 명목 위치(실제는 ±2cm 랜덤, 좌표 미기록) — 관절 궤적은 실데이터`);
   }
   document.getElementById('s3-meta').innerHTML = meta.map(x => `<span>${escapeHtml(x)}</span>`).join(' · ');
+  const grp = (SIM3D.groups || []).find(g => g.key === ep.group);
+  const osd = document.getElementById('s3-osd');
+  if (osd) osd.innerHTML = `
+    <div class="t">${escapeHtml(grp ? grp.label : '')}</div>
+    <div class="e">${escapeHtml(ep.label)}</div>
+    <div class="k">Space 재생/정지 · ← → 에피소드 · ESC 종료</div>`;
   sim3dApplyFrame(0); sim3dSyncScrub();
 }
 
@@ -4063,14 +4078,45 @@ function renderSim3d() {
     sim3dApplyFrame(SIM3D.frame); sim3dSyncScrub();
   });
   // 시연 모드: 전체화면 + 자동재생 + 연속재생 + 카메라 저속 회전 (ESC 로 종료)
-  document.getElementById('s3-demo').addEventListener('click', () => {
+  function enterDemoMode() {
     const wrap = document.getElementById('s3-wrap');
     if (wrap.requestFullscreen) wrap.requestFullscreen();
     SIM3D.autoRotate = true;
     SIM3D.playing = true;
     document.getElementById('s3-play').textContent = '⏸ 정지';
     document.getElementById('s3-chain').checked = true;
+  }
+  document.getElementById('s3-demo').addEventListener('click', enterDemoMode);
+
+  // 발표용 키보드: Space 재생/정지 · ←→ 에피소드 · F 시연 모드 (입력 필드 포커스 시 무시)
+  document.addEventListener('keydown', e => {
+    if (currentRoute !== 'sim3d') return;
+    if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      document.getElementById('s3-play').click();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); sim3dStepEpisode(-1, true);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault(); sim3dStepEpisode(1, true);
+    } else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) enterDemoMode();
+    }
   });
+
+  // 전체화면 중 마우스 2.5초 무입력 시 커서 숨김 (시네마틱)
+  {
+    const wrap = document.getElementById('s3-wrap');
+    let cursorTimer = null;
+    wrap.addEventListener('mousemove', () => {
+      wrap.style.cursor = '';
+      clearTimeout(cursorTimer);
+      if (document.fullscreenElement === wrap) {
+        cursorTimer = setTimeout(() => { wrap.style.cursor = 'none'; }, 2500);
+      }
+    });
+    document.addEventListener('fullscreenchange', () => { wrap.style.cursor = ''; clearTimeout(cursorTimer); });
+  }
   sim3dFillEpisodeSelect();
   // 첫 진입 자동재생 — 보고 시연에서 '클릭 없이 움직이는' 첫인상
   SIM3D.playing = true; document.getElementById('s3-play').textContent = '⏸ 정지';
