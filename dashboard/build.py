@@ -1312,15 +1312,23 @@ def build_web3d() -> dict:
             t = pq.read_table(f, columns=["observation.state", "episode_index"])
             states = np.array(t["observation.state"].to_pylist(), dtype=np.float32)
             ep_idx = np.array(t["episode_index"].to_pylist())
+            # 큐브 실좌표 사이드카 (수집기가 기록 — 있으면 리플레이에서 큐브가 실제로 움직인다)
+            cube_side = _read_json_file(REPO_ROOT / "data" / src / "meta" / "cube_traj.json") or {}
+            cube_eps = cube_side.get("episodes", [])
             for ep in sorted(set(ep_idx.tolist())):
                 qpos = states[ep_idx == ep]
-                episodes.append({
+                entry = {
                     "id": f"{src}-{int(ep):03d}",
                     "source": src,
                     "episode": int(ep),
                     "n_frames": int(len(qpos)),
                     "qpos_b64": _b64.b64encode(qpos.tobytes()).decode(),
-                })
+                }
+                if int(ep) < len(cube_eps) and cube_eps[int(ep)]:
+                    cube = np.array(cube_eps[int(ep)], dtype=np.float32)  # (n, 7) xyz+wxyz
+                    if len(cube) == len(qpos):
+                        entry["cube_b64"] = _b64.b64encode(cube.tobytes()).decode()
+                episodes.append(entry)
     except Exception as e:  # pyarrow 미설치/스키마 변경 — 3D 페이지는 정책 rollout 만으로도 동작
         print(f"  [web3d] dataset episodes skip: {e}", file=sys.stderr)
 

@@ -353,6 +353,11 @@ def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0, 
     # 에피소드 프레임 버퍼 (성공 시에만 flush)
     frame_buffer = []
 
+    # 큐브 실좌표+회전 사이드카 (웹 3D 리플레이용 — 학습 데이터에는 안 들어감).
+    # LeRobot features 는 불변 유지, meta/cube_traj.json 에 에피소드별 [x,y,z,qw,qx,qy,qz] 기록.
+    cube_buffer: list = []
+    cube_traj_all: list = []
+
     def record():
         """현재 시뮬 상태 1프레임을 버퍼에 적재 (overhead RGB + qpos[:6] + ctrl[:6])."""
         renderer.update_scene(data, camera=camera_id)
@@ -365,6 +370,8 @@ def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0, 
             "observation.state": data.qpos[:num_joints].astype(np.float32).copy(),
             "action": data.ctrl[:num_joints].astype(np.float32).copy(),
         })
+        cube = data.body("cube")
+        cube_buffer.append([round(float(v), 4) for v in list(cube.xpos) + list(cube.xquat)])
 
     expert.record_hook = record
 
@@ -373,6 +380,7 @@ def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0, 
     while saved < target_episodes and attempts < max_attempts:
         attempts += 1
         frame_buffer.clear()
+        cube_buffer.clear()
 
         if use_dr:
             # 매 에피소드 원본 복원 후 무작위화 (누적 방지). 카메라 노이즈 std 는 record() 에 전달.
@@ -393,6 +401,7 @@ def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0, 
             for fr in frame_buffer:
                 dataset.add_frame(fr)
             dataset.save_episode()
+            cube_traj_all.append(list(cube_buffer))  # 에피소드 index = 저장 순서
             saved += 1
             print(f"[성공 {saved}/{target_episodes}] 시도 #{attempts} "
                   f"lift={maxlift * 1000:5.1f}mm frames={len(frame_buffer)} grasp재시도={tries} "
@@ -403,6 +412,13 @@ def main(dataset_root_arg=None, num_episodes_arg=None, use_dr=False, dr_seed=0, 
                   f"cube=({cube_xy[0]:.3f},{cube_xy[1]:.3f})")
 
     dataset.finalize()
+    if cube_traj_all:
+        import json as _json
+        _sidecar = os.path.join(dataset_root, "meta", "cube_traj.json")
+        with open(_sidecar, "w") as _f:
+            _json.dump({"frame_format": "cube [x,y,z,qw,qx,qy,qz] per recorded frame",
+                        "episodes": cube_traj_all}, _f)
+        print(f"[사이드카] 큐브 궤적 {len(cube_traj_all)}ep → {_sidecar}")
     yld = (saved / attempts * 100) if attempts else 0.0
     print(f"\n수집 완료: 성공 {saved}/{target_episodes}  (시도 {attempts}회, yield {yld:.0f}%)  "
           f"→ {dataset_root}")

@@ -115,9 +115,11 @@ def run_rollout(model, data, policy, renderer, cam_id, device, rng, max_frames, 
 
         lift = float(data.body("cube").xpos[2]) - cube_init_z
         max_lift = max(max_lift, lift)
+        cube_body = data.body("cube")
         traj.append(
             [round(float(q), 4) for q in data.qpos[:N_JOINTS]]
-            + [round(float(x), 4) for x in data.body("cube").xpos]
+            + [round(float(x), 4) for x in cube_body.xpos]
+            + [round(float(x), 4) for x in cube_body.xquat]  # 회전까지 — 뷰어 파고듦 방지
         )
 
     return (max_lift >= LIFT_THRESHOLD_M), max_lift, frames, traj
@@ -280,7 +282,7 @@ def main(argv=None):
         "dr": args.dr,
         "fps": round(1.0 / (0.002 * DATA_SAMPLE_EVERY), 2),  # 궤적 1프레임 = 정책 1스텝 = 물리 17스텝×2ms ≈ 29.4fps
         "joint_names": ["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll", "gripper"],
-        "frame_format": "qpos[0:6] + cube_xyz[6:9]",
+        "frame_format": "qpos[0:6] + cube_xyz[6:9] + cube_wxyz[9:13]",
         "rollouts": trajectories,
     }
     (hist_dir / f"{hist_base}_traj.json").write_text(
