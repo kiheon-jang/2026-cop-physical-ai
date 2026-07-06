@@ -37,3 +37,12 @@
   - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
   - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 42.5mm (throwaway 루트, 실행 후 삭제, 운영 무접촉)
   - 운영 데이터 무결성: `episodes_cl` 50ep/3350frame·`episodes_cl_dr` 50ep/3350frame·`rollout_summary.json` 0.70 불변.
+
+## 2026-07-06
+- Phase 2 W1 — **DR 재학습 트리거→진행→완료**(W1 잔여 절반): `agent/research-log/2026-07-06.md`, `research/simulation/2026-07-06_phase2-w1-pipeline-audit-dr-retrain-trigger.md`, `research/simulation/2026-07-06_phase2-w1-dr-retrain-inflight.md` → 7월 보고서 [Sim2Real 준비 / DR 재학습] 섹션.
+  - 적대적 파이프라인 감사(19건 확정, critical 6건 수정) 후 `episodes_cl_dr`→`checkpoints/act_cl_dr` 100epoch 재학습 트리거(13:31)→**23:02 완료**(wall_clock ≈9.5h, final loss 0.00498). 측정은 다음 드라이버 사이클 담당.
+- 23:30 nightly sim-test — DR 학습완료 감지 + 우선순위 4종 회귀: `agent/research-log/2026-07-06.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임), `sim_camera_verification.py` PASS(2카메라 30프레임 동기)
+  - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 41.5~42.0mm (throwaway 루트, 실행 후 삭제, 운영 무접촉)
+  - 운영 데이터 무결성: `episodes_cl` 50ep/3350frame·`episodes_cl_dr` 50ep/3350frame·baseline `rollout_summary.json` 0.70/43.7mm 불변, DR ckpt 격리(`act_cl_dr`) 유지.
