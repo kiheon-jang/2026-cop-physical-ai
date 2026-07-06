@@ -1289,6 +1289,17 @@ def build_web3d() -> dict:
     chain = _read_json_file(DASHBOARD_DIR / "web3d_chain.json")
     policy = _read_json_file(INFER_DIR / "rollout_traj_latest.json")
 
+    # 측정 히스토리별 정책 rollout 궤적 — 학습 진척 ↔ 3D 리플레이 연동의 핵심.
+    # 측정할 때마다 history/*_traj.json 이 쌓이고, 최근 12개까지 리플레이 소스로 노출된다.
+    policy_history: list[dict] = []
+    hist_dir = INFER_DIR / "history"
+    if hist_dir.exists():
+        for f in sorted(hist_dir.glob("*_traj.json"))[-12:]:
+            d = _read_json_file(f)
+            if d and d.get("rollouts"):
+                d["file"] = f.name
+                policy_history.append(d)
+
     import base64 as _b64
     episodes: list[dict] = []
     try:
@@ -1316,6 +1327,7 @@ def build_web3d() -> dict:
     return {
         "chain": chain,
         "policy_rollouts": policy,
+        "policy_history": policy_history,
         "dataset_episodes": episodes,
         "dataset_fps": 30,
     }

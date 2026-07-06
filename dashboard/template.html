@@ -1612,11 +1612,7 @@
           드래그 = 회전 · 휠 = 줌. 데이터는 야간 파이프라인이 측정할 때마다 자동 갱신.</div>
       </div>
       <div class="r4-toolbar">
-        <select id="s3-source" class="sort-sel">
-          <option value="policy">정책 rollout (최신 측정)</option>
-          <option value="episodes_cl">수집 에피소드 — closed-loop</option>
-          <option value="episodes_cl_dr">수집 에피소드 — DR</option>
-        </select>
+        <select id="s3-source" class="sort-sel"></select>
         <select id="s3-episode" class="sort-sel"></select>
         <button class="r4-btn" id="s3-prev" title="이전">◀</button>
         <button class="r4-btn" id="s3-next" title="다음">▶</button>
@@ -1627,10 +1623,13 @@
           <option value="2">2×</option>
         </select>
         <span class="r4-badge" id="s3-badge"></span>
+        <label class="r4-chk" title="에피소드가 끝나면 자동으로 다음 에피소드 재생"><input type="checkbox" id="s3-chain" checked> 연속재생</label>
+        <button class="r4-btn" id="s3-demo" title="전체화면 + 자동재생 + 카메라 회전">🎬 시연 모드</button>
       </div>
       <div class="r4-canvas-wrap" id="s3-wrap">
         <canvas id="s3-canvas"></canvas>
         <div class="r4-canvas-note" id="s3-note"></div>
+        <div class="r4-gauge" id="s3-gauge"></div>
       </div>
       <div class="r4-scrub">
         <input type="range" id="s3-slider" min="0" max="0" value="0" step="1">
@@ -3649,6 +3648,15 @@ if (IS_LIVE) {
 .r4-btn:hover { border-color:var(--accent); color:var(--accent-strong); }
 .r4-btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:700; min-width:84px; }
 .r4-badge .ok { color:var(--hl-green, #22a06b); font-weight:700; font-size:12.5px; }
+.r4-chk { display:inline-flex; gap:5px; align-items:center; font-size:12.5px; color:var(--text-sub); cursor:pointer; }
+.r4-chk input { accent-color:var(--accent); }
+.r4-gauge { position:absolute; right:14px; top:12px; font-size:14px; color:var(--text-sub);
+  background:color-mix(in srgb, var(--bg) 82%, transparent); border:1px solid var(--border);
+  border-radius:10px; padding:7px 12px; pointer-events:none; }
+.r4-gauge:empty { display:none; }
+.r4-gauge b { font-size:18px; font-variant-numeric:tabular-nums; }
+.r4-gauge .th { color:var(--text-dim); }
+.r4-gauge.on { border-color:var(--hl-green, #22a06b); color:var(--hl-green, #22a06b); font-weight:700; }
 .r4-badge .fail { color:#dc2626; font-weight:700; font-size:12.5px; }
 .r4-canvas-wrap { position:relative; border:1px solid var(--border); border-radius:12px; overflow:hidden;
   background:linear-gradient(180deg, var(--bg-sub), var(--bg)); }
@@ -3747,7 +3755,8 @@ function sim3dBuildScene() {
   if (!chain || typeof THREE === 'undefined') return false;
   const wrap = document.getElementById('s3-wrap');
   const canvas = document.getElementById('s3-canvas');
-  const W = wrap.clientWidth || 900, H = 520;
+  const canvasH = () => (document.fullscreenElement === wrap ? window.innerHeight : 520);
+  const W = wrap.clientWidth || 900, H = canvasH();
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -3869,42 +3878,72 @@ function sim3dBuildScene() {
   function loop(t) {
     requestAnimationFrame(loop);
     if (currentRoute !== 'sim3d') return;
+    const dt = Math.min(0.1, (t - SIM3D.lastT) / 1000 || 0);
+    if (SIM3D.autoRotate) { az += dt * 0.22; applyCam(); }
     if (SIM3D.playing && SIM3D.current) {
-      const dt = Math.min(0.1, (t - SIM3D.lastT) / 1000 || 0);
       const speed = parseFloat(document.getElementById('s3-speed').value || '1');
       SIM3D.acc += dt * speed * (SIM3D.current.fps || 30);
+      let ended = false;
       while (SIM3D.acc >= 1) {
         SIM3D.acc -= 1; SIM3D.frame++;
-        if (SIM3D.frame >= SIM3D.current.n) SIM3D.frame = 0; // 루프 재생
+        if (SIM3D.frame >= SIM3D.current.n) {
+          if (document.getElementById('s3-chain')?.checked) { ended = true; SIM3D.frame = SIM3D.current.n - 1; break; }
+          SIM3D.frame = 0; // 단일 루프 재생
+        }
       }
       sim3dApplyFrame(SIM3D.frame); sim3dSyncScrub();
+      if (ended) { SIM3D.acc = 0; sim3dStepEpisode(1, true); } // 연속재생: 다음 에피소드 (끝이면 처음으로)
     }
     SIM3D.lastT = t;
     renderer.render(scene, camera);
   }
   requestAnimationFrame(loop);
 
-  window.addEventListener('resize', () => {
-    const w2 = wrap.clientWidth || W;
-    renderer.setSize(w2, H); camera.aspect = w2 / H; camera.updateProjectionMatrix();
+  function fitCanvas() {
+    const w2 = wrap.clientWidth || W, h2 = canvasH();
+    renderer.setSize(w2, h2); camera.aspect = w2 / h2; camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', fitCanvas);
+  document.addEventListener('fullscreenchange', () => {
+    fitCanvas();
+    if (!document.fullscreenElement) SIM3D.autoRotate = false; // ESC 로 나가면 회전 정지
   });
   return true;
 }
 
+function sim3dModelLabel(ckptDir) {
+  if (ckptDir === 'act') return 'baseline CL';
+  if (ckptDir === 'act_cl_dr') return 'DR 재학습';
+  return ckptDir || '?';
+}
+
 function sim3dEpisodeList() {
   const w = D.web3d || {};
-  const eps = [];
-  ((w.policy_rollouts || {}).rollouts || []).forEach(r => eps.push({
-    kind: 'policy', id: `policy-${r.rollout}`, source: 'policy',
-    label: `rollout #${r.rollout} — ${r.success ? '✅ 성공' : '❌ 실패'} (${Math.round(r.max_lift_m * 1000)}mm)`,
-    frames: r.frames, n: r.frames.length, fps: (w.policy_rollouts || {}).fps || 29.4,
-    success: r.success, meta: w.policy_rollouts,
-  }));
+  const eps = []; const groups = [];
+  // 정책 rollout — 측정 히스토리 오래된 것 → 최신 순 (학습 진척 내러티브)
+  const hist = (w.policy_history && w.policy_history.length) ? w.policy_history
+             : (w.policy_rollouts ? [w.policy_rollouts] : []);
+  hist.forEach((m, mi) => {
+    const rolls = m.rollouts || [];
+    const nOk = rolls.filter(r => r.success).length;
+    const date = (m.measured_at || '').slice(5, 16).replace('T', ' ');
+    const g = 'policy-' + mi;
+    groups.push({ key: g, label: `🤖 정책 rollout · ${date} · ${sim3dModelLabel(m.ckpt_dir)} · 성공 ${nOk}/${rolls.length}` });
+    rolls.forEach(r => eps.push({
+      kind: 'policy', group: g, id: `${g}-${r.rollout}`,
+      label: `rollout #${r.rollout} — ${r.success ? '✅ 성공' : '❌ 실패'} (${Math.round(r.max_lift_m * 1000)}mm)`,
+      frames: r.frames, n: r.frames.length, fps: m.fps || 29.4,
+      success: r.success, meta: m,
+    }));
+  });
+  groups.push({ key: 'episodes_cl', label: '📦 수집 에피소드 — closed-loop (50)' });
+  groups.push({ key: 'episodes_cl_dr', label: '📦 수집 에피소드 — DR (50)' });
   (w.dataset_episodes || []).forEach(e => eps.push({
-    kind: 'dataset', id: e.id, source: e.source,
+    kind: 'dataset', group: e.source, id: e.id,
     label: `${e.source === 'episodes_cl_dr' ? 'DR' : 'CL'} ep ${String(e.episode).padStart(2, '0')} (${e.n_frames}f)`,
     qpos: b64ToF32(e.qpos_b64), n: e.n_frames, fps: w.dataset_fps || 30, success: true,
   }));
+  SIM3D.groups = groups;
   return eps;
 }
 
@@ -3916,6 +3955,7 @@ function sim3dCubeOpacity(a) {
 
 function sim3dApplyFrame(f) {
   const ep = SIM3D.current; if (!ep) return;
+  const gauge = document.getElementById('s3-gauge');
   let q;
   if (ep.kind === 'policy') {
     const fr = ep.frames[Math.min(f, ep.n - 1)];
@@ -3924,6 +3964,12 @@ function sim3dApplyFrame(f) {
       SIM3D.cubeGroup.visible = true;
       SIM3D.cubeGroup.position.set(fr[6], fr[7], fr[8]);
       sim3dCubeOpacity(1);
+    }
+    if (gauge) {
+      const lift = Math.max(0, (fr[8] - ep.frames[0][8]) * 1000);
+      const ok = lift >= 40;
+      gauge.className = 'r4-gauge' + (ok ? ' on' : '');
+      gauge.innerHTML = `큐브 리프트 <b>+${lift.toFixed(0)}mm</b>${ok ? ' · 성공 기준 40mm 도달 ✓' : ' <span class="th">/ 40mm</span>'}`;
     }
   } else {
     q = ep.qpos.subarray(f * 6, f * 6 + 6);
@@ -3934,6 +3980,7 @@ function sim3dApplyFrame(f) {
       SIM3D.cubeGroup.position.set(0.13, 0, 0.175);
       sim3dCubeOpacity(0.3);
     }
+    if (gauge) { gauge.className = 'r4-gauge'; gauge.innerHTML = ''; }
   }
   SIM3D.hinges.forEach(h => {
     if (h.qposadr < 6) h.pivot.quaternion.setFromAxisAngle(h.axisV, q[h.qposadr]);
@@ -3968,9 +4015,19 @@ function sim3dSelect(id) {
 function sim3dFillEpisodeSelect() {
   const src = document.getElementById('s3-source').value;
   const sel = document.getElementById('s3-episode');
-  const subset = SIM3D.episodes.filter(e => (src === 'policy' ? e.kind === 'policy' : e.source === src));
+  const subset = SIM3D.episodes.filter(e => e.group === src);
   sel.innerHTML = subset.map(e => `<option value="${e.id}">${escapeHtml(e.label)}</option>`).join('');
   if (subset.length) sim3dSelect(subset[0].id);
+}
+
+// 이전/다음 에피소드. wrapAround=true(연속재생)면 끝에서 처음으로 순환.
+function sim3dStepEpisode(dir, wrapAround) {
+  const sel = document.getElementById('s3-episode');
+  if (!sel || !sel.options.length) return;
+  let i = sel.selectedIndex + dir;
+  if (wrapAround) i = (i + sel.options.length) % sel.options.length;
+  else i = Math.max(0, Math.min(sel.options.length - 1, i));
+  sel.selectedIndex = i; sim3dSelect(sel.value);
 }
 
 let _sim3dInit = false;
@@ -3987,10 +4044,16 @@ function renderSim3d() {
   if (cnt) cnt.textContent = SIM3D.episodes.length;
   if (!sim3dBuildScene()) { note.textContent = 'WebGL 초기화 실패'; return; }
 
-  document.getElementById('s3-source').addEventListener('change', sim3dFillEpisodeSelect);
+  // 소스 셀렉트: 측정 히스토리(정책 rollout, 시간순) + 데이터셋 그룹. 기본 = 최신 측정.
+  const srcSel = document.getElementById('s3-source');
+  srcSel.innerHTML = (SIM3D.groups || []).map(g => `<option value="${g.key}">${escapeHtml(g.label)}</option>`).join('');
+  const lastPolicy = (SIM3D.groups || []).filter(g => g.key.startsWith('policy-')).pop();
+  if (lastPolicy) srcSel.value = lastPolicy.key;
+
+  srcSel.addEventListener('change', sim3dFillEpisodeSelect);
   document.getElementById('s3-episode').addEventListener('change', e => sim3dSelect(e.target.value));
-  document.getElementById('s3-prev').addEventListener('click', () => stepEpisode(-1));
-  document.getElementById('s3-next').addEventListener('click', () => stepEpisode(1));
+  document.getElementById('s3-prev').addEventListener('click', () => sim3dStepEpisode(-1, false));
+  document.getElementById('s3-next').addEventListener('click', () => sim3dStepEpisode(1, false));
   document.getElementById('s3-play').addEventListener('click', () => {
     SIM3D.playing = !SIM3D.playing;
     document.getElementById('s3-play').textContent = SIM3D.playing ? '⏸ 정지' : '▶ 재생';
@@ -3999,11 +4062,15 @@ function renderSim3d() {
     SIM3D.frame = parseInt(e.target.value, 10) || 0; SIM3D.acc = 0;
     sim3dApplyFrame(SIM3D.frame); sim3dSyncScrub();
   });
-  function stepEpisode(d) {
-    const sel = document.getElementById('s3-episode');
-    const i = Math.max(0, Math.min(sel.options.length - 1, sel.selectedIndex + d));
-    sel.selectedIndex = i; sim3dSelect(sel.value);
-  }
+  // 시연 모드: 전체화면 + 자동재생 + 연속재생 + 카메라 저속 회전 (ESC 로 종료)
+  document.getElementById('s3-demo').addEventListener('click', () => {
+    const wrap = document.getElementById('s3-wrap');
+    if (wrap.requestFullscreen) wrap.requestFullscreen();
+    SIM3D.autoRotate = true;
+    SIM3D.playing = true;
+    document.getElementById('s3-play').textContent = '⏸ 정지';
+    document.getElementById('s3-chain').checked = true;
+  });
   sim3dFillEpisodeSelect();
   // 첫 진입 자동재생 — 보고 시연에서 '클릭 없이 움직이는' 첫인상
   SIM3D.playing = true; document.getElementById('s3-play').textContent = '⏸ 정지';
