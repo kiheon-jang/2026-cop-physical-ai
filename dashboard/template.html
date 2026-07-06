@@ -100,6 +100,8 @@
   .home-hero h1 { margin: 0 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -.6px; }
   .home-hero .sub { color: var(--text-sub); font-size: 14px; }
   .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 0 20px; }
+  .kpi-row-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 900px) { .kpi-row-4 { grid-template-columns: repeat(2, 1fr); } }
   .kpi { background: var(--bg-sub); border: 1px solid var(--border); padding: 18px;
     border-radius: 10px; position: relative; overflow: hidden; }
   .kpi.is-accent { background: var(--accent-soft); border-color: transparent; }
@@ -1120,22 +1122,13 @@
     <!-- HOME (Overview) — 관제탑형 게이지 히어로 (executive-glance) -->
     <div class="view" id="view-home">
       <div class="cockpit" id="cockpit">
-        <!-- 좌: 성공률 반원 게이지 + 돌파 스토리 -->
+        <!-- 좌: 성공률 반원 게이지 + 0→70→90 여정 -->
         <div class="ck-gauge" id="ck-gauge"></div>
-        <!-- 우상: 3D 포스터 (클릭 → 3D 시연) -->
+        <!-- 우: 3D 포스터 (클릭 → 3D 시연) -->
         <div class="ck-poster" id="ck-poster" onclick="setRoute('sim3d')" role="button" tabindex="0"></div>
-        <!-- 우하: D-day + Phase 스텝퍼 -->
-        <div class="ck-side">
-          <div class="ck-dday" id="ck-dday"></div>
-          <div class="ck-stepper" id="ck-stepper"></div>
-        </div>
-        <!-- 전폭: 무인 자동화 파이프라인 루프 -->
-        <div class="ck-pipe" id="ck-pipe"></div>
-        <!-- 전폭: 4→9월 일정 스파크라인 -->
-        <div class="ck-schedule" id="ck-schedule"></div>
       </div>
 
-      <div class="kpi-row" id="kpi-row"></div>
+      <div class="kpi-row kpi-row-4" id="kpi-row"></div>
 
       <!-- 성공률 스펙트럼 (seed 분포 + 공정추정 + 목표) -->
       <div id="ck-spectrum"></div>
@@ -3299,25 +3292,27 @@ function renderCockpitGauge() {
       <div class="ck-gauge-num"><span id="ck-gauge-val">${Math.round(sr*100)}</span><span class="u">%</span></div>
       <div class="ck-gauge-cap">시뮬 Pick 성공률</div>
     </div>`;
+  const srP = Math.round(sr * 100), tgP = Math.round(target * 100);
   document.getElementById('ck-gauge').innerHTML =
     `<div class="ck-eyebrow">CoP Physical AI · 시뮬레이션 성과</div>
-     <div class="ck-goal">SO-ARM101 로봇팔 · MuJoCo 모방학습으로 Pick&amp;Place 자동화</div>
+     <div class="ck-goal">SO-ARM101 로봇팔이 MuJoCo 시뮬에서 스스로 Pick&amp;Place를 배운다</div>
      <div class="ck-gauge-wrap">
        <div class="ck-gauge-svg">${svg}</div>
-       <div class="ck-gauge-sub">${fair != null ? `공정추정 ${(fair*100).toFixed(1)}% · ` : ''}목표 ${Math.round(target*100)}% · 남은 ${Math.round((target-sr)*100)}%p</div>
-       <div class="ck-gauge-legend">
-         <span><i style="background:var(--accent)"></i>달성 ${Math.round(sr*100)}%</span>
-         <span><i style="background:var(--border-strong)"></i>남은 과제 ${Math.round((target-sr)*100)}%p</span>
-         <span><i style="width:2px;height:12px;background:var(--text);border-radius:1px"></i>목표 ${Math.round(target*100)}%</span>
+       <div class="ck-journey">
+         <div class="ck-journey-track">
+           <div class="ck-journey-fill" style="width:${srP}%"></div>
+           <div class="ck-journey-gap" style="left:${srP}%;width:${tgP-srP}%"></div>
+           <div class="ck-journey-node start" style="left:0%"></div>
+           <div class="ck-journey-node now" style="left:${srP}%"></div>
+           <div class="ck-journey-badge" style="left:${srP}%"><small>현재</small>${srP}%</div>
+           <div class="ck-journey-node goal" style="left:${tgP}%"></div>
+         </div>
+         <div class="ck-journey-ends">
+           <span class="s">open-loop <b>0%</b></span>
+           <span class="g">목표 <b>${tgP}%</b></span>
+         </div>
+         <div class="ck-journey-cap">제어 방식 전환으로 <b>0% → ${srP}%</b> 돌파${fair != null ? ` · 공정추정 ${(fair*100).toFixed(1)}%` : ''}</div>
        </div>
-     </div>
-     <div class="ck-break">
-       <div class="ck-break-row">
-         <div class="ck-break-item was"><div class="v">0%</div><div class="l">이전 · open-loop 시연</div></div>
-         <div class="ck-break-arrow">→</div>
-         <div class="ck-break-item now"><div class="v">${Math.round(sr*100)}%</div><div class="l">지금 · closed-loop 정책</div></div>
-       </div>
-       <div class="ck-break-cap">제어 방식 전환 한 번으로 <b>0% → ${Math.round(sr*100)}%</b> 돌파 · 다음 목표 ${Math.round(target*100)}%</div>
      </div>`;
 
   // 오프닝 애니메이션 (home 최초 1회, reduced-motion 이면 정적)
@@ -3358,75 +3353,52 @@ function renderCockpitPoster() {
     <span class="pill br">▶ 3D 시연 열기</span>`;
 }
 
-function renderCockpitSide() {
+// KPI 밴드 4칸: 완성 D-day · 현재 Phase · 무인 파이프라인(미니루프) · 이번 달 마일스톤
+function renderCockpitKPI() {
   const kpi = D.business_kpi || {};
   const v = D.vision || {};
   const phases = D.phases || [];
-  document.getElementById('ck-dday').innerHTML = `
-    <div class="l">기능 완성까지</div>
-    <div class="n">D-${kpi.d_day != null ? kpi.d_day : '?'}</div>
-    <div class="d">${escapeHtml(kpi.completion_date || v.completion_date || '2026-09-30')}</div>`;
-  const stepper = document.getElementById('ck-stepper');
-  stepper.innerHTML = phases.map(p => {
-    const done = p.status === '완료', active = p.status === '진행';
-    const ppct = Math.round((p.progress || 0) * 100);
-    const cls = done ? 'done' : (active ? 'active' : '');
-    const fill = done ? 'var(--accent)' : (active ? `linear-gradient(90deg,var(--action),var(--action))` : 'transparent');
-    const w = done ? 100 : (active ? ppct : 0);
-    const bl = p.business_label || p.name || '';
-    const mm = bl.match(/(\d+월)/);
-    const short = mm ? mm[1] : bl.split(/[:\-]/)[0].trim().slice(0, 4);
-    return `<div class="ck-step ${cls}" title="${escapeHtml(bl)} · ${ppct}%">
-      <div class="bar"><i style="width:${w}%;background:${fill}"></i></div>
-      <div class="lb">${escapeHtml(short)}</div>
-    </div>`;
-  }).join('');
-}
-
-function renderCockpitPipe() {
-  const el = document.getElementById('ck-pipe'); if (!el) return;
   const live = D.pipeline_live || {};
+
+  const activePhase = phases.find(p => p.status === '진행') || phases.find(p => p.status !== '완료') || {};
+  const apPct = Math.round((activePhase.progress || 0) * 100);
+
+  // 미니 파이프라인 루프
   const stage = live.stage || '';
-  // 스테이지 문자열 → 4단계 루프 중 현재 활성 인덱스
-  const steps = [
-    { key: '수집', ic: '📥' },
-    { key: '학습', ic: '🧠' },
-    { key: '측정', ic: '🎯' },
-    { key: '반복', ic: '↻' },
-  ];
-  let active = 1; // 기본 학습
+  let active = 1;
   if (stage.includes('수집')) active = 0;
   else if (stage.includes('학습')) active = 1;
   else if (stage.includes('측정')) active = 2;
   else if (stage.includes('완료') || stage.includes('유지')) active = 3;
-  const ep = live.last_epoch ? ` · epoch ${live.last_epoch.epoch + 1}/100` : '';
-  const nodes = steps.map((s, i) => {
+  const steps = ['수집', '학습', '측정', '반복'];
+  const loop = steps.map((s, i) => {
     const cls = i < active ? 'done' : (i === active ? 'active' : '');
-    const node = `<div class="ck-node ${cls}"><div class="ring">${s.ic}</div><div class="nm">${s.key}</div></div>`;
-    if (i < steps.length - 1) return node + `<div class="ck-link"><i></i></div>`;
-    return node;
+    const node = `<div class="ck-mn ${cls}"><span class="d"></span><span class="t">${s}</span></div>`;
+    return i < steps.length - 1 ? node + `<div class="ck-ml"><i></i></div>` : node;
   }).join('');
-  el.innerHTML = `
-    <div class="ck-pipe-head">
-      <span class="live"><span class="dot"></span>가동 중</span>
-      <span class="lbl">무인 자동화 파이프라인 — 매일 밤 스스로 1사이클 전진 · 현재 <b>${escapeHtml(stage)}</b>${ep}</span>
-    </div>
-    <div class="ck-pipe-flow">${nodes}</div>`;
-}
+  const ep = live.last_epoch ? `epoch ${live.last_epoch.epoch + 1}/100` : '';
 
-function renderCockpitSchedule() {
-  const kpi = D.business_kpi || {};
-  const prog = Math.round((kpi.target_progress || 0) * 100);
-  const tnow = Math.round((kpi.time_elapsed || 0) * 100);
-  const gap = kpi.progress_vs_time_gap || 0;
-  const gapTxt = gap >= 0 ? `일정 대비 +${Math.round(gap*100)}%p 선행` : `일정 대비 ${Math.round(gap*100)}%p 지연`;
-  document.getElementById('ck-schedule').innerHTML = `
-    <div class="ck-sched-label">전체 일정 · 진척 ${prog}%</div>
-    <div class="ck-sched-track">
-      <div class="ck-sched-fill" style="width:${prog}%"></div>
-      <div class="ck-sched-now" style="left:${tnow}%" title="오늘 (경과 ${tnow}%)"></div>
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi">
+      <div class="l">기능 완성까지</div>
+      <div class="n">D-${kpi.d_day != null ? kpi.d_day : '?'}</div>
+      <div class="d">${escapeHtml(kpi.completion_date || v.completion_date || '2026-09-30')} 목표</div>
     </div>
-    <div class="ck-sched-scale"><span>4월</span><span>${escapeHtml(gapTxt)}</span><span>9월</span></div>`;
+    <div class="kpi">
+      <div class="l">현재 단계</div>
+      <div class="n" style="font-size:20px;">${escapeHtml(activePhase.name || '-')} · ${apPct}%</div>
+      <div class="d">${escapeHtml(kpi.current_phase_business || activePhase.business_label || '')}</div>
+    </div>
+    <div class="kpi">
+      <div class="l">무인 파이프라인 · 가동중</div>
+      <div class="ck-miniloop">${loop}</div>
+      <div class="d">${escapeHtml(stage)}${ep ? ' · ' + ep : ''}</div>
+    </div>
+    <div class="kpi is-accent">
+      <div class="l">공정추정 성공률</div>
+      <div class="n">${((D.rollout_metrics||{}).fair_estimate != null ? ((D.rollout_metrics.fair_estimate*100).toFixed(1)+'%') : '—')}</div>
+      <div class="d">4-seed pooled · 목표 ${Math.round(((D.rollout_metrics||{}).target||0.9)*100)}%</div>
+    </div>`;
 }
 
 function renderCockpitSpectrum() {
@@ -3468,12 +3440,10 @@ function renderHome() {
   const kpi = D.business_kpi || {};
   const phases = D.phases || [];
 
-  // 1) 관제탑 히어로
+  // 1) 관제탑 히어로 + KPI 밴드 + 스펙트럼
   renderCockpitGauge();
   renderCockpitPoster();
-  renderCockpitSide();
-  renderCockpitPipe();
-  renderCockpitSchedule();
+  renderCockpitKPI();
   renderCockpitSpectrum();
 
   // 핵심 목표 카드 (유지)
@@ -3496,30 +3466,7 @@ function renderHome() {
       </div>`).join('');
   }
 
-  // 2) KPI 리본 (공정추정 · 무인 파이프라인 · 이번 달 마일스톤)
-  const rm = D.rollout_metrics || {};
-  const live = D.pipeline_live || {};
-  const fair = rm.fair_estimate != null ? (rm.fair_estimate*100).toFixed(1) + '%' : '—';
-  const epTxt = live.last_epoch ? `epoch ${live.last_epoch.epoch + 1}/100` : (live.stage || '—');
-  document.getElementById('kpi-row').innerHTML = `
-    <div class="kpi is-accent">
-      <div class="l">공정추정 성공률</div>
-      <div class="n">${fair}</div>
-      <div class="d">4-seed pooled · 목표 ${Math.round((rm.target||0.9)*100)}%</div>
-    </div>
-    <div class="kpi">
-      <div class="l">무인 파이프라인</div>
-      <div class="n" style="font-size:20px;">${escapeHtml(live.stage || '—')}</div>
-      <div class="d">${escapeHtml(live.dataset || '')} · ${epTxt}</div>
-    </div>
-    <div class="kpi">
-      <div class="l">이번 달 마일스톤</div>
-      <div class="n" style="font-size:15px; line-height:1.35;">${escapeHtml(kpi.current_phase_business || '-')}</div>
-      <div class="d">${escapeHtml(kpi.current_phase_label || '')}</div>
-    </div>
-  `;
-
-  // 3) Gantt 6개월 (사전학습 + Phase 0~4). 10월 시연은 phases 에 없음.
+  // 2) Gantt 6개월 (사전학습 + Phase 0~4). 10월 시연은 phases 에 없음.
   const gEl = document.getElementById('gantt');
   if (gEl) {
     const colorOf = s => s === '완료' ? '#22c55e' : (s === '진행' ? '#2563eb' : 'rgba(148,163,184,.45)');
@@ -3560,9 +3507,8 @@ function renderHome() {
 }
 
 function updateBookmarkCount() {
-  document.getElementById('cnt-bookmarks').textContent = Object.keys(STATE.bookmarks).length;
-  document.getElementById('kpi-row')?.querySelectorAll('.kpi')[3]?.querySelector('.n')
-    && (document.getElementById('kpi-row').querySelectorAll('.kpi')[3].querySelector('.n').textContent = Object.keys(STATE.bookmarks).length);
+  const el = document.getElementById('cnt-bookmarks');
+  if (el) el.textContent = Object.keys(STATE.bookmarks).length;
 }
 
 /* ====== Charts (SVG) ====== */
@@ -3808,136 +3754,94 @@ if (IS_LIVE) {
 /*__DOCS_VIEWER_JS__*/
 </script>
 <style>
-/* ====== 관제탑 히어로 (Overview) ====== */
+/* ====== 관제탑 히어로 (Overview) — 게이지 + 3D 포스터 두 주인공 ====== */
 .cockpit {
-  display:grid; grid-template-columns: minmax(0,1.35fr) minmax(0,1fr);
-  grid-template-areas: "gauge poster" "gauge side" "pipe pipe" "sched sched";
-  gap:16px; margin:0 0 18px; position:relative;
+  display:grid; grid-template-columns: minmax(0,0.85fr) minmax(0,1.15fr);
+  gap:28px; margin:0 0 16px; align-items:stretch;
   background:
-    radial-gradient(120% 100% at 12% -20%, var(--accent-soft) 0%, transparent 55%),
+    radial-gradient(120% 130% at 8% -30%, var(--accent-soft) 0%, transparent 50%),
     var(--bg-sub);
-  border:1px solid var(--border); border-radius:20px; padding:22px 24px;
+  border:1px solid var(--border); border-radius:20px; padding:30px 32px;
 }
-.ck-gauge { grid-area:gauge; display:flex; flex-direction:column; }
-.ck-poster { grid-area:poster; }
-.ck-side { grid-area:side; display:flex; flex-direction:column; gap:12px; }
-.ck-pipe { grid-area:pipe; }
-.ck-schedule { grid-area:sched; }
+.ck-gauge { display:flex; flex-direction:column; justify-content:center; }
 .ck-eyebrow { font-size:11px; letter-spacing:2.5px; text-transform:uppercase;
   color:var(--text-dim); font-weight:700; }
-.ck-goal { font-size:13px; color:var(--text-sub); margin-top:4px; font-weight:500; }
+.ck-goal { font-size:13px; color:var(--text-sub); margin-top:5px; font-weight:500; line-height:1.4; }
 
 /* 게이지 */
-.ck-gauge-wrap { display:flex; flex-direction:column; align-items:center;
-  justify-content:flex-start; flex:1; margin-top:10px; }
-.ck-gauge-svg { position:relative; width:100%; max-width:360px; }
+.ck-gauge-wrap { display:flex; flex-direction:column; align-items:center; margin-top:16px; }
+.ck-gauge-svg { position:relative; width:100%; max-width:320px; }
 .ck-gauge-svg svg { width:100%; height:auto; display:block; }
-.ck-gauge-center { position:absolute; left:0; right:0; bottom:2px; text-align:center; pointer-events:none; }
-.ck-gauge-num { font-weight:800; letter-spacing:-3px; line-height:.95;
-  font-size:clamp(54px, 6vw, 78px); color:var(--text);
-  font-variant-numeric:tabular-nums; }
+.ck-gauge-center { position:absolute; left:0; right:0; bottom:0; text-align:center; pointer-events:none; }
+.ck-gauge-num { font-weight:800; letter-spacing:-3px; line-height:.92;
+  font-size:clamp(56px, 6vw, 76px); color:var(--text); font-variant-numeric:tabular-nums; }
 .ck-gauge-num .u { font-size:.42em; letter-spacing:-1px; color:var(--text-sub); margin-left:2px; }
-.ck-gauge-cap { font-size:12.5px; color:var(--text-sub); margin-top:3px; font-weight:600; }
-.ck-gauge-sub { font-size:12px; color:var(--text-dim); margin-top:10px; }
-.ck-gauge-legend { display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:9px; font-size:11px; }
-.ck-gauge-legend span { display:inline-flex; align-items:center; gap:5px; color:var(--text-dim); }
-.ck-gauge-legend i { width:9px; height:9px; border-radius:2px; display:inline-block; }
+.ck-gauge-cap { font-size:12.5px; color:var(--text-sub); margin-top:4px; font-weight:600; }
 
-/* 돌파 스토리 (open-loop 0% → closed-loop 70%) */
-.ck-break { margin-top:auto; padding-top:16px; }
-.ck-break-row { display:flex; align-items:stretch; gap:10px; }
-.ck-break-item { flex:1; border-radius:12px; padding:11px 14px; border:1px solid var(--border); position:relative; }
-.ck-break-item .v { font-size:30px; font-weight:800; letter-spacing:-1.5px; line-height:1; font-variant-numeric:tabular-nums; }
-.ck-break-item .l { font-size:11px; margin-top:4px; }
-.ck-break-item.was { background:var(--bg); }
-.ck-break-item.was .v { color:var(--text-dim); text-decoration:line-through; text-decoration-thickness:2px; }
-.ck-break-item.was .l { color:var(--text-dim); }
-.ck-break-item.now { background:var(--accent-soft); border-color:transparent; }
-.ck-break-item.now .v { color:var(--accent-strong); }
-.ck-break-item.now .l { color:var(--accent-strong); font-weight:600; }
-.ck-break-arrow { display:flex; align-items:center; color:var(--accent); font-size:22px; font-weight:800; }
-.ck-break-cap { font-size:11.5px; color:var(--text-dim); margin-top:9px; text-align:center; }
-.ck-break-cap b { color:var(--accent-strong); }
-
-/* 무인 자동화 파이프라인 루프 */
-.ck-pipe { border-top:1px solid var(--border); padding-top:14px; }
-.ck-pipe-head { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
-.ck-pipe-head .lbl { font-size:12px; color:var(--text-sub); font-weight:600; }
-.ck-pipe-head .live { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--accent-strong); font-weight:700; }
-.ck-pipe-head .live .dot { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:ckpulse 1.8s ease-in-out infinite; }
-.ck-pipe-flow { display:flex; align-items:center; gap:0; }
-.ck-node { display:flex; flex-direction:column; align-items:center; gap:5px; flex:0 0 auto; }
-.ck-node .ring { width:46px; height:46px; border-radius:50%; display:grid; place-items:center;
-  border:2px solid var(--border-strong); background:var(--bg); color:var(--text-dim);
-  font-size:18px; position:relative; transition:.2s; }
-.ck-node.done .ring { border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
-.ck-node.active .ring { border-color:var(--accent); color:var(--accent-strong); background:var(--accent-soft);
-  box-shadow:0 0 0 0 var(--accent-soft); animation:ckring 1.8s ease-out infinite; }
-.ck-node .nm { font-size:11px; color:var(--text-dim); font-weight:600; }
-.ck-node.active .nm { color:var(--text); font-weight:700; }
-.ck-node.done .nm { color:var(--accent-strong); }
-.ck-link { flex:1 1 auto; height:3px; border-radius:2px; position:relative; overflow:hidden;
-  background:var(--border); min-width:24px; margin:0 2px; margin-bottom:20px; }
-.ck-link i { position:absolute; inset:0; border-radius:2px;
-  background:linear-gradient(90deg, transparent 0%, var(--accent) 45%, var(--accent) 55%, transparent 100%);
-  background-size:60% 100%; background-repeat:no-repeat;
-  animation:ckflow 1.6s linear infinite; }
-@keyframes ckflow { 0% { background-position:-60% 0; } 100% { background-position:160% 0; } }
-@keyframes ckpulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(.8); } }
-@keyframes ckring { 0% { box-shadow:0 0 0 0 var(--accent-soft); } 70% { box-shadow:0 0 0 10px transparent; } 100% { box-shadow:0 0 0 0 transparent; } }
-@media (prefers-reduced-motion: reduce) {
-  .ck-link i, .ck-pipe-head .live .dot, .ck-node.active .ring { animation:none; }
-  .ck-link i { background-position:50% 0; }
-}
+/* 0 → 70 → 90 여정 바 (돌파 스토리를 절제된 한 줄로) */
+.ck-journey { width:100%; max-width:340px; margin:26px auto 0; }
+.ck-journey-track { position:relative; height:6px; border-radius:3px; background:var(--border); }
+.ck-journey-fill { position:absolute; left:0; top:0; bottom:0; border-radius:3px;
+  background:linear-gradient(90deg, var(--accent), var(--accent-strong)); }
+.ck-journey-gap { position:absolute; top:0; bottom:0; border-radius:3px; background:var(--accent-soft); }
+.ck-journey-node { position:absolute; top:50%; width:11px; height:11px; border-radius:50%;
+  transform:translate(-50%,-50%); }
+.ck-journey-node.start { background:var(--text-dim); }
+.ck-journey-node.now { background:var(--accent); box-shadow:0 0 0 4px var(--accent-soft); }
+.ck-journey-node.goal { width:9px; height:9px; background:var(--bg-sub); border:2px solid var(--border-strong); }
+.ck-journey-badge { position:absolute; bottom:calc(100% + 9px); transform:translateX(-50%);
+  font-size:12px; font-weight:800; color:var(--accent-strong); white-space:nowrap; }
+.ck-journey-badge small { display:block; font-size:9px; font-weight:600; color:var(--text-dim);
+  letter-spacing:.3px; text-align:center; }
+.ck-journey-ends { display:flex; justify-content:space-between; margin-top:12px; font-size:11px; }
+.ck-journey-ends b { font-weight:800; }
+.ck-journey-ends .s { color:var(--text-dim); }
+.ck-journey-ends .g { color:var(--text-sub); }
+.ck-journey-cap { text-align:center; font-size:11.5px; color:var(--text-dim); margin-top:10px; }
+.ck-journey-cap b { color:var(--accent-strong); }
 
 /* 포스터 카드 */
 .ck-poster { position:relative; border-radius:16px; overflow:hidden; cursor:pointer;
-  border:1px solid var(--border); min-height:190px; background:#11212e;
+  border:1px solid var(--border); min-height:300px; background:#11212e;
   box-shadow: var(--shadow); transition: transform .18s ease, box-shadow .18s ease; }
 .ck-poster:hover { transform: translateY(-2px); box-shadow: var(--shadow-elev); }
 .ck-poster:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .ck-poster img { width:100%; height:100%; object-fit:cover; display:block; }
-.ck-poster-fallback { width:100%; height:100%; min-height:190px;
+.ck-poster-fallback { width:100%; height:100%; min-height:300px;
   background:linear-gradient(160deg, #1b3547, #0d1b25); display:grid; place-items:center; color:#9fb4c2; }
 .ck-poster .pill { position:absolute; display:inline-flex; align-items:center; gap:6px;
-  font-size:11px; font-weight:600; padding:5px 10px; border-radius:999px;
+  font-size:11px; font-weight:600; padding:6px 11px; border-radius:999px;
   background:rgba(8,14,18,.62); color:#eaf1f5; backdrop-filter:blur(6px); }
-.ck-poster .pill.tl { top:12px; left:12px; }
-.ck-poster .pill.br { bottom:12px; right:12px; background:rgba(37,99,235,.82); }
+.ck-poster .pill.tl { top:14px; left:14px; }
+.ck-poster .pill.br { bottom:14px; right:14px; background:rgba(37,99,235,.85); }
 .ck-poster .pill .dot { width:7px; height:7px; border-radius:50%; background:var(--hl-blue-d); }
-.ck-poster .osd { position:absolute; bottom:12px; left:12px; font-size:11px; color:#cdd9e0;
-  background:rgba(8,14,18,.55); padding:4px 9px; border-radius:8px; backdrop-filter:blur(6px); }
+.ck-poster .osd { position:absolute; bottom:14px; left:14px; font-size:11px; color:#cdd9e0;
+  background:rgba(8,14,18,.55); padding:5px 10px; border-radius:8px; backdrop-filter:blur(6px); }
 .ck-poster:hover .pill.br { background:rgba(37,99,235,1); }
 
-/* D-day */
-.ck-dday { background:linear-gradient(135deg, var(--accent), var(--accent-strong));
-  color:#fff; border-radius:14px; padding:14px 16px; display:flex; flex-direction:column;
-  box-shadow:0 6px 20px rgba(0,136,80,.22); }
-[data-theme="dark"] .ck-dday { box-shadow:0 6px 20px rgba(0,179,119,.26); }
-.ck-dday .l { font-size:11px; opacity:.9; letter-spacing:.5px; }
-.ck-dday .n { font-size:34px; font-weight:800; letter-spacing:-1.5px; line-height:1.05;
-  font-variant-numeric:tabular-nums; }
-.ck-dday .d { font-size:11.5px; opacity:.92; margin-top:1px; }
-
-/* Phase 스텝퍼 */
-.ck-stepper { display:flex; gap:5px; align-items:stretch; }
-.ck-step { flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:5px; }
-.ck-step .bar { height:6px; border-radius:3px; background:var(--border-strong); overflow:hidden; }
-.ck-step .bar i { display:block; height:100%; border-radius:3px; }
-.ck-step .lb { font-size:9.5px; color:var(--text-dim); text-align:center; line-height:1.2;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.ck-step.done .lb { color:var(--accent-strong); font-weight:700; }
-.ck-step.active .lb { color:var(--text); font-weight:700; }
-
-/* 일정 스파크라인 */
-.ck-schedule { display:flex; align-items:center; gap:14px; padding-top:4px; border-top:1px solid var(--border); }
-.ck-sched-label { font-size:11px; color:var(--text-dim); white-space:nowrap; font-weight:600; }
-.ck-sched-track { flex:1; height:8px; border-radius:4px; background:var(--bg);
-  border:1px solid var(--border); position:relative; overflow:visible; }
-.ck-sched-fill { height:100%; border-radius:4px 0 0 4px;
-  background:linear-gradient(90deg, var(--accent) 0%, var(--accent-strong) 100%); }
-.ck-sched-now { position:absolute; top:-3px; width:2px; height:14px; background:var(--text); border-radius:1px; }
-.ck-sched-scale { display:flex; justify-content:space-between; font-size:10px; color:var(--text-dim); width:180px; }
+/* KPI 카드 내 미니 파이프라인 루프 (수집·학습·측정·반복) */
+.ck-miniloop { display:flex; align-items:center; gap:0; margin:8px 0 2px; }
+.ck-mn { display:flex; flex-direction:column; align-items:center; gap:3px; flex:0 0 auto; }
+.ck-mn .d { width:10px; height:10px; border-radius:50%; background:var(--border-strong); }
+.ck-mn .t { font-size:9px; color:var(--text-dim); white-space:nowrap; }
+.ck-mn.done .d { background:var(--accent); }
+.ck-mn.active .d { background:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); animation:ckpulse 1.8s ease-in-out infinite; }
+.ck-mn.active .t { color:var(--text); font-weight:700; }
+.ck-mn.done .t { color:var(--accent-strong); }
+.ck-ml { flex:1 1 auto; height:2px; background:var(--border); position:relative; overflow:hidden;
+  margin:0 3px; margin-bottom:12px; min-width:12px; border-radius:1px; }
+.ck-ml i { position:absolute; inset:0;
+  background:linear-gradient(90deg, transparent, var(--accent) 50%, transparent);
+  background-size:60% 100%; background-repeat:no-repeat; animation:ckflow 1.6s linear infinite; }
+@keyframes ckflow { 0% { background-position:-60% 0; } 100% { background-position:160% 0; } }
+@keyframes ckpulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.45; transform:scale(.85); } }
+@media (prefers-reduced-motion: reduce) {
+  .ck-poster { transition:none; }
+  .ck-ml i, .ck-mn.active .d { animation:none; }
+}
+@media (max-width: 900px) {
+  .cockpit { grid-template-columns:1fr; }
+}
 
 /* 성공률 스펙트럼 */
 .ck-spectrum { background:var(--bg-sub); border:1px solid var(--border); border-radius:16px;
