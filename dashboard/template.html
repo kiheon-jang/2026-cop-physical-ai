@@ -4015,10 +4015,10 @@ function sim3dBuildScene() {
     const c = document.createElement('canvas'); c.width = c.height = 256;
     const ctx = c.getContext('2d'); const s = 128;
     for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
-      ctx.fillStyle = ((i + j) % 2 === 0) ? '#2e5273' : '#20384e';
+      ctx.fillStyle = ((i + j) % 2 === 0) ? '#265788' : '#173049';
       ctx.fillRect(i * s, j * s, s, s);
     }
-    ctx.strokeStyle = 'rgba(224,238,248,0.28)'; ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(230,242,252,0.34)'; ctx.lineWidth = 3;
     ctx.strokeRect(0, 0, 256, 256); ctx.beginPath();
     ctx.moveTo(128, 0); ctx.lineTo(128, 256); ctx.moveTo(0, 128); ctx.lineTo(256, 128); ctx.stroke();
     const tex = new THREE.CanvasTexture(c);
@@ -4029,11 +4029,11 @@ function sim3dBuildScene() {
 
   const scene = new THREE.Scene();
   scene.background = makeSkyTexture();
-  scene.fog = new THREE.Fog(0x1a3145, 2.4, 6.5);
+  // 안개 없음 — 뿌옇게 보이던 주원인. 선명하게 유지.
   // 중립~약간 따뜻한 조명으로 노란 팔을 골든하게 (포스터 감성) + 파란 림으로 분리.
   // 앰비언트/필을 낮춰 그림자 대비를 살린다(평면 느낌 제거).
-  scene.add(new THREE.HemisphereLight(0xdce8f5, 0x2a3a4a, 0.5));
-  const keyLight = new THREE.DirectionalLight(0xfff4e6, 1.55);
+  scene.add(new THREE.HemisphereLight(0xdce8f5, 0x2a3a4a, 0.36));
+  const keyLight = new THREE.DirectionalLight(0xfff4e6, 1.7);
   keyLight.position.set(0.85, 1.6, 0.95);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.set(2048, 2048);
@@ -4079,7 +4079,7 @@ function sim3dBuildScene() {
     const col = new THREE.Color(rgba[0], rgba[1], rgba[2]);
     // 채도 살짝 올려 쨍하게 (톤매핑과 함께 홈 포스터 감성)
     const hsl = {}; col.getHSL(hsl);
-    col.setHSL(hsl.h, Math.min(1, hsl.s * 1.4), hsl.l);
+    col.setHSL(hsl.h, Math.min(1, hsl.s * 1.65), hsl.l);
     const mat = new THREE.MeshStandardMaterial({
       color: col,
       roughness: 0.55, metalness: 0.04,
