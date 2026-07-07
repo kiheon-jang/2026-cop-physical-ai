@@ -3996,8 +3996,11 @@ function sim3dBuildScene() {
   renderer.setSize(W, H);
   // 색을 쨍하게 — sRGB 출력 + 필믹 톤매핑 (홈 포스터의 MuJoCo 렌더 감성)
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
+  // MuJoCo 처럼 채도 유지 — 필믹 톤매핑은 노랑을 흰색으로 굴려 크림빛이 됨. 톤매핑 최소화.
+  renderer.toneMapping = THREE.NoToneMapping;
+  // 그림자 — 팔 밑 접지감/입체감 (바래 보이던 주원인 해소)
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   // 그라디언트 하늘 텍스처 (파란 스카이 → 어두운 하단)
   function makeSkyTexture() {
@@ -4027,13 +4030,21 @@ function sim3dBuildScene() {
   const scene = new THREE.Scene();
   scene.background = makeSkyTexture();
   scene.fog = new THREE.Fog(0x1a3145, 2.4, 6.5);
-  // 중립~약간 따뜻한 조명으로 노란 팔을 골든하게 (포스터 감성) + 파란 림으로 분리
-  scene.add(new THREE.HemisphereLight(0xdce8f5, 0x2a3a4a, 1.0));
-  const keyLight = new THREE.DirectionalLight(0xfff4e2, 2.7);
-  keyLight.position.set(0.8, 1.5, 0.9); scene.add(keyLight);
-  const fillLight = new THREE.DirectionalLight(0xeef2f7, 0.65);
+  // 중립~약간 따뜻한 조명으로 노란 팔을 골든하게 (포스터 감성) + 파란 림으로 분리.
+  // 앰비언트/필을 낮춰 그림자 대비를 살린다(평면 느낌 제거).
+  scene.add(new THREE.HemisphereLight(0xdce8f5, 0x2a3a4a, 0.5));
+  const keyLight = new THREE.DirectionalLight(0xfff4e6, 1.55);
+  keyLight.position.set(0.85, 1.6, 0.95);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.camera.near = 0.05; keyLight.shadow.camera.far = 6;
+  keyLight.shadow.camera.left = -0.7; keyLight.shadow.camera.right = 0.7;
+  keyLight.shadow.camera.top = 0.7; keyLight.shadow.camera.bottom = -0.7;
+  keyLight.shadow.bias = -0.0004; keyLight.shadow.normalBias = 0.02;
+  scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0xdfeaf5, 0.22);
   fillLight.position.set(-0.9, 0.7, -0.4); scene.add(fillLight);
-  const rimLight = new THREE.DirectionalLight(0x9ec6ff, 0.5);
+  const rimLight = new THREE.DirectionalLight(0x9ec6ff, 0.35);
   rimLight.position.set(-0.3, 0.9, -1.2); scene.add(rimLight);
 
   const camera = new THREE.PerspectiveCamera(42, W / H, 0.01, 20);
@@ -4046,9 +4057,9 @@ function sim3dBuildScene() {
   // 큰 체커보드 바닥 (MuJoCo z=0 평면 = root 로컬 XY, 법선 +z)
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(6, 6),
-    new THREE.MeshStandardMaterial({ map: checkerTex, roughness: 0.82, metalness: 0.05 })
+    new THREE.MeshStandardMaterial({ map: checkerTex, roughness: 0.62, metalness: 0.12 })
   );
-  floor.position.z = 0; root.add(floor);
+  floor.position.z = 0; floor.receiveShadow = true; root.add(floor);
 
   // 메시 지오메트리 준비
   const geoms = {};
@@ -4071,7 +4082,7 @@ function sim3dBuildScene() {
     col.setHSL(hsl.h, Math.min(1, hsl.s * 1.4), hsl.l);
     const mat = new THREE.MeshStandardMaterial({
       color: col,
-      roughness: 0.42, metalness: 0.28,
+      roughness: 0.55, metalness: 0.04,
       transparent: rgba[3] < 1, opacity: rgba[3],
     });
     let mesh = null;
@@ -4080,6 +4091,7 @@ function sim3dBuildScene() {
     else if (ge.type === 'sphere') mesh = new THREE.Mesh(new THREE.SphereGeometry(ge.size[0], 20, 14), mat);
     else if (ge.type === 'cylinder') mesh = new THREE.Mesh(new THREE.CylinderGeometry(ge.size[0], ge.size[0], ge.size[1] * 2, 20).rotateX(Math.PI / 2), mat);
     if (!mesh) return null;
+    mesh.castShadow = true; mesh.receiveShadow = true;
     mesh.position.fromArray(ge.pos);
     mesh.quaternion.premultiply ? mesh.quaternion.copy(mjq(ge.quat)) : null;
     return mesh;
