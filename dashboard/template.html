@@ -3991,14 +3991,50 @@ function sim3dBuildScene() {
   const canvasH = () => (document.fullscreenElement === wrap ? window.innerHeight : 520);
   const W = wrap.clientWidth || 900, H = canvasH();
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(W, H);
+  // 색을 쨍하게 — sRGB 출력 + 필믹 톤매핑 (홈 포스터의 MuJoCo 렌더 감성)
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  // 그라디언트 하늘 텍스처 (파란 스카이 → 어두운 하단)
+  function makeSkyTexture() {
+    const c = document.createElement('canvas'); c.width = 8; c.height = 256;
+    const g = c.getContext('2d').createLinearGradient(0, 0, 0, 256);
+    g.addColorStop(0.0, '#3a6ea5'); g.addColorStop(0.45, '#24506f'); g.addColorStop(1.0, '#0c1a26');
+    const ctx = c.getContext('2d'); ctx.fillStyle = g; ctx.fillRect(0, 0, 8, 256);
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
+  }
+  // 파란 체커보드 바닥 텍스처 (흰 그리드 라인)
+  function makeCheckerTexture() {
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    const ctx = c.getContext('2d'); const s = 128;
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
+      ctx.fillStyle = ((i + j) % 2 === 0) ? '#2e5273' : '#20384e';
+      ctx.fillRect(i * s, j * s, s, s);
+    }
+    ctx.strokeStyle = 'rgba(224,238,248,0.28)'; ctx.lineWidth = 3;
+    ctx.strokeRect(0, 0, 256, 256); ctx.beginPath();
+    ctx.moveTo(128, 0); ctx.lineTo(128, 256); ctx.moveTo(0, 128); ctx.lineTo(256, 128); ctx.stroke();
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(14, 14);
+    tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4; return tex;
+  }
+  const checkerTex = makeCheckerTexture();
 
   const scene = new THREE.Scene();
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x556677, 1.1));
-  const dl = new THREE.DirectionalLight(0xffffff, 1.4);
-  dl.position.set(0.6, 1.2, 0.8); scene.add(dl);
+  scene.background = makeSkyTexture();
+  scene.fog = new THREE.Fog(0x1a3145, 2.4, 6.5);
+  // 중립~약간 따뜻한 조명으로 노란 팔을 골든하게 (포스터 감성) + 파란 림으로 분리
+  scene.add(new THREE.HemisphereLight(0xdce8f5, 0x2a3a4a, 1.0));
+  const keyLight = new THREE.DirectionalLight(0xfff4e2, 2.7);
+  keyLight.position.set(0.8, 1.5, 0.9); scene.add(keyLight);
+  const fillLight = new THREE.DirectionalLight(0xeef2f7, 0.65);
+  fillLight.position.set(-0.9, 0.7, -0.4); scene.add(fillLight);
+  const rimLight = new THREE.DirectionalLight(0x9ec6ff, 0.5);
+  rimLight.position.set(-0.3, 0.9, -1.2); scene.add(rimLight);
 
   const camera = new THREE.PerspectiveCamera(42, W / H, 0.01, 20);
 
@@ -4007,10 +4043,12 @@ function sim3dBuildScene() {
   root.rotation.x = -Math.PI / 2;
   scene.add(root);
 
-  // 스케일 감각용 5cm 격자 (0.8m / 16칸). 바닥 살짝 위에 그려 z-fighting 회피.
-  const grid = new THREE.GridHelper(0.8, 16, 0x7f95ad, 0xb9c6d4);
-  grid.position.y = 0.0015;
-  scene.add(grid);
+  // 큰 체커보드 바닥 (MuJoCo z=0 평면 = root 로컬 XY, 법선 +z)
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(6, 6),
+    new THREE.MeshStandardMaterial({ map: checkerTex, roughness: 0.82, metalness: 0.05 })
+  );
+  floor.position.z = 0; root.add(floor);
 
   // 메시 지오메트리 준비
   const geoms = {};
@@ -4025,19 +4063,20 @@ function sim3dBuildScene() {
   const mjq = q => new THREE.Quaternion(q[1], q[2], q[3], q[0]); // (w,x,y,z)→THREE
 
   function geomMesh(ge) {
+    if (ge.type === 'plane') return null; // 전용 체커 바닥으로 대체
     const rgba = ge.rgba || [0.7, 0.7, 0.7, 1];
+    const col = new THREE.Color(rgba[0], rgba[1], rgba[2]);
+    // 채도 살짝 올려 쨍하게 (톤매핑과 함께 홈 포스터 감성)
+    const hsl = {}; col.getHSL(hsl);
+    col.setHSL(hsl.h, Math.min(1, hsl.s * 1.4), hsl.l);
     const mat = new THREE.MeshStandardMaterial({
-      color: new THREE.Color(rgba[0], rgba[1], rgba[2]),
-      roughness: 0.62, metalness: 0.15,
+      color: col,
+      roughness: 0.42, metalness: 0.28,
       transparent: rgba[3] < 1, opacity: rgba[3],
     });
     let mesh = null;
     if (ge.type === 'mesh' && geoms[ge.mesh]) mesh = new THREE.Mesh(geoms[ge.mesh], mat);
     else if (ge.type === 'box') mesh = new THREE.Mesh(new THREE.BoxGeometry(ge.size[0] * 2, ge.size[1] * 2, ge.size[2] * 2), mat);
-    else if (ge.type === 'plane') {
-      mat.color = new THREE.Color(0.32, 0.35, 0.40); mat.roughness = 0.95;
-      mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), mat); // MuJoCo plane 법선 +z = 로컬 그대로
-    }
     else if (ge.type === 'sphere') mesh = new THREE.Mesh(new THREE.SphereGeometry(ge.size[0], 20, 14), mat);
     else if (ge.type === 'cylinder') mesh = new THREE.Mesh(new THREE.CylinderGeometry(ge.size[0], ge.size[0], ge.size[1] * 2, 20).rotateX(Math.PI / 2), mat);
     if (!mesh) return null;
