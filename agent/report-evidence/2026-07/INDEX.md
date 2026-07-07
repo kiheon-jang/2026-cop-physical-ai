@@ -46,3 +46,14 @@
   - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
   - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 41.5~42.0mm (throwaway 루트, 실행 후 삭제, 운영 무접촉)
   - 운영 데이터 무결성: `episodes_cl` 50ep/3350frame·`episodes_cl_dr` 50ep/3350frame·baseline `rollout_summary.json` 0.70/43.7mm 불변, DR ckpt 격리(`act_cl_dr`) 유지.
+
+## 2026-07-07
+- Phase 2 W1 — **DR-trained 측정 + 다중시드 공정추정 비교 → W1 종료**: `agent/research-log/2026-07-07.md`, `research/simulation/2026-07-07_phase2-w1-dr-trained-rollout-compare.md` → 7월 보고서 [Sim2Real 준비 / DR 결론] 섹션.
+  - 4-seed 공정추정 **baseline 0.825 vs DR-trained 0.800**(통계적 동등, seed7 실패 +1=노이즈), 유일 개선=**median lift ~44→~50mm 전 시드 +6mm**(임계값 위→이진판정 무영향).
+  - 실패 큐브배치 거의 불변(42{2,5,8}·123{0,1}·2026{5}) → **병목=섭동강건성 아닌 배치 커버리지(모방격차)**, DR 축은 sim 성공 천장 못 올림. 다음 레버=`.next=episodes_floor`(배치 다양성↑).
+  - baseline 아카이브 `rollout_summary_baseline_cl.json`(0.70/43.7mm) 보존, 신규 `rollout_summary_cldr_seed{7,123,2026}.json` 3종.
+- 23:30 nightly sim-test — 우선순위 4종 실제 실행 회귀: `agent/research-log/2026-07-07.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임 3/3), `sim_camera_verification.py` PASS(2카메라 30프레임)
+  - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 41.5~42.0mm (throwaway 루트, 운영 무접촉)
+  - 운영 데이터 무결성: `episodes_cl` 50ep·`episodes_cl_dr` 50ep·운영 `rollout_summary.json`(현 DR-trained act_cl_dr 0.70/50.2mm)·baseline 아카이브 보존.
