@@ -3,68 +3,68 @@
   "checkpoint": "checkpoints/act_cl_dr/epoch_0099",
   "ckpt_dir": "act_cl_dr",
   "scene": "scene_grasp_pads.xml",
-  "measured_at": "2026-07-07T23:00:52",
-  "seed": 42,
+  "measured_at": "2026-07-07T23:03:41",
+  "seed": 2026,
   "rollouts": 10,
-  "success": 7,
-  "success_rate": 0.7,
-  "median_lift_mm": 50.2,
+  "success": 9,
+  "success_rate": 0.9,
+  "median_lift_mm": 50.5,
   "lift_threshold_m": 0.04,
   "dr": false,
   "dr_axes": null,
-  "video_path": "research/simulation/inference_progress/inference_act_cl_dr_epoch_0099_20260707.mp4",
-  "wall_clock_sec": 13.4,
+  "video_path": "research/simulation/inference_progress/inference_act_cl_dr_epoch_0099_20260707_seed2026.mp4",
+  "wall_clock_sec": 13.1,
   "device": "cpu",
   "results": [
     {
       "rollout": 0,
       "success": true,
-      "max_lift_m": 0.0507
+      "max_lift_m": 0.0508
     },
     {
       "rollout": 1,
       "success": true,
-      "max_lift_m": 0.0502
+      "max_lift_m": 0.0506
     },
     {
       "rollout": 2,
-      "success": false,
-      "max_lift_m": 0.0029
+      "success": true,
+      "max_lift_m": 0.0504
     },
     {
       "rollout": 3,
       "success": true,
-      "max_lift_m": 0.0492
+      "max_lift_m": 0.0496
     },
     {
       "rollout": 4,
       "success": true,
-      "max_lift_m": 0.0502
+      "max_lift_m": 0.0505
     },
     {
       "rollout": 5,
       "success": false,
-      "max_lift_m": 0.0062
+      "max_lift_m": 0.0036
     },
     {
       "rollout": 6,
       "success": true,
-      "max_lift_m": 0.0476
+      "max_lift_m": 0.0494
     },
     {
       "rollout": 7,
       "success": true,
-      "max_lift_m": 0.051
+      "max_lift_m": 0.049
     },
     {
       "rollout": 8,
-      "success": false,
-      "max_lift_m": 0.0058
+      "success": true,
+      "max_lift_m": 0.0506
     },
     {
       "rollout": 9,
       "success": true,
-      "max_lift_m": 0.0504
+      "max_lift_m": 0.0507
     }
   ]
 }

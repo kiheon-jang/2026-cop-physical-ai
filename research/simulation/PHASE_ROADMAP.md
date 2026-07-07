@@ -181,7 +181,7 @@ uv pip install <패키지명>
 
 - W1 (7/1 ~ 7/7): Domain Randomization (조명, 마찰, 카메라 노이즈)
   - [v] **7/1**: DR 기반 모듈 신규 작성 (`samples/training/sim_domain_randomization.py`) — 조명/마찰/카메라노이즈 3축 무작위화, 8샘플 self-test 적용범위 전부 정상, 샘플프레임 `research/simulation/dr_samples/`. 상세: `2026-07-01_phase2-w1-domain-randomization.md`
-  - [ ] DR 를 `sim_data_collector.py` reset 훅 + `render_act_rollout.py` 에 연결 → DR 데이터셋 합성·측정
+  - [v] DR 를 `sim_data_collector.py` reset 훅 + `render_act_rollout.py` 에 연결 → DR 데이터셋 합성·측정
     - 🔄 **2026-07-01 야간**: **연결(배선) 완료 + 비파괴 스모크 통과**. opt-in `--dr` 플래그로 두 스크립트에
       DR 연결(기본 off → 드라이버 파이프라인 불변). `snapshot_baseline`/`restore_baseline` 로 friction 곱셈·
       light_pos 덧셈 누적 방지. 수집기 DR 스모크 2/2(yield 100%, friction 1.188/0.802 독립), 측정기 DR 스모크
@@ -240,6 +240,15 @@ uv pip install <패키지명>
       +마커 2단계+baseline 아카이브(주간 6 critical 수정)로 학습중에도 baseline 무손상. **다음 사이클**:
       학습완료→마커 승격→`act_cl_dr/epoch_0099` 측정→DR-trained rollout, 이후 다중시드 공정추정 비교.
       상세: `2026-07-06_phase2-w1-dr-retrain-inflight.md`.
+    - ✅ **2026-07-07 — W1 종료**: DR-trained 모델(`act_cl_dr/epoch_0099`) **측정 + 다중시드 공정추정
+      비교 완료**(비파괴). 드라이버 STAGE=측정 seed42 0.70(median lift **50.2mm**, 마커 2단계 승격 정상,
+      baseline 은 `rollout_summary_baseline_cl.json` 보존). 야간 에이전트가 동일 3 seed(7/123/2026) 추가
+      → **4-seed 평균 baseline 0.825 vs DR-trained 0.800**(seed7 실패 1건 추가 = 노이즈, **성공률 통계적 동등**).
+      유일 개선 = **median lift ~44→~50mm 전 시드 +6mm**(임계값 위라 이진판정 무영향). **실패 큐브배치 거의
+      불변**(42{2,5,8}·123{0,1}·2026{5}) → **병목 = 섭동강건성 아닌 배치 커버리지(모방격차)** 7/3~7/4 가설
+      DR 실모델로 실증. **결론: DR 축 증강은 sim 성공 천장을 못 올림 → 배치 다양성이 다음 레버(`.next=episodes_floor`).**
+      신규 `rollout_summary_cldr_seed{7,123,2026}.json`, baseline seed 요약·`episodes_cl(_dr)` 불변.
+      상세: `2026-07-07_phase2-w1-dr-trained-rollout-compare.md`.
 - W2: Zero-shot 실기 추론 → 격차 측정
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
