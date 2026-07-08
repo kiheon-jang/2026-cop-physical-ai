@@ -57,3 +57,13 @@
   - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
   - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 41.5~42.0mm (throwaway 루트, 운영 무접촉)
   - 운영 데이터 무결성: `episodes_cl` 50ep·`episodes_cl_dr` 50ep·운영 `rollout_summary.json`(현 DR-trained act_cl_dr 0.70/50.2mm)·baseline 아카이브 보존.
+
+## 2026-07-08
+- Phase 2 W2 진입 — **W1(DR) 사이클 종료 → 배치 다양성(floor) 사이클 ACT 재학습 착수**: `agent/research-log/2026-07-08.md`, `research/simulation/2026-07-08_phase2-w2-floor-placement-retrain-inflight.md` → 7월 보고서 [Sim2Real 준비 / 다음 레버] 섹션.
+  - 드라이버가 `episodes_cl_dr`→`act_cl_dr` STAGE=완료/유지(0.7)로 닫고 예약 `.next=episodes_floor`(바닥/받침대 없는 파지, 배치 커버리지↑)로 전환 → `episodes_floor` 50ep/3350frame(수집 yield 98%, 배치 x0.11~0.15)로 100epoch 재학습(pid 94316, `--no-resume`→`checkpoints/act_floor`). "DR 축 아닌 배치 다양성이 sim 천장을 올리는가" 첫 실측 준비.
+  - 마커 2단계(target=`episodes_floor`·marker=`episodes_cl_dr:1783181837` 유지·pending=`episodes_floor:1783324998`)+ckpt 3자 격리로 학습중 baseline(운영 rollout 0.70/50.2mm) 무손상 — 무결성 설계 작동.
+- 23:30 nightly sim-test — 우선순위 4종 실제 실행 회귀: `agent/research-log/2026-07-08.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임), `sim_camera_verification.py` PASS(2카메라 30프레임 동기)
+  - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 41.2~42.4mm (throwaway 루트, 운영 무접촉)
+  - floor ACT 학습 alive(loss 25.5→0.681 정상 수렴), 운영 데이터 무결성: `episodes_cl`/`episodes_cl_dr`/`episodes_floor` 각 50ep·3350frame·운영 `rollout_summary.json` 0.70/50.2mm 불변.
