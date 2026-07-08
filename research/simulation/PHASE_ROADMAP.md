@@ -249,7 +249,19 @@ uv pip install <패키지명>
       DR 실모델로 실증. **결론: DR 축 증강은 sim 성공 천장을 못 올림 → 배치 다양성이 다음 레버(`.next=episodes_floor`).**
       신규 `rollout_summary_cldr_seed{7,123,2026}.json`, baseline seed 요약·`episodes_cl(_dr)` 불변.
       상세: `2026-07-07_phase2-w1-dr-trained-rollout-compare.md`.
-- W2: Zero-shot 실기 추론 → 격차 측정
+- W2 (7/8 ~): Zero-shot 실기 추론 → 격차 측정 *(실기 스텝 = Orin/실기 SSH 외부의존 미수신 → 진입 불가.
+  대기 중 sim track 은 W1 결론이 지목한 배치 다양성 레버로 전진)*
+  - 🔄 **2026-07-08 — 배치 다양성(floor) 사이클 ACT 재학습 착수(in-flight)**: 드라이버가 W1 타겟
+    `episodes_cl_dr` 을 STAGE=완료/유지(50ep·0.7)로 닫고 **예약 사이클 `.next=episodes_floor`(바닥/받침대
+    없는 파지 = 배치 커버리지↑)로 전환** → `episodes_floor`(50ep/3350f, 수집 yield 98%, 배치 x0.11~0.15)
+    로 ACT 100epoch 재학습 시작(pid 94316, `--no-resume`, →`checkpoints/act_floor`). 현 epoch 0(막 시작).
+    **마커 2단계+ckpt 3자 격리 정상**: target=`episodes_floor`·marker=`episodes_cl_dr:1783181837`(직전 승격값
+    유지, 운영 rollout_summary 불변)·pending=`episodes_floor:1783324998`(대기). 6/22 SILENT 반대·설계대로
+    학습 미완이라 승격/측정 보류 → baseline 무손상. **의의**: 7/7 W1 실증(병목=배치 커버리지, DR 축은 sim
+    천장 0.825↔0.800 못 올림)의 처방 = 배치 다양성 데이터 재학습의 첫 실측. [자가치유] 없음. 상세:
+    `2026-07-08_phase2-w2-floor-placement-retrain-inflight.md`. **다음(드라이버)**: 학습완료→pending 승격→
+    `act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed(42/7/123/2026) 공정추정으로 배치 다양성이
+    성공률 천장을 올리는지 비교.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
