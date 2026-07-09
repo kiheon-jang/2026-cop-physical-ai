@@ -67,3 +67,14 @@
   - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
   - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 41.2~42.4mm (throwaway 루트, 운영 무접촉)
   - floor ACT 학습 alive(loss 25.5→0.681 정상 수렴), 운영 데이터 무결성: `episodes_cl`/`episodes_cl_dr`/`episodes_floor` 각 50ep·3350frame·운영 `rollout_summary.json` 0.70/50.2mm 불변.
+
+## 2026-07-09
+- Phase 2 W2 — **floor 재학습 재시도 + DataLoader FD 누수 자가치유**: `agent/research-log/2026-07-09.md`, `research/simulation/2026-07-09_phase2-w2-floor-retrain-fd-selfheal.md` → 7월 보고서 [Sim2Real 준비 / 파이프라인 견고성] 섹션.
+  - 어제 floor 학습(pid 94316) epoch ~50 이상종료 = `OSError [Errno 24] Too many open files`(매 epoch DataLoader 워커 4개 재spawn·FD 누수). 드라이버 감지→재학습 재시작(pid 21661).
+  - **[자가치유]** `train_act.py` DataLoader `persistent_workers=workers > 0`(surgical 1줄, 워커 1회 spawn 재사용) → FD 누수 재발 방지. ast·DataLoader 스모크 검증. (pid 21661은 fix 이전 로드 → 재크래시 시 내일 드라이버가 수정코드로 완주.)
+  - 무결성 격리: target=`episodes_floor`·marker=`episodes_cl_dr`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor` 대기, baseline 무손상.
+- 23:30 nightly sim-test — 우선순위 4종 실제 실행 회귀: `agent/research-log/2026-07-09.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임 3/3, mean 14.8s), `sim_camera_verification.py` PASS(2카메라 30프레임 3/3)
+  - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.323m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 42.5mm, LeRobot v3.0 구조 정상 (throwaway 루트, 운영 무접촉)
+  - floor ACT 재학습 pid 21661 alive(epoch 5/100 loss 0.656, ETA ~08:15), 운영 데이터 무결성: `episodes_cl`/`episodes_floor` 각 50ep·운영 `rollout_summary.json` 0.70/50.2mm 불변.
