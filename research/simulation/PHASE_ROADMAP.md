@@ -262,6 +262,18 @@ uv pip install <패키지명>
     `2026-07-08_phase2-w2-floor-placement-retrain-inflight.md`. **다음(드라이버)**: 학습완료→pending 승격→
     `act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed(42/7/123/2026) 공정추정으로 배치 다양성이
     성공률 천장을 올리는지 비교.
+  - 🔄 **2026-07-09 — floor 재학습 재시도 + FD 누수 자가치유(in-flight)**: 어제 run(pid 94316)이
+    epoch ~50(epoch_0049 03:45 저장 후) 부근에서 **이상종료** — 드라이버가 감지(`metrics 마지막 epoch
+    미달`) 후 원인 `OSError: [Errno 24] Too many open files` 로 **재학습 재시도**(STAGE=학습시작, **새 run
+    pid 21661** `--no-resume`). **근본원인 규명**: `train_act.py` DataLoader 1회 생성 + epoch 루프 매 epoch
+    재순회 + `num_workers=4` `persistent_workers` 미설정 → 매 epoch 워커 4개 재spawn → macOS spawn +
+    낮은 `ulimit -n` 에서 파이프 FD 누적 → ~50 epoch 후 고갈. **[자가치유]**: DataLoader 에
+    `persistent_workers=workers > 0` 추가(워커 1회 spawn 후 재사용, smoke 0 은 False 게이트) — surgical
+    1줄, 학습 로직 무변경, ast/DataLoader 스모크 검증. **fix 발효**: pid 21661 은 수정 이전 로드 → 이 run 은
+    미적용(재크래시 시 내일 드라이버가 수정 코드로 재시작→완주); 하드룰상 학습 kill/재실행 안 함. **무결성
+    격리 유지**: target=`episodes_floor`·marker=`episodes_cl_dr:1783346557`(운영 rollout_summary 불변)·
+    pending=`episodes_floor:1783324998` 대기, 학습 미완→승격/측정 보류→baseline 무손상. pid 21661 현재
+    epoch 0 loss 38.8→5.67 정상 수렴. 상세: `2026-07-09_phase2-w2-floor-retrain-fd-selfheal.md`.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 

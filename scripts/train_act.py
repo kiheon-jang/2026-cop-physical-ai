@@ -182,6 +182,10 @@ def load_dataset(
     # pin_memory 는 CUDA 에서만 의미가 있음. MPS/CPU 에서는 워크로드 무익 + 워닝 발생.
     use_pin = bool(getattr(torch, "cuda", None) and torch.cuda.is_available())
     workers = config.num_workers if num_workers is None else num_workers
+    # persistent_workers: 워커를 매 epoch 재생성하지 않고 1회 spawn 후 재사용.
+    # macOS(spawn)에서 epoch 마다 워커 pipe FD 가 누적돼 ~50 epoch 후
+    # OSError [Errno 24] Too many open files 로 학습이 이상종료하던 문제 해결(2026-07-09).
+    # num_workers=0(smoke) 에서는 persistent_workers 를 반드시 False 로 둬야 함.
     return torch.utils.data.DataLoader(
         dataset,
         batch_size=config.batch_size,
@@ -189,6 +193,7 @@ def load_dataset(
         num_workers=workers,
         pin_memory=use_pin,
         drop_last=True,
+        persistent_workers=workers > 0,
     )
 
 
