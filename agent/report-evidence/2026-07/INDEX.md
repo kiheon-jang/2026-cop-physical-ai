@@ -78,3 +78,13 @@
   - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.323m — 기대 기준선)
   - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 42.5mm, LeRobot v3.0 구조 정상 (throwaway 루트, 운영 무접촉)
   - floor ACT 재학습 pid 21661 alive(epoch 5/100 loss 0.656, ETA ~08:15), 운영 데이터 무결성: `episodes_cl`/`episodes_floor` 각 50ep·운영 `rollout_summary.json` 0.70/50.2mm 불변.
+
+## 2026-07-10
+- Phase 2 W2 — **floor 재학습 3차 = FD-fix(persistent_workers) 첫 발효 run**: `agent/research-log/2026-07-10.md`, `research/simulation/2026-07-10_phase2-w2-floor-retrain-fdfix-run.md` → 7월 보고서 [Sim2Real 준비 / 파이프라인 견고성] 섹션.
+  - 어제 run(pid 21661, fix 이전 코드 로드) 예측대로 ~epoch 50 FD 고갈 재크래시(`epoch_0049` 03:45) → 드라이버 이상종료 감지 후 **새 run pid 39732**(23:00:26, `--no-resume`→`checkpoints/act_floor`). pid 39732 는 FD-fix 커밋 `c827ffe`(7/9) 이후 디스크 코드 로드 → **수정 실적용** → 100epoch 완주 기대(어제 예고 실현).
+  - 23:30 재확인 pid 39732 alive **epoch 6 step 320 loss 0.534** = 크래시 지점 이전 정상 진행, FD-fix 실효 확인.
+- 23:30 nightly sim-test — 우선순위 4종 실제 실행 회귀: `agent/research-log/2026-07-10.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS 3/3(2501프레임/run), `sim_camera_verification.py` PASS 3/3(2카메라 30프레임 동기)
+  - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 43.9mm (throwaway `data/_smoke_0710` → 삭제, 운영 무접촉)
+  - 무결성 전수: target=`episodes_floor`·marker=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·datasets `episodes_cl`/`episodes_cl_dr`/`episodes_floor` 각 50ep·3350frame 불변.
