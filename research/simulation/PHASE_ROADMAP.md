@@ -274,6 +274,20 @@ uv pip install <패키지명>
     격리 유지**: target=`episodes_floor`·marker=`episodes_cl_dr:1783346557`(운영 rollout_summary 불변)·
     pending=`episodes_floor:1783324998` 대기, 학습 미완→승격/측정 보류→baseline 무손상. pid 21661 현재
     epoch 0 loss 38.8→5.67 정상 수렴. 상세: `2026-07-09_phase2-w2-floor-retrain-fd-selfheal.md`.
+  - 🔄 **2026-07-10 — floor 재학습 3차 = FD-fix 발효 run(in-flight)**: 어제 run(pid 21661, fix
+    미적용 코드 로드)이 예측대로 ~epoch 50 부근 FD 고갈 재크래시(`epoch_0049` 03:45 마지막) →
+    드라이버가 이상종료 감지(`metrics 마지막 epoch 미달` + `OSError [Errno 24] Too many open files`)
+    후 **새 run pid 39732** 시작(23:00:26, `--epochs 100 --no-resume`, →`checkpoints/act_floor`).
+    **오늘의 진척 = fix 발효 시점 전환**: pid 39732 는 FD-fix 커밋 `c827ffe`(7/9) **이후** 디스크
+    `train_act.py`(persistent_workers L185~196) 를 로드 → **수정이 이 run 에 실제 적용** → 매 epoch
+    워커 재spawn 없이 **100epoch 완주 기대**(어제 예고 "내일 드라이버가 수정코드로 재시작→완주" 실현).
+    현 epoch 0 step 120 loss 27.1→6.4 정상 수렴, log mtime 23:01:56. **무결성 격리 유지**:
+    target=`episodes_floor`·marker=`episodes_cl_dr:1783181837`(직전 승격값 유지, 운영 rollout_summary
+    act_cl_dr 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기(미승격), 학습 미완→승격/측정
+    보류→baseline 무손상. datasets floor/cl/cl_dr 각 50/3350 불변. [자가치유] 없음(어제 fix 첫 발효가
+    오늘의 진척). 상세: `2026-07-10_phase2-w2-floor-retrain-fdfix-run.md`. **다음(드라이버)**: 완주→
+    pending 승격→`act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed 공정추정으로 배치
+    다양성이 성공률 천장을 올리는지 비교.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
