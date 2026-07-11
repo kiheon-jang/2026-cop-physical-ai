@@ -424,7 +424,32 @@ def _parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     return p.parse_args(argv)
 
 
+def _raise_fd_limit() -> Optional[tuple]:
+    """프로세스 자신의 열린-파일 소프트 한도를 하드 한도까지 올린다.
+
+    크론 셸은 낮은 RLIMIT_NOFILE 소프트 한도(예: macOS 256)를 물려주는데,
+    persistent_workers 를 써도 epoch 당 소량의 워커 파이프 FD 가 누적돼 ~50~60 epoch
+    후 OSError [Errno 24] Too many open files 로 학습이 이상종료했다(2026-07-09 fix 는
+    누수 속도만 낮춰 crash 지점을 ~49→~59 로 밀었을 뿐 한도 자체는 그대로였다).
+    학습 프로세스가 부모 셸과 무관하게 자기 한도를 하드 한도로 올려 근본 차단(2026-07-11).
+    반환: (old_soft, new_soft) 또는 실패/미지원 시 None.
+    """
+    try:
+        import resource
+    except ImportError:
+        return None
+    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    if soft >= hard:
+        return None
+    try:
+        resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
+    except (ValueError, OSError):
+        return None
+    return (soft, hard)
+
+
 def main(argv: Optional[List[str]] = None) -> None:
+    _fd_raise = _raise_fd_limit()
     args = _parse_args(argv)
     config = ACTTrainingConfig()
     errors = config.validate()
@@ -438,6 +463,7 @@ def main(argv: Optional[List[str]] = None) -> None:
             "torch_available": TORCH_AVAILABLE,
             "lerobot_available": LEROBOT_AVAILABLE,
             "cuda_available": torch.cuda.is_available() if TORCH_AVAILABLE else False,
+            "fd_limit_raised": _fd_raise,
         },
         "config": asdict(config),
         "config_errors": errors,

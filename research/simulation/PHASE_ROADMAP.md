@@ -288,6 +288,24 @@ uv pip install <패키지명>
     오늘의 진척). 상세: `2026-07-10_phase2-w2-floor-retrain-fdfix-run.md`. **다음(드라이버)**: 완주→
     pending 승격→`act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed 공정추정으로 배치
     다양성이 성공률 천장을 올리는지 비교.
+  - 🔄 **2026-07-11 — floor 재학습 4차 = FD 누수 근본강화(RLIMIT_NOFILE) + 재시작(in-flight)**:
+    어제 FD-fix(`persistent_workers`) 발효 run(pid 39732)이 crash 를 ~epoch **49→59** 로 밀었으나
+    (`epoch_0059` 04:02 마지막, metrics 마지막=epoch 59, `epoch_0069`+ 없음) **100epoch 완주엔 실패** →
+    드라이버가 이상종료 감지 후 **새 run pid 56445**(23:00:54, `--epochs 100 --no-resume`, →`act_floor`)
+    시작. **근본원인 재규명**: 진짜 벽은 누수 *속도* 가 아니라 **크론 셸이 물려준 낮은 `RLIMIT_NOFILE`
+    소프트 한도(macOS 기본 256)** — persistent_workers 로도 epoch 당 소량 FD/세마포어 누적
+    (`256/~4≈64ep` → crash ~59 정합, 드라이버 출력 "21 leaked semaphore" 방증). **[자가치유]**:
+    `train_act.py` `main()` 진입 즉시 `_raise_fd_limit()` 로 학습 프로세스가 **부모 셸과 무관하게
+    자기 FD 소프트 한도를 하드(무제한)까지** 상승 → 천장 제거(surgical: 헬퍼1+main1줄+관측필드1,
+    학습로직 무변경). **검증**: ast OK · 소프트 256 강제→호출→`after unlimited` PASS · `--dry-run`
+    `fd_limit_raised` 노출. **발효는 다음 run**(pid 56445 는 미수정 코드 로드→~59 재crash 예상→내일
+    드라이버 재시작이 수정코드 로드→완주 기대. 7/9→7/10 패턴). **무결성 격리 유지**: target=
+    `episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(직전 승격값)·pending=`episodes_floor:1783324998`
+    (대기)·measured=`episodes_cl_dr:1783346557`, 학습 미완→승격/측정 보류→운영 rollout_summary
+    (act_cl_dr 0.70/50.2mm, 7/7) 불변→baseline 무손상. datasets floor/cl/cl_dr 각 50/3350 불변.
+    상세: `2026-07-11_phase2-w2-floor-retrain-fd-rootfix.md`. **다음(드라이버)**: 완주→pending 승격→
+    `act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed 공정추정으로 배치 다양성이 성공률
+    천장을 올리는지 비교.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
