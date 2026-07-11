@@ -88,3 +88,12 @@
   - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
   - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 43.9mm (throwaway `data/_smoke_0710` → 삭제, 운영 무접촉)
   - 무결성 전수: target=`episodes_floor`·marker=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·datasets `episodes_cl`/`episodes_cl_dr`/`episodes_floor` 각 50ep·3350frame 불변.
+
+## 2026-07-11
+- Phase 2 W2 — **floor 재학습 4차 = FD 누수 근본강화(RLIMIT_NOFILE 셀프-상승)**: `agent/research-log/2026-07-11.md`, `research/simulation/2026-07-11_phase2-w2-floor-retrain-fd-rootfix.md` → 7월 보고서 [Sim2Real 준비 / 파이프라인 견고성] 섹션.
+  - 어제 run(pid 39732, persistent_workers fix)이 crash 를 ~49→59 로 밀었으나 완주 실패 → 드라이버가 이상종료 감지 후 **새 run pid 56445** 재시작. 근본원인=크론 셸 낮은 FD 천장(256) → `train_act.py` `_raise_fd_limit()` 로 학습 프로세스가 자기 FD 소프트한도를 하드까지 셀프-상승(다음 run 발효).
+- 23:30 nightly sim-test — 우선순위 4종 실제 실행 회귀: `agent/research-log/2026-07-11.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임), `sim_camera_verification.py` PASS(2카메라 30프레임 동기)
+  - `sim_pick_place.py` open-loop baseline 0/2(결정론적 동일, min_approach 0.323m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% 성공(yield 67%), lift 42.7mm (throwaway `data/_smoke_0711` → 삭제, 운영 무접촉)
+  - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets 각 50ep·3350frame 불변. 학습 pid 56445 alive(epoch 5, loss 0.676).
