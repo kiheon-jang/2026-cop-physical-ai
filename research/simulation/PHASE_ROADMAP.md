@@ -306,6 +306,22 @@ uv pip install <패키지명>
     상세: `2026-07-11_phase2-w2-floor-retrain-fd-rootfix.md`. **다음(드라이버)**: 완주→pending 승격→
     `act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed 공정추정으로 배치 다양성이 성공률
     천장을 올리는지 비교.
+  - 🔄 **2026-07-12 — floor 재학습 5차 = RLIMIT-fix 발효 run(in-flight)**: 어제 run(pid 56445,
+    RLIMIT-fix 미적용 코드 로드)이 예측대로 ~epoch 59 부근 FD 고갈 재크래시 → 드라이버가 이상종료
+    감지(`21 leaked semaphore` + `OSError [Errno 24]`) 후 **새 run pid 85398** 시작(23:00, `--epochs
+    100 --no-resume`, →`checkpoints/act_floor`). **오늘의 진척 = FD 근본 fix 발효 시점 전환**: pid
+    85398 은 RLIMIT-fix 커밋 `3fa8bb6`(7/11) **이후** 디스크 `train_act.py`(persistent_workers L196 +
+    `_raise_fd_limit()` L452) 를 로드 → 두 FD fix 실제 적용 → 지난 4 run(pid 94316·21661·39732·56445)
+    을 ~49~59 epoch 에서 죽인 macOS 256 FD 천장 제거 → **100epoch 완주 기대**(7/9→7/10 패턴 재현,
+    어제 예고 "내일 드라이버 재시작이 수정코드 로드→완주" 실현). 현 epoch 0 step 30 loss 36.7→17.4
+    정상 수렴. **무결성 격리 유지**: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`
+    (직전 승격값 유지, 운영 rollout_summary act_cl_dr 0.70/50.2mm 불변)·pending=
+    `episodes_floor:1783324998`(mtime 7/12 23:00, 대기·미승격)·measured=`episodes_cl_dr:1783346557`,
+    학습 미완→승격/측정 보류(6/22 SILENT 반대·설계대로)→baseline 무손상. datasets floor/cl/cl_dr 각
+    50ep 불변. [자가치유] 없음(어제 RLIMIT-fix 첫 발효가 오늘의 진척). 상세:
+    `2026-07-12_phase2-w2-floor-retrain-rlimit-effective-run.md`. **다음(드라이버)**: 완주→pending
+    승격→`act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed 공정추정으로 배치 다양성이
+    성공률 천장을 올리는지 비교.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
