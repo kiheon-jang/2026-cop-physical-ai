@@ -52,6 +52,11 @@
 
 
 
+
+### 2026-07-12
+- 📊 [로그] 2026-07-12 시뮬 테스트 — 우선순위 4종 회귀(6dof·camera PASS·pick0/3·collector-floor2/2 yield100%) + floor 재학습 5차 pid85398 epoch5 정상(RLIMIT-fix 발효), 운영 무결성 불변
+- 🛠 [시뮬] floor 재학습 5차 — RLIMIT-fix 발효 run(pid85398, 3fa8bb6 이후 코드 로드) in-flight; persistent_workers+_raise_fd_limit 실적용 → 256 FD 천장 제거 → 100epoch 완주 기대, 운영 무결성 불변 — 2026-07-12
+
 ### 2026-07-11
 - 📊 [로그] 2026-07-11 시뮬 테스트 — 우선순위 4종 회귀(6dof·camera PASS·데모0/2·수집2/2 yield67%) + floor 재학습 pid56445 epoch5 정상, 운영 무결성 불변
 - 🛠 [시뮬] floor 재학습 4차 — FD 누수 근본강화(RLIMIT_NOFILE 셀프-상승) + 재시작 run(pid56445); persistent_workers는 crash 49→59로 밀었으나 미완주 → 천장 제거로 완주 기대(다음 run 발효) — 2026-07-11
