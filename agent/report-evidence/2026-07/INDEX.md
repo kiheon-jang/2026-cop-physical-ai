@@ -97,3 +97,12 @@
   - `sim_pick_place.py` open-loop baseline 0/2(결정론적 동일, min_approach 0.323m — 기대 기준선)
   - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% 성공(yield 67%), lift 42.7mm (throwaway `data/_smoke_0711` → 삭제, 운영 무접촉)
   - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets 각 50ep·3350frame 불변. 학습 pid 56445 alive(epoch 5, loss 0.676).
+
+## 2026-07-12
+- Phase 2 W2 — **floor 재학습 5차 = RLIMIT-fix 발효 run(in-flight)**: `agent/research-log/2026-07-12.md`, `research/simulation/2026-07-12_phase2-w2-floor-retrain-rlimit-effective-run.md` → 7월 보고서 [Sim2Real 준비 / 파이프라인 견고성] 섹션.
+  - 어제 run(pid 56445, RLIMIT-fix 미적용)이 예측대로 ~59 재크래시 → 드라이버가 이상종료 감지(`21 leaked semaphore`+`OSError [Errno 24]`) 후 **새 run pid 85398** 재시작. pid 85398 은 RLIMIT-fix 커밋 `3fa8bb6`(7/11) 이후 `train_act.py` 로드 → persistent_workers(L196)+_raise_fd_limit(L452) 두 FD fix 실적용 → 256 FD 천장 제거 → 100epoch 완주 기대.
+- 23:30 nightly sim-test — 우선순위 4종 실제 실행 회귀: `agent/research-log/2026-07-12.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임/6관절), `sim_camera_verification.py` PASS(2카메라 30프레임 동기)
+  - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop floor 씬 수집 스모크 2/2=100% yield, lift 65.3mm (throwaway `data/episodes_smoke_0712` → 삭제, 운영 무접촉)
+  - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets `episodes_cl`/`episodes_cl_dr`/`episodes_floor` 각 50ep 불변. 학습 pid 85398 alive(epoch 5, loss 0.757).
