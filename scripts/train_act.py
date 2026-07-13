@@ -498,7 +498,12 @@ def main(argv: Optional[List[str]] = None) -> None:
             effective_workers = 0
         else:
             effective_device = args.device
-            effective_workers = None
+            # num_workers=0 강제 (2026-07-13): macOS spawn 에서 DataLoader 워커가 epoch 마다
+            # 재spawn 되며 os.pipe FD 를 누적 → ~256/4≈58 epoch 후 OSError [Errno 24] 로
+            # 6 run 연속 이상종료(pid 94316·21661·39732·56445·85398). persistent_workers(7/9)·
+            # RLIMIT_NOFILE 셀프상승(7/11) 둘 다 재spawn 을 못 막아 미완주. 데이터셋 3350frame
+            # 소형이라 멀티프로세싱 이득 미미 → 워커 제거로 FD/세마포어 누수 원천 차단 = 100epoch 완주 보장.
+            effective_workers = 0
 
         # 데이터셋 존재 검증 — 오타/미동기 경로면 LeRobot 이 빈 디렉터리를 만들고
         # HF Hub 다운로드를 시도해 혼란스러운 실패가 되므로 여기서 명확히 차단.

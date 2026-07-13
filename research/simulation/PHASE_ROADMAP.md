@@ -322,6 +322,26 @@ uv pip install <패키지명>
     `2026-07-12_phase2-w2-floor-retrain-rlimit-effective-run.md`. **다음(드라이버)**: 완주→pending
     승격→`act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed 공정추정으로 배치 다양성이
     성공률 천장을 올리는지 비교.
+  - 🔄 **2026-07-13 — floor 재학습 6차 = FD 누수 근본치유(num_workers=0) + 재시작(in-flight)**:
+    어제 "RLIMIT-fix 발효 run"(pid 85398)이 예상과 달리 **또 epoch 58 에서 이상종료**(`21 leaked
+    semaphore` + `OSError [Errno 24]`) → 드라이버 감지 후 **새 run pid 8470**(23:00:49, `--epochs 100
+    --no-resume`, →`act_floor`) 시작. **두 선행 fix 무효 판명**: 크래시 트레이스백이 epoch 루프 안에서
+    DataLoader 가 **매 epoch 새 워커 spawn**(`_MultiProcessingDataLoaderIter` 재생성→`os.pipe()`,
+    `256/4워커≈58ep` 정합)함을 지목 → persistent_workers(7/9)·RLIMIT_NOFILE 셀프상승(7/11) 둘 다
+    **재spawn 이라는 누수 원천을 못 막고 증상만 늦추려** 한 것. **[자가치유]**: `train_act.py` 비smoke
+    학습 경로 `effective_workers` 를 `None`(→기본 4)에서 **`0` 강제**(`num_workers=0`)
+    → SingleProcess DataLoader → 워커 subprocess/os.pipe/세마포어 **생성 자체 없음 → FD 누수 물리적
+    불가**. 6-run 실패의 유일 원인(워커 churn) 근본 제거. 데이터 3350frame 소형이라 멀티프로세싱 이득
+    미미(비용≈0). surgical(else 분기 상수 1개+주석, 로직 무변경), `ast` OK·`persistent_workers=workers>0`
+    자동 False. **발효는 다음 run**(pid 8470 은 미수정 코드 로드→오늘밤 ~58 재크래시 예상→내일 드라이버
+    재시작이 수정코드 로드→**완주 기대**; 7/9→7/10 패턴이나 이번은 증상지연 아닌 원천제거라 확실성↑).
+    현 epoch 0 step 320 loss 41.2→4.5 정상 수렴. **무결성 격리 유지**: target=`episodes_floor`·
+    trained_on=`episodes_cl_dr:1783181837`(직전 승격값·운영 rollout_summary act_cl_dr 0.70/50.2mm 불변)·
+    pending=`episodes_floor:1783324998`(대기·미승격)·measured=`episodes_cl_dr:1783346557`, 학습 미완→
+    승격/측정 보류→baseline 무손상. datasets floor/cl/cl_dr 각 50ep 불변. 상세:
+    `2026-07-13_phase2-w2-floor-retrain-numworkers-selfheal.md`. **다음(드라이버)**: 완주→pending 승격→
+    `act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed 공정추정으로 배치 다양성이 성공률
+    천장을 올리는지 비교.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
