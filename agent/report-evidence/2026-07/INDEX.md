@@ -106,3 +106,13 @@
   - `sim_pick_place.py` open-loop baseline 0/3(결정론적 동일, min_approach 0.3228m — 기대 기준선)
   - `sim_data_collector.py` closed-loop floor 씬 수집 스모크 2/2=100% yield, lift 65.3mm (throwaway `data/episodes_smoke_0712` → 삭제, 운영 무접촉)
   - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets `episodes_cl`/`episodes_cl_dr`/`episodes_floor` 각 50ep 불변. 학습 pid 85398 alive(epoch 5, loss 0.757).
+
+## 2026-07-13
+- Phase 2 W2 — **floor 재학습 6차 = FD 누수 근본치유(num_workers=0)**: `agent/research-log/2026-07-13.md`, `research/simulation/2026-07-13_phase2-w2-floor-retrain-numworkers-selfheal.md` → 7월 보고서 [Sim2Real 준비 / 파이프라인 견고성] 섹션.
+  - 어제 run(pid 85398, RLIMIT-fix 발효 예상)이 또 epoch 58 이상종료 → 두 선행 fix(persistent_workers·RLIMIT) 무효 판명. 크래시 트레이스백이 **매 epoch DataLoader 워커 재spawn**(`_MultiProcessingDataLoaderIter` 재생성→`os.pipe()`) 지목. 드라이버 감지 후 **새 run pid 8470** 재시작.
+  - **[자가치유]** `train_act.py` 비smoke 경로 `effective_workers` `None`→**`0` 강제**(`num_workers=0` SingleProcess DataLoader → 워커 subprocess/pipe/세마포어 생성 없음 → FD 누수 물리적 불가). 6-run 실패 유일원인(워커 churn) 근본 제거. 발효는 다음 run(7/14).
+- 23:30 nightly sim-test — 우선순위 4종 실제 실행 회귀: `agent/research-log/2026-07-13.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임/6관절), `sim_camera_verification.py` PASS(2카메라 30프레임 동기)
+  - `sim_pick_place.py` open-loop baseline 0/2(결정론적 동일, min_approach 0.3228m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 42.3mm (throwaway `data/episodes_smoke_20260713` → 삭제, 운영 무접촉)
+  - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets 각 50ep 불변. 학습 pid 8470 alive(epoch 5, loss 0.694, FD 크래시 없이 진행).
