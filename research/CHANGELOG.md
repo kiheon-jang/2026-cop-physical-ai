@@ -53,6 +53,12 @@
 
 
 
+
+### 2026-07-13
+- 📊 [로그] 2026-07-13 시뮬 테스트 — 우선순위 4종 회귀(6dof·camera PASS/collector 2/2 yield100% lift42.3mm/pick0-2 결정론) + floor 재학습 6차 pid8470 epoch5 정상(num_workers=0 자가치유 발효 대기), 운영 무결성 불변
+- 🛠 [시뮬] floor 재학습 6차 — FD 누수 근본치유(num_workers=0): 6-run 미완주 원인=매 epoch DataLoader 워커 재spawn(os.pipe FD 누적), persistent_workers·RLIMIT 둘 다 무효 → 워커 제거로 원천 차단(다음 run 발효) — 2026-07-13
+- 📝 [히스토리] 2026-07-12 작업 기록 + README 현황 업데이트 — 2026-07-13
+
 ### 2026-07-12
 - 📊 [로그] 2026-07-12 시뮬 테스트 — 우선순위 4종 회귀(6dof·camera PASS·pick0/3·collector-floor2/2 yield100%) + floor 재학습 5차 pid85398 epoch5 정상(RLIMIT-fix 발효), 운영 무결성 불변
 - 🛠 [시뮬] floor 재학습 5차 — RLIMIT-fix 발효 run(pid85398, 3fa8bb6 이후 코드 로드) in-flight; persistent_workers+_raise_fd_limit 실적용 → 256 FD 천장 제거 → 100epoch 완주 기대, 운영 무결성 불변 — 2026-07-12
