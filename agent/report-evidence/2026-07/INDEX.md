@@ -116,3 +116,13 @@
   - `sim_pick_place.py` open-loop baseline 0/2(결정론적 동일, min_approach 0.3228m — 기대 기준선)
   - `sim_data_collector.py` closed-loop 수집 스모크 2/2=100% yield, lift 42.3mm (throwaway `data/episodes_smoke_20260713` → 삭제, 운영 무접촉)
   - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets 각 50ep 불변. 학습 pid 8470 alive(epoch 5, loss 0.694, FD 크래시 없이 진행).
+
+## 2026-07-14
+- Phase 2 W2 — **floor 재학습 7차 = num_workers=0 fix 발효 run**: `agent/research-log/2026-07-14.md`, `research/simulation/2026-07-14_phase2-w2-floor-retrain-numworkers-effective-run.md` → 7월 보고서 [Sim2Real 준비 / 파이프라인 견고성] 섹션.
+  - 어제 run(pid 8470, fix 미적용)이 예측대로 epoch 58 크래시 → 드라이버 감지 후 **새 run pid 48167** 시작. pid 48167 은 num_workers=0 커밋(7/13) 이후 디스크 로드 → fix 실제 적용(L501~506 비smoke else 분기 `effective_workers=0`, L196 persistent_workers→False). **워커 재spawn 없음 → FD 누수 물리적 불가 → 완주 기대**. 23:30 epoch 5/100 loss 0.683 크래시 없이 진행.
+- 23:30 nightly sim-test — 우선순위 5종 실제 실행 회귀: `agent/research-log/2026-07-14.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임/6관절), `sim_camera_verification.py` PASS(2카메라 30프레임 동기)
+  - `sim_pick_place.py` open-loop baseline fail 2회 결정론 동일(min_approach 0.3228m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 스모크 2/2=100% yield, lift 41.8mm (throwaway root → 삭제, 운영 무접촉)
+  - `joint_angle_comparison_sim.py` 추론 6관절 최대오차 **0.0244° < ±1°** — 시뮬 관절각 정합 유지
+  - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets 각 50ep/3350f 불변.
