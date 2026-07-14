@@ -54,6 +54,11 @@
 
 
 
+
+### 2026-07-14
+- 📊 [로그] 2026-07-14 시뮬 테스트 — 우선순위 5종 회귀(6dof·camera PASS/collector 2/2 yield100% lift41.8mm/pick 결정론/관절각 0.0244°<1°) + floor 재학습 7차 pid48167 epoch5 크래시없이 진행(num_workers=0 fix 발효), 무결성 격리 불변
+- 🛠 [시뮬] floor 재학습 7차 — num_workers=0 자가치유 발효 run(pid 48167): 어제 pid 8470 epoch58 크래시(fix 미적용) → 오늘 run 이 disk num_workers=0(비smoke else L501~506) 로드 → 워커 재spawn 없음 → FD 누수 물리적 불가 → 완주 기대. 무결성 격리 유지(baseline 0.70/50.2mm·datasets 50ep 불변) — 2026-07-14
+
 ### 2026-07-13
 - 📊 [로그] 2026-07-13 시뮬 테스트 — 우선순위 4종 회귀(6dof·camera PASS/collector 2/2 yield100% lift42.3mm/pick0-2 결정론) + floor 재학습 6차 pid8470 epoch5 정상(num_workers=0 자가치유 발효 대기), 운영 무결성 불변
 - 🛠 [시뮬] floor 재학습 6차 — FD 누수 근본치유(num_workers=0): 6-run 미완주 원인=매 epoch DataLoader 워커 재spawn(os.pipe FD 누적), persistent_workers·RLIMIT 둘 다 무효 → 워커 제거로 원천 차단(다음 run 발효) — 2026-07-13
