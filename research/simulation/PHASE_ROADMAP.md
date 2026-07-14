@@ -342,6 +342,22 @@ uv pip install <패키지명>
     `2026-07-13_phase2-w2-floor-retrain-numworkers-selfheal.md`. **다음(드라이버)**: 완주→pending 승격→
     `act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed 공정추정으로 배치 다양성이 성공률
     천장을 올리는지 비교.
+  - 🔄 **2026-07-14 — floor 재학습 7차 = num_workers=0 fix 발효 run(in-flight)**: 어제 run(pid 8470,
+    num_workers=0 fix **미적용** 코드 로드)이 예측대로 **epoch 58 이상종료**(로그 tail `{"epoch": 58,
+    "step": 340}` 직후 `21 leaked semaphore`) → 드라이버가 이상종료 감지 후 **새 run pid 48167**
+    시작(23:00:41, `--epochs 100 --no-resume`, →`checkpoints/act_floor`). **오늘의 진척 = FD 누수
+    근본치유(num_workers=0) 발효 시점 전환**: pid 48167 은 num_workers=0 커밋(7/13) **이후** 디스크
+    `train_act.py` 로드 → 수정 실제 적용. 검증: L501~506 **비smoke else 분기** `effective_workers=0`
+    (이 run 은 `--smoke` 없음→else 진입→workers=0), L196 `persistent_workers=workers>0`→자동 False →
+    **워커 재spawn 없음 → FD 누수 물리적 불가 → 100epoch 완주 기대**(7/9→7/10 패턴, 이번은 증상지연
+    아닌 누수 원천 제거라 확실성↑). 현 epoch 0 step 20 loss 35.99→22.58 정상 수렴. **무결성 격리
+    유지**: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(직전 승격값 유지, 운영
+    rollout_summary act_cl_dr 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998`(대기·미승격)·
+    measured=`episodes_cl_dr:1783346557`, 학습 미완→승격/측정 보류→baseline 무손상. datasets
+    floor/cl/cl_dr 각 50ep/3350frame 불변. [자가치유] 없음(어제 num_workers=0 fix 첫 발효가 오늘의
+    진척). 상세: `2026-07-14_phase2-w2-floor-retrain-numworkers-effective-run.md`. **다음(드라이버)**:
+    완주→pending 승격→`act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed 공정추정으로
+    배치 다양성이 성공률 천장을 올리는지 비교.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
