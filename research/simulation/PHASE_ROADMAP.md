@@ -358,6 +358,28 @@ uv pip install <패키지명>
     진척). 상세: `2026-07-14_phase2-w2-floor-retrain-numworkers-effective-run.md`. **다음(드라이버)**:
     완주→pending 승격→`act_floor/epoch_0099` 측정→floor-trained rollout, 이후 4-seed 공정추정으로
     배치 다양성이 성공률 천장을 올리는지 비교.
+  - 🔄 **2026-07-15 — floor 재학습 8차 = FD 가설 경험적 반증 + MPS OOM 재규명(in-flight)**:
+    어제 "num_workers=0 발효 run"(pid 48167, fix **적용** 코드)이 예상과 달리 **또 epoch 57
+    이상종료**(`metrics 마지막 epoch 미달`, shutdown `1 leaked semaphore` — 어제 21→오늘 1,
+    워커 소멸 방증) → 드라이버가 새 run **pid 73001**(23:00:14, `--epochs 100 --no-resume`,
+    →`act_floor`) 시작. **오늘의 반전 = 3일간 쫓던 워커 FD 누수 가설을 프로브로 직접 반증**:
+    `_fd_leak_probe.py` 로 `episodes_floor`+num_workers=0 DataLoader 를 4 full-epoch(각 418 step
+    완전 순회) 재순회 → `/dev/fd` = **baseline 6·epoch0~3 전부 6 고정**(누수 재현 불가). crash
+    재규명 근거: ①num_workers=0 실제 적용에도 crash epoch=57(7 run 동일 천장) ②이번 run
+    **OSError [Errno 24] traceback 부재** = epoch57 도중(step370/418) SIGKILL 시그니처(OOM)
+    ③epoch 시간 **완전 평탄 ~313s**(점진 slowdown 아님). → **유력 원인 = MPS 메모리 누적
+    OOM**(16GB M5, torch MPS 할당자 캐시 미반환), 워커 FD 는 2차 증상. **[자가치유]**:
+    `train_act.py` epoch 루프에 ①`torch.mps.empty_cache()`+`gc.collect()`(완화, mps 게이트,
+    정확도 무영향) ②`mps_mem=driver_allocated_memory()` 로깅(계측 — 다음 run 이 OOM 가설
+    직접 확증/반증; 이전 3 fix 와 차이 = 가설을 계측으로 검증). 검증: ast OK·torch.mps API
+    존재·`--smoke` 완주(cpu, `mps_mem:null`). **발효는 다음 run**(pid 73001 은 수정 이전 코드
+    →오늘밤 ~57 재crash 예상→내일 드라이버 재시작이 수정+계측 코드 로드→완주 또는 메모리
+    곡선 확보). **무결성 격리 유지**: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`
+    (운영 rollout_summary act_cl_dr 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998`(대기)·
+    measured=`episodes_cl_dr:1783346557`, 학습 미완→승격/측정 보류→baseline 무손상. datasets
+    floor/cl/cl_dr 각 50ep 불변. 상세: `2026-07-15_phase2-w2-floor-retrain-fd-disproof-mps-oom.md`.
+    **다음(드라이버)**: 완주→pending 승격→`act_floor/epoch_0099` 측정→floor-trained rollout,
+    이후 4-seed 공정추정 비교 / 재crash 시 `mps_mem` 곡선으로 OOM 확정→batch_size 축소 등 root fix.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 

@@ -16,6 +16,7 @@ ACT (Action Chunking with Transformers) 학습 파이프라인
 """
 
 import argparse
+import gc
 import json
 import os
 import sys
@@ -390,6 +391,9 @@ def train(
             # 런 식별자 — 여러 데이터셋 학습이 한 jsonl 에 누적되므로 구분 필수
             "dataset": Path(config.dataset_root).name,
             "ckpt_dir": Path(config.checkpoint_dir).name,
+            # MPS 드라이버 할당 메모리(bytes). epoch 마다 증가하면 OOM 원인 규명(2026-07-15).
+            "mps_mem": (torch.mps.driver_allocated_memory()
+                        if device.type == "mps" and hasattr(torch, "mps") else None),
         }
         history.append(epoch_metric)
         print(json.dumps({"epoch_done": epoch_metric}, ensure_ascii=False), flush=True)
@@ -402,6 +406,13 @@ def train(
                 json.dumps({"checkpoint_saved": str(ckpt_path)}, ensure_ascii=False),
                 flush=True,
             )
+
+        # epoch 마다 MPS 캐시 반환 + gc. FD 는 원인 아님(2026-07-15 프로브: num_workers=0
+        # 에서 4 full-epoch open_fds 6 고정) → 8-run ~57 천장의 잔여 가설 = MPS 메모리 누적
+        # OOM(SIGKILL, traceback 없음). 표준 완화책, 정확도 무영향.
+        if device.type == "mps" and hasattr(torch, "mps"):
+            torch.mps.empty_cache()
+        gc.collect()
 
     return history
 
