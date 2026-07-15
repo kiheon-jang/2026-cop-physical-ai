@@ -126,3 +126,13 @@
   - `sim_data_collector.py` closed-loop 스모크 2/2=100% yield, lift 41.8mm (throwaway root → 삭제, 운영 무접촉)
   - `joint_angle_comparison_sim.py` 추론 6관절 최대오차 **0.0244° < ±1°** — 시뮬 관절각 정합 유지
   - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets 각 50ep/3350f 불변.
+
+## 2026-07-15
+- Phase 2 W2 — **floor 재학습 8차 = FD 누수 가설 경험적 반증 + MPS OOM 재규명**: `agent/research-log/2026-07-15.md`, `research/simulation/2026-07-15_phase2-w2-floor-retrain-fd-disproof-mps-oom.md` → 7월 보고서 [파이프라인 견고성 / 근본원인 정정] 섹션.
+  - `_fd_leak_probe.py` 로 num_workers=0 DataLoader 4 full-epoch 재순회 → open_fds 6 고정 = **FD 누수 직접 반증**(3일간 red herring). crash epoch=57 천장 불변 + traceback 부재(SIGKILL) + epoch시간 평탄 → **MPS OOM 재규명**. [자가치유] epoch 루프 `torch.mps.empty_cache()`+`gc.collect()` 완화 + `mps_mem` 계측(다음 run 자기검증).
+- 23:30 nightly sim-test — 우선순위 5종 실제 실행 회귀: `agent/research-log/2026-07-15.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임/6관절), `sim_camera_verification.py` PASS(2카메라 30프레임 동기)
+  - `sim_pick_place.py` open-loop baseline fail 1회 결정론(min_approach 0.323m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 스모크 2/2=100%, lift 42.3mm, yield 67% (throwaway root → 삭제, 운영 무접촉)
+  - `joint_angle_comparison_sim.py` 추론 6관절 최대오차 **0.0244° < ±1°** — 시뮬 관절각 정합 유지
+  - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets 각 50ep/3350f 불변. 학습 pid 73001 alive(epoch 5, loss 0.706).
