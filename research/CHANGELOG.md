@@ -55,6 +55,12 @@
 
 
 
+
+### 2026-07-15
+- 📊 [로그] 2026-07-15 시뮬 테스트 — 우선순위 5종 회귀(camera·6dof PASS/collector 2/2 lift42.3mm yield67%/pick 결정론 0/1/관절각 0.0244°<1°) + floor 재학습 8차 pid73001 epoch5 진행, FD가설 반증·MPS OOM 재규명, 무결성 격리 불변
+- 🛠 [시뮬] floor 재학습 8차 — FD 가설 경험적 반증 + MPS OOM 재규명 — 2026-07-15
+- 📝 [히스토리] 2026-07-14 작업 기록 + README 현황 업데이트 — 2026-07-15
+
 ### 2026-07-14
 - 📊 [로그] 2026-07-14 시뮬 테스트 — 우선순위 5종 회귀(6dof·camera PASS/collector 2/2 yield100% lift41.8mm/pick 결정론/관절각 0.0244°<1°) + floor 재학습 7차 pid48167 epoch5 크래시없이 진행(num_workers=0 fix 발효), 무결성 격리 불변
 - 🛠 [시뮬] floor 재학습 7차 — num_workers=0 자가치유 발효 run(pid 48167): 어제 pid 8470 epoch58 크래시(fix 미적용) → 오늘 run 이 disk num_workers=0(비smoke else L501~506) 로드 → 워커 재spawn 없음 → FD 누수 물리적 불가 → 완주 기대. 무결성 격리 유지(baseline 0.70/50.2mm·datasets 50ep 불변) — 2026-07-14
