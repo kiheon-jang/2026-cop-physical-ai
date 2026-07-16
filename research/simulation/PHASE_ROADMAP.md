@@ -380,6 +380,24 @@ uv pip install <패키지명>
     floor/cl/cl_dr 각 50ep 불변. 상세: `2026-07-15_phase2-w2-floor-retrain-fd-disproof-mps-oom.md`.
     **다음(드라이버)**: 완주→pending 승격→`act_floor/epoch_0099` 측정→floor-trained rollout,
     이후 4-seed 공정추정 비교 / 재crash 시 `mps_mem` 곡선으로 OOM 확정→batch_size 축소 등 root fix.
+  - 🔄 **2026-07-16 — floor 재학습 9차 = MPS-fix + mps_mem 계측 발효 run(in-flight)**: 어제 8차
+    run(pid 73001, mps-fix **미적용** 코드)이 예측대로 **epoch 56 이상종료**(`metrics 마지막 epoch
+    미달`, tail `{"epoch":56,"step":270}` 후 `1 leaked semaphore`) → 드라이버가 새 run **pid 7243**
+    시작(23:00:22, `--epochs 100 --no-resume`, →`checkpoints/act_floor`). **오늘의 진척 = mps-fix
+    발효 시점 전환**: pid 7243 은 mps-fix 커밋 `32fcb5d`(7/15) **이후** 디스크 `train_act.py` 로드
+    → 수정 실제 적용(L395 `mps_mem=torch.mps.driver_allocated_memory()` 계측 · L414
+    `torch.mps.empty_cache()`+`gc.collect()` 완화 · L509 `effective_workers=0` 유지). **의의**:
+    8-run 을 ~56~59 에서 죽인 천장에 **처음으로 완화+계측 동시 적용** → 완주 시 MPS 캐시 미반환이
+    진짜 원인 실증(해소), ~57 재crash 시 `mps_mem` 곡선으로 **OOM 직접 확증/반증→batch_size 축소 등
+    root fix** 직행(어느 쪽이든 워커 FD red-herring 루프 탈출). 현 epoch 0 step 30 loss 28.5→14.2
+    정상 수렴, pid 7243 alive. **무결성 격리 유지**: target=`episodes_floor`·trained_on=
+    `episodes_cl_dr:1783181837`(직전 승격값 유지, 운영 rollout_summary act_cl_dr 0.70/50.2mm 불변)·
+    pending=`episodes_floor:1783324998`(대기·미승격)·measured=`episodes_cl_dr:1783346557`, 학습 미완→
+    승격/측정 보류→baseline 무손상. datasets floor/cl/cl_dr 각 50ep/3350frame 불변. `act_floor` 최신
+    ckpt=`epoch_0059`(과거 run, crash56<59→신규 상위 ckpt 없음). [자가치유] 없음(어제 mps-fix 첫
+    발효가 오늘의 진척). 상세: `2026-07-16_phase2-w2-floor-retrain-mps-fix-effective-run.md`.
+    **다음(드라이버)**: 완주→pending 승격→`act_floor/epoch_0099` 측정→floor-trained rollout, 이후
+    4-seed 공정추정 비교 / 재crash 시 `mps_mem` 곡선으로 OOM 확정→batch_size 축소 등 root fix.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
