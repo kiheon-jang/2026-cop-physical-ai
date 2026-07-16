@@ -2,6 +2,16 @@
 
 > 7월 보고서 매핑: Phase 2 (Sim2Real) — 실기 50ep + Sim2Real 준비(DR).
 
+## 2026-07-16
+- Phase 2 W2 — **floor 재학습 9차 = MPS-fix(empty_cache) + mps_mem 계측 발효 run**: `agent/research-log/2026-07-16.md`, `research/simulation/2026-07-16_phase2-w2-floor-retrain-mps-fix-effective-run.md` → 7월 보고서 [파이프라인 견고성 / 근본원인 정정] 섹션.
+  - pid 7243 은 mps-fix 커밋 `32fcb5d`(7/15) 이후 코드 로드 → empty_cache 완화 + `mps_mem` 계측 실적용. 8-run 천장(~56~59ep)에 처음 완화+계측 동시 적용 → 완주=OOM 해소 실증 / 재crash=`mps_mem` 곡선으로 OOM 확정→batch_size root fix.
+- 23:30 nightly sim-test — 우선순위 5종 실제 실행 회귀: `agent/research-log/2026-07-16.md` (23:30 회차)
+  - `sim_headless_6dof_video.py` PASS(2501프레임/6관절), `sim_camera_verification.py` PASS(2카메라 30프레임)
+  - `sim_pick_place.py` open-loop baseline fail 2회 결정론 동일(min_approach 0.3228m — 기대 기준선)
+  - `sim_data_collector.py` closed-loop 스모크 2/2=100% yield, lift 47.0mm (throwaway root → 삭제, 운영 무접촉)
+  - `joint_angle_comparison_sim.py` 추론 6관절 최대오차 **0.0244° < ±1°** — 시뮬 관절각 정합 유지
+  - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets 각 50ep/3350f 불변. 학습 pid 7243 alive(epoch 6, loss 0.58).
+
 ## 2026-07-01
 - Phase 2 W1 착수 — Domain Randomization 모듈 신규 + 수집기/측정기 연결(opt-in `--dr`): `agent/research-log/2026-07-01.md`, `research/simulation/2026-07-01_phase2-w1-domain-randomization.md`, `research/simulation/2026-07-01_phase2-w1-dr-wiring.md` → 7월 보고서 [Sim2Real 준비] 섹션.
 - DR 3축 무작위화 8샘플 검증 프레임: `research/simulation/dr_samples/dr_sample_00~07.png`
