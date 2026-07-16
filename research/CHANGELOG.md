@@ -56,6 +56,12 @@
 
 
 
+
+### 2026-07-16
+- 📊 [로그] 2026-07-16 시뮬 테스트 — 우선순위 5종 회귀(camera·6dof PASS/collector 2/2 lift47mm/pick 결정론 0.3228m/관절각 0.0244°<1°) + floor 재학습 9차 pid7243 mps-fix발효 epoch6 진행, 무결성 격리 불변
+- 🛠 [시뮬] floor 재학습 9차 — MPS-fix(empty_cache)+mps_mem 계측 발효 run — 2026-07-16
+- 📝 [히스토리] 2026-07-15 작업 기록 + README 현황 업데이트 — 2026-07-16
+
 ### 2026-07-15
 - 📊 [로그] 2026-07-15 시뮬 테스트 — 우선순위 5종 회귀(camera·6dof PASS/collector 2/2 lift42.3mm yield67%/pick 결정론 0/1/관절각 0.0244°<1°) + floor 재학습 8차 pid73001 epoch5 진행, FD가설 반증·MPS OOM 재규명, 무결성 격리 불변
 - 🛠 [시뮬] floor 재학습 8차 — FD 가설 경험적 반증 + MPS OOM 재규명 — 2026-07-15
