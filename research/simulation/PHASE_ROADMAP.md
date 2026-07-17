@@ -398,6 +398,29 @@ uv pip install <패키지명>
     발효가 오늘의 진척). 상세: `2026-07-16_phase2-w2-floor-retrain-mps-fix-effective-run.md`.
     **다음(드라이버)**: 완주→pending 승격→`act_floor/epoch_0099` 측정→floor-trained rollout, 이후
     4-seed 공정추정 비교 / 재crash 시 `mps_mem` 곡선으로 OOM 확정→batch_size 축소 등 root fix.
+  - 🔄 **2026-07-17 — floor 재학습 10차 = mps_mem 판독으로 GPU OOM 반증 + RSS 프로브(자가치유)**:
+    어제 9차 run(pid 7243, **mps-fix 발효 코드**)이 완화(`empty_cache`)에도 **또 epoch 58 이상종료**
+    (`metrics 마지막 epoch 미달`, tail `{"epoch":58,"step":10}` 후 `1 leaked semaphore`, traceback 없음)
+    → 드라이버가 새 run **pid 26783**(23:00:34, `--epochs 100 --no-resume`, →`act_floor`) 시작.
+    **오늘의 결착 = 9-run 만에 GPU OOM 가설 반증**: 계측된 `mps_mem` 곡선이 epoch 0 5.72GB→epoch 7
+    6.65GB 1회 상승 후 **epoch 8~57 완전 평탄(6.65~6.67GB, 단조증가 전무)**. 6.65GB=16GB 통합메모리
+    42% → **GPU OOM 물리적 불가**(7/15 OOM 가설 반증; FD 가설은 프로브로 이미 반증 → FD·GPU OOM 둘 다
+    아님). **crash 시그니처 종합**: crash epoch ~57(9-run 천장)·mps_mem 평탄·elapsed_sec 평탄(~311s,
+    slowdown 없음)·traceback 없음+leaked semaphore = **외부 SIGKILL 급사**. epoch57 done=04:03:54→crash
+    ~04:04(고정 23:00 시작 탓 epoch~57↔벽시계~04:00 교락). **남은 유일 미측정 변수 = 프로세스 RSS**
+    (mps_mem 은 GPU 할당자만 계측; jetsam 통합메모리 압박이면 GPU 평탄이어도 RSS 상승). **[자가치유]**:
+    `train_act.py` ①모듈 top `import resource`(지역 import뿐→epoch 루프 NameError 방지) ②`epoch_metric`
+    에 `rss_bytes`(getrusage RUSAGE_SELF, macOS=bytes) 1필드 ③반증된 OOM 주석 2곳 정정 — surgical, 학습
+    로직 무변경(`ast` OK·샘플 17MB bytes 확인). 판독: 다음 crash 시 **RSS 평탄=외부/시각연동**(교락 해제/
+    resume/epoch 하향), **RSS 상승=jetsam**(batch/워커 축소). 발효는 다음 run(pid 26783 은 23:00:34 편집前
+    로드→오늘밤 ~57 재crash 예상→내일 재시작이 계측코드 로드). 현 epoch 0 step 350 loss 3.79 정상 수렴.
+    **무결성 격리 유지**: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(불변, 운영
+    rollout_summary act_cl_dr 0.70/50.2mm 불변)·pending=`episodes_floor`(대기·미승격)·measured=
+    `episodes_cl_dr:1783346557`, 학습 미완→승격/측정 보류→baseline 무손상. datasets floor/cl/cl_dr 각
+    50ep/3350frame 불변. `act_floor` 최신 ckpt=`epoch_0059`(과거 run, crash56<59→신규 상위 ckpt 없음).
+    상세: `2026-07-17_phase2-w2-floor-retrain-oom-refuted-rss-probe.md`. **다음(드라이버)**: 완주→pending
+    승격→`act_floor/epoch_0099` 측정→floor rollout→4-seed 공정추정 / 재crash 시 RSS 곡선으로 jetsam vs
+    외부 시각연동 판정→root fix. **오늘 OOM 반증 = 9-run 증상추적 루프 탈출의 첫 결착.**
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 

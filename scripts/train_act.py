@@ -19,6 +19,7 @@ import argparse
 import gc
 import json
 import os
+import resource
 import sys
 import time
 from dataclasses import asdict, dataclass, field
@@ -391,9 +392,14 @@ def train(
             # 런 식별자 — 여러 데이터셋 학습이 한 jsonl 에 누적되므로 구분 필수
             "dataset": Path(config.dataset_root).name,
             "ckpt_dir": Path(config.checkpoint_dir).name,
-            # MPS 드라이버 할당 메모리(bytes). epoch 마다 증가하면 OOM 원인 규명(2026-07-15).
+            # MPS 드라이버 할당 메모리(bytes). 2026-07-17 판정: 9차 run(mps-fix 발효)에서
+            # epoch 7~57 내내 ~6.65GB 평탄(누수 없음) → GPU OOM 가설 반증. crash 는 여전히
+            # ~epoch 57. mps_mem 은 GPU 할당자만 계측 → 미측정 변수 = 프로세스 전체(통합메모리)
+            # RSS. rss_bytes 추가(2026-07-17): 다음 crash 에서 RSS 도 평탄이면 프로세스 메모리
+            # 아님(외부 SIGKILL/시각연동), RSS 상승이면 CPU측 통합메모리 압박(jetsam).
             "mps_mem": (torch.mps.driver_allocated_memory()
                         if device.type == "mps" and hasattr(torch, "mps") else None),
+            "rss_bytes": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         }
         history.append(epoch_metric)
         print(json.dumps({"epoch_done": epoch_metric}, ensure_ascii=False), flush=True)
@@ -407,9 +413,9 @@ def train(
                 flush=True,
             )
 
-        # epoch 마다 MPS 캐시 반환 + gc. FD 는 원인 아님(2026-07-15 프로브: num_workers=0
-        # 에서 4 full-epoch open_fds 6 고정) → 8-run ~57 천장의 잔여 가설 = MPS 메모리 누적
-        # OOM(SIGKILL, traceback 없음). 표준 완화책, 정확도 무영향.
+        # epoch 마다 MPS 캐시 반환 + gc. FD(2026-07-15 프로브)·GPU OOM(2026-07-17 mps_mem
+        # 평탄 반증) 둘 다 원인 아님. 완화책은 무해하므로 유지하되 crash 원인은 rss_bytes 로
+        # 재조사(외부 SIGKILL / jetsam). 표준 완화책, 정확도 무영향.
         if device.type == "mps" and hasattr(torch, "mps"):
             torch.mps.empty_cache()
         gc.collect()
