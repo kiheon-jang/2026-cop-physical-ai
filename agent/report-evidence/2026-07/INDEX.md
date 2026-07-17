@@ -146,3 +146,11 @@
   - `sim_data_collector.py` closed-loop 스모크 2/2=100%, lift 42.3mm, yield 67% (throwaway root → 삭제, 운영 무접촉)
   - `joint_angle_comparison_sim.py` 추론 6관절 최대오차 **0.0244° < ±1°** — 시뮬 관절각 정합 유지
   - 무결성 전수: target=`episodes_floor`·trained_on=`episodes_cl_dr:1783181837`(운영 rollout 0.70/50.2mm 불변)·pending=`episodes_floor:1783324998` 대기·measured=`episodes_cl_dr:1783346557`·datasets 각 50ep/3350f 불변. 학습 pid 73001 alive(epoch 5, loss 0.706).
+- Phase 2 W2 — **floor 재학습 10차 = mps_mem 판독으로 GPU OOM 반증 + RSS 프로브(자가치유)**: `agent/research-log/2026-07-17.md`, `research/simulation/2026-07-17_phase2-w2-floor-retrain-oom-refuted-rss-probe.md` → 7월 보고서 [파이프라인 견고성 / 근본원인 정정] 섹션.
+  - 9차 run(mps-fix 발효) `mps_mem` 곡선 epoch7 6.65GB→8~57 완전 평탄(42% of 16GB) = **GPU OOM 물리적 반증**(FD·GPU OOM 둘 다 아님). crash epoch~57 천장·traceback 부재·elapsed 평탄 = **외부 SIGKILL 급사**. [자가치유] `epoch_metric` 에 `rss_bytes`(getrusage) 계측 추가 → 다음 crash 시 RSS 평탄=외부/시각연동 vs 상승=jetsam 판정.
+- 23:30 nightly sim-test — 우선순위 5종 실제 실행 회귀 (7/17 회차): `agent/research-log/2026-07-17.md`
+  - `sim_camera_verification.py` PASS(2카메라 30프레임 동기), `sim_headless_6dof_video.py` PASS(2501프레임/6관절)
+  - `sim_pick_place.py` open-loop baseline fail 결정론(min_approach **0.3228m** — 기대 기준선 불변)
+  - `sim_data_collector.py` closed-loop 스모크 2/2=100%, lift 42.2mm, yield 100% (throwaway root)
+  - `joint_angle_comparison_sim.py` 6관절 최대오차 **0.0244° < ±1°** — 시뮬 관절각 정합 유지
+  - 무결성: 운영 rollout act_cl_dr 0.70/50.2mm 불변·datasets 각 50ep/3350f 불변·학습 pid 26783 alive(epoch 5, loss 0.71).
