@@ -57,6 +57,12 @@
 
 
 
+
+### 2026-07-17
+- 📊 [로그] 2026-07-17 시뮬 테스트 — 우선순위 5종 회귀(camera·6dof PASS/pick 결정론 0.3228m/collector 2/2 lift42.2mm/관절각 0.0244°<1°) + floor 재학습 10차 pid26783 진행, mps_mem 판독 GPU OOM 반증, 무결성 격리 불변
+- 🛠 [시뮬] floor 재학습 10차 — mps_mem 판독으로 GPU OOM 반증 + RSS 프로브 자가치유 — 2026-07-17
+- 📝 [히스토리] 2026-07-16 작업 기록 + README 현황 업데이트 — 2026-07-17
+
 ### 2026-07-16
 - 📊 [로그] 2026-07-16 시뮬 테스트 — 우선순위 5종 회귀(camera·6dof PASS/collector 2/2 lift47mm/pick 결정론 0.3228m/관절각 0.0244°<1°) + floor 재학습 9차 pid7243 mps-fix발효 epoch6 진행, 무결성 격리 불변
 - 🛠 [시뮬] floor 재학습 9차 — MPS-fix(empty_cache)+mps_mem 계측 발효 run — 2026-07-16
