@@ -58,6 +58,12 @@
 
 
 
+
+### 2026-07-18
+- 📊 [로그] 2026-07-18 시뮬 테스트 — floor 11차 RSS 프로브 발효 실증: pid 5069 metrics 에 rss_bytes 실재(827MB 평탄, 10차 부재 대조) + mps_mem 6.6GB 평탄 GPU OOM 재반증. 우선순위 5종 회귀 독립 PASS(관절각 0.0244°<1°/camera 30f/6dof 2501f/collector 2/2 yield100% lift41.4mm/pick 0.3228m 결정론). 무결성 격리 불변
+- 🛠 [시뮬] floor 재학습 11차 — RSS 프로브 발효 run: 10차(pid 26783) epoch57 외부 SIGKILL 재현(mps_mem 평탄 6.64GB GPU OOM 재반증), 새 run pid 5069 이 RSS-probe 코드(884294f) 로드 → 다음 crash 가 9-run 만에 첫 rss_bytes 곡선(jetsam vs 외부 판정). 회귀 5종 PASS. 무결성 격리 불변 — 2026-07-18
+- 📝 [히스토리] 2026-07-17 작업 기록 + README 현황 업데이트 — 2026-07-18
+
 ### 2026-07-17
 - 📊 [로그] 2026-07-17 시뮬 테스트 — 우선순위 5종 회귀(camera·6dof PASS/pick 결정론 0.3228m/collector 2/2 lift42.2mm/관절각 0.0244°<1°) + floor 재학습 10차 pid26783 진행, mps_mem 판독 GPU OOM 반증, 무결성 격리 불변
 - 🛠 [시뮬] floor 재학습 10차 — mps_mem 판독으로 GPU OOM 반증 + RSS 프로브 자가치유 — 2026-07-17
