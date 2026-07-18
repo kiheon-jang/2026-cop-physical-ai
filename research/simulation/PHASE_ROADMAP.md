@@ -421,6 +421,26 @@ uv pip install <패키지명>
     상세: `2026-07-17_phase2-w2-floor-retrain-oom-refuted-rss-probe.md`. **다음(드라이버)**: 완주→pending
     승격→`act_floor/epoch_0099` 측정→floor rollout→4-seed 공정추정 / 재crash 시 RSS 곡선으로 jetsam vs
     외부 시각연동 판정→root fix. **오늘 OOM 반증 = 9-run 증상추적 루프 탈출의 첫 결착.**
+  - 🔄 **2026-07-18 — floor 재학습 11차 = RSS 프로브 발효 run(in-flight)**: 어제 10차 run(pid 26783,
+    RSS-probe **미적용** 코드)이 예측대로 **epoch 57 이상종료**(드라이버 tail `{"epoch":57,"step":310}`
+    후 `1 leaked semaphore`, traceback 없음) → 드라이버가 새 run **pid 5069** 시작(23:00:52, `--epochs
+    100 --no-resume`, →`checkpoints/act_floor`). **오늘의 진척 = RSS 프로브 발효 시점 전환**: pid 5069 는
+    RSS-probe 커밋 `884294f`(7/17) **이후** 디스크 `train_act.py`(L22 `import resource` · L402 `rss_bytes`
+    =getrusage RUSAGE_SELF) 로드 → 계측 실제 적용. 방증: 10차 run `act_train_metrics.jsonl` 은 `mps_mem`
+    만 있고 `rss_bytes` 부재(편집前 코드). → **다음 crash(pid 5069)가 9-run 만에 처음 RSS 곡선 남김** →
+    jetsam vs 외부 시각연동 최종 판정(마지막 미측정 변수 계측). **GPU OOM 재확인 반증**: 10차 run mps_mem
+    epoch 54/55/56 **완전 평탄 6.64GB**(=16GB 42%) · elapsed_sec 평탄 ~313s · crash epoch ~57(천장 불변)
+    · traceback 없음+leaked semaphore = **외부 SIGKILL 급사** 재현(FD·GPU OOM 둘 다 반증 유지). 현 epoch
+    0 step 40 loss 29.2→12.3 정상 수렴. **무결성 격리 유지**: target=`episodes_floor`·trained_on=
+    `episodes_cl_dr:1783181837`(직전 승격값 불변, 운영 rollout_summary act_cl_dr 0.70/50.2mm 불변)·pending=
+    `episodes_floor:1783324998`(대기·미승격)·measured=`episodes_cl_dr:1783346557`, 학습 미완→승격/측정
+    보류→baseline 무손상. datasets floor/cl/cl_dr 각 50ep/3350frame 불변. `act_floor` 최신 ckpt=
+    `epoch_0059`(과거 run, crash57<59→신규 상위 ckpt 없음). [자가치유] 없음(어제 RSS 프로브 첫 발효가
+    오늘의 진척). 우선순위 5종 회귀 PASS(camera·6dof·collector 2/2 yield100% lift43.5mm·pick 결정론
+    0.3228m·관절각 0.0244°<1°). 상세: `2026-07-18_phase2-w2-floor-retrain-rss-probe-effective-run.md`.
+    **다음(드라이버)**: 완주→pending 승격→`act_floor/epoch_0099` 측정→floor-trained rollout→4-seed
+    공정추정 vs baseline 0.825/DR-trained 0.800 / 재crash 시 `rss_bytes` 곡선으로 jetsam vs 외부 시각연동
+    판정→root fix.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
