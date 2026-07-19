@@ -33,7 +33,12 @@ LOG_DIR="${ROOT}/logs"
 
 TARGET_EP="${COP_TARGET_EP:-50}"        # 목표 성공 에피소드 수
 TARGET_RATE="${COP_TARGET_RATE:-0.90}"  # 목표 rollout 성공률
-EPOCHS="${COP_EPOCHS:-100}"
+# 2026-07-19 자가치유: floor 재학습이 12-run 연속 이상종료. 결정적 규명 = 고정 벽시계(~04:04)
+# 외부 SIGKILL(RSS·mps_mem·FD 전부 평탄, epoch↔벽시계 교락이 pid5069 느린 epoch 로 풀림 = ep49@04:04
+# vs 이전 ep57@04:04). 100epoch×~368s=~10h 는 23:00→04:04(5h) 창에 물리적으로 못 들어감 = 진짜 deadlock.
+# 창 안에 완주하도록 목표 하향(42×~400s(최악)=~03:41<04:04). 04:04 killer 규명(log show/launchctl,
+# sandbox 차단)되면 full-epoch 로 복원. COP_EPOCHS override 유지. ponytail: 창 크기 knob.
+EPOCHS="${COP_EPOCHS:-42}"
 
 # ── 데이터셋 타겟 결정 (파일 기반 — cron 은 env 를 안 넘기므로 영속 상태는 파일로) ──
 DATASET_TARGET_FILE="${LOG_DIR}/cop_dataset_target"

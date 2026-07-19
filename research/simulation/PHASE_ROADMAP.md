@@ -441,6 +441,23 @@ uv pip install <패키지명>
     **다음(드라이버)**: 완주→pending 승격→`act_floor/epoch_0099` 측정→floor-trained rollout→4-seed
     공정추정 vs baseline 0.825/DR-trained 0.800 / 재crash 시 `rss_bytes` 곡선으로 jetsam vs 외부 시각연동
     판정→root fix.
+  - 🔧 **2026-07-19 — floor 재학습 12차 = 시각연동 외부 SIGKILL 확정 + deadlock 규명 자가치유**:
+    11차 run(pid 5069, RSS-probe 발효)이 **epoch 49 이상종료**(tail `{"epoch":49,"step":10}`,
+    `1 leaked semaphore`, traceback 없음) → 드라이버가 새 run **pid 91975**(`--epochs 100 --no-resume`)
+    재시작. **9-run 미스터리 종결**: RSS 프로브가 처음 남긴 곡선 = `rss_bytes` **789→811MB 초반 1회
+    +22MB 후 39ep 완전 평탄**(jetsam 반증) · mps_mem ~6.64GB 평탄(GPU OOM 재반증). **결정적 증거 =
+    epoch↔벽시계 교락 해제**: pid 5069 는 epoch 가 느려(평균 **368.8s** vs 이전 ~313s) **같은 ~04:04
+    까지 49 epoch 만**(이전 57) 돌고 죽음(시작 23:00:52·ep48 완료 04:02:24·crash ~04:04:15) → crash 는
+    **고정 epoch 아닌 고정 벽시계(~04:04)** = **외부 시각연동 SIGKILL 확정**(FD·GPU OOM·jetsam 3가설
+    전부 기각). **진짜 deadlock 규명**: 100ep×~368s=~10h 는 23:00→04:04(5h) 창에 물리적으로 못 들어감 →
+    `--no-resume` 매일 폐기 → 영원히 완주 불가(resume 도 L546 옵티마이저/epoch 리셋으로 완료게이트 못
+    채움). **[자가치유]**: 드라이버 L36 `COP_EPOCHS:-100`→`:-42`(창 안 ~03:41 완주<04:04, override knob
+    유지, surgical 1줄). 발효는 내일 재시작(오늘 pid 91975 는 편집前 --epochs 100 → 오늘밤도 재crash).
+    **한계**: 42ep 저학습 → baseline(100ep) 대비 공정비교 아님. **full-epoch 복원 = ~04:04 killer 규명
+    필요**(log show/launchctl → sandbox 차단, 에스컬레이션). **무결성 격리 유지**: 운영 rollout_summary
+    act_cl_dr 0.70/50.2mm 불변·마커 4종 격리·datasets 불변·joint_angle 회귀 PASS 0.0244°. 상세:
+    `2026-07-19_floor-retrain-timelinked-sigkill-confirmed.md`. **다음(드라이버)**: 내일 ~03:41 완주→
+    pending 승격→`act_floor/epoch_0041` 측정→**12-run 만에 첫 floor rollout**→4-seed 공정추정.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 

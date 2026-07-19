@@ -57,6 +57,12 @@
   - 영향: 23:00/23:30 nightly cron 이 (a) 시뮬 런타임 메트릭 수집 불가, (b) 산출물 git push 불가, (c) Obsidian 미러 불가. 워킹트리에 미커밋 산출물 누적 (2026-06-07, 2026-06-08 분).
   - 필요 조치: settings.json hooks/permissions 에서 `.venv/bin/python3` 절대경로 + `git add|commit|push` + `cp ... 00_AI_Wiki/CoP_PhysicalAI/...` 를 명시적 allow 또는 working-dir 확장.
   - 임시 우회: 사용자 수동 `git add -A && git commit -m "..." && git push` 1회 + Obsidian 폴더 수동 sync.
+  - **2026-07-19 추가 — floor 재학습 04:04 killer 규명용 진단권한**: floor ACT 재학습이 12-run 연속
+    **고정 벽시계 ~04:04 외부 SIGKILL**로 죽음(RSS·mps_mem·FD 전부 평탄, epoch↔벽시계 교락 해제로 확정 —
+    상세 `research/simulation/2026-07-19_floor-retrain-timelinked-sigkill-confirmed.md`). 야간 자가치유로
+    `COP_EPOCHS=42`(창 안 완주)로 우회했으나 **full-epoch(100) 공정비교 복원엔 04:04 killer 규명·제거 필요**.
+    → `log show --predicate 'eventMessage contains "kill"'` / `launchctl list` / `ps` 권한 필요(macOS 주기
+    유지보수·백업·스케줄 프로세스 후보). 현재 sandbox 차단.
 
 ---
 
