@@ -2,6 +2,17 @@
 
 > 7월 보고서 매핑: Phase 2 (Sim2Real) — 실기 50ep + Sim2Real 준비(DR).
 
+## 2026-07-19
+- Phase 2 W2 — **floor 재학습 12차 = 시각연동 외부 SIGKILL 확정 + deadlock 규명 자가치유**: `agent/research-log/2026-07-19.md`, `research/simulation/2026-07-19_floor-retrain-timelinked-sigkill-confirmed.md` → 7월 보고서 [파이프라인 견고성 / 근본원인 규명] 섹션.
+  - RSS 프로브 첫 crash 곡선(pid 5069, 49ep): `rss_bytes` 827→850MB 초반 1회 후 완전 평탄(**jetsam 반증**)·`mps_mem` 6.64GB 평탄(GPU OOM 재반증)·`elapsed` 368.8s slowdown 없음. **epoch↔벽시계 교락 해제**(느린 epoch 로 같은 ~04:04 에 49ep 만 돌고 죽음) = **고정 벽시계 외부 SIGKILL 확정**(FD·GPU OOM·jetsam 3가설 전부 기각). deadlock 규명: 100ep×368s=~10h 가 5h 창 초과 + `--no-resume` = 영원히 완주 불가.
+  - **[자가치유]** `cop_pipeline_advance.sh` `COP_EPOCHS:-100`→`:-42`(창 안 ~03:41 완주<04:04) → 내일 발효 → **12-run 만에 첫 floor rollout** 경로 개통. 한계: 42ep 저학습=공정비교 아님, full-epoch 복원은 ~04:04 killer 규명(sandbox 차단) 필요.
+- 23:30 nightly sim-test — 우선순위 5종 실제 실행 회귀 (7/19 회차): `agent/research-log/2026-07-19.md`
+  - `sim_camera_verification.py` PASS(2카메라 30프레임 동기), `sim_headless_6dof_video.py` PASS(2501프레임/6관절)
+  - `sim_pick_place.py` open-loop baseline fail 결정론(min_approach **0.3228m** — 기대 기준선 불변)
+  - `sim_data_collector.py` closed-loop 스모크 2/2=100%, lift **42.9mm**, yield 100% (throwaway root)
+  - `joint_angle_comparison_sim.py` 6관절 최대오차 **0.0244° < ±1°** — 시뮬 관절각 정합 유지
+  - 무결성: 운영 rollout act_cl_dr **0.70/50.2mm** 불변·markers 격리(pending=`episodes_floor` 대기)·datasets floor/cl/cl_dr 불변·학습 pid 91975 alive(epoch 5, loss 0.72, rss_bytes 836MB 평탄).
+
 ## 2026-07-16
 - Phase 2 W2 — **floor 재학습 9차 = MPS-fix(empty_cache) + mps_mem 계측 발효 run**: `agent/research-log/2026-07-16.md`, `research/simulation/2026-07-16_phase2-w2-floor-retrain-mps-fix-effective-run.md` → 7월 보고서 [파이프라인 견고성 / 근본원인 정정] 섹션.
   - pid 7243 은 mps-fix 커밋 `32fcb5d`(7/15) 이후 코드 로드 → empty_cache 완화 + `mps_mem` 계측 실적용. 8-run 천장(~56~59ep)에 처음 완화+계측 동시 적용 → 완주=OOM 해소 실증 / 재crash=`mps_mem` 곡선으로 OOM 확정→batch_size root fix.
