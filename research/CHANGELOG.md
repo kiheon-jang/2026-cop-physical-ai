@@ -59,6 +59,12 @@
 
 
 
+
+### 2026-07-19
+- 📊 [로그] 2026-07-19 시뮬 테스트 — floor 12차 시각연동 SIGKILL 확정: 우선순위 5종 회귀 독립 PASS(관절각 0.0244°<1°/camera 30f/6dof 2501f/collector 2/2 yield100% lift42.9mm/pick 0.3228m 결정론). 학습 pid 91975 rss_bytes 836MB 평탄(jetsam 재반증)+mps_mem 5.6GB 평탄(GPU OOM 재반증). 무결성 격리 불변(운영 0.70/50.2mm·markers·datasets)
+- 🛠 [시뮬] floor 재학습 12차 — 시각연동 외부 SIGKILL 확정 + deadlock 규명 자가치유 — 2026-07-19
+- 📝 [히스토리] 2026-07-18 작업 기록 + README 현황 업데이트 — 2026-07-19
+
 ### 2026-07-18
 - 📊 [로그] 2026-07-18 시뮬 테스트 — floor 11차 RSS 프로브 발효 실증: pid 5069 metrics 에 rss_bytes 실재(827MB 평탄, 10차 부재 대조) + mps_mem 6.6GB 평탄 GPU OOM 재반증. 우선순위 5종 회귀 독립 PASS(관절각 0.0244°<1°/camera 30f/6dof 2501f/collector 2/2 yield100% lift41.4mm/pick 0.3228m 결정론). 무결성 격리 불변
 - 🛠 [시뮬] floor 재학습 11차 — RSS 프로브 발효 run: 10차(pid 26783) epoch57 외부 SIGKILL 재현(mps_mem 평탄 6.64GB GPU OOM 재반증), 새 run pid 5069 이 RSS-probe 코드(884294f) 로드 → 다음 crash 가 9-run 만에 첫 rss_bytes 곡선(jetsam vs 외부 판정). 회귀 5종 PASS. 무결성 격리 불변 — 2026-07-18
