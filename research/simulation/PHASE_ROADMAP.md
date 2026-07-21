@@ -458,6 +458,20 @@ uv pip install <패키지명>
     act_cl_dr 0.70/50.2mm 불변·마커 4종 격리·datasets 불변·joint_angle 회귀 PASS 0.0244°. 상세:
     `2026-07-19_floor-retrain-timelinked-sigkill-confirmed.md`. **다음(드라이버)**: 내일 ~03:41 완주→
     pending 승격→`act_floor/epoch_0041` 측정→**12-run 만에 첫 floor rollout**→4-seed 공정추정.
+  - ✅ **2026-07-21 — floor-trained 첫 rollout = seed42 10/10 = 1.0 (12-run 결착)**: 7/19 자가치유
+    (`COP_EPOCHS=42`, 04:04 벽시계 killer 회피)가 발효 → floor 재학습이 **12-run 만에 처음 창 안 완주**
+    (`act_floor/epoch_0041` mtime 7/21 02:46, 42epoch, wall_clock 3.76h, loss 0.0259, rss 925MB·mps
+    5.66GB 평탄=jetsam·GPU OOM 재반증) → 드라이버 STAGE=측정(`epoch_0041`, seed42, N=10, 씬
+    `scene_grasp_floor.xml`) = **success 10/10, success_rate 1.0, median lift 66.0mm**(max_lift
+    0.056~0.068m 전부 임계 0.04m 여유). **의의**: open-loop 0%→closed-loop 0.70→**floor 1.0** —
+    7/7 W1 결론(병목=배치 커버리지, DR 축은 천장 못 올림 0.825↔0.800)의 처방(배치 다양성 데이터)이
+    실측으로 적중, seed42(비관적 끝단 0.70)에서 1.0 도약. **한계**: 42epoch<baseline 100epoch →
+    완전 공정비교 아님(04:04 killer 탓 full-epoch 불가, 외부 에스컬레이션 대기) · 단일 seed42 →
+    정식 판정은 4-seed 공정추정 후속. **무결성 격리 불변**: datasets floor/cl/cl_dr 각 50ep · 마커 3자
+    정합(target=`episodes_floor`·trained_on=`episodes_floor:1783324998`·measured=`episodes_floor:1783710169`).
+    [자가치유] research-log 2026-07-20 결손 → git·마커로 재구성. 상세:
+    `2026-07-21_floor-trained-first-rollout.md`. **다음(드라이버)**: `act_floor` 4-seed(42/7/123/2026)
+    공정추정 → baseline 0.825/DR-trained 0.800 대비 배치 다양성이 성공률 천장을 올리는지 확정.
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
