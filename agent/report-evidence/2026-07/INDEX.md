@@ -2,6 +2,12 @@
 
 > 7월 보고서 매핑: Phase 2 (Sim2Real) — 실기 50ep + Sim2Real 준비(DR).
 
+## 2026-07-22
+- Phase 2 W2 — **floor-trained 4-seed 공정추정 = 4/4 전부 1.0 (배치 다양성이 성공률 천장을 올렸다)**: `agent/research-log/2026-07-22.md`, `research/simulation/2026-07-22_floor-trained-4seed-fair-estimation.md` → 7월 보고서 [Sim2Real / 배치 다양성 성공률] 섹션.
+  - 비파괴 프록시로 `act_floor/epoch_0041` 에 seed 7/123/2026 추가 rollout: 4-seed(42/7/123/2026) **전부 10/10=1.0, 40/40 성공, 실패 배치 0건, 평균 median lift 64.0mm**. baseline 0.825 / DR-trained 0.800 → **floor-trained 1.000**. 7/7 W1 결론(병목=큐브배치 커버리지)의 처방(배치 다양성 데이터)을 4-seed 로 실증 확증. 한계: 42ep<100ep(04:04 killer) → apples-to-apples 는 killer 규명 후속.
+- 23:30 nightly sim-test — 우선순위 5종 실제 실행 회귀 (7/22 회차): `agent/research-log/2026-07-22.md`
+  - camera 30프레임 2카메라 PASS · 6dof 2501프레임 PASS · pick 0.3228327m 결정론(기지 baseline) · collector 2/2 yield100% lift **43.0mm**(throwaway root 삭제) · joint_angle 최대오차 **0.0244°<1°**. 운영 `rollout_summary.json` md5 `5207f67b…` 전후 불변·datasets 각 50ep/3350f 불변.
+
 ## 2026-07-21
 - Phase 2 W2 — **floor-trained 첫 rollout = seed42 10/10 = 1.0 (12-run 결착)**: `agent/research-log/2026-07-21.md`, `research/simulation/2026-07-21_floor-trained-first-rollout.md` → 7월 보고서 [Sim2Real / 배치 다양성 성공률] 섹션.
   - 7/19 자가치유(`COP_EPOCHS=42`)가 발효 → floor 재학습 **12-run 만에 첫 창내 완주**(`act_floor/epoch_0041` mtime 02:46, 42ep, wall 3.76h, loss 0.0259) → 드라이버 측정 seed42 N=10 = **success 10/10 = 1.0, median lift 66.0mm**(max 0.056~0.068m 임계 0.04m 여유). open-loop 0%→closed-loop 0.70→**floor 1.0**. W1 결론(병목=배치 커버리지)의 처방 실측 적중. 한계: 42ep<100ep 공정비교 아님·단일 seed42(4-seed 후속).
