@@ -1,0 +1,70 @@
+{
+  "status": "ok",
+  "checkpoint": "checkpoints/act_floor/epoch_0041",
+  "ckpt_dir": "act_floor",
+  "scene": "scene_grasp_floor.xml",
+  "measured_at": "2026-07-22T23:03:31",
+  "seed": 2026,
+  "rollouts": 10,
+  "success": 10,
+  "success_rate": 1.0,
+  "median_lift_mm": 64.9,
+  "lift_threshold_m": 0.04,
+  "dr": false,
+  "dr_axes": null,
+  "video_path": null,
+  "wall_clock_sec": 12.9,
+  "device": "cpu",
+  "results": [
+    {
+      "rollout": 0,
+      "success": true,
+      "max_lift_m": 0.0649
+    },
+    {
+      "rollout": 1,
+      "success": true,
+      "max_lift_m": 0.0577
+    },
+    {
+      "rollout": 2,
+      "success": true,
+      "max_lift_m": 0.0668
+    },
+    {
+      "rollout": 3,
+      "success": true,
+      "max_lift_m": 0.0579
+    },
+    {
+      "rollout": 4,
+      "success": true,
+      "max_lift_m": 0.0577
+    },
+    {
+      "rollout": 5,
+      "success": true,
+      "max_lift_m": 0.0678
+    },
+    {
+      "rollout": 6,
+      "success": true,
+      "max_lift_m": 0.0654
+    },
+    {
+      "rollout": 7,
+      "success": true,
+      "max_lift_m": 0.0668
+    },
+    {
+      "rollout": 8,
+      "success": true,
+      "max_lift_m": 0.0577
+    },
+    {
+      "rollout": 9,
+      "success": true,
+      "max_lift_m": 0.0551
+    }
+  ]
+}

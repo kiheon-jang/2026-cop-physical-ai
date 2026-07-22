@@ -472,6 +472,21 @@ uv pip install <패키지명>
     [자가치유] research-log 2026-07-20 결손 → git·마커로 재구성. 상세:
     `2026-07-21_floor-trained-first-rollout.md`. **다음(드라이버)**: `act_floor` 4-seed(42/7/123/2026)
     공정추정 → baseline 0.825/DR-trained 0.800 대비 배치 다양성이 성공률 천장을 올리는지 확정.
+  - ✅ **2026-07-22 — floor-trained 4-seed 공정추정 = 4 seed 전부 1.0 (배치 다양성이 천장을 올렸다)**:
+    드라이버 STAGE=완료/유지(새 사이클 미트리거)여서, 야간 에이전트가 7/4·7/7 과 동일 프로토콜로
+    나머지 3 seed(7/123/2026)를 `act_floor/epoch_0041` 에 **비파괴 프록시** rollout(`--summary-suffix
+    _floor_seed{N}`, 운영 summary 불변). **결과: seed42 1.0(66mm)·seed7 1.0(65.3mm)·seed123 1.0(60mm)·
+    seed2026 1.0(64.9mm) → 4-seed 평균 성공률 1.000, 40/40 rollout 성공, 실패 배치 0건.** **결론**:
+    baseline 0.825 / DR-trained 0.800 → **floor-trained 1.000** — 7/7 W1 결론(병목=큐브배치 커버리지,
+    DR 축은 천장 못 올림)의 처방(배치 다양성 데이터)이 4-seed 로 **실증 확증**. baseline·DR-trained 이
+    seed마다 특정 배치에서 실패(42{2,5,8}·123{0,1}·2026{5})했던 모방격차를 floor 데이터가 전 seed
+    실패 0 으로 메움. **한계**: 42epoch<baseline 100epoch(04:04 killer 탓 full-epoch 불가) → 저학습에도
+    1.0 이라 결론 방향은 더 강해지나 엄밀한 100ep apples-to-apples 는 04:04 killer 규명(외부
+    에스컬레이션) 후속. **무결성 격리**: 운영 `rollout_summary.json` md5 `5207f67b…` 전후 불변·신규
+    `rollout_summary_floor_seed{7,123,2026}.json` 3종만 추가·datasets floor/cl/cl_dr 각 50ep/3350f 불변·
+    마커 3자 정합 유지. 상세: `2026-07-22_floor-trained-4seed-fair-estimation.md`. **다음**: sim 트랙
+    성공률 레버 규명 완료 → 실기 스텝(W2 zero-shot, Orin SSH 외부의존 미수신 대기) / full-epoch 복원
+    (04:04 killer 진단권한 대기).
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
