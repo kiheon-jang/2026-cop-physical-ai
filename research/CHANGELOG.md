@@ -61,6 +61,12 @@
 
 
 
+
+### 2026-07-22
+- 📊 [로그] 2026-07-22 시뮬 테스트 — 우선순위 5종 회귀 독립 PASS(camera 30f/6dof 2501f/collector 2/2 yield100% lift43.0mm/pick 0.3228m 결정론/관절각 0.0244°<1°). floor 4-seed 4/4=1.0 증거 인덱싱. 운영 summary md5 5207f67b 불변
+- 🛠 [시뮬] floor-trained 4-seed 공정추정 4/4=1.0 — 배치 다양성이 성공률 천장 올림(0.825/0.800→1.000) — 2026-07-22
+- 📝 [히스토리] 2026-07-21 작업 기록 + README 현황 업데이트 — 2026-07-22
+
 ### 2026-07-21
 - 📊 [로그] 2026-07-21 시뮬 테스트 — floor rollout 1.0 결착 + 우선순위 5종 회귀 독립 PASS(camera 30f/6dof 2501f/collector 2/2 yield100% lift63.4mm/pick 0.3228m 결정론/관절각 0.0244°<1°). 운영 datasets 3종 각 50ep·마커 3자 정합 불변
 - 🛠 [시뮬] floor-trained 첫 rollout seed42 10/10=1.0 (12-run 결착) — 2026-07-21
