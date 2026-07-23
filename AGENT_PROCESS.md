@@ -26,7 +26,7 @@
 |------|------|
 | **프로젝트명** | 사내 CoP Physical AI — 첫걸음 |
 | **목적** | SO-ARM101 로봇팔 기반 모방학습 → 강화학습 → 모바일 매니퓰레이터 |
-| **현재 단계** | **Phase 2 - 진행중** —  (2026-07-23~) |
+| **현재 단계** | **Phase 2 - 진행중** —  (2026-07-24~) |
 | **GitHub** | https://github.com/kiheon-jang/2026-cop-physical-ai |
 | **담당자** | 장기헌 (xaqwer@gmail.com) |
 | **보고 수신자** | insoo.kum@hyundaielevator.com, giheon.jang@hyundaielevator.com |
