@@ -487,6 +487,17 @@ uv pip install <패키지명>
     마커 3자 정합 유지. 상세: `2026-07-22_floor-trained-4seed-fair-estimation.md`. **다음**: sim 트랙
     성공률 레버 규명 완료 → 실기 스텝(W2 zero-shot, Orin SSH 외부의존 미수신 대기) / full-epoch 복원
     (04:04 killer 진단권한 대기).
+  - 🔄 **2026-07-23 — sim 성공률 레버 결착 후 hold + 우선순위 5종 회귀**: 드라이버 STAGE=완료/유지
+    (episodes_floor 50ep·성공률 1.0, 새 사이클 미트리거) → 수집/학습/측정 재실행 없음. sim 트랙
+    성공률 레버(배치 다양성)는 7/22 4-seed 공정추정(4/4=1.0)으로 이미 결착 → hold 일. 야간 에이전트가
+    **우선순위 5종 회귀 독립 실행**: camera 30f 2대 · 6dof 2501f · pick min_approach 0.3228327m 결정론
+    (max_lift 0.0=고정포즈 expert 미접근 기지값) · collector 2/2 yield100% lift41.8mm(스모크 격리→삭제) ·
+    joint_angle 0.0244°<1° — **5종 전부 PASS**. **무결성 격리 불변**: 운영 `rollout_summary.json` md5
+    `5207f67b189645de1bb26c124873b683` 7/22 값과 동일(측정 후 불변, act_floor/epoch_0041 seed42 1.0/66mm)·
+    마커 3자 정합(target=`episodes_floor`·trained_on=`episodes_floor:1783324998`·measured=
+    `episodes_floor:1783710169`)·datasets floor/cl/cl_dr 각 50ep 불변·학습 프로세스 없음. [자가치유] 없음.
+    상세: `2026-07-23_phase2-w2-sim-lever-hold-regression.md`. **다음**: 남은 두 항목 모두 외부 의존 대기 —
+    실기 스텝(W2 zero-shot, Orin SSH 미수신) / full-epoch(100) 공정비교 복원(04:04 killer 진단권한 대기).
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
