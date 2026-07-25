@@ -184,3 +184,8 @@
   - `sim_data_collector.py` closed-loop 스모크 2/2=100%, lift 42.2mm, yield 100% (throwaway root)
   - `joint_angle_comparison_sim.py` 6관절 최대오차 **0.0244° < ±1°** — 시뮬 관절각 정합 유지
   - 무결성: 운영 rollout act_cl_dr 0.70/50.2mm 불변·datasets 각 50ep/3350f 불변·학습 pid 26783 alive(epoch 5, loss 0.71).
+
+## 2026-07-25
+- Phase 2 W2 — **sim 레버 결착 후 hold + 무결성 전수 감사 + 23:30 우선순위 5종 회귀**: `agent/research-log/2026-07-25.md`, `research/simulation/2026-07-25_phase2-w2-sim-lever-hold-integrity-audit.md` → 7월 보고서 [Sim2Real 안정성 / 파이프라인 견고성] 섹션.
+  - 23:30 5종 독립 PASS: 6dof 2501프레임 · camera 30프레임×2 동기 · pick min_approach **0.3228327m** 결정론 · joint_angle 최대오차 **0.0244°<1°** · collector 스모크 2/2 yield100% lift **48.4mm**(격리 루트→삭제, 운영 무접촉).
+  - 무결성: 운영 `rollout_summary.json` md5 **5207f67b189645de1bb26c124873b683** 실행 후 불변 · 마커 3자 정합(target=`episodes_floor`·trained_on=`episodes_floor:1783324998`·measured=`episodes_floor:1783710169`) · datasets floor/cl/cl_dr 각 50ep/3350f 불변 · 학습 프로세스 없음(hold).
