@@ -498,6 +498,18 @@ uv pip install <패키지명>
     `episodes_floor:1783710169`)·datasets floor/cl/cl_dr 각 50ep 불변·학습 프로세스 없음. [자가치유] 없음.
     상세: `2026-07-23_phase2-w2-sim-lever-hold-regression.md`. **다음**: 남은 두 항목 모두 외부 의존 대기 —
     실기 스텝(W2 zero-shot, Orin SSH 미수신) / full-epoch(100) 공정비교 복원(04:04 killer 진단권한 대기).
+  - 🔄 **2026-07-25 — sim 레버 결착 후 hold + 무결성 전수 감사**: 드라이버 STAGE=완료/유지
+    (`episodes_floor` 50ep·성공률 1.0, 새 사이클 미트리거) → 수집/학습/측정 재실행 없음. sim 레버
+    (배치 다양성)는 7/22 4-seed 4/4=1.0 으로 이미 결착 → hold 일. 야간 에이전트가 **비파괴 무결성
+    전수 감사**(이번 세션 도구결과): 운영 `rollout_summary.json` md5 `5207f67b189645de1bb26c124873b683`
+    7/22·7/23 값과 **동일**(sr 1.0, ckpt act_floor/epoch_0041)·마커 3자 정합(target=`episodes_floor`·
+    trained_on=`episodes_floor:1783324998`·measured=`episodes_floor:1783710169`)·datasets
+    floor/cl/cl_dr 각 50ep/3350f(info.json) 불변·학습 프로세스 없음 → **회귀/오염 0**. **[자가치유]
+    2026-07-24 research-log 결손 → git 재구성**: 7/24 야간 sim 크론 전진 커밋 부재(git 상 7/24 는
+    히스토리 커밋 `20f00da` 뿐)로 7/24 야간 전진 없이 hold 유지됐음을 확인, `research-log/2026-07-24.md`
+    재구성 생성. 상세: `2026-07-25_phase2-w2-sim-lever-hold-integrity-audit.md`. **다음**: 남은 두 항목
+    모두 외부 의존 대기 — 실기 W2 zero-shot(Orin SSH 미수신) / full-epoch(100) 공정비교(04:04 killer
+    진단권한 에스컬레이션 대기).
 - W3: 실기 fine-tune (10 에피소드)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
 
