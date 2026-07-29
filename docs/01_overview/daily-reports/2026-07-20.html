@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoP Physical AI 일일 보고</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f1117; font-family: 'Segoe UI', -apple-system, sans-serif; color: #e2e8f0; }
+  .wrapper { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
+
+  /* 헤더 */
+  .header { background: linear-gradient(135deg, #1a1f2e 0%, #16213e 100%); border-radius: 16px; padding: 32px; margin-bottom: 16px; border: 1px solid #2d3748; position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%); }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .badge { background: #6366f1; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; }
+  .vol { font-size: 12px; color: #64748b; }
+  .title { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #94a3b8; }
+  .github-btn { display: inline-block; margin-top: 16px; background: #6366f1; color: #fff !important; text-decoration: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+
+  /* 진행 현황 바 */
+  .progress-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+  .progress-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .progress-title { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+  .progress-count { font-size: 20px; font-weight: 800; color: #6366f1; }
+  .progress-bar-bg { background: #2d3748; border-radius: 99px; height: 8px; overflow: hidden; }
+  .progress-bar-fill { background: linear-gradient(90deg, #6366f1, #8b5cf6); height: 100%; border-radius: 99px; transition: width 0.3s; }
+  .milestone { font-size: 12px; color: #64748b; margin-top: 8px; }
+
+  /* 섹션 공통 */
+  .section { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+  .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #2d3748; }
+  .section-icon { font-size: 18px; }
+  .section-title { font-size: 14px; font-weight: 700; color: #e2e8f0; text-transform: uppercase; letter-spacing: 0.5px; }
+  .section-badge { margin-left: auto; font-size: 11px; background: #2d3748; color: #94a3b8; padding: 2px 8px; border-radius: 99px; }
+
+  /* 작업 항목 */
+  .task-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1e2636; }
+  .task-item:last-child { border-bottom: none; }
+  .task-num { font-size: 11px; font-weight: 700; color: #6366f1; background: rgba(99,102,241,0.1); width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .task-content { flex: 1; }
+  .task-title { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 3px; }
+  .task-path { font-size: 11px; color: #6366f1; font-family: monospace; background: rgba(99,102,241,0.08); padding: 2px 6px; border-radius: 4px; }
+  .task-type { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; margin-right: 6px; margin-bottom: 4px; }
+  .type-research { background: rgba(16,185,129,0.15); color: #10b981; }
+  .type-sample { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .type-docs { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .type-fix { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+  /* 이슈 */
+  .issue-item { padding: 10px 12px; border-radius: 8px; background: rgba(239,68,68,0.07); border-left: 3px solid #ef4444; margin-bottom: 8px; font-size: 13px; color: #fca5a5; }
+  .no-issue { font-size: 13px; color: #64748b; padding: 8px 0; }
+
+  /* 팀 요청 */
+  .action-item { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid #1e2636; }
+  .action-item:last-child { border-bottom: none; }
+  .action-dot { color: #6366f1; font-size: 16px; flex-shrink: 0; }
+  .action-text { font-size: 13px; color: #e2e8f0; }
+  .pending-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid #2d3748; }
+  .pending-title { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .pending-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12px; }
+  .pending-dot { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; }
+  .pending-label { color: #fbbf24; font-weight: 600; }
+  .pending-arrow { color: #4b5563; margin: 0 4px; }
+  .pending-desc { color: #94a3b8; }
+  /* 결정 가이드 박스 */
+  .decision-guide { margin-top: 14px; background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 14px 16px; }
+  .guide-title { font-size: 12px; font-weight: 700; color: #10b981; margin-bottom: 8px; }
+  .guide-text { font-size: 12px; color: #94a3b8; line-height: 1.6; }
+  .guide-example { margin: 8px 0; background: #111827; border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #6ee7b7; font-family: monospace; line-height: 1.8; }
+  .guide-example code { color: #a5b4fc; }
+
+  /* 리서치 */
+  .research-summary { background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.2); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+  .research-topic { font-size: 15px; font-weight: 700; color: #a5b4fc; margin-bottom: 4px; }
+  .research-oneliner { font-size: 13px; color: #94a3b8; line-height: 1.6; }
+  .concept-list { margin-top: 14px; }
+  .concept-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1e2636; }
+  .concept-item:last-child { border-bottom: none; }
+  .concept-num { font-size: 11px; font-weight: 800; color: #8b5cf6; width: 20px; flex-shrink: 0; margin-top: 2px; }
+  .concept-name { font-size: 12px; font-weight: 700; color: #c4b5fd; margin-bottom: 2px; }
+  .concept-desc { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+  .why-card { background: rgba(16,185,129,0.07); border-left: 3px solid #10b981; border-radius: 0 8px 8px 0; padding: 10px 12px; margin-top: 14px; font-size: 13px; color: #6ee7b7; line-height: 1.6; }
+  .read-more { margin-top: 10px; font-size: 12px; }
+  .read-more a { color: #6366f1; text-decoration: none; }
+
+  /* 샘플 */
+  .sample-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #1e2636; }
+  .sample-item:last-child { border-bottom: none; }
+  .stars { font-size: 12px; flex-shrink: 0; }
+  .sample-name { font-size: 12px; font-weight: 600; font-family: monospace; color: #93c5fd; }
+  .sample-desc { font-size: 12px; color: #64748b; margin-left: auto; }
+  .review-box { background: rgba(245,158,11,0.07); border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 10px 12px; margin-top: 14px; font-size: 12px; color: #fcd34d; line-height: 1.6; }
+
+  /* 경로 변경 */
+  .change-item { display: flex; gap: 8px; padding: 7px 0; font-size: 12px; border-bottom: 1px solid #1e2636; }
+  .change-item:last-child { border-bottom: none; }
+  .change-type { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+  .type-add { background: rgba(16,185,129,0.15); color: #10b981; }
+  .type-move { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .type-del { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .change-path { font-family: monospace; color: #94a3b8; }
+
+  /* 예정 */
+  .schedule-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1e2636; }
+  .schedule-item:last-child { border-bottom: none; }
+  .schedule-time { font-size: 12px; font-weight: 700; color: #6366f1; width: 50px; flex-shrink: 0; }
+  .schedule-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; }
+  .tag-research { background: rgba(16,185,129,0.15); color: #10b981; }
+  .tag-sample { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .tag-report { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+  .schedule-desc { font-size: 13px; color: #94a3b8; }
+
+  /* 링크 그리드 */
+  .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .link-item { background: #111827; border: 1px solid #2d3748; border-radius: 8px; padding: 10px 12px; text-decoration: none; display: block; }
+  .link-label { font-size: 11px; font-weight: 700; color: #6366f1; margin-bottom: 2px; }
+  .link-url { font-size: 10px; color: #4b5563; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* 결정 폼 버튼 */
+  .decision-btn-wrap { margin-top: 14px; }
+  .decision-btn { display: block; width: 100%; padding: 12px; background: rgba(16,185,129,0.1); border: 1.5px solid rgba(16,185,129,0.3); border-radius: 8px; color: #10b981 !important; text-decoration: none; font-size: 13px; font-weight: 600; text-align: center; transition: all 0.15s; }
+  .decision-btn:hover { background: rgba(16,185,129,0.18); }
+  .decision-hint { font-size: 11px; color: #4b5563; text-align: center; margin-top: 6px; }
+
+  /* 결과물 미디어 카드 */
+  .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .media-card { background: #111827; border: 1px solid #2d3748; border-radius: 10px; padding: 12px; text-decoration: none; display: block; transition: all 0.15s; }
+  .media-card:hover { border-color: #6366f1; }
+  .media-icon { font-size: 22px; margin-bottom: 6px; }
+  .media-name { font-size: 12px; font-weight: 700; color: #c4b5fd; margin-bottom: 3px; word-break: break-all; }
+  .media-meta { font-size: 10px; color: #64748b; font-family: monospace; }
+  .media-cta { display: inline-block; margin-top: 8px; font-size: 11px; color: #6366f1; font-weight: 600; }
+
+  /* 푸터 */
+  .footer { text-align: center; padding: 20px; font-size: 11px; color: #374151; }
+
+  /* ─── 모바일 반응형 (≤ 600px) ─── */
+  @media only screen and (max-width: 600px) {
+    .wrapper { padding: 12px 8px !important; }
+    .header { padding: 20px 18px !important; border-radius: 12px !important; }
+    .header-top { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; margin-bottom: 12px !important; }
+    .title { font-size: 22px !important; }
+    .subtitle { font-size: 12px !important; }
+    .vol { font-size: 11px !important; }
+    .github-btn { padding: 7px 14px !important; font-size: 12px !important; }
+
+    .section { padding: 16px 14px !important; border-radius: 10px !important; }
+    .section-header { gap: 6px !important; margin-bottom: 12px !important; padding-bottom: 10px !important; }
+    .section-title { font-size: 13px !important; }
+    .section-icon { font-size: 16px !important; }
+    .section-badge { font-size: 10px !important; padding: 2px 6px !important; }
+
+    /* 작업 항목 */
+    .task-item { gap: 8px !important; padding: 8px 0 !important; }
+    .task-num { width: 20px !important; height: 20px !important; font-size: 10px !important; }
+    .task-title { font-size: 12px !important; }
+    .task-path { font-size: 10px !important; word-break: break-all !important; }
+    .task-type { font-size: 9px !important; padding: 1px 5px !important; }
+
+    /* 외부 의존 */
+    .action-item { padding: 8px 0 !important; }
+    .action-text { font-size: 12px !important; line-height: 1.5 !important; }
+    .pending-item { font-size: 11px !important; flex-wrap: wrap !important; }
+    .pending-label { font-size: 11px !important; }
+    .pending-desc { font-size: 11px !important; }
+
+    /* 리서치 / 오늘의 한 줄 */
+    .research-summary { padding: 12px !important; }
+    .research-topic { font-size: 14px !important; line-height: 1.5 !important; }
+    .research-oneliner { font-size: 12px !important; }
+    .why-card { padding: 10px !important; font-size: 12px !important; line-height: 1.6 !important; }
+    .concept-item { gap: 8px !important; padding: 6px 0 !important; }
+    .concept-num { font-size: 10px !important; width: 18px !important; }
+    .concept-name { font-size: 11px !important; }
+    .concept-desc { font-size: 11px !important; }
+
+    /* 샘플 */
+    .sample-item { flex-wrap: wrap !important; gap: 6px !important; padding: 7px 0 !important; }
+    .sample-name { font-size: 11px !important; }
+    .sample-desc { font-size: 10px !important; margin-left: 0 !important; width: 100%; }
+    .stars { font-size: 11px !important; }
+    .review-box { font-size: 11px !important; padding: 8px 10px !important; }
+
+    /* 경로 변경 */
+    .change-item { gap: 6px !important; padding: 6px 0 !important; flex-wrap: wrap !important; }
+    .change-type { font-size: 9px !important; padding: 1px 5px !important; }
+    .change-path { font-size: 11px !important; word-break: break-all !important; }
+
+    /* 일정 */
+    .schedule-item { gap: 8px !important; padding: 8px 0 !important; flex-wrap: wrap !important; }
+    .schedule-time { font-size: 11px !important; width: auto !important; }
+    .schedule-tag { font-size: 9px !important; padding: 1px 6px !important; }
+    .schedule-desc { font-size: 12px !important; flex-basis: 100% !important; }
+
+    /* 빠른 링크 — 1열 */
+    .link-grid { grid-template-columns: 1fr !important; gap: 6px !important; }
+    .link-item { padding: 8px 10px !important; }
+    .link-label { font-size: 10px !important; }
+    .link-url { font-size: 9px !important; }
+
+    /* 미디어 카드 — 1열 */
+    .media-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+    .media-card { padding: 10px !important; }
+    .media-name { font-size: 11px !important; }
+    .media-meta { font-size: 9px !important; }
+
+    /* 푸터 */
+    .footer { padding: 16px !important; font-size: 10px !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="title">CoP Physical AI</div>
+    <div class="subtitle">일일 연구 보고 &nbsp;·&nbsp; 2026-07-20 (월)</div>
+    <a href="https://github.com/kiheon-jang/2026-cop-physical-ai" class="github-btn">GitHub 바로가기 →</a>
+  </div>
+
+  <!-- 💡 오늘의 한 줄 (★ 매거진의 hook ★) -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">💡</span>
+      <span class="section-title">오늘의 한 줄</span>
+    </div>
+    <div class="research-summary">
+      <div class="research-topic">로봇 학습을 방해하던 미스터리 외부 간섭의 정체를 밝혀냈습니다!</div>
+      <div class="research-oneliner">어떤 의미냐면, 우리 로봇이 가상 공간에서 학습하는 과정이 마치 누군가 매일 새벽 특정 시간에 게임 전원을 꺼버리는 것처럼 갑자기 중단되어 왔습니다. 그 원인을 찾기 위해 여러 가설을 세우고 실험했는데, 결국 컴퓨터 내부의 문제가 아니라 외부에서 정해진 시간에 학습을 강제로 멈추게 하는 요인이 있다는 것을 명확히 확인했습니다.<br/>이제 이 외부 간섭의 정체를 정확히 알게 되어, 로봇이 중단 없이 학습을 완주할 수 있는 길을 찾을 수 있게 되었습니다.</div>
+    </div>
+    <div class="why-card">
+      <strong style="color:#10b981;">왜 중요한가:</strong> 이 미스터리 해결은 로봇이 안정적으로 학습 데이터를 축적하여 더 똑똑해지는 데 필수적입니다. 학습이 중단 없이 잘 이루어져야 10월 목표인 PCB 조정 및 RS232 HHT 결선 시연을 위한 로봇의 정교한 움직임을 구현할 수 있습니다.
+    </div>
+  </div>
+
+  <!-- 🎬 오늘의 결과물 (영상/이미지/PDF 직접 링크) -->
+  
+
+  <!-- 1. 어제 완료 작업 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">✅</span>
+      <span class="section-title">어제 완료한 작업</span>
+      <span class="section-badge">3건</span>
+    </div>
+    <div class="task-item">
+      <div class="task-num">1</div>
+      <div class="task-content">
+        <div><span class="task-type type-sample">SIM</span><span class="task-title">📊 [로그] 2026-07-19 시뮬 테스트 — floor 12차 시각연동 SIGKILL 확정: 우선순위 5종 회귀 독립 PASS(관절각 0.0244°&lt;1°/camera 30f/6dof 2501f/collector 2/2 yield100% lift42.9mm/pick 0.3228m 결정론). 학습 pid 91975 rss_bytes 836MB 평탄(jetsam 재반증)+mps_mem 5.6GB 평탄(GPU OOM 재반증). 무결성 격리 불변(운영 0.70/50.2mm·markers·datasets)</span></div>
+        <div class="task-path">agent/report-evidence/2026-07/INDEX.md · agent/research-log/2026-07-19.md</div>
+      </div>
+    </div>
+    <div class="task-item">
+      <div class="task-num">2</div>
+      <div class="task-content">
+        <div><span class="task-type type-sample">SIM</span><span class="task-title">🛠 [시뮬] floor 재학습 12차 — 시각연동 외부 SIGKILL 확정 + deadlock 규명 자가치유 — 2026-07-19</span></div>
+        <div class="task-path">agent/external-dependencies.md · agent/research-log/2026-07-19.md</div>
+      </div>
+    </div>
+    <div class="task-item">
+      <div class="task-num">3</div>
+      <div class="task-content">
+        <div><span class="task-type type-docs">DOCS</span><span class="task-title">📝 [히스토리] 2026-07-18 작업 기록 + README 현황 업데이트 — 2026-07-19</span></div>
+        <div class="task-path">AGENT_PROCESS.md · README.md</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2.5. 현재 진행 중인 주요 AI 에이전트 작업 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">⚙️</span>
+      <span class="section-title">오늘의 시뮬 진척</span>
+    </div>
+    <div class="research-summary">
+      <div class="research-topic">Phase 2 - W2 - floor 배치다양성 재학습 12차 (시각연동 외부 SIGKILL 확정 + deadlock 규명 자가치유)</div>
+      <div class="research-oneliner">상세 로그 → <code>agent/research-log/2026-07-19.md</code></div>
+    </div>
+    <div class="why-card">
+      <pre style="margin:0;font-size:11px;color:#94a3b8;white-space:pre-wrap;font-family:monospace;"></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🔴</span>
+      <span class="section-title">이슈 / 문제점</span>
+    </div>
+    <div class="issue-item">[자가치유] 목표 epoch 하향으로 창 안 완주 — cop_pipeline_advance.sh L36</div>
+    <div class="issue-item">COP_EPOCHS:-100→:-42(surgical 1줄+근거 주석, bash -n OK). 42×~400s(최악)=~03:41 완주 &lt; 04:04</div>
+    <div class="issue-item">→ 완주 → pending 승격 → act_floor/epoch_0041 측정 → 12-run 만에 첫 floor rollout. override</div>
+    <div class="issue-item">knob(COP_EPOCHS=100) 유지. 발효는 내일 재시작(오늘 pid 91975 는 편집前 --epochs 100 → 오늘밤도</div>
+    <div class="issue-item">~04:04 재crash; 7/9→7/10 패턴).</div>
+    <div class="issue-item">[한계·정직] 42ep floor 모델은 baseline(100ep, loss ~0.0045) 대비 저학습(ep41 loss ~0.019)</div>
+    <div class="issue-item">→ 성공률 비교가 epoch 교락. 첫 신호엔 유효, 공정 비교엔 full-epoch 필요. full-epoch 복원 조건 =</div>
+    <div class="issue-item">~04:04 killer 규명·제거 → log show/launchctl/ps 필요 → sandbox allowlist 차단(에스컬레이션).</div>
+    <div class="issue-item">무결성 격리 유지: 운영 rollout_summary.json act_cl_dr 0.70/50.2mm 불변(7/7). 마커 target=</div>
+    <div class="issue-item">episodes_floor·trained_on=episodes_cl_dr:1783181837(불변)·pending=episodes_floor:1783324998</div>
+    <div class="issue-item">(대기·미승격)·measured=episodes_cl_dr:1783346557. datasets floor/cl/cl_dr 불변. act_floor 최신</div>
+    <div class="issue-item">ckpt=epoch_0059(과거 run).</div>
+    <div class="issue-item">sandbox: ps/log show/launchctl(04:04 killer 규명) 권한 차단 지속 — external-dependencies.md 블로커.</div>
+  </div>
+
+  <!-- 3. 외부 의존 / 사용자 수동 작업 (★ 핵심 ★) -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🙋</span>
+      <span class="section-title">외부 의존 / 사용자 수동 작업</span>
+      <span class="section-badge">Action Required</span>
+    </div>
+    <div class="action-item">
+      <span class="action-dot">📌</span>
+      <span class="action-text">[실기 담당] 웹캠 사양 + 캘리브레이션값 제공 (옵션 — Phase 2 Sim2Real 전까지)</span>
+    </div>
+    <div class="action-item">
+      <span class="action-dot">📌</span>
+      <span class="action-text">[실기 담당] SO-ARM101 실측 무게 + 관절 마찰계수 (옵션 — Phase 2 Sim2Real 전까지)</span>
+    </div>
+    <div class="action-item">
+      <span class="action-dot">📌</span>
+      <span class="action-text">[장기헌] Orin Nano SSH 접속 정보 제공 <span style="color:#ef4444;font-size:11px;font-weight:700;">⚠ 마감 초과 (2026-06-22)</span></span>
+    </div>
+    <div class="action-item">
+      <span class="action-dot">📌</span>
+      <span class="action-text">[CoP 위원회] Phase 3/4 차년도 추진 여부 결정 <span style="color:#f59e0b;font-size:11px;">D-72</span></span>
+    </div>
+    <div class="action-item">
+      <span class="action-dot">📌</span>
+      <span class="action-text">[장기헌] Claude Code v3.2 harness 권한 allowlist 점검 (블로커 — 2026-06-07/08 nightly 연속 누적)</span>
+    </div>
+    <div class="pending-section">
+      <div class="pending-title">⏳ 결정 대기 항목</div>
+      <div class="pending-item"><div class="pending-dot"></div><span class="pending-label">ACT vs Diffusion Policy</span><span class="pending-arrow">→</span><span class="pending-desc">첫 학습 정책 선택</span></div>
+    </div>
+  </div>
+
+  <!-- 4. 시뮬 단계 진척 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🔬</span>
+      <span class="section-title">이번 주 시뮬 단계</span>
+      <span class="section-badge">Phase 2</span>
+    </div>
+    <div class="research-summary">
+      <div class="research-topic">Phase 2 — 7월 Sim2Real 검증</div>
+      <div class="research-oneliner">- · Day 20/31 (64%)</div>
+    </div>
+    <div class="concept-list">
+      <div class="concept-item">
+        <div class="concept-num">01</div>
+        <div>
+          <div class="concept-name">Phase 2 — 7월 Sim2Real 검증</div>
+          <div class="concept-desc">- · Day 20/31 (64%)</div>
+        </div>
+      </div>
+    </div>
+    <div class="why-card">
+      Phase별 상세는 PHASE_ROADMAP.md 참조.
+    </div>
+    <div class="read-more">상세 로그: <a href="https://github.com/kiheon-jang/2026-cop-physical-ai/tree/main/research/simulation">research/simulation/ →</a></div>
+  </div>
+
+  <!-- 5. 시뮬/학습 스크립트 현황 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">💻</span>
+      <span class="section-title">시뮬/학습 스크립트 현황</span>
+    </div>
+    <div class="no-issue">어제 변경된 스크립트 없음 — <a href="https://github.com/kiheon-jang/2026-cop-physical-ai/blob/main/samples/SAMPLE_STATUS.md" style="color:#6366f1;">전체 현황 →</a></div>
+    <div class="review-box">
+      💡 모든 시뮬/학습 스크립트는 <code>.venv</code>에서 실행되어야 합니다.<br/>
+      실행: <code>.venv/bin/python3 &lt;스크립트&gt;</code>
+    </div>
+  </div>
+
+  <!-- 6. 경로 변경 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">📁</span>
+      <span class="section-title">경로 및 구조 변경</span>
+    </div>
+    <div class="change-item"><span class="change-type type-move">MOD</span><span class="change-path">agent/report-evidence/2026-07/INDEX.md</span></div>
+    <div class="change-item"><span class="change-type type-add">ADD</span><span class="change-path">agent/research-log/2026-07-19.md</span></div>
+    <div class="change-item"><span class="change-type type-move">MOD</span><span class="change-path">agent/external-dependencies.md</span></div>
+    <div class="change-item"><span class="change-type type-add">ADD</span><span class="change-path">research/simulation/2026-07-19_floor-retrain-timelinked-sigkill-confirmed.md</span></div>
+    <div class="change-item"><span class="change-type type-move">MOD</span><span class="change-path">research/simulation/PHASE_ROADMAP.md</span></div>
+    <div class="change-item"><span class="change-type type-move">MOD</span><span class="change-path">scripts/cop_pipeline_advance.sh</span></div>
+    <div class="change-item"><span class="change-type type-move">MOD</span><span class="change-path">AGENT_PROCESS.md</span></div>
+    <div class="change-item"><span class="change-type type-move">MOD</span><span class="change-path">README.md</span></div>
+  </div>
+
+  <!-- 7. 내일 예정 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">📅</span>
+      <span class="section-title">내일 예정</span>
+    </div>
+    <div class="schedule-item"><span class="schedule-tag tag-sample">시뮬 구축</span><span class="schedule-desc">- · Day 21/31 (67%)</span></div>
+    <div class="schedule-item"><span class="schedule-tag tag-research">테스트</span><span class="schedule-desc">시뮬 메트릭 수집 + research-log 작성</span></div>
+    <div class="schedule-item"><span class="schedule-tag tag-report">보고</span><span class="schedule-desc">일일 보고 메일 발송</span></div>
+  </div>
+
+  <!-- 8. 빠른 링크 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-icon">🔗</span>
+      <span class="section-title">빠른 링크</span>
+    </div>
+    <div class="link-grid">
+      <a href="https://github.com/kiheon-jang/2026-cop-physical-ai" class="link-item"><div class="link-label">📂 전체 레포</div><div class="link-url">github.com/kiheon-jang/...</div></a>
+      <a href="https://github.com/kiheon-jang/2026-cop-physical-ai/tree/main/research/simulation" class="link-item"><div class="link-label">🔬 시뮬 진행 로그</div><div class="link-url">.../research/simulation</div></a>
+      <a href="https://github.com/kiheon-jang/2026-cop-physical-ai/blob/main/agent/external-dependencies.md" class="link-item"><div class="link-label">🙋 외부 의존</div><div class="link-url">.../external-dependencies.md</div></a>
+      <a href="https://github.com/kiheon-jang/2026-cop-physical-ai/tree/main/agent/report-evidence" class="link-item"><div class="link-label">📂 보고용 증거 (월별)</div><div class="link-url">.../report-evidence</div></a>
+    </div>
+  </div>
+
+  <!-- 푸터 -->
+  <div class="footer">
+    본 메일은 매일 오전 7시에 자동 발송됩니다.<br>
+    문의: xaqwer@gmail.com (장기헌)
+  </div>
+
+</div>
+</body>
+</html>
