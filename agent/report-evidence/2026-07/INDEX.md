@@ -2,6 +2,11 @@
 
 > 7월 보고서 매핑: Phase 2 (Sim2Real) — 실기 50ep + Sim2Real 준비(DR).
 
+## 2026-07-30
+- Phase 2 W2 — **sim 레버 결착 후 hold + 무결성 전수 감사 + 23:30 우선순위 5종 회귀**: `agent/research-log/2026-07-30.md`, `research/simulation/2026-07-30_phase2-w2-sim-lever-hold-integrity-audit.md` → 7월 보고서 [Sim2Real 안정성 / 파이프라인 견고성] 섹션.
+  - 23:30 5종 독립 PASS: 6dof 2501프레임 · camera 30프레임×2 · pick min_approach **0.3228327114m** 결정론 · joint_angle 최대오차 **0.0244°<1°** · collector 2/2 yield100% lift **42.3mm**(격리 루트, 운영 무접촉).
+  - 무결성: 운영 `rollout_summary.json` md5 **5207f67b189645de1bb26c124873b683** 실행 후 불변(7/22~7/29 동일) · 마커 3자 정합(target=`episodes_floor`·trained_on=`episodes_floor:1783324998`·measured=`episodes_floor:1783710169`) · datasets floor/cl/cl_dr 각 50ep/3350f 불변 · 학습 프로세스 없음(hold).
+
 ## 2026-07-22
 - Phase 2 W2 — **floor-trained 4-seed 공정추정 = 4/4 전부 1.0 (배치 다양성이 성공률 천장을 올렸다)**: `agent/research-log/2026-07-22.md`, `research/simulation/2026-07-22_floor-trained-4seed-fair-estimation.md` → 7월 보고서 [Sim2Real / 배치 다양성 성공률] 섹션.
   - 비파괴 프록시로 `act_floor/epoch_0041` 에 seed 7/123/2026 추가 rollout: 4-seed(42/7/123/2026) **전부 10/10=1.0, 40/40 성공, 실패 배치 0건, 평균 median lift 64.0mm**. baseline 0.825 / DR-trained 0.800 → **floor-trained 1.000**. 7/7 W1 결론(병목=큐브배치 커버리지)의 처방(배치 다양성 데이터)을 4-seed 로 실증 확증. 한계: 42ep<100ep(04:04 killer) → apples-to-apples 는 killer 규명 후속.
