@@ -70,6 +70,11 @@
 
 
 
+
+### 2026-08-04
+- 📊 [로그] 2026-08-04 시뮬 테스트 — hold일 우선순위 5종 회귀 재실행 PASS(camera 30f×2/6dof 2501f/joint 0.0244°<1°/pick 0.3228327m 결정론/collector 2/2 yield100% lift42.6mm) + 무결성 md5 5207f67b 불변(sr 1.0 seed42 ckpt act_floor/epoch_0041)
+- 🛠 [시뮬] sim 레버 결착 후 hold + 무결성 전수 감사 (md5 5207f67b 불변) — 2026-08-04
+
 ### 2026-08-01
 - 📊 [로그] 2026-08-01 시뮬 테스트 — hold일 우선순위 5종 회귀 PASS(camera 30f×2/6dof 2501f/joint 0.0244°<1°/pick 0.3228327m 결정론/collector 2/2 yield100% lift43.4mm) + 무결성 md5 5207f67b 불변(sr 1.0 seed42)
 - 🛠 [시뮬] sim 레버 결착 후 hold + 무결성 전수 감사 (md5 5207f67b 불변) — 2026-08-01
