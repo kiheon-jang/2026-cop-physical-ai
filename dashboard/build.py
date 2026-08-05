@@ -801,30 +801,39 @@ def build_videos() -> list[dict]:
     first_frame = next(iter(sorted(video_dir.glob("overhead_frame_0000.png"))), None) if video_dir.exists() else None
     poster_default = str(first_frame.relative_to(REPO_ROOT)) if first_frame else None
 
-    # 1) 학습 데이터셋 영상 — 200 에피소드 합성 결과 (있으면 가장 먼저 노출)
-    dataset_video = REPO_ROOT / "data" / "episodes" / "videos" / "observation.images.top" / "chunk-000" / "file-000.mp4"
-    if dataset_video.exists():
+    # 1) 학습 데이터셋 영상 — (데이터셋 루트, 카메라, 라벨) 별로 존재하는 것만 노출.
+    #    S1(episodes_s1) 이 최신 트랙이므로 먼저.
+    dataset_specs = [
+        ("episodes_s1", "top", "S1 리셋버튼 합성 데이터셋 — top(광각)", "2단계 S1 트랙 · 실기 정렬 top 카메라 시점"),
+        ("episodes_s1", "closeup", "S1 리셋버튼 합성 데이터셋 — closeup(근접)", "2단계 S1 트랙 · 실기 정렬 closeup 카메라 시점 (버튼·LED 디테일)"),
+        ("episodes", "top", "Pick&Place 학습 데이터셋", "1단계 트랙 · 천장 카메라 시점, ACT 학습 직전 단계 산출물"),
+    ]
+    for ds_name, cam, title, desc_suffix in dataset_specs:
+        dataset_video = (REPO_ROOT / "data" / ds_name / "videos"
+                         / f"observation.images.{cam}" / "chunk-000" / "file-000.mp4")
+        if not dataset_video.exists():
+            continue
         try:
             st = dataset_video.stat()
-            ep_count, frame_count = 200, 12400
-            info_json = REPO_ROOT / "data" / "episodes" / "meta" / "info.json"
+            ep_count = frame_count = 0
+            info_json = REPO_ROOT / "data" / ds_name / "meta" / "info.json"
             if info_json.exists():
                 try:
                     info = json.loads(info_json.read_text())
-                    ep_count = info.get("total_episodes", ep_count)
-                    frame_count = info.get("total_frames", frame_count)
+                    ep_count = info.get("total_episodes", 0)
+                    frame_count = info.get("total_frames", 0)
                 except Exception:
                     pass
             out.append({
-                "id": make_id("video", "dataset_top"),
-                "filename": "dataset_top_camera.mp4",
+                "id": make_id("video", f"dataset_{ds_name}_{cam}"),
+                "filename": f"{ds_name}_{cam}.mp4",
                 "path": str(dataset_video.relative_to(REPO_ROOT)),
                 "kind": "dataset",
                 "size_bytes": st.st_size,
                 "modified": datetime.fromtimestamp(st.st_mtime, KST).isoformat(timespec="seconds"),
-                "poster": poster_default,
-                "description": f"학습 데이터셋 영상 — {ep_count} 에피소드 / {frame_count:,} 프레임 (천장 카메라 시점, ACT 학습 직전 단계 산출물)",
-                "preload": "none",  # 27MB — 클릭 시 로드
+                "poster": poster_default if ds_name == "episodes" else None,
+                "description": f"{title} — {ep_count} 에피소드 / {frame_count:,} 프레임 ({desc_suffix})",
+                "preload": "none",  # 수십 MB — 클릭 시 로드
                 "episode_count": ep_count,
                 "frame_count_total": frame_count,
             })

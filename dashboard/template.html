@@ -2691,33 +2691,30 @@ function renderVideos() {
   const cntEl = document.getElementById('cnt-videos');
   // 카운트: 학습 데이터셋 + 시뮬 영상 + 프레임 시퀀스 + 하드웨어 사진 전부
   if (cntEl) cntEl.textContent = videos.length + hwPhotos.length;
-  const dataset = videos.find(v => v.kind === 'dataset');
+  const datasets = videos.filter(v => v.kind === 'dataset');
   const players = videos.filter(v => v.kind !== 'frame-sequence' && v.kind !== 'dataset');
   const frameSeqs = videos.filter(v => v.kind === 'frame-sequence');
   const KIND_LABEL = { 'pick-place': '시나리오', '6dof': '6축 움직임', 'sim': '시뮬', 'dataset': '학습 데이터셋' };
 
-  // 1) 학습 데이터셋 영상 (강등: hero → 보조 자료 카드, 페이지 맨 아래로 이동)
+  // 1) 학습 데이터셋 영상 — 데이터셋·카메라별 카드 전부 (S1 top/closeup + 구 pick&place)
   const heroWrap = document.getElementById('dataset-hero-wrap');
   if (heroWrap) {
-    if (dataset) {
-      heroWrap.innerHTML = `
-        <div class="section-head" style="margin-top:24px;"><h3>학습 데이터셋 영상 (참고 자료)</h3><div class="right">합성 1회 완료 · 갱신 없음</div></div>
-        <div class="dataset-compact">
-          <div class="meta">
-            <div class="stats">
-              <span>에피소드 <b>${(dataset.episode_count || 200).toLocaleString()}</b></span>
-              <span>총 프레임 <b>${(dataset.frame_count_total || 12400).toLocaleString()}</b></span>
-              <span>30 fps · 파일 <b>${fmtBytes(dataset.size_bytes)}</b></span>
-            </div>
-            <p class="note">200 에피소드 합성 결과를 한 영상으로 합친 천장 카메라 시점 데이터입니다. ACT 학습 입력으로 사용되며, 시각적 진척 자료는 아닙니다. ▶ 클릭 시 본체 로드.</p>
+    heroWrap.innerHTML = datasets.length ? `
+      <div class="section-head" style="margin-top:24px;"><h3>학습 데이터셋 영상</h3><div class="right">합성 시연을 한 영상으로 이어붙임 · ▶ 클릭 시 로드</div></div>
+      ${datasets.map(ds => `
+      <div class="dataset-compact">
+        <div class="meta">
+          <div class="stats">
+            <span>에피소드 <b>${(ds.episode_count || 0).toLocaleString()}</b></span>
+            <span>총 프레임 <b>${(ds.frame_count_total || 0).toLocaleString()}</b></span>
+            <span>30 fps · 파일 <b>${fmtBytes(ds.size_bytes)}</b></span>
           </div>
-          <video controls preload="none" ${dataset.poster ? `poster="${copStatic(dataset.poster)}"` : ''}>
-            <source src="${copStatic(dataset.path)}" type="video/mp4">
-          </video>
-        </div>`;
-    } else {
-      heroWrap.innerHTML = '';
-    }
+          <p class="note">${escapeHtml(ds.description || '')}</p>
+        </div>
+        <video controls preload="none" ${ds.poster ? `poster="${copStatic(ds.poster)}"` : ''}>
+          <source src="${copStatic(ds.path)}" type="video/mp4">
+        </video>
+      </div>`).join('')}` : '';
   }
 
   // 0) Explainer 박스 동적 채움 (DYN-2) — 라벨은 대시, 본문 콜론 그대로
