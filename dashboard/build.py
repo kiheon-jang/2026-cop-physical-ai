@@ -73,9 +73,9 @@ PHASE_META: list[dict] = [
         "report_label": "ACT 학습",
     },
     {
-        "id": "phase4", "name": "Phase 4 — RS232 결선 / 1차 기능 완성", "month": "2026-09", "weeks": 4,
-        "business_label": "9월: RS232 통신 학습 + 작업 완료",
-        "outcome": "RS232 직렬통신 결선 자동화 + DP 비교. PCB 70% / RS232 40% 달성, 10월 시연 준비.",
+        "id": "phase4", "name": "Phase 4 — RS232 케이블 연결 · 1차 기능 완성", "month": "2026-09", "weeks": 4,
+        "business_label": "9월: RS232 케이블 연결 + 1차 기능 완성",
+        "outcome": "점검 단말기(HHT)를 PCB 의 RS232 포트에 정밀하게 꽂는 작업 자동화. S1 70% / RS232 40% 달성, 10월 시연 준비.",
         "report_label": "DP 비교, 기능 완성",
     },
 ]
@@ -100,7 +100,7 @@ PROJECT_VISION = {
             "icon": "wrench",
         },
         {
-            "label": "RS232 HHT 결선",
+            "label": "RS232 케이블 연결",
             "metric": "부분 성공률",
             "target": "40%",
             "context": "Phase 4 (9월) 평가 · 정밀 삽입 (±0.5mm)",

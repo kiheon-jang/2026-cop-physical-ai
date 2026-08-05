@@ -1166,8 +1166,6 @@
       <!-- 일정(달력) 대비 실제 진척 — 어긋난 만큼이 지연이다 -->
       <div class="vh-progress" id="schedule-gap"></div>
 
-      <!-- 성공률 스펙트럼 (seed 분포 + 공정추정 + 목표) -->
-      <div id="ck-spectrum"></div>
 
       <div class="targets-section" id="targets-section">
         <div class="targets-header">
@@ -1247,7 +1245,7 @@
     <div class="view hidden" id="view-realtrack">
       <div class="home-hero">
         <h1>실기 트랙 — S1 리셋버튼</h1>
-        <div class="sub" id="rt-sub">실기 담당자 저장소(soarm_lerobot) 미러 · 대시보드 rebuild 마다 자동 pull</div>
+        <div class="sub" id="rt-sub"><b>여기서 보는 것</b> — 실물 로봇 쪽(협업 트랙)의 진행 상황. 담당자 저장소를 자동으로 받아와 보여줍니다.</div>
       </div>
       <div id="rt-body"></div>
     </div>
@@ -1256,7 +1254,7 @@
     <div class="view hidden" id="view-daily">
       <div class="home-hero">
         <h1>활동 타임라인</h1>
-        <div class="sub" id="daily-sub">날짜별 시뮬 작업 · 커밋 · 자동 복구 통합. 매일 23:30 자동 갱신.</div>
+        <div class="sub" id="daily-sub"><b>여기서 보는 것</b> — 날짜별로 무슨 작업을 했는지 (매일 밤 자동 기록). 카드를 클릭하면 상세가 열립니다.</div>
       </div>
       <div class="timeline" id="timeline-list"></div>
     </div>
@@ -1265,7 +1263,7 @@
     <div class="view hidden" id="view-magazines">
       <div class="home-hero">
         <h1>보고용 자료</h1>
-        <div class="sub" id="mag-sub">월별 CoP 활동보고서 — 카드를 클릭하면 해당 월 보고서가 열립니다. 인쇄(⌘P)·PPTX 내보내기 지원.</div>
+        <div class="sub" id="mag-sub"><b>여기서 보는 것</b> — 월별 공식 활동보고서. 카드를 클릭하면 해당 월 보고서가 열립니다 (인쇄·PPTX 지원).</div>
       </div>
       <div class="report-picker" id="report-picker"></div>
       <div class="report-body" id="report-body">
@@ -1458,10 +1456,11 @@
         <div class="sub">사용 기술, 학습 방법, 의사결정 근거를 한 페이지에 정리했습니다.</div>
       </div>
 
-      <!-- 1. 한 줄 결론 -->
+      <!-- 1. 이 페이지의 역할 (프로젝트 소개는 Overview 한 곳에만 — 중복 제거) -->
       <div class="tech-summary">
-        <p>정비현장의 PCB 작업을 로봇에 가르치는 프로젝트입니다. <b>가상 환경(시뮬)에서 시연 데이터를 자동으로 만들고</b> → <b>AI가 그 시연을 흉내내는 법을 학습</b>하고 → <b>학습된 모델을 실제 로봇팔에 옮기는</b> 흐름입니다.
-        <b>1단계(물건 집기)는 시뮬 성공률 100%로 결착</b>했고, 지금은 <b>2단계(PCB 리셋버튼 누르기)</b>를 같은 방식으로 진행 중입니다 (시뮬 = 이 사이트, 실기 = 협업 트랙). 3단계는 RS232 결선입니다.</p>
+        <p><b>여기서 보는 것</b> — 이 프로젝트가 <b>기술적으로 어떻게 굴러가는지</b>: 학습이 이뤄지는
+        순서(플로우), 데이터가 어떻게 만들어지는지, 왜 이런 방식을 골랐는지(의사결정 근거).
+        프로젝트가 무엇인지는 <a href="#" onclick="setRoute('home');return false">Overview</a> 첫 화면에 있습니다.</p>
       </div>
 
       <!-- 2. 전체 흐름 플로우차트 -->
@@ -1587,7 +1586,7 @@
         <li><b>왜 MuJoCo (Isaac Lab 아님)?</b> Mac Mini (Apple Silicon ARM64) 에서 Isaac Lab 미지원 (2026-05-01 결정 변경). MuJoCo 는 네이티브 + 즉시 설치. Isaac Lab 은 차년도 GPU 서버 도입 시 RL 학습용으로 전환.</li>
         <li><b>왜 텔레오퍼 안 함 (시뮬만)?</b> 사람 시연은 정확하지만 시간/노동 비용 큼. IK 기반 시뮬 합성으로 빠르게 200ep 확보 → 1차 학습. 시뮬에 없는 변수 (조명, 마찰, 노이즈) 는 Domain Randomization 으로 보강.</li>
         <li><b>왜 ACT (Diffusion Policy 아님)?</b> DP 보다 가볍고 빠름 → Mac Mini 에서 학습 가능. 트랜스포머가 시간 일관성 있는 chunk 단위 액션 예측 → 안정적. 정확도 부족 시 9월 (Phase 4) 에 DP 비교/전환.</li>
-        <li><b>왜 Pick-Place 부터?</b> 가장 단순한 정밀 작업. 성공하면 PCB 부품 픽업 → RS232 결선 (HHT 단자 꽂기) 까지 단계 확장. 정비현장 핵심 반복 작업 자동화가 최종 목표.</li>
+        <li><b>왜 Pick-Place 부터?</b> 가장 단순한 정밀 작업. 성공하면 리셋 버튼 누르기 → RS232 케이블 연결(점검 단말기 HHT 꽂기)까지 단계 확장. 정비현장 핵심 반복 작업 자동화가 최종 목표.</li>
         <li><b>왜 Sim-to-Real 단계 분리?</b> 시뮬 학습 결과를 실기에 옮길 때 "현실 격차" (Sim-to-Real gap) 존재. → 8월 현재 2단계 S1 에서 시뮬(합성 데이터)과 실기(omen 수집)를 같은 작업·관측으로 정렬해 격차를 좁히는 중.</li>
       </ul>
 
@@ -1605,7 +1604,7 @@
     <div class="view hidden" id="view-videos">
       <div class="home-hero">
         <h1>시뮬 영상</h1>
-        <div class="sub" id="videos-sub">지금 진행 중인 2단계(리셋버튼) 영상 → 1단계 학습 히스토리 → 아카이브 순. 새 산출물은 자동 추가.</div>
+        <div class="sub" id="videos-sub"><b>여기서 보는 것</b> — 로봇이 배우는 모습을 영상으로. 지금 진행 중인 2단계부터, 옛 자료는 아래 아카이브에. 새 산출물은 자동 추가.</div>
       </div>
 
       <!-- 1. (맨 위) 이 페이지가 보여주는 것 — 컨텍스트 안내 (동적 DYN-2) -->
@@ -1637,8 +1636,8 @@
     <div class="view hidden" id="view-sim3d">
       <div class="view-head">
         <h2>3D 리플레이</h2>
-        <div class="sub">로봇이 실제로 움직인 기록을 3D 로 재생합니다. 드래그 = 회전 · 휠 = 줌.
-          기본 = 지금 진행 중인 <b>2단계 리셋버튼 시연</b>. 1단계(집기) 기록과 옛 측정은 목록 아래 [아카이브].</div>
+        <div class="sub"><b>여기서 보는 것</b> — 로봇이 실제로 움직인 기록을 3D 로 돌려봅니다 (드래그 = 회전 · 휠 = 줌).
+          기본 = 지금 진행 중인 <b>2단계 리셋버튼</b>. 🤖 = AI 시험 결과 · 🔘 = 2단계 연습 데이터 · [아카이브] = 지난 기록.</div>
       </div>
       <div class="r4-toolbar">
         <select id="s3-source" class="sort-sel"></select>
@@ -1672,7 +1671,7 @@
     <div class="view hidden" id="view-results">
       <div class="view-head">
         <h2>성과 지표</h2>
-        <div class="sub">AI 의 시험 성적. 시험 = 배운 적 없는 상황 10번을 스스로 해내는지 측정 (측정할 때마다 자동 누적).</div>
+        <div class="sub"><b>여기서 보는 것</b> — AI 의 시험 성적표. 시험 = 배운 적 없는 상황 10번을 스스로 해내는지 측정하며, 측정할 때마다 자동 누적됩니다.</div>
       </div>
 
       <!-- 12살 기준 성적표 요약 — 단계별 한 줄 -->
@@ -1680,25 +1679,28 @@
 
       <div class="kpi-row r4-kpis" id="results-kpis"></div>
       <div class="r4-card" id="results-pipeline"></div>
-      <div class="r4-card">
-        <h4 class="r4-h">측정 비교 — nominal · DR · seed <span class="r4-hint">(막대 = 성공률, 점 = rollout 별 성공/실패)</span></h4>
-        <div id="results-bars"></div>
-      </div>
-      <div class="r4-card">
-        <h4 class="r4-h">측정 히스토리 <span class="r4-hint">(매 측정마다 자동 성장)</span></h4>
-        <div id="results-history"></div>
-      </div>
-      <div class="r4-card">
-        <h4 class="r4-h">Domain Randomization 샘플 <span class="r4-hint">(조명·마찰·카메라 노이즈 무작위화 — Sim2Real 격차 축소)</span></h4>
-        <div class="r4-gallery" id="results-gallery"></div>
-      </div>
-      <div class="r4-card" id="results-videos"></div>
+      <details class="video-archive" style="margin-top:18px">
+        <summary><b>전문 데이터</b> — 측정별 상세 비교·히스토리·실험 샘플 (펼치기)</summary>
+        <div class="r4-card">
+          <h4 class="r4-h">측정 비교 — nominal · DR · seed <span class="r4-hint">(막대 = 성공률, 점 = rollout 별 성공/실패)</span></h4>
+          <div id="results-bars"></div>
+        </div>
+        <div class="r4-card">
+          <h4 class="r4-h">측정 히스토리 <span class="r4-hint">(매 측정마다 자동 성장)</span></h4>
+          <div id="results-history"></div>
+        </div>
+        <div class="r4-card">
+          <h4 class="r4-h">Domain Randomization 샘플 <span class="r4-hint">(조명·마찰·카메라 노이즈 무작위화 — Sim2Real 격차 축소)</span></h4>
+          <div class="r4-gallery" id="results-gallery"></div>
+        </div>
+        <div class="r4-card" id="results-videos"></div>
+      </details>
     </div>
 
     <div class="view hidden" id="view-apps">
       <div class="home-hero">
-        <h1>6개월 여정 (4월 사전학습 + 5~9월 작업)</h1>
-        <div class="sub">실기 없이 학습할 수 있는 환경 구축 → 9월 1차 기능 완성 (10월 시연). 각 단계의 비즈니스 결과와 주차별 진행률.</div>
+        <h1>Phase 로드맵 — 6개월 여정</h1>
+        <div class="sub"><b>여기서 보는 것</b> — 월별 계획과 실제 진행(주차별 체크리스트). 4월 준비 → 5~9월 작업 → 10월 시연.</div>
       </div>
       <div class="cards" id="apps-cards" style="grid-template-columns: 1fr; gap: 18px;"></div>
     </div>
@@ -2501,7 +2503,7 @@ function renderTech() {
     { idx: '③', month: '2026-06', title: 'ACT 학습 — 모방학습',          detail: actDetail },
     { idx: '④', month: '2026-07', title: '시뮬 검증',                   detail: '학습된 모델이 시뮬에서 큐브 잘 집는가 (성공률 측정)' },
     { idx: '⑤', month: '2026-08', title: '2단계 — S1 리셋버튼 (실기 정렬)', detail: '실기 트랙(omen)과 동일 작업·관측으로 시뮬 정렬 · 합성 100ep + ACT 학습 · LED 자동판정' },
-    { idx: '⑥', month: '2026-09', title: 'RS232 결선 + 1차 기능 완성',  detail: 'S1 리셋버튼 70% · RS232 결선 부분 성공 40% (작업 완료, 10월 시연)' },
+    { idx: '⑥', month: '2026-09', title: 'RS232 케이블 연결 + 1차 기능 완성', detail: 'S1 리셋버튼 70% · RS232 케이블 연결 부분 성공 40% (작업 완료, 10월 시연)' },
   ];
   const STATUS_TAG = { '완료': 'DONE', '진행': '진행 중', '예정': '예정' };
   const wrap = document.getElementById('flow-chart');
@@ -2618,7 +2620,7 @@ function renderTrainingProgress() {
           <div class="m"><div class="l">최저 Loss</div><div class="v" style="color:#22c55e;">${best}</div></div>
           <div class="m"><div class="l">학습률</div><div class="v" style="font-size:13px;">${lr}</div></div>
         </div>
-        ${lossSvg}
+        <details class="video-archive" style="margin-top:10px"><summary><b>전문 데이터</b> — Loss 곡선 (펼치기)</summary>${lossSvg}</details>
       </div>
     `);
   }
@@ -3470,25 +3472,26 @@ function renderStoryStrip() {
   const s1done = (rm.latest && rm.latest.success_rate >= 0.9);
   el.innerHTML = `
     <div class="lead">
-      로봇팔이 <b>엘리베이터 제어반(PCB) 정비</b>를 사람 대신 하게 만드는 프로젝트입니다.
-      실물 로봇을 부수지 않고 빨리 배우도록, 먼저 <b>컴퓨터 속 가상 로봇(시뮬레이션)</b>으로 연습시키고
-      잘 되면 실물 로봇에 옮깁니다. 목표는 3단계 — 지금은 <b>2단계</b>를 하고 있습니다.
+      로봇팔에게 <b>엘리베이터 제어반(PCB) 정비 작업</b>을 가르치는 프로젝트입니다.
+      연습은 <b>컴퓨터 속 가상 작업장(시뮬레이션)</b>에서 합니다 — 밤사이 수백 번씩 자동으로
+      연습할 수 있고, 실수해도 잃는 것이 없기 때문입니다. 가상에서 충분히 능숙해지면
+      실물 로봇으로 옮깁니다. 목표는 3단계, 지금은 <b>2단계</b>입니다.
     </div>
     <div class="story-steps">
       <div class="story-step ${s1done ? 'done' : 'now'}">
         <span class="tag">${s1done ? '1단계 · 완료 ✓' : '1단계 · 진행'}</span><br>
-        <b>물건 집어 옮기기</b> — 로봇이 카메라만 보고 큐브를 집는 기본기.
-        시뮬 성공률 <b>100%</b>로 졸업.
+        <b>물건 집어 옮기기</b> — 카메라만 보고 물체를 집어 올리는 기본기.
+        가상 시험 성공률 <b>100%</b>로 마쳤습니다.
       </div>
       <div class="story-step now">
         <span class="tag">2단계 · 지금 여기</span><br>
-        <b>PCB 리셋 버튼 누르기</b> — 위치가 매번 바뀌는 보드에서 버튼을 찾아 누르고,
-        초록 LED 로 성공 확인. 시뮬(이 사이트) + 실물(협업 트랙) 동시 진행.
+        <b>PCB 리셋 버튼 누르기</b> — 위치가 매번 바뀌는 보드에서 버튼을 찾아 누르면
+        초록 LED 가 켜집니다. 가상(이 사이트)과 실물(협업 트랙)에서 동시에 진행 중.
       </div>
       <div class="story-step">
         <span class="tag">3단계 · 예정</span><br>
-        <b>RS232 케이블 꽂기</b> — 점검 단말기를 포트에 정밀하게(±0.5mm) 삽입.
-        9월 도전, 10월 시연.
+        <b>RS232 케이블 연결</b> — 점검 단말기(HHT)를 PCB 포트에 오차 0.5mm 이내로
+        꽂는 가장 어려운 작업. 9월 도전, 10월 시연.
       </div>
     </div>`;
 }
@@ -3544,11 +3547,13 @@ function renderRealTrack() {
     <div class="section-head"><h3>학습된 정책</h3><div class="right">training_runs/</div></div>
     <table class="r4-table"><thead><tr><th>행동</th><th>정책</th><th>학습량</th><th>데이터셋</th></tr></thead><tbody>${polRows}</tbody></table>
 
-    <div class="section-head"><h3>최근 커밋 ${(rt.commits || []).length}건</h3><div class="right">rebuild 마다 자동 pull · ${escapeHtml(rt.checked_at || '')}</div></div>
-    <div class="tl-detail" style="max-height:420px;overflow-y:auto">${commitRows}</div>
-
-    <div class="section-head"><h3>문서</h3><div class="right">환경·spec·플랜</div></div>
-    <div>${docLinks}</div>`;
+    <details class="video-archive" style="margin-top:18px">
+      <summary><b>전문 데이터</b> — 작업 기록 ${(rt.commits || []).length}건 · 기술 문서 (펼치기)</summary>
+      <div class="section-head"><h3>최근 커밋</h3><div class="right">자동 갱신 · ${escapeHtml(rt.checked_at || '')}</div></div>
+      <div class="tl-detail" style="max-height:420px;overflow-y:auto">${commitRows}</div>
+      <div class="section-head"><h3>문서</h3><div class="right">환경·spec·플랜</div></div>
+      <div>${docLinks}</div>
+    </details>`;
 }
 
 /* 일정(달력) 대비 실제 진척 — "날짜는 여기까지 왔는데 진척은 저기서 멈췄다".
@@ -3654,7 +3659,7 @@ function renderHome() {
   renderCockpitPoster();
   renderCockpitKPI();
   renderScheduleGap();
-  renderCockpitSpectrum();
+  // 성공률 스펙트럼은 성과 지표 메뉴와 중복이라 홈에서 제거 (2026-08-06 정리)
 
   // 핵심 목표 카드 (유지)
   const tgEl = document.getElementById('vh-targets');
