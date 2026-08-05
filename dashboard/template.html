@@ -1096,6 +1096,7 @@
       <a class="nav-item" data-route="videos" data-icon="video"> 시뮬 영상 <span class="count" id="cnt-videos">0</span></a>
       <a class="nav-item" data-route="sim3d" data-icon="bot"> 3D 리플레이 <span class="count" id="cnt-sim3d">0</span></a>
       <a class="nav-item" data-route="results" data-icon="barChart"> 성과 지표</a>
+      <a class="nav-item" data-route="realtrack" data-icon="wrench"> 실기 트랙 <span class="count" id="cnt-realtrack">0</span></a>
       <a class="nav-item" data-route="daily" data-icon="activity"> 활동 타임라인 <span class="count" id="cnt-daily">0</span></a>
       <a class="nav-item" data-route="magazines" data-icon="clipboard"> 보고용 자료 <span class="count" id="cnt-magazines">0</span></a>
     </div>
@@ -1213,6 +1214,15 @@
       </div>
       <div class="cards" id="proposals-cards"></div>
       <div class="rows hidden" id="proposals-rows"></div>
+    </div>
+
+    <!-- REALTRACK — 실기 트랙 (soarm_lerobot 미러, 매 빌드 pull) -->
+    <div class="view hidden" id="view-realtrack">
+      <div class="home-hero">
+        <h1>실기 트랙 — S1 리셋버튼</h1>
+        <div class="sub" id="rt-sub">실기 담당자 저장소(soarm_lerobot) 미러 · 대시보드 rebuild 마다 자동 pull</div>
+      </div>
+      <div id="rt-body"></div>
     </div>
 
     <!-- DAILY = 활동 타임라인 (R3-4) -->
@@ -1907,11 +1917,11 @@ function icon(name, cls = '') {
   return `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
 }
 
-const ROUTES = ['home', 'tech', 'ops', 'apps', 'videos', 'sim3d', 'results', 'proposals', 'daily', 'magazines',
+const ROUTES = ['home', 'tech', 'ops', 'apps', 'videos', 'sim3d', 'results', 'realtrack', 'proposals', 'daily', 'magazines',
                 'blockers', 'samples', 'decisions',
                 'bookmarks', 'analytics', 'about', 'guide'];
 const ROUTE_LABEL = { home: 'Overview', apps: 'Phase 로드맵', tech: 'CoP 리뷰', ops: 'AI 자동화 운영', videos: '시뮬 영상', proposals: '시뮬 작업',
-  sim3d: '3D 리플레이', results: '성과 지표',
+  sim3d: '3D 리플레이', results: '성과 지표', realtrack: '실기 트랙',
   daily: '활동 타임라인', magazines: '보고용 자료',
   blockers: '외부 의존 차단', samples: '샘플 코드 상태', decisions: '결정',
   bookmarks: '북마크', analytics: '분석', about: '사이트 설명', guide: '사용가이드' };
@@ -1952,6 +1962,7 @@ function setRoute(r) {
   if (r === 'videos') renderVideos();
   if (r === 'sim3d') renderSim3d();
   if (r === 'results') renderResults();
+  if (r === 'realtrack') renderRealTrack();
   if (r === 'blockers') renderBlockers();
   if (r === 'samples') renderSamples();
   if (r === 'decisions') renderDecisions();
@@ -3414,6 +3425,64 @@ function renderCockpitKPI() {
       <div class="n">${((D.rollout_metrics||{}).fair_estimate != null ? ((D.rollout_metrics.fair_estimate*100).toFixed(1)+'%') : '—')}</div>
       <div class="d">4-seed pooled · 목표 ${Math.round(((D.rollout_metrics||{}).target||0.9)*100)}%</div>
     </div>`;
+}
+
+/* ====== 실기 트랙 (soarm_lerobot 미러) ====== */
+function renderRealTrack() {
+  const rt = D.real_track || {};
+  const body = document.getElementById('rt-body');
+  const cnt = document.getElementById('cnt-realtrack');
+  const sub = document.getElementById('rt-sub');
+  if (cnt) cnt.textContent = rt.total_commits || 0;
+  if (!body) return;
+  if (rt.missing || !rt.head) {
+    body.innerHTML = `<div class="empty">실기 트랙 미러 없음 — <code>git clone ${escapeHtml(rt.url || '')}</code> 를 /Volumes/MARK_DATA/dev/soarm_lerobot 에 두면 다음 rebuild 부터 표시됩니다.</div>`;
+    return;
+  }
+  if (sub) sub.textContent = `${rt.machine || ''} · 최근 커밋 ${rt.last_commit_date || '?'} (${rt.head})` +
+    (rt.pulled_ok ? ' · pull 성공' : ' · ⚠ pull 실패(이전 상태 표시)');
+
+  const dsRows = (rt.datasets || []).map(d => `
+    <tr${d.deprecated ? ' style="opacity:.45"' : ''}>
+      <td><code>${escapeHtml(d.name)}</code>${d.deprecated ? ' <span style="font-size:10px">(보존용 — 카메라 라벨 뒤바뀜, 사용 금지)</span>' : ''}</td>
+      <td>${d.episodes ?? '?'}ep</td><td>${(d.frames || 0).toLocaleString()}f</td><td>${d.fps ?? '?'}fps</td>
+    </tr>`).join('');
+  const polRows = (rt.policies || []).map(p => {
+    const dead = p.behavior === 'act_s1';
+    return `<tr${dead ? ' style="opacity:.45"' : ''}>
+      <td><b>${escapeHtml(p.behavior)}</b>${dead ? ' <span style="font-size:10px">(카메라 라벨 교정 전 학습 — 롤아웃 금지)</span>' : ''}</td>
+      <td>${escapeHtml(String(p.policy).toUpperCase())}</td><td>${(p.steps || 0).toLocaleString()} steps</td>
+      <td><code style="font-size:10.5px">${escapeHtml(p.dataset)}</code></td>
+    </tr>`;
+  }).join('');
+  const commitRows = (rt.commits || []).map(c => `
+    <div class="commit-line"><b>${escapeHtml(c.sha)}</b><span style="color:var(--text-dim);margin:0 8px">${escapeHtml(c.date)}</span>${escapeHtml(c.msg)}</div>`).join('');
+  const docLinks = (rt.docs || []).map(d =>
+    `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener" style="display:block;font-size:12.5px;margin:3px 0"><code>${escapeHtml(d.path)}</code> ↗</a>`).join('');
+
+  body.innerHTML = `
+    <div class="kpi-row kpi-row-4">
+      <div class="kpi"><div class="l">작업</div><div class="n" style="font-size:16px">${escapeHtml(rt.task || '')}</div>
+        <div class="d">성공판정 = P1 녹색 LED (OpenCV 규칙 기반)</div></div>
+      <div class="kpi"><div class="l">데이터</div><div class="n">${(rt.datasets || []).filter(d => !d.deprecated).reduce((a, d) => a + (d.episodes || 0), 0)}ep</div>
+        <div class="d">목표 ~80ep · top+closeup 640×480@30</div></div>
+      <div class="kpi"><div class="l">정책</div><div class="n">${(rt.policies || []).filter(p => p.behavior !== 'act_s1').length}</div>
+        <div class="d">ACT 20k steps · 롤아웃 성공률 미측정</div></div>
+      <div class="kpi is-accent"><div class="l">시뮬 정렬 (Phase 3)</div><div class="n" style="font-size:16px">같은 작업 · 같은 스키마</div>
+        <div class="d">시뮬이 메울 것: 합성 데이터(존 다양화) + LED 판정 검증</div></div>
+    </div>
+
+    <div class="section-head"><h3>데이터셋</h3><div class="right"><a href="${escapeHtml(rt.url)}" target="_blank" rel="noopener">github ↗</a></div></div>
+    <table class="r4-table"><thead><tr><th>repo_id</th><th>에피소드</th><th>프레임</th><th>fps</th></tr></thead><tbody>${dsRows}</tbody></table>
+
+    <div class="section-head"><h3>학습된 정책</h3><div class="right">training_runs/</div></div>
+    <table class="r4-table"><thead><tr><th>행동</th><th>정책</th><th>학습량</th><th>데이터셋</th></tr></thead><tbody>${polRows}</tbody></table>
+
+    <div class="section-head"><h3>최근 커밋 ${(rt.commits || []).length}건</h3><div class="right">rebuild 마다 자동 pull · ${escapeHtml(rt.checked_at || '')}</div></div>
+    <div class="tl-detail" style="max-height:420px;overflow-y:auto">${commitRows}</div>
+
+    <div class="section-head"><h3>문서</h3><div class="right">환경·spec·플랜</div></div>
+    <div>${docLinks}</div>`;
 }
 
 /* 일정(달력) 대비 실제 진척 — "날짜는 여기까지 왔는데 진척은 저기서 멈췄다".

@@ -166,7 +166,9 @@ uv pip install <패키지명>
   - 🔄 **2026-06-25 01:00 진척**: 학습중(pid 20078 alive, epoch **85/100**, loss 0.00556, MPS) → ETA ~02:20 → 측정대기. **데이터셋 정합 확정**: run2 step≈419/epoch=`episodes_cl`(로그 내 dataset_root=`data/episodes` 1550step 항목은 run1 open-loop 종료요약). **체크포인트 저장 정상**: `epoch_0079/model.safetensors` mtime 00:26(closed-loop 신선; 디렉터리 mtime 6/21~22 은 save_pretrained 덮어쓰기 특성·결함 아님). 자가치유 없음. 학습 미완이라 본 항목 `[ ]` 유지. 상세: `2026-06-25_closed-loop-cycle1-training.md`.
   - ✅ **2026-06-25 02:17 학습완료 / 23:00 측정완료**: pid 20078 종료, epoch_0099 model.safetensors mtime 02:17(closed-loop 신선). 드라이버 측정 스테이지 `rollout_summary.json`(mtime 23:00) = 10 rollout 7성공 70%, median lift 43.7mm. 본 항목 `[v]` 클로즈.
   - ✅ **2026-06-26~30 완료/유지**: 드라이버 STAGE=완료/유지(마커·산출물·체크포인트 3자 정합, 회귀 없음). **6/30 = W4 dated 범위(6/22~6/30) 마지막 날 → Phase 1 W4 dated 작업 종료, 7월 Phase 2(Sim2Real) 진입.** 상세: `2026-06-30_closed-loop-cycle1-hold.md`.
-- [ ] 학습 모델 Orin Nano 배포 (SSH 연결 확보 시) — 외부 의존(장기헌 SSH) 미수신으로 Phase 2 이연
+- [ ] 학습 모델 온디바이스(Orin Nano) 배포 — **시연 단계로 보류** *(2026-08-05 전제 갱신:
+  실기 트랙이 omen(RTX 2080 Ti, 실기 담당자)에서 진행되어 실기 추론 경로가 Orin SSH 에서
+  omen 협업으로 바뀜. Orin 배포는 10월 시연의 온디바이스 데모 항목으로 이동)*
 
 **Phase 1 완료 기준 (2026-06-23 갱신)**:
 - ✅ 시뮬 사전학습 파이프라인 전 구간 가동 (데이터 합성 → ACT 학습 → 추론 → 성공률 측정)
@@ -259,8 +261,11 @@ uv pip install <패키지명>
   - [v] **7/8~7/21**: 배치 다양성(floor) 재학습 **결착** — `episodes_floor` 50ep/3350f 로 ACT 재학습을 **12-run 만에 창 안 완주**(`act_floor/epoch_0041`, 42epoch, 3.76h, loss 0.0259). 이상종료 원인 순차 규명(FD 누수 → `persistent_workers` fix · num_workers=0 · RLIMIT · GPU OOM/jetsam 반증) 끝에 **고정 벽시계 04:04 외부 SIGKILL 확정**, 자가치유 `COP_EPOCHS=42` 로 창 회피. 상세: `2026-07-19_*`, `2026-07-21_floor-trained-first-rollout.md`
   - [v] **7/21**: floor-trained 첫 rollout 측정 — seed42 N=10 → **success 10/10, 성공률 1.0, median lift 66.0mm**(max_lift 0.056~0.068m, 임계 0.04m 여유). open-loop 0% → closed-loop 0.70 → **floor 1.0** 도약. 상세: `2026-07-21_floor-trained-first-rollout.md`
   - [v] **7/22**: floor-trained 4-seed 공정추정 — seed 42/7/123/2026 **전부 1.0**(66.0/65.3/60.0/64.9mm), **40/40 rollout 성공 · 실패 배치 0건**. baseline 0.825 / DR-trained 0.800 → floor-trained **1.000** 으로 7/7 결론의 처방을 실증 확증. 운영 `rollout_summary.json` md5 `5207f67b…` 전후 불변. 상세: `2026-07-22_floor-trained-4seed-fair-estimation.md`
-  - [ ] **Zero-shot 실기 추론 → Sim2Real 격차 측정** — 외부 의존 대기(Orin Nano / 실기 SSH 접속정보 미수신, 마감 6/22 초과). 이 항목이 Phase 2 완료 기준(실기 Pick 60%)의 관문
-  - [ ] **full-epoch(100) apples-to-apples 공정비교** — 외부 의존 대기(04:04 벽시계 killer 진단권한 에스컬레이션). 현 결론은 42epoch 저학습 기준이라 방향은 더 강하지만 엄밀 비교는 미완
+  - [ ] **Zero-shot 실기 추론 → Sim2Real 격차 측정** — *(2026-08-05 전제 갱신)* 실기가 omen
+    (실기 담당자, soarm_lerobot)에서 진행 중이므로 경로 = Orin SSH 가 아니라 **omen 협업**.
+    단, 실기 트랙 작업이 pick&place 가 아닌 S1 버튼누르기라 이 항목의 실효 검증은
+    **Phase 3 W4 핸드오프로 이관**. Orin 온디바이스 배포는 시연 단계 항목으로 보류
+  - [ ] **full-epoch(100) apples-to-apples 공정비교** — 외부 의존 대기(04:04 벽시계 killer 진단권한 에스컬레이션). 현 결론은 42epoch 저학습 기준이라 방향은 더 강하지만 엄밀 비교는 미완. **Phase 3 착수로 우선순위 하향(보류)**
   - 🔄 **2026-07-08 — 배치 다양성(floor) 사이클 ACT 재학습 착수(in-flight)**: 드라이버가 W1 타겟
     `episodes_cl_dr` 을 STAGE=완료/유지(50ep·0.7)로 닫고 **예약 사이클 `.next=episodes_floor`(바닥/받침대
     없는 파지 = 배치 커버리지↑)로 전환** → `episodes_floor`(50ep/3350f, 수집 yield 98%, 배치 x0.11~0.15)
@@ -630,14 +635,38 @@ uv pip install <패키지명>
 
 ---
 
-## Phase 3 — PCB 조정 (2026-08, 4주)
+## Phase 3 — S1 리셋버튼 시뮬 (실기 정렬) (2026-08, 4주)
 
-- W1: PCB 조정 단계 분해 (피킹 → 정렬 → 배치)
-- W2: PCB mesh + 작업대 MJCF 모델링
-- W3: 시뮬 100 에피소드 자동 수집
-- W4: ACT 학습 + 시뮬 검증
+> **2026-08-05 재정의.** 실기 트랙(soarm_lerobot, omen)이 7/22 부터 **S1 = PCB 리셋 버튼
+> 누르기 + P1 = 녹색 LED 판정**을 진행 중이다(데이터 10ep/목표 80, ACT 20k 학습 1회,
+> 롤아웃 성공률 미측정·LED ROI 미캘리브). 시뮬은 막연한 "PCB 조정" 대신 **실기와 동일한
+> 작업·동일한 관측 스키마**로 정렬한다 — 실기의 두 결핍(데이터 부족, 성공판정 부재)을
+> 시뮬이 메우는 구조. 기존 pick&place 시뮬 트랙은 Phase 2 에서 결착(4-seed 1.0)로 종료.
+> 참조: `https://github.com/deois/soarm_lerobot` (로컬 미러 `/Volumes/MARK_DATA/dev/soarm_lerobot`)
+>
+> **정렬 계약(실기와 동일해야 하는 것):** 카메라 이름 `top`(광각)+`closeup`(근접) 2대
+> 640×480@30fps · `observation.state`/`action` = 6dof pos · task_label
+> `"press the reset button"` · LeRobot v3 포맷(omen lerobot 0.6.1 로드 가능 확인 필수) ·
+> PCB 15×15cm 존 배치 다양화(7/22 배치 커버리지 실증 교훈 그대로).
 
-**완료 기준**: 시뮬에서 PCB 조정 성공률 70%
+- W1 (8/5 ~ 8/11): 실기 트윈 씬 정합
+  - [ ] 실기 `pcb_reset_scene.xml` 기반 씬 이식 — 우리 SO-ARM100 로컬 자산으로 로드 스모크 (2026-08-05 통과: geom 33, pcb_board/reset_button/led 인식)
+  - [ ] 리셋 버튼 눌림 메커니즘 (슬라이드 조인트 + 스프링 복원 + 눌림 임계) — 현 트윈은 접촉 latch 뿐
+  - [ ] `top`/`closeup` 2 카메라 640×480 실기 배치 근사 (현 씬은 overhead 1대)
+  - [ ] PCB 15×15cm 존 배치 무작위화 reset 훅
+- W2 (8/12 ~ 8/18): expert + 합성 데이터
+  - [ ] closed-loop 버튼누르기 expert (Phase 1 grasp expert 자산 이식 — IK 접근 + 누름 + LED 확인)
+  - [ ] LED latch = 공짜 정답 라벨로 에피소드 자동 성공판정 (P1 시뮬 검증 겸용)
+  - [ ] 100ep 합성 (존 다양화) + LeRobot v3 포맷 emit → omen lerobot 0.6.1 로드 스모크
+- W3 (8/19 ~ 8/25): ACT 학습 + 측정
+  - [ ] ACT 학습 (obs = top+closeup+state6, 실기 train_config 하이퍼 참조: chunk 100, batch 8)
+  - [ ] sim rollout 성공률 측정 (LED 판정 자동 채점, 4-seed 공정추정 프로토콜 재사용)
+- W4 (8/26 ~ 8/31): sim2real 핸드오프
+  - [ ] 합성 데이터셋 + sim-trained 정책 omen 전달 (실기 담당자 협업 — 실기 fine-tune 대조군)
+  - [ ] P1 LED ROI 캘리브 지원 — 시뮬 top/closeup 프레임으로 ROI·임계값 검증 결과 공유
+  - [ ] Sim2Real 격차 보고 (sim 성공률 vs 실기 롤아웃)
+
+**완료 기준**: 시뮬 버튼누르기 성공률 70% (LED 자동 판정) + 합성 데이터셋 omen 로드 확인
 
 ---
 
@@ -687,3 +716,4 @@ uv pip install <패키지명>
 ## 변경 이력
 - 2026-05-01: 최초 작성. Isaac Lab → MuJoCo 변경. Phase 0~5 정의.
 - 2026-06-11: 작업 9월 종료 일정으로 단축. Phase 0~4 (5개) 구조. 옛 Phase 5(10월 1차완성) → Phase 4(9월) 통합. 10월 = phase 외부 시연.
+- 2026-08-05: 7/2~7/22 성과를 체크 항목으로 승격(파서 버그 수정과 함께). **Phase 3 재정의** — "PCB 조정" → "S1 리셋버튼 시뮬 (실기 정렬)". 실기 트랙(deois/soarm_lerobot, omen)과 작업·관측 스키마 정렬. Phase 2 잔여 2건: zero-shot 실기 = Phase 3 W4 이관(Orin SSH → omen 협업 전제 갱신), full-epoch 공정비교 = 보류.

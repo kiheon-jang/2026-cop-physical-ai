@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -66,9 +67,9 @@ PHASE_META: list[dict] = [
         "report_label": "데이터 50 에피소드",
     },
     {
-        "id": "phase3", "name": "Phase 3 — PCB 조정", "month": "2026-08", "weeks": 4,
-        "business_label": "8월: PCB 부품 픽앤플레이스",
-        "outcome": "실제 PCB 부품 픽앤플레이스 학습. 정비현장 자동화 가능성 입증.",
+        "id": "phase3", "name": "Phase 3 — S1 리셋버튼 시뮬 (실기 정렬)", "month": "2026-08", "weeks": 4,
+        "business_label": "8월: PCB 리셋버튼 누르기 — 실기 트랙과 동일 작업으로 시뮬 정렬",
+        "outcome": "실기(omen)와 동일 관측 스키마의 버튼누르기 시뮬 + 합성 데이터 100ep + LED 자동판정. 실기의 데이터 부족(10/80ep)·성공판정 부재를 시뮬이 메운다.",
         "report_label": "ACT 학습",
     },
     {
@@ -211,7 +212,8 @@ def run(cmd: list[str], cwd: Path | None = None, timeout: int = 15) -> str:
 # PHASE_ROADMAP 파서 (메뉴 1, 5)
 # ─────────────────────────────────────────────────────────────────────────────
 
-_PHASE_HEADING = re.compile(r"^##\s+Phase\s+(\d+)\s+—\s+(.+?)\s*\((.+?)\)\s*$", re.MULTILINE)
+# 이름에 괄호가 들어갈 수 있으므로("S1 리셋버튼 시뮬 (실기 정렬)") 날짜는 **마지막** 괄호만 잡는다.
+_PHASE_HEADING = re.compile(r"^##\s+Phase\s+(\d+)\s+—\s+(.+?)\s*\(([^()]+)\)\s*$", re.MULTILINE)
 _H2_HEADING = re.compile(r"^##\s+", re.MULTILINE)
 # 주차 표기가 두 형식으로 공존한다 — Phase 0~1 은 `### W1 (5/1 ~ 5/7) — 이름`,
 # Phase 2~4 는 `- W1 (7/1 ~ 7/7): 이름` (날짜 괄호 없는 `- W3: 이름` 도 있음).
@@ -1455,6 +1457,93 @@ def build_pipeline_live() -> dict:
     }
 
 
+REAL_TRACK_REPO = Path("/Volumes/MARK_DATA/dev/soarm_lerobot")
+REAL_TRACK_URL = "https://github.com/deois/soarm_lerobot"
+
+
+def build_real_track() -> dict:
+    """실기 트랙(soarm_lerobot, omen 머신) 미러 → 사이트 '실기 트랙' 뷰 데이터.
+
+    로컬 미러를 매 빌드마다 best-effort pull (GIT_LFS_SKIP_SMUDGE=1 로 clone 되어
+    LFS 미디어는 안 받는다 — 사이트는 스탯·커밋·문서만 쓴다). 미러가 없거나 pull
+    실패해도 빌드는 계속된다 (missing=True 또는 이전 상태로 렌더).
+    """
+    if not (REAL_TRACK_REPO / ".git").exists():
+        return {"missing": True, "url": REAL_TRACK_URL}
+
+    # pull best-effort — run() 은 실패 시 "" 반환이라 그대로 진행
+    env_pull = subprocess.run(
+        ["git", "pull", "--ff-only", "origin", "main"], cwd=str(REAL_TRACK_REPO),
+        capture_output=True, text=True, timeout=30,
+        env={**os.environ, "GIT_LFS_SKIP_SMUDGE": "1"},
+    ) if os.environ.get("COP_REAL_TRACK_NO_PULL") != "1" else None
+    pulled_ok = bool(env_pull and env_pull.returncode == 0)
+
+    head = run(["git", "rev-parse", "--short", "HEAD"], cwd=REAL_TRACK_REPO, timeout=5).strip()
+    last_date = run(["git", "log", "-1", "--format=%ad", "--date=format:%Y-%m-%d %H:%M"],
+                    cwd=REAL_TRACK_REPO, timeout=5).strip()
+    total = run(["git", "rev-list", "--count", "HEAD"], cwd=REAL_TRACK_REPO, timeout=5).strip()
+    log_raw = run(["git", "log", "-30", "--format=%h%x09%ad%x09%s", "--date=format:%Y-%m-%d"],
+                  cwd=REAL_TRACK_REPO, timeout=5)
+    commits = []
+    for line in log_raw.strip().splitlines():
+        parts = line.split("\t", 2)
+        if len(parts) == 3:
+            commits.append({"sha": parts[0], "date": parts[1], "msg": parts[2][:140]})
+
+    # 행동 레지스트리 — soarm/behaviors.py 를 import 하지 않고 (omen 전용 경로 의존)
+    # 데이터셋 meta/info.json 과 training_runs 디렉터리에서 사실만 읽는다.
+    datasets = []
+    ds_root = REAL_TRACK_REPO / "datasets" / "local"
+    if ds_root.is_dir():
+        for d in sorted(ds_root.iterdir()):
+            info = _read_json_file(d / "meta" / "info.json")
+            if info:
+                datasets.append({
+                    "name": d.name,
+                    "episodes": info.get("total_episodes"),
+                    "frames": info.get("total_frames"),
+                    "fps": info.get("fps"),
+                    "deprecated": "__before" in d.name,
+                })
+
+    policies = []
+    tr_root = REAL_TRACK_REPO / "training_runs"
+    if tr_root.is_dir():
+        for beh_dir in sorted(p for p in tr_root.iterdir() if p.is_dir()):
+            for ts_dir in sorted(p for p in beh_dir.iterdir() if p.is_dir()):
+                cfg = _read_json_file(
+                    ts_dir / "checkpoints" / "020000" / "pretrained_model" / "train_config.json")
+                if cfg:
+                    policies.append({
+                        "behavior": beh_dir.name,
+                        "stamp": ts_dir.name,
+                        "policy": (cfg.get("policy") or {}).get("type", "?"),
+                        "steps": cfg.get("steps"),
+                        "dataset": (cfg.get("dataset") or {}).get("repo_id", ""),
+                    })
+
+    docs = []
+    for p in sorted((REAL_TRACK_REPO / "docs").rglob("*.md")):
+        rel = p.relative_to(REAL_TRACK_REPO)
+        docs.append({"path": str(rel), "url": f"{REAL_TRACK_URL}/blob/main/{rel}"})
+
+    return {
+        "missing": False,
+        "url": REAL_TRACK_URL,
+        "machine": "omen — Ubuntu 22.04 · RTX 2080 Ti 11GB · lerobot 0.6.1 · 팔 2대(leader/follower) 연결",
+        "task": "S1 — PCB 리셋 버튼 누르기 (P1 녹색 LED 판정)",
+        "head": head, "last_commit_date": last_date,
+        "total_commits": int(total) if total.isdigit() else None,
+        "pulled_ok": pulled_ok,
+        "commits": commits,
+        "datasets": datasets,
+        "policies": policies,
+        "docs": docs,
+        "checked_at": datetime.now(KST).isoformat(timespec="seconds"),
+    }
+
+
 def read_hero_poster() -> str:
     """히어로 3D 포스터 (scripts/export_hero_poster.py 산출) → base64 JPEG. 없으면 빈 문자열."""
     p = DASHBOARD_DIR / "hero_poster.txt"
@@ -1525,6 +1614,7 @@ def build_real_data() -> dict:
         "web3d": build_web3d(),                      # 3D 리플레이 (체인+에피소드+정책 rollout)
         "dr_gallery": build_dr_gallery(),            # DR 샘플 썸네일
         "pipeline_live": build_pipeline_live(),      # 파이프라인 현재 상태
+        "real_track": build_real_track(),            # 실기 트랙(soarm_lerobot) 미러 — 매 빌드 pull
     }
     data["web3d"]["hero_poster_b64"] = read_hero_poster()  # 히어로 3D 포스터 인라인
     # Hdel template.html 호환 alias (기존 render* 함수가 새 키 모르므로)
