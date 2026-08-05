@@ -53,13 +53,18 @@ class ACTTrainingConfig:
     """ACT 학습 하이퍼파라미터. SO-ARM101 (6 DOF) 기준 기본값."""
 
     # 데이터셋
-    dataset_repo_id: str = "local/cop-pickplace"
+    # COP_DATASET_REPO_ID 로 오버라이드 — 데이터셋 meta 의 repo_id 와 일치해야 로드된다
+    # (S1 합성 데이터셋 episodes_s1 = "local/pcb_reset_sim").
+    dataset_repo_id: str = os.environ.get("COP_DATASET_REPO_ID", "local/cop-pickplace")
     # COP_DATASET_ROOT 로 데이터 경로 오버라이드 (파이프라인 드라이버가 closed-loop data/episodes_cl 지정).
     dataset_root: str = os.environ.get(
         "COP_DATASET_ROOT",
         "/Volumes/MARK_DATA/dev/2026-cop-physical-ai/data/episodes",
     )
-    camera_keys: List[str] = field(default_factory=lambda: ["top"])
+    # COP_CAMERA_KEYS 로 카메라 오버라이드 (콤마 구분). S1 데이터셋(episodes_s1)은
+    # 실기 정렬 계약으로 top+closeup 2대 — "top,closeup" 지정.
+    camera_keys: List[str] = field(default_factory=lambda: os.environ.get(
+        "COP_CAMERA_KEYS", "top").split(","))
     fps: int = 30
     # 영상 디코딩 백엔드. 기본 torchcodec 은 시스템 ffmpeg(libtorchcodec) 에 의존 —
     # Homebrew ffmpeg/libvpx 링크가 깨지면 dlopen 실패로 첫 배치에서 학습이 중단된다.

@@ -662,6 +662,17 @@ uv pip install <패키지명>
   - [v] **8/5**: LED latch = 공짜 정답 라벨 자동 성공판정 — 수집기가 latch 성공 에피소드만 저장 (P1 계약과 동일)
   - [v] **8/5**: 100ep 합성 완료 — `data/episodes_s1` **100ep/7,231frame** (시도 107, **yield 93%**, seed 20260805, 58MB). 전수 재로드 검증 통과: v3.0 · top+closeup 640×480 · state/action 6 · task "press the reset button". 실패 7건 = 기하 도달불가 배치(예측대로)
   - [ ] omen lerobot 0.6.1 로드 스모크 — 실기 담당자 협업 (데이터셋 전달 경로 협의 포함, W4 핸드오프와 병합 가능)
+  - 🔧 **2026-08-05 야간 — S1 합성 결착 문서화 + Phase 2 hold + W3 ACT 인에이블러**:
+    낮 세션이 Phase 3 W1+W2 커밋 완료(56cd84f 트윈 4/4·7096f13 expert 95%·88c655c
+    100ep 합성). 야간 드라이버 STAGE=완료/유지(`episodes_floor` 50ep·sr 1.0, Phase 2
+    레거시 타겟, 새 사이클 미트리거). **무결성 감사**: 운영 `rollout_summary.json` md5
+    `5207f67b189645de1bb26c124873b683` 7/22~8/04 불변(sr 1.0, act_floor/epoch_0041,
+    seed42, 66.0mm)·학습 프로세스 없음 → 회귀/오염 0. **S1 데이터셋 실측**:
+    `episodes_s1` 100ep/7,231f, top+closeup, v3. **W3 인에이블러**: `train_act.py`
+    미커밋 변경(`COP_DATASET_REPO_ID`+`COP_CAMERA_KEYS` env 오버라이드 3필드,
+    기본값 불변·하위호환, `ast.parse` OK) → W3 ACT 학습이 `episodes_s1`(2카메라)를
+    읽도록 준비. [자가치유] 없음. 상세: `2026-08-05_phase3-w2-s1-synth-hold-w3-enabler.md`.
+    **다음**: W2 잔여 omen 로드 스모크(실기 협업) / W3(8/19~) episodes_s1 ACT 학습→LED 채점 rollout.
 - W3 (8/19 ~ 8/25): ACT 학습 + 측정
   - [ ] ACT 학습 (obs = top+closeup+state6, 실기 train_config 하이퍼 참조: chunk 100, batch 8)
   - [ ] sim rollout 성공률 측정 (LED 판정 자동 채점, 4-seed 공정추정 프로토콜 재사용)
