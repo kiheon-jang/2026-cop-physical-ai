@@ -654,10 +654,13 @@ uv pip install <패키지명>
   - [v] **8/5**: 리셋 버튼 눌림 메커니즘 — 슬라이드 조인트(z, 3mm) + 스프링 복원(stiffness 150) + 변위 임계(-1.5mm). 자가검증: 눌림 latch → 스프링 복원 후에도 latch 유지, LED rgba 점등 반영
   - [v] **8/5**: `top`/`closeup` 2 카메라 640×480 실기 배치 근사 — top = 존 수직 상방(홈 자세에서 PCB 전체+팔 베이스, 실기 C920 뷰 서술과 일치 육안 검증) / closeup = 존 측면 근접(버튼·LED·그리퍼 접근영역, 보조광 추가로 그림자 해소). 홈 자세 `HOME_QPOS` 도입(팔이 top 뷰를 가리던 문제 해소)
   - [v] **8/5**: PCB 15×15cm 존 배치 무작위화 reset 훅 — x(0.15~0.30)×y(±0.075)+yaw ±10°, seed 결정론·존 경계 50회 검증
-- W2 (8/12 ~ 8/18): expert + 합성 데이터
-  - [ ] closed-loop 버튼누르기 expert (Phase 1 grasp expert 자산 이식 — IK 접근 + 누름 + LED 확인)
-  - [ ] LED latch = 공짜 정답 라벨로 에피소드 자동 성공판정 (P1 시뮬 검증 겸용)
-  - [ ] 100ep 합성 (존 다양화) + LeRobot v3 포맷 emit → omen lerobot 0.6.1 로드 스모크
+- W2 (8/12 ~ 8/18): expert + 합성 데이터 — **8/5 조기 착수** (`samples/training/sim_pcb_reset_collector.py`)
+  - [v] **8/5**: closed-loop 버튼누르기 expert — **20-seed 95%**. 핵심 규명 3건:
+    ① TCP(패드 갭 중점) 아닌 **jaw 끝 접촉점**(보드 접촉 실측 캘리브 `PRESS_LOCAL`)으로 겨냥해야 함
+    ② 버튼↔보드 접촉 배제 필요(원본 트윈은 버튼 하단이 보드에 눌러붙어 물리적으로 안 눌렸음 — 실물 버튼은 보드 구멍 관통 구조. **버튼 치수·스프링은 실기 원본 그대로**, 환경 난이도 불변)
+    ③ 남는 실패 5% = 존 구석의 기하 도달불가 배치(press 자세가 팔 링크의 보드 2.5mm 관통을 요구 — 같은 SO-101 인 실기도 동일). pan 정렬→경유→단계 하강(매단계 IK 재계산)→재시도 3
+  - [v] **8/5**: LED latch = 공짜 정답 라벨 자동 성공판정 — 수집기가 latch 성공 에피소드만 저장 (P1 계약과 동일)
+  - [ ] 100ep 합성 (존 다양화) — **8/5 in-flight** (seed 20260805, `data/episodes_s1`, `logs/s1_collect_100ep.log`). 2ep 스모크는 **로컬 LeRobotDataset 재로드 검증 통과**(v3.0·top+closeup 640×480·state/action 6·task 라벨); omen lerobot 0.6.1 로드 스모크는 실기 담당자 협업 잔여
 - W3 (8/19 ~ 8/25): ACT 학습 + 측정
   - [ ] ACT 학습 (obs = top+closeup+state6, 실기 train_config 하이퍼 참조: chunk 100, batch 8)
   - [ ] sim rollout 성공률 측정 (LED 판정 자동 채점, 4-seed 공정추정 프로토콜 재사용)

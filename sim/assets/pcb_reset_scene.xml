@@ -41,7 +41,10 @@
     <body name="pcb" pos="0.225 0.0 0.02">
       <geom name="pcb_board" type="box" size="0.075 0.075 0.005" rgba="0.1 0.4 0.1 1"/>
       <!-- 리셋 버튼: 슬라이드 조인트(z, 3mm 트래블) + 스프링 복원.
-           눌림 판정 = 조인트 변위 임계(sim_pcb_reset.PRESS_THRESHOLD) — 접촉이 아니라 실제 눌림. -->
+           눌림 판정 = 조인트 변위 임계(sim_pcb_reset.PRESS_THRESHOLD) — 접촉이 아니라 실제 눌림.
+           치수는 실기 트윈 원본 그대로(pos z 0.008, r4×h6mm) — 돌출을 키워 난이도를 낮추지
+           않는다(실기 = 엘리베이터 제어반 버튼, 환경 동일 원칙). 눌림은 아래 contact exclude
+           (버튼이 보드 구멍을 관통하는 실물 구조 반영)로 물리적으로 가능해진다. -->
       <body name="reset_button" pos="0.0 0.0 0.008">
         <joint name="reset_button_slide" type="slide" axis="0 0 1" range="-0.003 0"
                stiffness="150" springref="0" damping="0.5"/>
@@ -54,4 +57,10 @@
             rgba="0.2 0.2 0.2 1"/>
     </body>
   </worldbody>
+
+  <!-- 버튼 실린더 ↔ 보드 상호 충돌 배제 — 실물 버튼은 보드 구멍을 관통하는 구조라
+       버튼-보드 접촉은 비물리적이고, 접촉이 잡히면 슬라이드가 그 지점에서 막힌다. -->
+  <contact>
+    <exclude body1="pcb" body2="reset_button"/>
+  </contact>
 </mujoco>
