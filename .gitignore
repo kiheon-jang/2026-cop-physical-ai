@@ -17,6 +17,7 @@ build/
 data/episodes/
 data/episodes_cl/
 data/episodes_cl_dr/
+data/episodes.bak-*/
 data/videos/
 data/chunks/
 data/*.parquet
