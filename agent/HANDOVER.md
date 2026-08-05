@@ -2,7 +2,10 @@
 
 > **다른 AI 에이전트가 이 프로젝트를 이어받을 때 가장 먼저 읽는 파일입니다.**
 > 모든 설정, 크론, 스킬, 환경이 하위 파일에 완전히 서술되어 있습니다.
-> **최종 업데이트**: 2026-05-22 (W3 완료 / W4 시작 / 크론 스킬 수정 / 히스토리 자동업데이트 추가)
+> **최종 업데이트**: 2026-08-06 — **최신 세션 인수인계**:
+> [`research/simulation/2026-08-06_session-handoff-s1-alignment.md`](../research/simulation/2026-08-06_session-handoff-s1-alignment.md)
+> (Phase 3 = S1 리셋버튼 실기 정렬 · W1/W2 완료 · S1 ACT 학습 in-flight · 04:04 killer 규명 ·
+> 사이트 전면 정비 · 실기 트랙 미러 = `/Volumes/MARK_DATA/dev/soarm_lerobot`)
 
 ---
 
@@ -11,13 +14,13 @@
 | 항목 | 내용 |
 |------|------|
 | **프로젝트명** | CoP Physical AI (현대엘리베이터 사내 CoP) |
-| **목표** | SO-ARM101 로봇팔로 PCB 조정 자동화 + RS232 HHT 결선 (10월 시연) |
+| **목표** | SO-ARM101 로봇팔로 PCB 정비 자동화 — 1단계 Pick&Place(결착) · 2단계 S1 리셋버튼(진행) · 3단계 RS232 케이블 연결 (10월 시연) |
 | **GitHub** | https://github.com/kiheon-jang/2026-cop-physical-ai |
-| **로컬 경로** | `/Users/markmini/Documents/dev/2026-cop-physical-ai` |
+| **로컬 경로** | `/Volumes/MARK_DATA/dev/2026-cop-physical-ai` (실기 미러: `/Volumes/MARK_DATA/dev/soarm_lerobot`) |
 | **자동화 플랫폼** | Hermes Agent (Mac Mini M5, 24/7 로컬 운영) |
 | **시뮬레이터** | MuJoCo 3.x (Apple Silicon 네이티브) — Phase 0~2 |
 | **담당자** | 장기헌 (xaqwer@gmail.com) |
-| **현재 단계** | **Phase 3 - 진행중** —  (2026-08-05~) |
+| **현재 단계** | **Phase 3 — S1 리셋버튼 시뮬 (실기 정렬)** · W1/W2 완료, W3 학습 in-flight (2026-08-06 기준) |
 
 ---
 
@@ -141,17 +144,16 @@ ls ~/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI/2026-05/
 
 ---
 
-## 📊 프로젝트 단계 현황 (2026-05-01 기준)
+## 📊 프로젝트 단계 현황 (2026-08-06 기준)
 
 | Phase | 기간 | 내용 | 상태 |
 |-------|------|------|------|
-| Phase 1 (구) | 2026-04 | 환경 구축 (조립/LeRobot/텔레오퍼레이션/카메라) | ✅ 완료 |
 | **사전학습 / Kick-off** | 2026-04 | 하드웨어 발주 + ACT/DP 자료 학습 (phase 외부) | ✅ 완료 |
-| **Phase 0** (신) | 2026-05 | 시뮬 환경 셋업 (MuJoCo + SO-ARM101 MJCF) | ✅ 완료 |
-| **Phase 1** (신) | 2026-06 | 시뮬 사전학습 (200 ep + ACT) | 🔄 **진행중** |
-| **Phase 2** (신) | 2026-07 | Sim2Real 검증 (DR + ACT/DP 비교) | ⏳ 대기 |
-| **Phase 3** (신) | 2026-08 | PCB 조정 시뮬 학습 | ⏳ 대기 |
-| **Phase 4** (신) | 2026-09 | RS232 HHT 결선 + 1차 기능 완성 (작업 완료) | ⏳ 대기 |
+| **Phase 0** | 2026-05 | 시뮬 환경 셋업 (MuJoCo + SO-ARM101 MJCF) | ✅ 완료 |
+| **Phase 1** | 2026-06 | 시뮬 사전학습 + ACT 파이프라인 | ✅ 92% (Orin 배포만 시연 단계로 보류) |
+| **Phase 2** | 2026-07 | Sim2Real 검증 — **pick&place 4-seed 1.0 결착** | 🔄 71% (실기 검증은 Phase 3 W4 이관) |
+| **Phase 3** | 2026-08 | **S1 리셋버튼 시뮬 (실기 정렬)** — W1/W2 완료, W3 학습 중 | 🔄 **진행중** |
+| **Phase 4** | 2026-09 | RS232 케이블 연결 + 1차 기능 완성 | ⏳ 대기 |
 | **시연** | 2026-10 | 통합 시연 + 사내 발표 (phase 외부) | ⏳ 대기 |
 
 > Phase 번호 체계는 2026-05-01에 재정의됨. 2026-06-11에 작업 9월 완료 일정으로 단축 (Phase 5 → Phase 4 통합, 10월 = phase 외부 시연).
@@ -227,3 +229,4 @@ ls ~/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI/2026-05/
 | 2026-04-22 | HTML 메일 템플릿 + 결정 폼 추가 | AI Agent (OpenClaw, 레거시) |
 | 2026-04-29 | OpenClaw → Hermes Agent 마이그레이션 완료 | Claude Code (Mac M5) |
 | 2026-05-01 | **시뮬 트랙 전환**: Isaac Lab → MuJoCo, Phase 0~5 재정의, 크론 ID/기능 전부 갱신, [4-A] 외부의존 섹션 신설, Obsidian 동기화 추가 | Hermes Agent |
+| 2026-08-06 | **실기 정렬 세션**: Phase 3 = S1 재정의, W1/W2 완료, 04:04 killer 규명·fix, 사이트 전면 정비, 실기 트랙 미러. 상세 = 상단 세션 인수인계 링크 | Claude Code |
