@@ -212,8 +212,20 @@ def run(cmd: list[str], cwd: Path | None = None, timeout: int = 15) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 _PHASE_HEADING = re.compile(r"^##\s+Phase\s+(\d+)\s+—\s+(.+?)\s*\((.+?)\)\s*$", re.MULTILINE)
-_WEEK_HEADING = re.compile(r"^###\s+W(\d+(?:-\d+)?)\s*(?:\((.+?)\))?\s*(?:—\s+(.+?))?\s*$", re.MULTILINE)
+_H2_HEADING = re.compile(r"^##\s+", re.MULTILINE)
+# 주차 표기가 두 형식으로 공존한다 — Phase 0~1 은 `### W1 (5/1 ~ 5/7) — 이름`,
+# Phase 2~4 는 `- W1 (7/1 ~ 7/7): 이름` (날짜 괄호 없는 `- W3: 이름` 도 있음).
+# 대시 형식을 못 읽으면 그 phase 의 체크 항목이 통째로 0/0 이 되어 진척률이 실제보다 낮게 나온다.
+_WEEK_HEADING_H3 = re.compile(r"^###\s+W(\d+(?:-\d+)?)\s*(?:\((.+?)\))?\s*(?:—\s+(.+?))?\s*$", re.MULTILINE)
+_WEEK_HEADING_LIST = re.compile(r"^-\s+W(\d+(?:-\d+)?)\s*(?:\(([^)]*)\))?\s*:\s*(.+?)\s*$", re.MULTILINE)
 _CHECK_ITEM = re.compile(r"^\s*-\s*\[(v| )\]\s+(?:\*\*(.+?)\*\*\s*:\s*)?(.+?)\s*$", re.MULTILINE)
+
+
+def _find_week_headings(body: str) -> list[tuple[int, tuple[str, str | None, str | None]]]:
+    """두 형식의 주차 헤딩을 한 리스트로 — (본문 오프셋, (번호, 기간, 이름)) 오름차순."""
+    found = [(m.start(), m.groups()) for m in _WEEK_HEADING_H3.finditer(body)]
+    found += [(m.start(), m.groups()) for m in _WEEK_HEADING_LIST.finditer(body)]
+    return sorted(found)
 
 
 def build_phase_roadmap() -> tuple[list[dict], str]:
@@ -244,12 +256,15 @@ def build_phase_roadmap() -> tuple[list[dict], str]:
     }]
     current_label = "(no active phase)"
     for i, (start, num, name, date_range) in enumerate(phase_starts[:-1]):
-        end = phase_starts[i + 1][0]
+        # 다음 phase 헤딩뿐 아니라 다음 `## ` 섹션에서도 끊는다. 마지막 phase 는 그렇지 않으면
+        # 본문이 파일 끝까지 늘어나 "10월 시연" 섹션의 W1~W4 까지 그 phase 주차로 흡수된다.
+        next_h2 = next((m.start() for m in _H2_HEADING.finditer(text) if m.start() > start), len(text))
+        end = min(phase_starts[i + 1][0], next_h2)
         body = text[start:end]
         meta = next((p for p in PHASE_META if p["id"] == f"phase{num}"), None)
 
         weeks: list[dict] = []
-        week_starts = [(m.start(), m.groups()) for m in _WEEK_HEADING.finditer(body)]
+        week_starts = _find_week_headings(body)
         week_starts.append((len(body), None))
         for j, (ws, wgroups) in enumerate(week_starts[:-1]):
             if wgroups is None:
@@ -261,7 +276,8 @@ def build_phase_roadmap() -> tuple[list[dict], str]:
             for cm in _CHECK_ITEM.finditer(wbody):
                 checked = cm.group(1) == "v"
                 date_label = cm.group(2) or ""
-                task = cm.group(3).strip()
+                # 대시보드는 항목 텍스트를 그대로 출력한다 → md 강조 표기는 벗겨야 `**...**` 가 안 보인다.
+                task = re.sub(r"\*\*(.+?)\*\*", r"\1", cm.group(3)).strip()
                 items.append({"checked": checked, "date": date_label, "task": task[:200]})
             total = len(items)
             done = sum(1 for it in items if it["checked"])
@@ -622,9 +638,15 @@ def build_business_kpi(phases: list[dict]) -> dict:
     real_phases = [p for p in phases if not p.get("is_prep")]
     order = [p.get("id") for p in real_phases]
     calendar_phase = next((p for p in real_phases if p.get("month") == today.strftime("%Y-%m")), None)
+    # 진행 중 phase 가 둘 이상일 수 있다(같은 외부 의존에 걸려 나란히 멈춘 경우). 지연은 **가장 앞선**
+    # 진행/완료 phase 기준으로 잰다 — 첫 미완료 phase 로 재면 이미 상당히 진행한 뒤 phase 를 0 으로 본다.
+    advanced = None
+    for p in real_phases:
+        if p.get("status") in ("진행", "완료"):
+            advanced = p
     lag = None
-    if calendar_phase and current and calendar_phase.get("id") in order and current.get("id") in order:
-        lag = order.index(calendar_phase["id"]) - order.index(current["id"])
+    if calendar_phase and advanced and calendar_phase.get("id") in order and advanced.get("id") in order:
+        lag = order.index(calendar_phase["id"]) - order.index(advanced["id"])
     next_actions: list[str] = []
     if current:
         for w in current.get("weeks", []):
@@ -651,7 +673,9 @@ def build_business_kpi(phases: list[dict]) -> dict:
         "calendar_phase_label": calendar_phase.get("name") if calendar_phase else "",
         "calendar_phase_business": calendar_phase.get("business_label") if calendar_phase else "",
         "calendar_month": today.strftime("%Y-%m"),
-        "schedule_lag_phases": lag,  # 달력 phase − 실제 phase. 0=온스케줄, 2=2단계 지연
+        "advanced_phase_label": advanced.get("name") if advanced else "",
+        "advanced_phase_progress": advanced.get("progress") if advanced else None,
+        "schedule_lag_phases": lag,  # 달력 phase − 가장 앞선 진행 phase. 0=온스케줄, 2=2단계 지연
         "next_actions": next_actions,
         # 진척 vs 일정 비교: 시간 X% 지났는데 목표 Y% 달성 → 격차 표시
         "progress_vs_time_gap": round(target_progress - time_elapsed, 3),

@@ -249,8 +249,18 @@ uv pip install <패키지명>
       DR 실모델로 실증. **결론: DR 축 증강은 sim 성공 천장을 못 올림 → 배치 다양성이 다음 레버(`.next=episodes_floor`).**
       신규 `rollout_summary_cldr_seed{7,123,2026}.json`, baseline seed 요약·`episodes_cl(_dr)` 불변.
       상세: `2026-07-07_phase2-w1-dr-trained-rollout-compare.md`.
-- W2 (7/8 ~): Zero-shot 실기 추론 → 격차 측정 *(실기 스텝 = Orin/실기 SSH 외부의존 미수신 → 진입 불가.
-  대기 중 sim track 은 W1 결론이 지목한 배치 다양성 레버로 전진)*
+  - [v] **7/2**: DR on/off 프록시 비교 — 동일 seed42 N=10 에서 DR-on 8/10=0.80 vs DR-off 7/10=0.70 → 1 rollout 차 = 노이즈, 성능 동등. 정책이 조명·마찰·카메라노이즈 섭동에 강건(긍정적 Sim2Real 신호). 상세: `2026-07-02_phase2-w1-dr-onoff-proxy.md`
+  - [v] **7/3**: 축별(per-axis) ablation — light/friction/camera **각각 단독 0.70**, 실패집합 {2,5,8} 이 운영 baseline 과 완전 동일 → 지배적 Sim2Real 섭동축 없음. 상세: `2026-07-03_phase2-w1-dr-axis-ablation.md`
+  - [v] **7/4**: 실패집합 seed 강건성 = 모방격차 가설 실증 — cube-placement seed 4종에서 실패 rollout 이 완전 이동(42{2,5,8}·7{9}·123{0,1}·2026{5}), 4-seed 평균 **0.825**(운영 seed42 0.70 은 비관적 끝단) → 병목 = 섭동강건성 아닌 **큐브배치 커버리지**. 상세: `2026-07-04_phase2-w1-seed-robustness.md`
+  - [v] **7/5**: DR 50ep 합성 — `data/episodes_cl_dr` 50ep/3350frame(성공 50/50, yield 86%, lift 40.2~45.3mm), 별도 데이터셋 루트라 운영 `episodes_cl`·`rollout_summary.json` 불변. 상세: `2026-07-05_phase2-w1-dr-dataset-synthesis.md`
+  - [v] **7/7 — W1 종료**: DR-trained(`act_cl_dr/epoch_0099`) 4-seed 공정추정 → baseline **0.825** vs DR-trained **0.800**(성공률 통계적 동등), 유일 개선 = median lift ~44→~50mm 전 시드 +6mm(임계값 위라 이진판정 무영향). **결론: DR 축 증강은 sim 성공률 천장을 못 올린다 → 다음 레버 = 배치 다양성.** 상세: `2026-07-07_phase2-w1-dr-trained-rollout-compare.md`
+- W2 (7/8 ~): Zero-shot 실기 추론 → 격차 측정
+  - *실기 스텝 = Orin/실기 SSH 외부의존 미수신 → 진입 불가. 대기 중 sim track 은 W1 결론이 지목한 배치 다양성 레버로 전진.*
+  - [v] **7/8~7/21**: 배치 다양성(floor) 재학습 **결착** — `episodes_floor` 50ep/3350f 로 ACT 재학습을 **12-run 만에 창 안 완주**(`act_floor/epoch_0041`, 42epoch, 3.76h, loss 0.0259). 이상종료 원인 순차 규명(FD 누수 → `persistent_workers` fix · num_workers=0 · RLIMIT · GPU OOM/jetsam 반증) 끝에 **고정 벽시계 04:04 외부 SIGKILL 확정**, 자가치유 `COP_EPOCHS=42` 로 창 회피. 상세: `2026-07-19_*`, `2026-07-21_floor-trained-first-rollout.md`
+  - [v] **7/21**: floor-trained 첫 rollout 측정 — seed42 N=10 → **success 10/10, 성공률 1.0, median lift 66.0mm**(max_lift 0.056~0.068m, 임계 0.04m 여유). open-loop 0% → closed-loop 0.70 → **floor 1.0** 도약. 상세: `2026-07-21_floor-trained-first-rollout.md`
+  - [v] **7/22**: floor-trained 4-seed 공정추정 — seed 42/7/123/2026 **전부 1.0**(66.0/65.3/60.0/64.9mm), **40/40 rollout 성공 · 실패 배치 0건**. baseline 0.825 / DR-trained 0.800 → floor-trained **1.000** 으로 7/7 결론의 처방을 실증 확증. 운영 `rollout_summary.json` md5 `5207f67b…` 전후 불변. 상세: `2026-07-22_floor-trained-4seed-fair-estimation.md`
+  - [ ] **Zero-shot 실기 추론 → Sim2Real 격차 측정** — 외부 의존 대기(Orin Nano / 실기 SSH 접속정보 미수신, 마감 6/22 초과). 이 항목이 Phase 2 완료 기준(실기 Pick 60%)의 관문
+  - [ ] **full-epoch(100) apples-to-apples 공정비교** — 외부 의존 대기(04:04 벽시계 killer 진단권한 에스컬레이션). 현 결론은 42epoch 저학습 기준이라 방향은 더 강하지만 엄밀 비교는 미완
   - 🔄 **2026-07-08 — 배치 다양성(floor) 사이클 ACT 재학습 착수(in-flight)**: 드라이버가 W1 타겟
     `episodes_cl_dr` 을 STAGE=완료/유지(50ep·0.7)로 닫고 **예약 사이클 `.next=episodes_floor`(바닥/받침대
     없는 파지 = 배치 커버리지↑)로 전환** → `episodes_floor`(50ep/3350f, 수집 yield 98%, 배치 x0.11~0.15)
@@ -612,7 +622,9 @@ uv pip install <패키지명>
     `2026-08-04_phase2-w2-sim-lever-hold-integrity-audit.md`. **다음**: 남은 두 항목 모두 외부 의존 대기 —
     실기 W2 zero-shot(Orin SSH 미수신) / full-epoch(100) 공정비교(04:04 killer 진단권한 에스컬레이션 대기).
 - W3: 실기 fine-tune (10 에피소드)
+  - [ ] 실기 10 에피소드 수집 → fine-tune → 재측정 — 실기 확보 후 진입(W2 zero-shot 선행)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
+  - [ ] Diffusion Policy 동일 절차 학습 + ACT 대비 비교
 
 **완료 기준**: 실기 Pick 성공률 60% (Sim2Real 격차 < 30%p)
 

@@ -3368,7 +3368,9 @@ function renderCockpitKPI() {
   const phases = D.phases || [];
   const live = D.pipeline_live || {};
 
-  const activePhase = phases.find(p => p.status === '진행') || phases.find(p => p.status !== '완료') || {};
+  // 진행 중 phase 가 둘 이상이면 가장 앞선 것을 '현재 단계'로 — 뒤 phase 를 0 으로 보이게 하지 않는다.
+  const actives = phases.filter(p => p.status === '진행');
+  const activePhase = actives[actives.length - 1] || phases.find(p => p.status !== '완료') || {};
   const apPct = Math.round((activePhase.progress || 0) * 100);
 
   // 미니 파이프라인 루프
@@ -3430,9 +3432,11 @@ function renderScheduleGap() {
   const lag = kpi.schedule_lag_phases;
   const why = (kpi.next_actions || [])[0] || '';
 
+  const adv = kpi.advanced_phase_label || kpi.current_phase_label || '-';
+  const advPct = kpi.advanced_phase_progress != null ? ` (${Math.round(kpi.advanced_phase_progress * 100)}%)` : '';
   const lagLine = kpi.calendar_phase_label
     ? `달력상 ${escapeHtml(kpi.calendar_month || '')} 은 <b>${escapeHtml(kpi.calendar_phase_label)}</b> 구간.
-       실제 진척은 <b>${escapeHtml(kpi.current_phase_label || '-')}</b> 에 머물러 있다` +
+       실제 진척은 <b>${escapeHtml(adv)}${advPct}</b> 에 머물러 있다` +
       (lag != null && lag > 0 ? ` — <span class="lag">${lag}단계 지연</span>.` : ' — 온스케줄.')
     : '';
 

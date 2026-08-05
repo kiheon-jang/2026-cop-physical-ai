@@ -895,9 +895,11 @@ def update_readme_status(phase_progress, commits, header):
     # 달력 기준 phase 만 쓰면 "8월이니 Phase 3" 으로 읽혀 지연이 감춰진다 → 실제 진척 병기.
     kpi = read_dashboard_kpi()
     actual_row = ""
-    if kpi.get("current_phase_label"):
+    # 진행 중 phase 가 둘 이상일 수 있어 라벨은 '가장 앞선' 것으로 — 지연 계산 기준과 같아야 한다.
+    actual_label = kpi.get("advanced_phase_label") or kpi.get("current_phase_label")
+    if actual_label:
         lag = kpi.get("schedule_lag_phases")
-        bits = [kpi["current_phase_label"]]
+        bits = [actual_label]
         if kpi.get("target_progress") is not None:
             bits.append(f"진척 {round(kpi['target_progress'] * 100)}%")
         if kpi.get("time_elapsed") is not None:
