@@ -4278,6 +4278,24 @@ function sim3dBuildScene() {
     });
   }
 
+  // S1 리셋버튼 트윈 — PCB(초록 보드)+리셋 버튼(빨강)+LED. chain 에는 없으므로 직접 생성.
+  // root 로컬 = MuJoCo 좌표계. 배치는 에피소드 사이드카(pcb {x,y,yaw})로 프레임 적용 시 지정.
+  {
+    const g = new THREE.Group();
+    const board = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.01),
+      new THREE.MeshStandardMaterial({ color: 0x1a662a, roughness: .7 }));
+    const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.006, 16).rotateX(Math.PI / 2),
+      new THREE.MeshStandardMaterial({ color: 0x991a1a }));
+    btn.position.set(0, 0, 0.008);
+    const led = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.008, 0.004),
+      new THREE.MeshStandardMaterial({ color: 0x22e06b, emissive: 0x1a8f46 }));
+    led.position.set(0.03, 0, 0.007);
+    g.add(board, btn, led);
+    g.visible = false;
+    root.add(g);
+    SIM3D.pcbGroup = g;
+  }
+
   // 간이 오빗 컨트롤 (드래그 회전 / 휠 줌 / 시프트드래그 팬 없음 — 보고용 최소)
   const target = new THREE.Vector3(0.08, 0.2, 0.0); // (MuJoCo→Y-up 변환 후 로봇 작업영역 중심)
   let az = 0.9, el = 0.35, dist = 0.62;
@@ -4348,6 +4366,7 @@ function sim3dModelLabel(ckptDir) {
   return ckptDir || '?';
 }
 const SIM3D_DS_LABEL = {
+  episodes_s1: '🔘 S1 리셋버튼 시연 — 2단계 트랙 (최근 12)',
   episodes_cl: '📦 수집 에피소드 — closed-loop',
   episodes_cl_dr: '📦 수집 에피소드 — DR',
   episodes_floor: '📦 수집 에피소드 — 바닥(받침대 없음)',
@@ -4355,7 +4374,8 @@ const SIM3D_DS_LABEL = {
 function sim3dIsFloor(ep) {
   if (!ep) return false;
   if (ep.kind === 'policy') return !!(ep.meta && (ep.meta.scene || '').includes('floor'));
-  return ep.group === 'episodes_floor';
+  // S1(pcb_reset_scene) 도 테이블 없는 바닥 씬 — 테이블 메시 숨김
+  return ep.group === 'episodes_floor' || ep.group === 'episodes_s1';
 }
 
 function sim3dEpisodeList() {
@@ -4387,6 +4407,7 @@ function sim3dEpisodeList() {
     label: `${e.source.replace('episodes_', '')} ep ${String(e.episode).padStart(2, '0')} (${e.n_frames}f)`,
     qpos: b64ToF32(e.qpos_b64), n: e.n_frames, fps: w.dataset_fps || 30, success: true,
     cube: e.cube_b64 ? b64ToF32(e.cube_b64) : null,  // [x,y,z,qw,qx,qy,qz] per frame
+    pcb: e.pcb || null,  // S1: {x, y, yaw_deg} — PCB+버튼을 그 자리에 표시
   }));
   SIM3D.groups = groups;
   return eps;
@@ -4405,6 +4426,7 @@ function sim3dApplyFrame(f) {
   if (ep.kind === 'policy') {
     const fr = ep.frames[Math.min(f, ep.n - 1)];
     q = fr;
+    if (SIM3D.pcbGroup) SIM3D.pcbGroup.visible = false;
     if (SIM3D.cubeGroup) {
       SIM3D.cubeGroup.visible = true;
       SIM3D.cubeGroup.position.set(fr[6], fr[7], fr[8]);
@@ -4417,8 +4439,22 @@ function sim3dApplyFrame(f) {
       gauge.className = 'r4-gauge' + (ok ? ' on' : '');
       gauge.innerHTML = `큐브 리프트 <b>+${lift.toFixed(0)}mm</b>${ok ? ' · 성공 기준 40mm 도달 ✓' : ' <span class="th">/ 40mm</span>'}`;
     }
+  } else if (ep.pcb) {
+    // S1 리셋버튼 에피소드 — PCB+버튼 표시, 큐브 숨김. 배치는 사이드카 값.
+    q = ep.qpos.subarray(f * 6, f * 6 + 6);
+    if (SIM3D.cubeGroup) SIM3D.cubeGroup.visible = false;
+    if (SIM3D.pcbGroup) {
+      SIM3D.pcbGroup.visible = true;
+      SIM3D.pcbGroup.position.set(ep.pcb.x, ep.pcb.y, 0.02);
+      SIM3D.pcbGroup.rotation.set(0, 0, (ep.pcb.yaw_deg || 0) * Math.PI / 180);
+    }
+    if (gauge) {
+      gauge.className = 'r4-gauge on';
+      gauge.innerHTML = `S1 리셋버튼 시연 · PCB (${ep.pcb.x.toFixed(2)}, ${ep.pcb.y.toFixed(2)}) · LED 점등 확인된 성공 에피소드 ✓`;
+    }
   } else {
     q = ep.qpos.subarray(f * 6, f * 6 + 6);
+    if (SIM3D.pcbGroup) SIM3D.pcbGroup.visible = false;
     if (SIM3D.cubeGroup) {
       SIM3D.cubeGroup.visible = true;
       if (ep.cube) {

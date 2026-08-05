@@ -170,6 +170,7 @@ def main(root=None, episodes=100, seed=None):
 
     saved = attempts = 0
     max_attempts = 2 * episodes  # expert 95% 검증 — 캡은 넉넉히
+    pcb_placements = []  # 에피소드별 PCB 배치 사이드카 (3D 리플레이가 PCB 를 그 자리에 그린다)
     while saved < episodes and attempts < max_attempts:
         attempts += 1
         frame_buffer.clear()
@@ -179,6 +180,7 @@ def main(root=None, episodes=100, seed=None):
             for fr in frame_buffer:
                 dataset.add_frame(fr)
             dataset.save_episode()
+            pcb_placements.append(placement)
             saved += 1
             print(f"[성공 {saved}/{episodes}] 시도#{attempts} frames={len(frame_buffer)} "
                   f"press시도={tries} pcb=({placement['x']:.3f},{placement['y']:.3f},{placement['yaw_deg']:.1f}°)",
@@ -188,6 +190,13 @@ def main(root=None, episodes=100, seed=None):
                   f"(기하 도달불가 배치 가능성)", flush=True)
 
     dataset.finalize()
+    if pcb_placements:
+        import json
+        sidecar = os.path.join(root, "meta", "pcb_traj.json")
+        with open(sidecar, "w") as f:
+            json.dump({"format": "per-episode PCB placement {x, y, yaw_deg} (worldbody pcb body)",
+                       "episodes": pcb_placements}, f)
+        print(f"[사이드카] PCB 배치 {len(pcb_placements)}ep → {sidecar}")
     yld = saved / attempts * 100 if attempts else 0
     print(f"\n수집 완료: {saved}/{episodes} (시도 {attempts}, yield {yld:.0f}%) → {root}")
     return 0 if saved >= episodes else 1

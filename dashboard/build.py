@@ -1356,17 +1356,26 @@ def build_web3d() -> dict:
     try:
         import pyarrow.parquet as pq
         import numpy as np
-        for src in ("episodes_cl", "episodes_cl_dr", "episodes_floor"):
+        for src in ("episodes_s1", "episodes_cl", "episodes_cl_dr", "episodes_floor"):
+            # S1 은 100ep 전수가 무거우므로(66f×100) 최근 12개만 리플레이 소스로.
             f = REPO_ROOT / "data" / src / "data" / "chunk-000" / "file-000.parquet"
-            if not f.exists():
+            files = sorted((REPO_ROOT / "data" / src / "data" / "chunk-000").glob("file-*.parquet")) \
+                if (REPO_ROOT / "data" / src).exists() else []
+            if not files:
                 continue
-            t = pq.read_table(f, columns=["observation.state", "episode_index"])
-            states = np.array(t["observation.state"].to_pylist(), dtype=np.float32)
-            ep_idx = np.array(t["episode_index"].to_pylist())
+            tables = [pq.read_table(fp, columns=["observation.state", "episode_index"]) for fp in files]
+            states = np.concatenate([np.array(t["observation.state"].to_pylist(), dtype=np.float32) for t in tables])
+            ep_idx = np.concatenate([np.array(t["episode_index"].to_pylist()) for t in tables])
             # 큐브 실좌표 사이드카 (수집기가 기록 — 있으면 리플레이에서 큐브가 실제로 움직인다)
             cube_side = _read_json_file(REPO_ROOT / "data" / src / "meta" / "cube_traj.json") or {}
             cube_eps = cube_side.get("episodes", [])
-            for ep in sorted(set(ep_idx.tolist())):
+            # S1: PCB 배치 사이드카 (에피소드별 {x, y, yaw_deg} — 뷰어가 PCB+버튼을 그 자리에 그린다)
+            pcb_side = _read_json_file(REPO_ROOT / "data" / src / "meta" / "pcb_traj.json") or {}
+            pcb_eps = pcb_side.get("episodes", [])
+            ep_list = sorted(set(ep_idx.tolist()))
+            if src == "episodes_s1":
+                ep_list = ep_list[-12:]
+            for ep in ep_list:
                 qpos = states[ep_idx == ep]
                 entry = {
                     "id": f"{src}-{int(ep):03d}",
@@ -1379,6 +1388,8 @@ def build_web3d() -> dict:
                     cube = np.array(cube_eps[int(ep)], dtype=np.float32)  # (n, 7) xyz+wxyz
                     if len(cube) == len(qpos):
                         entry["cube_b64"] = _b64.b64encode(cube.tobytes()).decode()
+                if int(ep) < len(pcb_eps) and pcb_eps[int(ep)]:
+                    entry["pcb"] = pcb_eps[int(ep)]
                 episodes.append(entry)
     except Exception as e:  # pyarrow 미설치/스키마 변경 — 3D 페이지는 정책 rollout 만으로도 동작
         print(f"  [web3d] dataset episodes skip: {e}", file=sys.stderr)
