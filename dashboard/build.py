@@ -86,7 +86,7 @@ PROJECT_VISION = {
     # 2026-08-05: Phase 3 재정의(실기 정렬)에 맞춰 갱신 — 1단계 pick&place 는 Phase 2 에서
     # 결착(4-seed 1.0), 8월부터는 실기 트랙(omen)과 동일 작업인 S1 리셋버튼.
     "subtitle": "SO-ARM101 로봇팔 + MuJoCo 시뮬 모방학습 — 1단계 Pick&Place 결착, 2단계 S1 리셋버튼 (실기 트랙 정렬)",
-    "subtitle_secondary": "AI 자동화 운영 — 매일 23시 시뮬 빌드 · 23시 30분 학습 테스트 · 07시 일일 보고 · 일요 주간 정리",
+    "subtitle_secondary": "AI 자동화 운영 — 매일 23:00 시뮬 빌드 · 23:30 테스트 · 01:00 실패 재시도 · 07:00 일일 보고",
     "demo_date": "2026-10-31",
     "completion_date": "2026-09-30",  # 작업 완료 기준 (D-day 표시)
     "start_date": "2026-04-01",
@@ -651,12 +651,16 @@ def build_business_kpi(phases: list[dict]) -> dict:
     lag = None
     if calendar_phase and advanced and calendar_phase.get("id") in order and advanced.get("id") in order:
         lag = order.index(calendar_phase["id"]) - order.index(advanced["id"])
+    # 다음 액션 = **가장 앞선 진행 phase** 의 미체크 항목 (보류/이관 표기는 제외).
+    # 종전엔 '첫 진행 phase'(잔여 1건 남은 옛 phase)에서 뽑아 보류된 6월 항목이
+    # "다음 액션"으로 표시됐다 — 2026-08-05 수정.
     next_actions: list[str] = []
-    if current:
-        for w in current.get("weeks", []):
+    if advanced:
+        for w in advanced.get("weeks", []):
             for it in w.get("items", []):
-                if not it.get("checked"):
-                    next_actions.append(it.get("task", "")[:120])
+                task = it.get("task", "")
+                if not it.get("checked") and "보류" not in task and "이관" not in task:
+                    next_actions.append(task[:120].rsplit(" ", 1)[0] + ("…" if len(task) > 120 else ""))
                     if len(next_actions) >= 3:
                         break
             if len(next_actions) >= 3:
@@ -670,9 +674,11 @@ def build_business_kpi(phases: list[dict]) -> dict:
         "phase_elapsed_days": phase_elapsed_days,
         "time_elapsed": round(time_elapsed, 3),
         "target_progress": round(target_progress, 3),
-        "current_phase_id": current.get("id") if current else "",
-        "current_phase_label": current.get("name") if current else "",
-        "current_phase_business": current.get("business_label") if current else "",
+        # current_phase_* 는 '가장 앞선 진행 phase' — 여러 소비처(explainer/카드)가 이 라벨을
+        # "지금"으로 표시하므로, 잔여 1건 남은 옛 phase 를 주면 화면 전체가 과거로 표시된다.
+        "current_phase_id": (advanced or current or {}).get("id", ""),
+        "current_phase_label": (advanced or current or {}).get("name", ""),
+        "current_phase_business": (advanced or current or {}).get("business_label", ""),
         "calendar_phase_id": calendar_phase.get("id") if calendar_phase else "",
         "calendar_phase_label": calendar_phase.get("name") if calendar_phase else "",
         "calendar_phase_business": calendar_phase.get("business_label") if calendar_phase else "",
@@ -806,7 +812,7 @@ def build_videos() -> list[dict]:
     dataset_specs = [
         ("episodes_s1", "top", "S1 리셋버튼 합성 데이터셋 — top(광각)", "2단계 S1 트랙 · 실기 정렬 top 카메라 시점"),
         ("episodes_s1", "closeup", "S1 리셋버튼 합성 데이터셋 — closeup(근접)", "2단계 S1 트랙 · 실기 정렬 closeup 카메라 시점 (버튼·LED 디테일)"),
-        ("episodes", "top", "Pick&Place 학습 데이터셋", "1단계 트랙 · 천장 카메라 시점, ACT 학습 직전 단계 산출물"),
+        # 구 data/episodes 는 2ep 스모크 잔재 — 진척 증거 가치 없음, 노출 제거 (2026-08-05 감사)
     ]
     for ds_name, cam, title, desc_suffix in dataset_specs:
         dataset_video = (REPO_ROOT / "data" / ds_name / "videos"
@@ -911,7 +917,7 @@ def build_training_metrics() -> dict:
     if not metrics_files:
         return {
             "status": "pending",
-            "message": "ACT 학습 시작 대기 중 (2026-06-15 Phase 1 W3 예정)",
+            "message": "ACT 학습 시작 대기 중 — 다음 학습 시작 시 자동 갱신",
             "epochs": [],
             "current_epoch": 0,
         }
@@ -942,6 +948,19 @@ def build_training_metrics() -> dict:
             "epochs": [],
             "current_epoch": 0,
         }
+    # 파일에는 여러 run 이 이어 붙는다(floor/cl_dr/s1...). **마지막 run 만** 카드·차트로 쓴다 —
+    # 전체를 한 run 처럼 그리면 옛 run 의 best loss 가 현 run 옆에 나와 수렴한 것처럼 오독된다
+    # (2026-08-05 감사). run 경계 = ckpt_dir(없으면 dataset) 값 변화.
+    def _run_key(e):
+        return e.get("ckpt_dir") or e.get("dataset") or "?"
+    last_key = _run_key(epochs[-1])
+    run_start = len(epochs)
+    for i in range(len(epochs) - 1, -1, -1):
+        if _run_key(epochs[i]) != last_key:
+            break
+        run_start = i
+    run_epochs = epochs[run_start:]
+
     # 24h 안에 새 epoch 추가됐으면 running, 아니면 paused
     try:
         last_ts = epochs[-1].get("timestamp", "")
@@ -950,16 +969,17 @@ def build_training_metrics() -> dict:
         status = "running" if idle_sec < 86400 else "paused"
     except Exception:
         status = "running"
-    losses = [e["loss"] for e in epochs if isinstance(e.get("loss"), (int, float))]
+    losses = [e["loss"] for e in run_epochs if isinstance(e.get("loss"), (int, float))]
     return {
         "status": status,
-        "epochs": epochs,
-        "current_epoch": epochs[-1].get("epoch", 0),
-        "current_step": epochs[-1].get("step", 0),
-        "current_loss": epochs[-1].get("loss"),
+        "epochs": run_epochs,
+        "current_epoch": run_epochs[-1].get("epoch", 0),
+        "current_step": run_epochs[-1].get("step", 0),
+        "current_loss": run_epochs[-1].get("loss"),
         "best_loss": min(losses) if losses else None,
-        "current_lr": epochs[-1].get("lr"),
-        "job_name": latest.parent.name,
+        "current_lr": run_epochs[-1].get("lr"),
+        "job_name": last_key,
+        "dataset": run_epochs[-1].get("dataset"),
         "metrics_path": str(latest.relative_to(REPO_ROOT)),
     }
 
@@ -975,17 +995,24 @@ def build_inference_progress() -> list[dict]:
         return []
     out: list[dict] = []
     for mp4 in sorted(progress_dir.glob("*.mp4"), key=lambda p: p.stat().st_mtime):
+        # 같은 체크포인트의 seed 변형 영상(_seedN)은 사실상 동일 — 대표 1건만 노출 (2026-08-05 감사)
+        if re.search(r"_seed\d+$", mp4.stem):
+            continue
         try:
             st = mp4.stat()
         except OSError:
             continue
         m = re.search(r"epoch[_-]?(\d+)", mp4.stem.lower())
         epoch = int(m.group(1)) if m else None
+        run = re.match(r"inference_(act[a-z_0-9]*?)_epoch", mp4.stem)
         out.append({
             "id": make_id("inference", mp4.name),
             "filename": mp4.name,
             "path": str(mp4.relative_to(REPO_ROOT)),
             "epoch": epoch,
+            "run": run.group(1) if run else "act",
+            # 트랙 표기 — S1(act_s1*) 이전 산출물은 전부 1단계 pick&place 런
+            "track": 2 if (run and run.group(1).startswith("act_s1")) else 1,
             "size_bytes": st.st_size,
             "modified": datetime.fromtimestamp(st.st_mtime, KST).isoformat(timespec="seconds"),
         })
@@ -1314,11 +1341,20 @@ def build_rollout_metrics() -> dict:
     by_name = {c["name"]: c for c in comparisons}
     baseline = by_name.get("rollout_summary_baseline_cl.json") or by_name.get("rollout_summary.json")
     latest = by_name.get("rollout_summary.json")
+    # 공정추정 = **현행 모델(latest 와 같은 ckpt_dir)** 의 다중 seed 측정 평균.
+    # 종전엔 rollout_summary_seed*(구모델 act/epoch_0099 시절) 고정이라 모델이 바뀐 뒤에도
+    # 82.5% 로 표시됐다 — 2026-08-05 수정 (floor 4-seed 전부 1.0 → 공정추정 1.0).
+    cur_ckpt = (latest or {}).get("ckpt_dir")
     seed_rates = [c["success_rate"] for c in comparisons
-                  if c["name"].startswith("rollout_summary_seed") and c["success_rate"] is not None]
-    if baseline and baseline.get("success_rate") is not None:
-        seed_rates = [baseline["success_rate"]] + seed_rates
+                  if c["success_rate"] is not None and c["ckpt_dir"] == cur_ckpt
+                  and (c["name"] == "rollout_summary.json" or "_seed" in c["name"])]
     fair = round(sum(seed_rates) / len(seed_rates), 3) if seed_rates else None
+    # 참고용: 구모델(과거) 공정추정 — 성장 서사에 쓰인다
+    old_rates = [c["success_rate"] for c in comparisons
+                 if c["name"].startswith("rollout_summary_seed") and c["success_rate"] is not None]
+    if baseline and baseline.get("success_rate") is not None:
+        old_rates = [baseline["success_rate"]] + old_rates
+    fair_prev = round(sum(old_rates) / len(old_rates), 3) if old_rates else None
     return {
         "comparisons": comparisons,
         "history": history,
@@ -1345,11 +1381,15 @@ def build_web3d() -> dict:
     policy_history: list[dict] = []
     hist_dir = INFER_DIR / "history"
     if hist_dir.exists():
-        for f in sorted(hist_dir.glob("*_traj.json"))[-12:]:
+        # 같은 (ckpt, checkpoint, 날짜) 재측정은 디버깅 잔재 — 마지막 1건만 (2026-08-05 dedupe)
+        by_key: dict[tuple, dict] = {}
+        for f in sorted(hist_dir.glob("*_traj.json")):
             d = _read_json_file(f)
             if d and d.get("rollouts"):
                 d["file"] = f.name
-                policy_history.append(d)
+                key = (d.get("ckpt_dir"), d.get("checkpoint"), (d.get("measured_at") or "")[:10])
+                by_key[key] = d
+        policy_history = sorted(by_key.values(), key=lambda d: d.get("measured_at") or "")[-12:]
 
     import base64 as _b64
     episodes: list[dict] = []

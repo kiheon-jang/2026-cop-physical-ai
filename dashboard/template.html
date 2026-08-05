@@ -243,6 +243,30 @@
     background: var(--text); border-radius: 1px; box-shadow: 0 0 0 3px var(--bg-sub); }
   .vh-progress .scale { display: flex; justify-content: space-between; margin-top: 6px;
     font-size: 9.5px; color: var(--text-dim); font-family: ui-monospace, monospace; letter-spacing: .4px; }
+  /* 처음 온 사람용 스토리 스트립 — 무엇을/왜/지금 어디 (홈 최상단) */
+  .story-strip { background: var(--bg-sub); border: 1px solid var(--border); border-radius: 16px;
+    padding: 18px 22px; margin-bottom: 16px; }
+  .story-strip .lead { font-size: 14.5px; line-height: 1.65; color: var(--text); }
+  .story-strip .lead b { color: var(--accent-strong); }
+  .video-archive { margin-top: 26px; border: 1px dashed var(--border-strong); border-radius: 12px;
+    padding: 12px 16px; background: var(--bg-sub); }
+  .video-archive > summary { cursor: pointer; font-size: 13px; color: var(--text-sub);
+    list-style: none; }
+  .video-archive > summary::before { content: '▸ '; }
+  .video-archive[open] > summary::before { content: '▾ '; }
+  .story-steps { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .story-step { flex: 1 1 180px; border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 14px; font-size: 12.5px; line-height: 1.5; color: var(--text-sub);
+    background: var(--bg); position: relative; }
+  .story-step .tag { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+    padding: 2px 8px; border-radius: 20px; margin-bottom: 6px;
+    background: var(--border); color: var(--text-dim); }
+  .story-step.done { border-color: var(--hl-green); }
+  .story-step.done .tag { background: rgba(0,179,119,.15); color: var(--hl-green-d); }
+  .story-step.now { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .story-step.now .tag { background: var(--accent); color: #fff; }
+  .story-step b { color: var(--text); }
+
   .vh-progress .note { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
     font-size: 12px; line-height: 1.6; color: var(--text-sub); }
   .vh-progress .note b { color: var(--text); font-weight: 700; }
@@ -1127,6 +1151,9 @@
 
     <!-- HOME (Overview) — 관제탑형 게이지 히어로 (executive-glance) -->
     <div class="view" id="view-home">
+      <!-- 처음 온 사람용 3문장 스토리 — 무엇을, 왜, 지금 어디까지 (12살 기준 명확성) -->
+      <div class="story-strip" id="story-strip"></div>
+
       <div class="cockpit" id="cockpit">
         <!-- 좌: 성공률 반원 게이지 + 0→70→90 여정 -->
         <div class="ck-gauge" id="ck-gauge"></div>
@@ -1238,7 +1265,7 @@
     <div class="view hidden" id="view-magazines">
       <div class="home-hero">
         <h1>보고용 자료</h1>
-        <div class="sub" id="mag-sub">Obsidian 월별 활동보고서. 카드 클릭 시 본문 펼침. 인쇄(⌘P) 친화.</div>
+        <div class="sub" id="mag-sub">월별 CoP 활동보고서 — 카드를 클릭하면 해당 월 보고서가 열립니다. 인쇄(⌘P)·PPTX 내보내기 지원.</div>
       </div>
       <div class="report-picker" id="report-picker"></div>
       <div class="report-body" id="report-body">
@@ -1266,7 +1293,7 @@
         <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 1 · 매일 23:00</span><span class="desc">시뮬 환경 단계별 구축 (MuJoCo)</span></div>
         <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 2 · 매일 23:30</span><span class="desc">시뮬 테스트 + 메트릭 수집</span></div>
         <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 3 · 매일 07:00</span><span class="desc">아침 보고 메일 자동 발송</span></div>
-        <div class="branch">│&nbsp;&nbsp;&nbsp;└─ <span class="cron">cron 4 · 일요 22:00</span><span class="desc">주간 정리 + 보고용 증거 식별</span></div>
+        <div class="branch">│&nbsp;&nbsp;&nbsp;└─ <span class="cron">cron 4 · 매일 01:00</span><span class="desc">야간 잡 실패 시 자동 재시도 (self-heal)</span></div>
         <div class="branch">├─ <b>Self-heal</b><span class="desc">실패 시 자가복구 기록 + 다음 cron 에서 재시도</span></div>
         <div class="branch">├─ <b>Claude 위임</b><span class="desc">복잡한 추론은 <code style="font-family:inherit;font-size:12px">claude -p</code> 로 위임</span></div>
         <div class="branch">├─ <b>Git auto-push</b><span class="desc">코드/로그/보고서 자동 commit + push</span></div>
@@ -1289,7 +1316,7 @@
               <div class="role">시뮬 환경 단계별 구축</div>
               <div class="desc">PHASE_ROADMAP 읽어 오늘 작업 단계 식별 → MuJoCo 코드 작성/실행</div>
             </td>
-            <td class="desc">MuJoCo 환경 셋업, MJCF 모델 검증, 시뮬 스크립트 작성. Phase 0~5 단계별 진행.</td>
+            <td class="desc">MuJoCo 환경 셋업, MJCF 모델 검증, 시뮬 스크립트 작성. Phase 0~4 단계별 진행.</td>
             <td class="out"><code>research/simulation/*.md</code><br><code>samples/training/*.py</code></td>
           </tr>
           <tr>
@@ -1305,7 +1332,7 @@
             <td class="when">매일 07:00</td>
             <td>
               <div class="role">아침 보고 메일</div>
-              <div class="desc"><code style="font-family:inherit;font-size:12px">generate_daily_report.py</code> 실행 → 메일 4명 자동 발송</div>
+              <div class="desc"><code style="font-family:inherit;font-size:12px">generate_daily_report.py</code> 실행 → 담당자·보고 수신자에게 메일 자동 발송</div>
             </td>
             <td class="desc">전일 작업 요약 + 진척 차트 + 자가치유 통계. CHANGELOG/README 자동 갱신 후 git push.</td>
             <td class="out">이메일 (담당자 + 보고 수신자)<br><code>CHANGELOG.md</code></td>
@@ -1332,12 +1359,12 @@
           <div class="hour" data-hour="18" style="left:75%"></div>
           <div class="hour" data-hour="24" style="left:100%"></div>
           <div class="timeline-event" style="left:29%">07:00 · 아침 보고 메일</div>
-          <div class="timeline-event alt" style="left:91.6%">일요 22:00 · 주간 정리</div>
+          <div class="timeline-event alt" style="left:4.2%">매일 01:00 · 실패 재시도</div>
           <div class="timeline-event" style="left:95.8%">23:00 · 시뮬 구축</div>
           <div class="timeline-event alt" style="left:97.9%">23:30 · 테스트+메트릭</div>
         </div>
         <p style="font-size:12px; color:var(--text-sub); margin-top:14px; line-height:1.7;">
-          밤 시간대 (23:00, 23:30) 에 시뮬·학습 작업 → 결과를 다음 날 07:00 메일로 받음. 일요일 밤은 주간 정리 추가. <b>사람이 개입할 필요 없음</b> — 사고 (실패/차단) 발생 시 자가치유 메커니즘이 다음 cron 에서 자동 재시도.
+          밤 시간대 (23:00, 23:30) 에 시뮬·학습 작업 → 실패하면 01:00 에 자동 재시도 → 결과를 다음 날 07:00 메일로 받음. <b>사람이 개입할 필요 없음</b> — 사고 (실패/차단) 발생 시 자가치유 메커니즘이 다음 cron 에서 자동 재시도.
         </p>
       </div>
 
@@ -1413,7 +1440,7 @@
           <tr><td>시뮬 코드 작성</td><td class="check">✓</td><td class="dash">—</td><td class="desc">Hermes + Claude 위임</td></tr>
           <tr><td>시뮬 실행 + 메트릭 수집</td><td class="check">✓</td><td class="dash">—</td><td class="desc">매일 23:00, 23:30 cron</td></tr>
           <tr><td>일일 research-log 작성</td><td class="check">✓</td><td class="dash">—</td><td class="desc">자가치유 포함 자동 작성</td></tr>
-          <tr><td>아침 보고 메일</td><td class="check">✓</td><td class="dash">—</td><td class="desc">매일 07:00 자동 발송 (4명)</td></tr>
+          <tr><td>아침 보고 메일</td><td class="check">✓</td><td class="dash">—</td><td class="desc">매일 07:00 자동 발송</td></tr>
           <tr><td>주간/월간 보고용 증거 식별</td><td class="check">✓</td><td class="dash">—</td><td class="desc">매주 일요 22:00</td></tr>
           <tr><td>월별 활동보고서 초안</td><td class="partial">초안</td><td class="check">✓</td><td class="desc">사람이 수정·보완 (Obsidian)</td></tr>
           <tr><td>의사결정 (시뮬레이터 등)</td><td class="partial">제안</td><td class="check">✓</td><td class="desc">AI 가 조사·제안 / 사람이 확정 (<code>research/decisions/</code>)</td></tr>
@@ -1433,7 +1460,8 @@
 
       <!-- 1. 한 줄 결론 -->
       <div class="tech-summary">
-        <p>정비현장의 PCB 작업을 로봇에 가르치는 프로젝트입니다. <b>가상 환경(시뮬)에서 200번 시연 데이터를 자동으로 만들고</b> → <b>AI가 그 시연을 흉내내는 법을 학습</b>하고 → <b>학습된 모델을 실제 로봇팔에 옮기는</b> 흐름입니다.</p>
+        <p>정비현장의 PCB 작업을 로봇에 가르치는 프로젝트입니다. <b>가상 환경(시뮬)에서 시연 데이터를 자동으로 만들고</b> → <b>AI가 그 시연을 흉내내는 법을 학습</b>하고 → <b>학습된 모델을 실제 로봇팔에 옮기는</b> 흐름입니다.
+        <b>1단계(물건 집기)는 시뮬 성공률 100%로 결착</b>했고, 지금은 <b>2단계(PCB 리셋버튼 누르기)</b>를 같은 방식으로 진행 중입니다 (시뮬 = 이 사이트, 실기 = 협업 트랙). 3단계는 RS232 결선입니다.</p>
       </div>
 
       <!-- 2. 전체 흐름 플로우차트 -->
@@ -1518,7 +1546,7 @@
           </section>
           <section class="how">
             <h5>어떻게 사용?</h5>
-            <p>시뮬 IK 가 "정답" 액션을 자동 생성 → 그 액션과 동시 카메라 관측을 짝지어 200 에피소드 저장 → ACT 모델이 "이 영상이 보일 때 이렇게 움직여라" 매핑 학습. 차년도 (Phase 3+) 에 강화학습 추가하여 시뮬에 없는 상황 대응력 보강 예정.</p>
+            <p>시뮬 IK 가 "정답" 액션을 자동 생성 → 그 액션과 동시 카메라 관측을 짝지어 200 에피소드 저장 → ACT 모델이 "이 영상이 보일 때 이렇게 움직여라" 매핑 학습. 차년도(2027~)에 강화학습 추가하여 시뮬에 없는 상황 대응력 보강 예정.</p>
           </section>
         </div>
       </div>
@@ -1555,16 +1583,16 @@
       <!-- 6. 의사결정 근거 -->
       <div class="section-head"><h3>왜 이렇게 진행하나 — 의사결정 근거</h3><div class="right">기획 시점 2026-05 기준 · 현황은 Phase 로드맵 참조</div></div>
       <ul class="rationale">
-        <li><b>왜 시뮬 합성 데이터?</b> 실기 로봇 24시간 가동 비용 큼. 시뮬은 일주일에 수백 에피소드 자동 합성 가능 → 데이터 비용 ↓, 알고리즘 검증 가속. 7월부터 실기 텔레오퍼레이션 데이터 추가 예정.</li>
+        <li><b>왜 시뮬 합성 데이터?</b> 실기 로봇 24시간 가동 비용 큼. 시뮬은 일주일에 수백 에피소드 자동 합성 가능 → 데이터 비용 ↓, 알고리즘 검증 가속. 실기 텔레오퍼 데이터는 8월 현재 실기 트랙(omen)에서 S1 수집으로 실현 중.</li>
         <li><b>왜 MuJoCo (Isaac Lab 아님)?</b> Mac Mini (Apple Silicon ARM64) 에서 Isaac Lab 미지원 (2026-05-01 결정 변경). MuJoCo 는 네이티브 + 즉시 설치. Isaac Lab 은 차년도 GPU 서버 도입 시 RL 학습용으로 전환.</li>
         <li><b>왜 텔레오퍼 안 함 (시뮬만)?</b> 사람 시연은 정확하지만 시간/노동 비용 큼. IK 기반 시뮬 합성으로 빠르게 200ep 확보 → 1차 학습. 시뮬에 없는 변수 (조명, 마찰, 노이즈) 는 Domain Randomization 으로 보강.</li>
         <li><b>왜 ACT (Diffusion Policy 아님)?</b> DP 보다 가볍고 빠름 → Mac Mini 에서 학습 가능. 트랜스포머가 시간 일관성 있는 chunk 단위 액션 예측 → 안정적. 정확도 부족 시 9월 (Phase 4) 에 DP 비교/전환.</li>
         <li><b>왜 Pick-Place 부터?</b> 가장 단순한 정밀 작업. 성공하면 PCB 부품 픽업 → RS232 결선 (HHT 단자 꽂기) 까지 단계 확장. 정비현장 핵심 반복 작업 자동화가 최종 목표.</li>
-        <li><b>왜 Sim-to-Real 단계 분리?</b> 시뮬 학습 결과를 실기에 옮길 때 "현실 격차" (Sim-to-Real gap) 존재. 7월 (Phase 2) 에 시뮬 모델을 실기 50 에피소드로 측정 → 격차 식별 → Domain Randomization / Fine-tuning 으로 좁힘.</li>
+        <li><b>왜 Sim-to-Real 단계 분리?</b> 시뮬 학습 결과를 실기에 옮길 때 "현실 격차" (Sim-to-Real gap) 존재. → 8월 현재 2단계 S1 에서 시뮬(합성 데이터)과 실기(omen 수집)를 같은 작업·관측으로 정렬해 격차를 좁히는 중.</li>
       </ul>
 
       <!-- 7. 차년도 계획 -->
-      <div class="section-head"><h3>차년도 (Phase 3+) 계획</h3><div class="right">2027~</div></div>
+      <div class="section-head"><h3>차년도 (2027~) 계획</h3><div class="right">2027~</div></div>
       <div class="future-box">
         <p><b>강화학습 도입</b> — 모방학습으로 부족한 상황 대응력을 RL 로 보강. Isaac Lab + LeIsaac (NVIDIA) 로 전환, GPU 병렬 환경으로 대규모 학습. 인프라: AWS g5.2xlarge (≈ $1.21/hr) 또는 별도 GPU 서버.</p>
         <p><b>GR00T N1.5 파인튜닝</b> — NVIDIA 의 VLA (Vision-Language-Action) 모델. 시뮬 데이터 → GR00T 파인튜닝 → 실기 배포 파이프라인. <code>--no-tune_diffusion_model</code> 플래그로 24GB VRAM 절약.</p>
@@ -1576,8 +1604,8 @@
     <!-- VIDEOS (R3-3 + MEDIA-3 + REORG) -->
     <div class="view hidden" id="view-videos">
       <div class="home-hero">
-        <h1>시각자료 · 진척 현황 <span style="font-size:13px;font-weight:600;color:var(--text-dim)">(1단계 트랙 · Pick&amp;Place)</span></h1>
-        <div class="sub" id="videos-sub">학습 진척 · 시뮬 동작 · 학습 입력 · 실제 하드웨어 · 학습 데이터셋. 진척 관점에서 정리.</div>
+        <h1>시뮬 영상</h1>
+        <div class="sub" id="videos-sub">지금 진행 중인 2단계(리셋버튼) 영상 → 1단계 학습 히스토리 → 아카이브 순. 새 산출물은 자동 추가.</div>
       </div>
 
       <!-- 1. (맨 위) 이 페이지가 보여주는 것 — 컨텍스트 안내 (동적 DYN-2) -->
@@ -1587,30 +1615,30 @@
         <p id="video-explainer-caveat">—</p>
       </div>
 
-      <!-- 2. PROG: 학습 진척 (메트릭 차트 + inference 영상) — 가장 중요 -->
+      <!-- 2. 지금 진행: 2단계 S1 데이터셋 영상 (가장 먼저) -->
+      <div id="dataset-hero-wrap"></div>
+
+      <!-- 3. 1단계 학습 진척 히스토리 (결착된 트랙 — 메트릭 차트 + inference 영상) -->
       <div id="training-progress-wrap"></div>
 
-      <!-- 3. 시뮬 동작 영상 (pick_place, 6dof) -->
-      <div class="section-head"><h3>시뮬 동작 영상</h3><div class="right">학습 전 단계 · IK 기반 시나리오</div></div>
-      <div class="video-grid" id="video-grid"></div>
-
-      <!-- 4. 학습 입력 카메라 시점 (대표 이미지 1장씩, 작게) -->
-      <div id="frame-strips-wrap"></div>
-
-      <!-- 5. 하드웨어 시각자료 -->
-      <div id="hardware-grid-wrap"></div>
-
-      <!-- 6. 학습 데이터셋 영상 (보조 자료, 맨 아래) -->
-      <div id="dataset-hero-wrap"></div>
+      <!-- 4. 아카이브 — 개발 초기 검증 산출물 (접힘) -->
+      <details class="video-archive" id="video-archive">
+        <summary><b>아카이브</b> — 개발 초기 검증 영상·프레임·하드웨어 사진 (클릭해서 펼치기)</summary>
+        <div class="section-head"><h3>시뮬 동작 영상</h3><div class="right">학습 전 단계 · IK 기반 시나리오</div></div>
+        <div class="video-grid" id="video-grid"></div>
+        <div id="old-dataset-wrap"></div>
+        <div id="frame-strips-wrap"></div>
+        <div id="hardware-grid-wrap"></div>
+      </details>
     </div>
 
     <!-- PHASES = apps 라우트 유지 (Phase 0~5 로드맵, R3 v2) -->
     <!-- ====== R4: 3D 리플레이 ====== -->
     <div class="view hidden" id="view-sim3d">
       <div class="view-head">
-        <h2>3D 리플레이 <span style="font-size:12px;font-weight:600;color:var(--text-dim)">(1단계 트랙 · Pick&amp;Place)</span></h2>
-        <div class="sub">MuJoCo 학습 씬과 동일한 1:1 모델로 수집 에피소드·정책 rollout 을 브라우저에서 재생.
-          드래그 = 회전 · 휠 = 줌. 데이터는 야간 파이프라인이 측정할 때마다 자동 갱신.</div>
+        <h2>3D 리플레이</h2>
+        <div class="sub">로봇이 실제로 움직인 기록을 3D 로 재생합니다. 드래그 = 회전 · 휠 = 줌.
+          기본 = 지금 진행 중인 <b>2단계 리셋버튼 시연</b>. 1단계(집기) 기록과 옛 측정은 목록 아래 [아카이브].</div>
       </div>
       <div class="r4-toolbar">
         <select id="s3-source" class="sort-sel"></select>
@@ -1643,10 +1671,13 @@
     <!-- ====== R4: 성과 지표 ====== -->
     <div class="view hidden" id="view-results">
       <div class="view-head">
-        <h2>성과 지표 — Sim Pick&amp;Place <span style="font-size:12px;font-weight:600;color:var(--text-dim)">(1단계 트랙 · Phase 0~2 결착)</span></h2>
-        <div class="sub">rollout 측정 자동 축적 (야간 파이프라인). 성공 기준 = 큐브 +40mm 리프트, 10 rollout/측정.
-          2단계 S1 리셋버튼 지표는 Phase 3 W3 측정부터 별도 축적.</div>
+        <h2>성과 지표</h2>
+        <div class="sub">AI 의 시험 성적. 시험 = 배운 적 없는 상황 10번을 스스로 해내는지 측정 (측정할 때마다 자동 누적).</div>
       </div>
+
+      <!-- 12살 기준 성적표 요약 — 단계별 한 줄 -->
+      <div class="story-steps" style="margin-bottom:18px" id="results-summary"></div>
+
       <div class="kpi-row r4-kpis" id="results-kpis"></div>
       <div class="r4-card" id="results-pipeline"></div>
       <div class="r4-card">
@@ -1999,25 +2030,16 @@ function trainingStartTextOrStatus() {
   return '학습 시작 대기 (시작 일정은 Phase 로드맵 참조)';
 }
 function currentPhaseHint() {
-  // explainer "지금 단계" 동적 텍스트 (라벨은 외부에서 붙임 → 본문만 반환)
+  // explainer "지금 단계" — 가장 앞선 진행 phase 기준 (첫 미완료 phase 를 쓰면
+  // 보류 항목 하나 남은 옛 phase("6월 사전학습")가 "지금"으로 표시된다 — 2026-08-05 수정)
   const kpi = D.business_kpi || {};
-  const s = getTrainingStatus();
-  const phaseBiz = kpi.current_phase_business || kpi.current_phase_label || '진행 중';
-  if (s === 'running') {
-    return `${phaseBiz}. ACT 학습이 진행 중이며, 매 epoch 마다 새 inference 영상과 메트릭이 아래 "학습 진척" 섹션에 자동 누적됩니다.`;
-  }
-  if (s === 'paused') {
-    return `${phaseBiz}. ACT 학습이 일시 중지 상태입니다. 최신 메트릭은 아래 "학습 진척" 섹션 참조.`;
-  }
-  return `${phaseBiz}. ACT 학습이 시작되면 아래 "학습 진척" 섹션에 매일 새 inference 영상과 메트릭이 자동 누적됩니다.`;
+  const phaseBiz = kpi.calendar_phase_business || kpi.advanced_phase_label
+    || kpi.current_phase_business || '진행 중';
+  return `${phaseBiz}. 학습·측정 산출물은 생길 때마다 이 페이지에 자동 누적됩니다.`;
 }
 function simVideoCaveat() {
-  // explainer "유의" — 학습 시작 후엔 컨텍스트 전환
-  const s = getTrainingStatus();
-  if (s === 'running' || s === 'paused') {
-    return `현재 시뮬 동작 영상은 학습 입력 데이터 시각자료입니다. <b>학습된 모델의 inference 결과</b>는 위 "학습 진척" 섹션에서 확인하세요.`;
-  }
-  return `현재 노출된 시뮬 영상은 모두 <b>학습 전 IK(역기구학) 기반 시나리오</b>입니다. 큐브를 정확히 집지 못하는 모습은 오류가 아니라 학습 전 정상 상태입니다.`;
+  return `아래 <b>아카이브</b>의 옛 영상들(학습 전 IK 데모, 6축 검증)은 개발 초기 검증 산출물입니다.
+    큐브를 못 집는 모습은 오류가 아니라 <b>학습 전</b> 정상 상태입니다.`;
 }
 function phaseStatusByMonth(month) {
   const p = (D.phases || []).find(x => x.month === month);
@@ -2026,7 +2048,8 @@ function phaseStatusByMonth(month) {
 function currentPhaseDatasetLabel() {
   // CoP 리뷰 "현재 학습 데이터셋" 헤더의 우측 컨텍스트
   const kpi = D.business_kpi || {};
-  return kpi.current_phase_label ? `${kpi.current_phase_label} 진행 증거` : '데이터 합성 완료';
+  const label = kpi.calendar_phase_label || kpi.advanced_phase_label || kpi.current_phase_label;
+  return label ? `${label} 진행 증거` : '데이터 합성 완료';
 }
 
 /* ====== Markdown rendering (lightweight) ====== */
@@ -2477,8 +2500,8 @@ function renderTech() {
     { idx: '②', month: '2026-06', title: '시뮬 시연 데이터 합성',      detail: 'IK 기반 Pick-Place 200 에피소드 / 12,400 프레임 · LeRobot Dataset v3.0' },
     { idx: '③', month: '2026-06', title: 'ACT 학습 — 모방학습',          detail: actDetail },
     { idx: '④', month: '2026-07', title: '시뮬 검증',                   detail: '학습된 모델이 시뮬에서 큐브 잘 집는가 (성공률 측정)' },
-    { idx: '⑤', month: '2026-08', title: '실기 적용 — Sim2Real',        detail: '시뮬 모델을 실기 로봇팔에 옮김 · Domain Randomization 으로 격차 좁힘' },
-    { idx: '⑥', month: '2026-09', title: 'PCB 작업 자동화 (1차 완성)', detail: 'Pick & Place 70% · RS232 결선 부분 성공 40% (작업 완료, 10월 시연)' },
+    { idx: '⑤', month: '2026-08', title: '2단계 — S1 리셋버튼 (실기 정렬)', detail: '실기 트랙(omen)과 동일 작업·관측으로 시뮬 정렬 · 합성 100ep + ACT 학습 · LED 자동판정' },
+    { idx: '⑥', month: '2026-09', title: 'RS232 결선 + 1차 기능 완성',  detail: 'S1 리셋버튼 70% · RS232 결선 부분 성공 40% (작업 완료, 10월 시연)' },
   ];
   const STATUS_TAG = { '완료': 'DONE', '진행': '진행 중', '예정': '예정' };
   const wrap = document.getElementById('flow-chart');
@@ -2510,10 +2533,10 @@ function renderTech() {
   if (actStatusEl) actStatusEl.textContent = trainingStartTextOrStatus();
   const phase2El = document.getElementById('phase2-status-text');
   if (phase2El) {
-    const s = phaseStatusByMonth('2026-07');
-    if (s === '완료') phase2El.textContent = '실기 검증 완료 (Phase 2)';
-    else if (s === '진행') phase2El.textContent = '실기 검증 진행 중 (Phase 2)';
-    else phase2El.textContent = '실기 검증은 Phase 2 (7월) 예정';
+    const rt = D.real_track || {};
+    phase2El.textContent = rt.head
+      ? '실기 트랙(omen)에서 S1 리셋버튼 수집·학습 진행 중 — 실기 트랙 메뉴 참조'
+      : '실기 검증은 실기 트랙에서 진행';
   }
   const dsCtxEl = document.getElementById('dataset-context-label');
   if (dsCtxEl) dsCtxEl.textContent = currentPhaseDatasetLabel();
@@ -2562,12 +2585,12 @@ function renderTrainingProgress() {
   // (1) 학습 메트릭 카드
   if (tm.status === 'pending') {
     blocks.push(`
-      <div class="section-head"><h3>학습 진척 — 메트릭 + Inference 영상</h3><div class="right">ACT 학습 시작 후 자동 갱신</div></div>
+      <div class="section-head"><h3>1단계 학습 히스토리 — AI 가 집기를 배워간 기록</h3><div class="right">ACT 학습 시작 후 자동 갱신</div></div>
       <div class="training-block pending">
         <div class="tb-head">
           <h4>학습 메트릭</h4>
           <span class="badge pending">대기 중</span>
-          <span class="right">2026-06-15 시작 예정</span>
+          <span class="right">다음 학습 시작 시 자동 갱신</span>
         </div>
         <div class="pending-msg">
           ${escapeHtml(tm.message || 'ACT 학습 시작 대기 중')}. 학습이 시작되면 매 epoch 마다 loss · 학습률 · 추론 영상이 이곳에 <b>자동으로 누적</b>됩니다 (cron 자동화). 별도 새로고침 필요 없음.
@@ -2579,8 +2602,9 @@ function renderTrainingProgress() {
     const cur = tm.current_loss != null ? tm.current_loss.toFixed(4) : '—';
     const best = tm.best_loss != null ? tm.best_loss.toFixed(4) : '—';
     const lr = tm.current_lr != null ? tm.current_lr.toExponential(2) : '—';
+    const isS1 = (tm.job_name || '').startsWith('act_s1');
     blocks.push(`
-      <div class="section-head"><h3>학습 진척 — 메트릭 + Inference 영상</h3><div class="right">cron 자동 갱신</div></div>
+      <div class="section-head"><h3>${isS1 ? '2단계 학습 현황 — AI 가 리셋버튼 누르기를 배우는 중' : '1단계 학습 히스토리 — AI 가 집기를 배워간 기록'}</h3><div class="right">자동 갱신</div></div>
       <div class="training-block">
         <div class="tb-head">
           <h4>학습 메트릭 · ${escapeHtml(tm.job_name || 'act_train')}</h4>
@@ -2604,8 +2628,8 @@ function renderTrainingProgress() {
     blocks.push(`
       <div class="training-block" style="margin-top:14px;">
         <div class="tb-head">
-          <h4>학습 진척 Inference 영상 (${ips.length}건)</h4>
-          <span class="right">시간순 · 좌측이 가장 이른 시점</span>
+          <h4>1단계 시험 영상 히스토리 (${ips.length}건) — 학습할수록 잘 집게 된 기록</h4>
+          <span class="right">시간순 · 좌측이 가장 이른 시점 · 2단계(S1) 시험 영상은 첫 측정부터 추가</span>
         </div>
         <div class="inference-prog">
           ${ips.map(v => `
@@ -2614,7 +2638,7 @@ function renderTrainingProgress() {
                 <source src="${copStatic(v.path)}" type="video/mp4">
               </video>
               <div class="ic-meta">
-                <div class="epoch">${v.epoch != null ? `Epoch ${v.epoch}` : escapeHtml(v.filename)}</div>
+                <div class="epoch">${v.epoch != null ? `Epoch ${v.epoch}` : escapeHtml(v.filename)}${v.run && v.run !== 'act' ? ` · ${escapeHtml(v.run.replace('act_', ''))}` : ''}</div>
                 <div class="when">${escapeHtml(v.modified || '')} · ${fmtBytes(v.size_bytes)}</div>
               </div>
             </div>
@@ -2692,16 +2716,13 @@ function renderVideos() {
   // 카운트: 학습 데이터셋 + 시뮬 영상 + 프레임 시퀀스 + 하드웨어 사진 전부
   if (cntEl) cntEl.textContent = videos.length + hwPhotos.length;
   const datasets = videos.filter(v => v.kind === 'dataset');
+  const s1sets = datasets.filter(v => (v.filename || '').startsWith('episodes_s1'));
+  const oldSets = datasets.filter(v => !(v.filename || '').startsWith('episodes_s1'));
   const players = videos.filter(v => v.kind !== 'frame-sequence' && v.kind !== 'dataset');
   const frameSeqs = videos.filter(v => v.kind === 'frame-sequence');
   const KIND_LABEL = { 'pick-place': '시나리오', '6dof': '6축 움직임', 'sim': '시뮬', 'dataset': '학습 데이터셋' };
 
-  // 1) 학습 데이터셋 영상 — 데이터셋·카메라별 카드 전부 (S1 top/closeup + 구 pick&place)
-  const heroWrap = document.getElementById('dataset-hero-wrap');
-  if (heroWrap) {
-    heroWrap.innerHTML = datasets.length ? `
-      <div class="section-head" style="margin-top:24px;"><h3>학습 데이터셋 영상</h3><div class="right">합성 시연을 한 영상으로 이어붙임 · ▶ 클릭 시 로드</div></div>
-      ${datasets.map(ds => `
+  const dsCard = ds => `
       <div class="dataset-compact">
         <div class="meta">
           <div class="stats">
@@ -2714,7 +2735,25 @@ function renderVideos() {
         <video controls preload="none" ${ds.poster ? `poster="${copStatic(ds.poster)}"` : ''}>
           <source src="${copStatic(ds.path)}" type="video/mp4">
         </video>
-      </div>`).join('')}` : '';
+      </div>`;
+
+  // 1) 지금 진행(2단계 S1) 데이터셋 영상 — 맨 위, 목적 설명과 함께
+  const heroWrap = document.getElementById('dataset-hero-wrap');
+  if (heroWrap) {
+    heroWrap.innerHTML = s1sets.length ? `
+      <div class="section-head" style="margin-top:20px;"><h3>지금 진행 — 2단계 · PCB 리셋버튼 누르기 시범 영상</h3><div class="right">100회 시범 · AI 가 이걸 보고 배운다 · ▶ 클릭 시 로드</div></div>
+      <p style="font-size:13px;color:var(--text-sub);line-height:1.6;margin:6px 0 12px;">
+        가상 로봇의 <b>선생님(정답 프로그램)</b>이 위치가 매번 바뀌는 PCB 보드의 리셋 버튼을 눌러
+        초록 LED 를 켜는 시범 100번을 녹화한 것입니다. AI 는 이 영상과 팔 움직임 기록만 보고
+        <b>스스로 누르는 법</b>을 배우는 중입니다 (학습이 끝나면 AI 본인의 시험 영상이 여기 추가됩니다).</p>
+      ${s1sets.map(dsCard).join('')}` : '';
+  }
+  // 1b) 구세대(1단계) 데이터셋 영상 — 아카이브
+  const oldDsWrap = document.getElementById('old-dataset-wrap');
+  if (oldDsWrap) {
+    oldDsWrap.innerHTML = oldSets.length ? `
+      <div class="section-head"><h3>1단계 학습 데이터셋 영상</h3><div class="right">결착된 트랙 · 참고용</div></div>
+      ${oldSets.map(dsCard).join('')}` : '';
   }
 
   // 0) Explainer 박스 동적 채움 (DYN-2) — 라벨은 대시, 본문 콜론 그대로
@@ -2722,15 +2761,9 @@ function renderVideos() {
   if (explNow) explNow.innerHTML = `<b>지금 단계</b> — ${escapeHtml(currentPhaseHint())}`;
   const explCav = document.getElementById('video-explainer-caveat');
   if (explCav) {
-    const phase2Status = phaseStatusByMonth('2026-07');
-    let phase2Note;
-    if (phase2Status === '완료') {
-      phase2Note = '실기 검증 완료 (Phase 2).';
-    } else if (phase2Status === '진행') {
-      phase2Note = '실기 검증 진행 중 (Phase 2).';
-    } else {
-      phase2Note = '실기 로봇팔 검증은 Phase 2 (7월) 예정.';
-    }
+    const phase2Note = (D.real_track && D.real_track.head)
+      ? '실기 검증은 2단계 S1 로 실기 트랙(omen)에서 진행 중 — 실기 트랙 메뉴 참조.'
+      : '';
     explCav.innerHTML = `<b>유의</b> — ${simVideoCaveat()} ${phase2Note}`;
   }
 
@@ -2788,13 +2821,10 @@ function renderVideos() {
   // 4) 하드웨어 시각자료 (DYN-4: Phase 0 status 기반 컨텍스트 라벨)
   const hwWrap = document.getElementById('hardware-grid-wrap');
   if (hwWrap) {
-    const _ph0 = phaseStatusByMonth('2026-05');
-    const hwCtx = _ph0 === '완료' ? 'SO-ARM100/101 · Phase 0 셋업 완료'
-      : _ph0 === '진행' ? 'SO-ARM100/101 · Phase 0 셋업 진행 중'
-      : 'SO-ARM100/101';
+    const hwCtx = 'SO-ARM100/101 · 벤더(TheRobotStudio) 제공 참고 이미지 — 실기 사진은 실기 트랙 참조';
     if (hwPhotos.length) {
       hwWrap.innerHTML = `
-        <div class="section-head"><h3>실제 하드웨어 시각자료</h3><div class="right">${escapeHtml(hwCtx)}</div></div>
+        <div class="section-head"><h3>하드웨어 참고 이미지</h3><div class="right">${escapeHtml(hwCtx)}</div></div>
         <div class="hardware-grid">
           ${hwPhotos.map(p => `
             <div class="hw-card">
@@ -2862,7 +2892,7 @@ function renderMagazines() {
   const cntEl = document.getElementById('cnt-magazines');
   if (cntEl) cntEl.textContent = reports.length;
   const subEl = document.getElementById('mag-sub');
-  if (subEl) subEl.textContent = `Obsidian 월별 활동보고서 ${reports.length}건 · 카드 클릭 시 본문 펼침. 인쇄(⌘P) 친화.`;
+  if (subEl) subEl.textContent = `월별 CoP 활동보고서 ${reports.length}건 — 카드를 클릭하면 해당 월 보고서가 열립니다. 인쇄(⌘P)·PPTX 내보내기 지원.`;
 
   const picker = document.getElementById('report-picker');
   if (!picker) return;
@@ -2875,9 +2905,11 @@ function renderMagazines() {
   const phasesByMonth = {};
   (D.phases || []).forEach(p => { phasesByMonth[p.month] = p; });
   if (!SELECTED_REPORT_ID) {
+    const nowMonth = ((D.meta || {}).today || '').slice(0, 7);
+    const current = reports.find(r => r.month === nowMonth);
     const inProgress = reports.find(r => phasesByMonth[r.month]?.status === '진행');
     const lastDone = [...reports].reverse().find(r => phasesByMonth[r.month]?.status === '완료');
-    SELECTED_REPORT_ID = (inProgress || lastDone || null)?.id || null;
+    SELECTED_REPORT_ID = (current || inProgress || lastDone || null)?.id || null;
   }
 
   picker.innerHTML = reports.map(r => {
@@ -2885,8 +2917,11 @@ function renderMagazines() {
     const phase = phasesByMonth[r.month];
     const status = phase ? phase.status : null;
     const sCls = status === '완료' ? 'is-done' : (status === '진행' ? 'is-active' : (status === '예정' ? 'is-plan' : ''));
-    const sBadge = status === '진행' ? '<span class="rp-badge active">진행 중</span>'
-      : status === '예정' ? '<span class="rp-badge plan">예정 목표 (수정 보완 필요)</span>'
+    const _nowM = ((D.meta || {}).today || '').slice(0, 7);
+    // 지난달 phase 가 잔여 보류 항목 탓에 '진행'으로 남아도 보고서 관점에선 그 달은 끝났다
+    const sBadge = (status === '진행' && r.month < _nowM) ? '<span class="rp-badge done">해당 월 종료</span>'
+      : status === '진행' ? '<span class="rp-badge active">진행 중</span>'
+      : (status === '예정' || (!status && r.month > _nowM)) ? '<span class="rp-badge plan">예정 목표 (수정 보완 필요)</span>'
       : status === '완료' ? '<span class="rp-badge done">완료</span>'
       : '';
     const isDemo = r.month === '2026-10';
@@ -3363,7 +3398,7 @@ function renderCockpitPoster() {
   const bg = poster
     ? `<img src="data:image/jpeg;base64,${poster}" alt="로봇팔이 큐브를 든 3D 리플레이">`
     : `<div class="ck-poster-fallback">${icon('bot', 'icon-xl')}</div>`;
-  const epTxt = live.last_epoch ? ` · 학습 epoch ${live.last_epoch.epoch + 1}/100` : '';
+  const epTxt = live.last_epoch ? ` · ${(live.last_epoch.dataset || '').includes('_s1') ? 'S1 ' : ''}학습 epoch ${live.last_epoch.epoch + 1}` : '';
   document.getElementById('ck-poster').innerHTML = `
     ${bg}
     <span class="pill tl"><span class="dot"></span>정책 rollout${epTxt}</span>
@@ -3396,7 +3431,7 @@ function renderCockpitKPI() {
     const node = `<div class="ck-mn ${cls}"><span class="d"></span><span class="t">${s}</span></div>`;
     return i < steps.length - 1 ? node + `<div class="ck-ml"><i></i></div>` : node;
   }).join('');
-  const ep = live.last_epoch ? `epoch ${live.last_epoch.epoch + 1}/100` : '';
+  const ep = live.last_epoch ? `${(live.last_epoch.dataset || '').includes('_s1') ? 'S1 ' : ''}epoch ${live.last_epoch.epoch + 1}` : '';
   // 달력 phase 와 실제 phase 가 몇 칸 벌어졌는지 (양수 = 지연)
   const lag = kpi.schedule_lag_phases;
   const lagTxt = (lag != null && lag > 0) ? `${lag}단계 지연` : '';
@@ -3423,6 +3458,38 @@ function renderCockpitKPI() {
       <div class="l">공정추정 성공률</div>
       <div class="n">${((D.rollout_metrics||{}).fair_estimate != null ? ((D.rollout_metrics.fair_estimate*100).toFixed(1)+'%') : '—')}</div>
       <div class="d">4-seed pooled · 목표 ${Math.round(((D.rollout_metrics||{}).target||0.9)*100)}%</div>
+    </div>`;
+}
+
+/* 처음 온 사람용 스토리 스트립 — 무엇을 만들려는 프로젝트인지 3문장 + 3단계 위치 */
+function renderStoryStrip() {
+  const el = document.getElementById('story-strip');
+  if (!el) return;
+  // 단계 상태는 데이터에서 — 1단계 = pick&place 결착 여부(rollout 1.0), 2단계 = Phase 3 진행
+  const rm = D.rollout_metrics || {};
+  const s1done = (rm.latest && rm.latest.success_rate >= 0.9);
+  el.innerHTML = `
+    <div class="lead">
+      로봇팔이 <b>엘리베이터 제어반(PCB) 정비</b>를 사람 대신 하게 만드는 프로젝트입니다.
+      실물 로봇을 부수지 않고 빨리 배우도록, 먼저 <b>컴퓨터 속 가상 로봇(시뮬레이션)</b>으로 연습시키고
+      잘 되면 실물 로봇에 옮깁니다. 목표는 3단계 — 지금은 <b>2단계</b>를 하고 있습니다.
+    </div>
+    <div class="story-steps">
+      <div class="story-step ${s1done ? 'done' : 'now'}">
+        <span class="tag">${s1done ? '1단계 · 완료 ✓' : '1단계 · 진행'}</span><br>
+        <b>물건 집어 옮기기</b> — 로봇이 카메라만 보고 큐브를 집는 기본기.
+        시뮬 성공률 <b>100%</b>로 졸업.
+      </div>
+      <div class="story-step now">
+        <span class="tag">2단계 · 지금 여기</span><br>
+        <b>PCB 리셋 버튼 누르기</b> — 위치가 매번 바뀌는 보드에서 버튼을 찾아 누르고,
+        초록 LED 로 성공 확인. 시뮬(이 사이트) + 실물(협업 트랙) 동시 진행.
+      </div>
+      <div class="story-step">
+        <span class="tag">3단계 · 예정</span><br>
+        <b>RS232 케이블 꽂기</b> — 점검 단말기를 포트에 정밀하게(±0.5mm) 삽입.
+        9월 도전, 10월 시연.
+      </div>
     </div>`;
 }
 
@@ -3580,6 +3647,8 @@ function renderHome() {
   const kpi = D.business_kpi || {};
   const phases = D.phases || [];
 
+  // 0) 처음 온 사람용 스토리
+  renderStoryStrip();
   // 1) 관제탑 히어로 + KPI 밴드 + 스펙트럼
   renderCockpitGauge();
   renderCockpitPoster();
@@ -3868,7 +3937,6 @@ function hideTooltip() {
 function initCounts() {
   document.getElementById('cnt-proposals').textContent = D.proposals.length;
   document.getElementById('cnt-daily').textContent = D.daily.length;
-  document.getElementById('cnt-magazines').textContent = D.magazines.length;
   const cntApps = document.getElementById('cnt-apps');
   if (cntApps) cntApps.textContent = (D.apps || []).length || 6;
   updateBookmarkCount();
@@ -4363,10 +4431,11 @@ function sim3dModelLabel(ckptDir) {
   if (ckptDir === 'act') return 'baseline CL';
   if (ckptDir === 'act_cl_dr') return 'DR 재학습';
   if (ckptDir === 'act_floor') return '바닥(받침대 없음) 재학습';
+  if (ckptDir === 'act_s1_sim') return 'S1 리셋버튼 (2단계)';
   return ckptDir || '?';
 }
 const SIM3D_DS_LABEL = {
-  episodes_s1: '🔘 S1 리셋버튼 시연 — 2단계 트랙 (최근 12)',
+  episodes_s1: '🔘 S1 합성 데이터셋 — 2단계 리셋버튼 (최근 12개)',
   episodes_cl: '📦 수집 에피소드 — closed-loop',
   episodes_cl_dr: '📦 수집 에피소드 — DR',
   episodes_floor: '📦 수집 에피소드 — 바닥(받침대 없음)',
@@ -4381,15 +4450,21 @@ function sim3dIsFloor(ep) {
 function sim3dEpisodeList() {
   const w = D.web3d || {};
   const eps = []; const groups = [];
-  // 정책 rollout — 측정 히스토리 오래된 것 → 최신 순 (학습 진척 내러티브)
+  // 정책 rollout 측정 히스토리 — **최신 1개만 메인**, 나머지는 [아카이브] 프리픽스.
+  // (같은 성적 반복 측정이 많아 다 보여주면 뭐가 중요한지 안 보인다 — 2026-08-05 정리)
   const hist = (w.policy_history && w.policy_history.length) ? w.policy_history
              : (w.policy_rollouts ? [w.policy_rollouts] : []);
+  const policyGroups = [];
   hist.forEach((m, mi) => {
     const rolls = m.rollouts || [];
     const nOk = rolls.filter(r => r.success).length;
     const date = (m.measured_at || '').slice(5, 16).replace('T', ' ');
     const g = 'policy-' + mi;
-    groups.push({ key: g, label: `🤖 정책 rollout · ${date} · ${sim3dModelLabel(m.ckpt_dir)} · 성공 ${nOk}/${rolls.length}` });
+    const isLatest = mi === hist.length - 1;
+    policyGroups.push({
+      key: g, latest: isLatest,
+      label: `${isLatest ? '🤖 AI 시험 결과 (1단계 최종)' : '[아카이브] 정책 rollout'} · ${date} · ${sim3dModelLabel(m.ckpt_dir)} · 성공 ${nOk}/${rolls.length}`,
+    });
     rolls.forEach(r => eps.push({
       kind: 'policy', group: g, id: `${g}-${r.rollout}`,
       label: `rollout #${r.rollout} — ${r.success ? '✅ 성공' : '❌ 실패'} (${Math.round(r.max_lift_m * 1000)}mm)`,
@@ -4399,8 +4474,14 @@ function sim3dEpisodeList() {
   });
   const srcCount = {};
   (w.dataset_episodes || []).forEach(e => { srcCount[e.source] = (srcCount[e.source] || 0) + 1; });
-  Object.keys(srcCount).forEach(src => groups.push({
-    key: src, label: `${SIM3D_DS_LABEL[src] || '📦 ' + src} (${srcCount[src]})`,
+  // 노출 순서: ① S1 시연(지금) ② 최신 정책 rollout(1단계 최종 성적) ③ 아카이브(옛 측정·1단계 수집)
+  if (srcCount.episodes_s1) {
+    groups.push({ key: 'episodes_s1', label: `${SIM3D_DS_LABEL.episodes_s1} (${srcCount.episodes_s1})` });
+  }
+  policyGroups.filter(g => g.latest).forEach(g => groups.push(g));
+  policyGroups.filter(g => !g.latest).reverse().forEach(g => groups.push(g));
+  Object.keys(srcCount).filter(s => s !== 'episodes_s1').forEach(src => groups.push({
+    key: src, label: `[아카이브] ${(SIM3D_DS_LABEL[src] || '📦 ' + src).replace(/^[^ ]+ /, '')} (${srcCount[src]})`,
   }));
   (w.dataset_episodes || []).forEach(e => eps.push({
     kind: 'dataset', group: e.source, id: e.id,
@@ -4503,6 +4584,9 @@ function sim3dSelect(id) {
   if (ep.kind === 'policy') {
     const m = ep.meta || {};
     meta.push(`체크포인트: ${m.checkpoint || '—'}`, `측정: ${m.measured_at || '—'}`, `큐브 궤적 포함 (qpos6 + cube_xyz)`);
+  } else if (ep.pcb) {
+    meta.push(`데이터셋: data/${ep.group}`, `closed-loop expert 시연 — 버튼 눌림 + LED 점등으로 성공 판정`,
+      `PCB 배치 사이드카 (x ${ep.pcb.x.toFixed(3)}, y ${ep.pcb.y.toFixed(3)}, yaw ${(ep.pcb.yaw_deg || 0).toFixed(1)}°)`);
   } else {
     meta.push(`데이터셋: data/${ep.group}`, `closed-loop expert 성공 시연 (lift ≥ 40mm)`,
       ep.cube ? `큐브 실좌표+회전 기록 (사이드카)` : `반투명 큐브 = 명목 위치(±2cm 랜덤, 좌표 미기록 구세대) — 관절 궤적은 실데이터`);
@@ -4553,8 +4637,10 @@ function renderSim3d() {
   // 소스 셀렉트: 측정 히스토리(정책 rollout, 시간순) + 데이터셋 그룹. 기본 = 최신 측정.
   const srcSel = document.getElementById('s3-source');
   srcSel.innerHTML = (SIM3D.groups || []).map(g => `<option value="${g.key}">${escapeHtml(g.label)}</option>`).join('');
-  const lastPolicy = (SIM3D.groups || []).filter(g => g.key.startsWith('policy-')).pop();
-  if (lastPolicy) srcSel.value = lastPolicy.key;
+  // 기본 선택 = 지금 진행 중인 트랙 (S1 시연). 없으면 최신 정책 rollout.
+  const defaultGroup = (SIM3D.groups || []).find(g => g.key === 'episodes_s1')
+    || (SIM3D.groups || []).find(g => g.key.startsWith('policy-') && g.latest);
+  if (defaultGroup) srcSel.value = defaultGroup.key;
 
   srcSel.addEventListener('change', sim3dFillEpisodeSelect);
   document.getElementById('s3-episode').addEventListener('change', e => sim3dSelect(e.target.value));
@@ -4630,6 +4716,23 @@ function renderResults() {
   const expert = (rm.expert || {}).force3 || 0.75;
   const gap = latest.success_rate != null ? Math.round((expert - latest.success_rate) * 100) : null;
 
+  // 단계별 성적표 요약 (12살 기준 — 숫자의 의미를 한 줄로)
+  const summaryEl = document.getElementById('results-summary');
+  if (summaryEl) {
+    const sr = latest.success_rate != null ? Math.round(latest.success_rate * 100) : null;
+    summaryEl.innerHTML = `
+      <div class="story-step done">
+        <span class="tag">1단계 · 물건 집기 — 졸업 ✓</span><br>
+        목표는 10번 중 9번 성공(90%)이었는데, 최종 시험에서 <b>${sr != null ? sr + '%' : '—'}</b>
+        (서로 다른 배치 40번 전부 성공)를 받았다. 아래 차트가 그 성장 기록.
+      </div>
+      <div class="story-step now">
+        <span class="tag">2단계 · 리셋버튼 — 학습 중</span><br>
+        시범 100번을 보고 배우는 중. 학습이 끝나면 <b>첫 시험 성적이 여기에</b> 추가된다.
+        목표: 10번 중 7번(70%) 이상, LED 점등으로 자동 채점.
+      </div>`;
+  }
+
   document.getElementById('results-kpis').innerHTML = `
     <div class="kpi"><div class="l">최신 성공률 (nominal·seed42)</div>
       <div class="n" style="color:${rateColor(latest.success_rate)}">${pct(latest.success_rate)}</div>
@@ -4637,12 +4740,14 @@ function renderResults() {
     <div class="kpi"><div class="l">4-seed 공정추정</div>
       <div class="n" style="color:${rateColor(rm.fair_estimate)}">${pct(rm.fair_estimate)}</div>
       <div class="d">seed 42/7/123/2026 평균 — 단일시드 비관편향 보정</div></div>
-    <div class="kpi"><div class="l">모방 격차 (expert 75% 대비)</div>
-      <div class="n">${gap == null ? '—' : gap + '%p'}</div>
-      <div class="d">closed-loop expert ${pct(expert)} → 정책 ${pct(latest.success_rate)}</div></div>
-    <div class="kpi"><div class="l">목표 (Phase 1 기준)</div>
-      <div class="n">${pct(rm.target)}</div>
-      <div class="d">현재 갭 ${latest.success_rate != null ? Math.round((rm.target - latest.success_rate) * 100) + '%p' : '—'} — DR 데이터 확장으로 접근 중</div></div>`;
+    <div class="kpi"><div class="l">선생님(expert) 대비</div>
+      <div class="n">${gap == null ? '—' : (gap <= 0 ? '+' + (-gap) + '%p 상회' : '-' + gap + '%p')}</div>
+      <div class="d">${gap != null && gap <= 0 ? 'AI 가 시범 프로그램(75%)보다 잘한다 — 한계 돌파' : `closed-loop expert ${pct(expert)} → 정책 ${pct(latest.success_rate)}`}</div></div>
+    <div class="kpi"><div class="l">1단계 목표 90%</div>
+      <div class="n">${latest.success_rate != null && latest.success_rate >= (rm.target || 0.9) ? '달성 ✓' : pct(rm.target)}</div>
+      <div class="d">${latest.success_rate != null && latest.success_rate >= (rm.target || 0.9)
+        ? '7/22 4-seed 전부 1.0 으로 결착 — 초과 달성'
+        : `현재 갭 ${latest.success_rate != null ? Math.round(((rm.target || 0.9) - latest.success_rate) * 100) + '%p' : '—'}`}</div></div>`;
 
   // 파이프라인 라이브 카드
   const le = live.last_epoch || {};
@@ -4652,7 +4757,7 @@ function renderResults() {
     <div class="r4-pipe">
       <span class="r4-stage ${live.stage === '학습중' ? 'on' : ''}">${escapeHtml(live.stage || '—')}</span>
       <span>타겟 데이터셋: <b>${escapeHtml(live.dataset || '—')}</b></span>
-      ${le.epoch != null ? `<span>epoch <b>${le.epoch + 1}/100</b> · loss <b>${(le.loss ?? 0).toFixed(4)}</b></span>` : ''}
+      ${le.epoch != null ? `<span>${(le.dataset || '').includes('_s1') ? 'S1 · ' : ''}epoch <b>${le.epoch + 1}</b> · loss <b>${(le.loss ?? 0).toFixed(4)}</b></span>` : ''}
       ${etaTxt ? `<span>${etaTxt}</span>` : ''}
       <span class="r4-hint">확인: ${escapeHtml(live.checked_at || '')}</span>
     </div>`;
@@ -4667,7 +4772,7 @@ function renderResults() {
       <div class="r4-bar-val">${pct(c.success_rate)}</div>
       ${dotGrid(c.results)}
     </div>`;
-  }).join('') + `<div class="r4-hint" style="margin-top:8px">기준선: closed-loop expert 75%(12V 실스펙) · 목표 90% · seed42 는 4-seed 분포의 비관적 끝단</div>`;
+  }).join('') + `<div class="r4-hint" style="margin-top:8px">기준선: closed-loop expert 75%(12V 실스펙) · 목표 90% · 아래 회색 항목은 6~7월 구모델 측정(성장 과정 기록)</div>`;
 
   // 히스토리
   const hist = rm.history || [];
