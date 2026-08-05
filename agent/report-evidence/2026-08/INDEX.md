@@ -11,3 +11,10 @@
 - Phase 2 W2 — **sim 레버 결착 후 hold + 우선순위 5종 회귀 재실행 PASS + 무결성 전수 감사**: `agent/research-log/2026-08-04.md`, `research/simulation/2026-08-04_phase2-w2-sim-lever-hold-integrity-audit.md` → 8월 보고서 [Sim2Real 안정성 / 재현성] 섹션.
   - 5종 재실행 PASS: 6dof 2501프레임 · camera 30프레임×2 · pick min_approach **0.3228327114m** 결정론 · joint_angle 최대오차 **0.0244°<1°** · collector 2/2 yield100% lift **42.6mm**(격리 루트 `/tmp`, 운영 무접촉).
   - 무결성: md5 **5207f67b189645de1bb26c124873b683** 불변(sr 1.0, ckpt `act_floor/epoch_0041`) · 마커 3자 정합 불변 · datasets 50ep/3350f 불변 · 학습 프로세스 없음.
+
+## 2026-08-05
+- Phase 3 W2 — **S1 합성 결착 + W3 ACT 학습 조기 착수(in-flight) + 우선순위 6종 회귀**: `agent/research-log/2026-08-05.md`, `research/simulation/2026-08-05_phase3-w2-s1-synth-hold-w3-enabler.md` → 8월 보고서 [ACT 학습 / Phase 3 PCB] 섹션.
+  - **W3 S1 ACT 학습 in-flight**(PID 65874, `--epochs 30`, dataset `episodes_s1` → ckpt `act_s1_sim`, **top+closeup 2카메라**): epoch0 완주 l1 **0.063**, epoch1 loss 1.36 정상 수렴 → W3 인에이블러(`COP_CAMERA_KEYS`/`COP_DATASET_REPO_ID`) 2카메라 학습 경험적 확증.
+  - **S1 데이터셋**: `episodes_s1` **100ep/7,231frame** · v3.0 · 30fps · top+closeup · LED latch 자동라벨.
+  - 6종 회귀 PASS: 6dof 2501프레임 · camera 30프레임×2 · pick min_approach **0.3228327114m** 결정론 · joint_angle 최대오차 **0.0244°<1°** · collector 2/2 yield100% lift 42.1mm · **sim_pcb_reset(S1 트윈) 4/4 PASS**.
+  - 무결성: 운영 `rollout_summary.json` md5 **5207f67b189645de1bb26c124873b683** 불변(7/22~8/04 동일, sr 1.0 act_floor/epoch_0041) · Phase 2 산출물 회귀/오염 0.
