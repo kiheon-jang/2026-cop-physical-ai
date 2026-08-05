@@ -3401,6 +3401,15 @@ function renderCockpitKPI() {
     </div>`;
 }
 
+/* 성공률 → 색. 스크립트 1(init)과 스크립트 3(성과 지표) 양쪽에서 쓰므로 여기서 정의.
+   블록 간 함수 hoisting 이 없어 스크립트 3 에 두면 init 중 ReferenceError 로 죽는다. */
+function rateColor(r) {
+  if (r == null) return 'var(--text-dim)';
+  if (r >= 0.9) return 'var(--hl-green, #22a06b)';
+  if (r >= 0.7) return 'var(--accent)';
+  return '#d97706';
+}
+
 function renderCockpitSpectrum() {
   const rm = D.rollout_metrics || {};
   const comps = (rm.comparisons || []).filter(c => c.success_rate != null &&
@@ -3733,6 +3742,14 @@ function initCounts() {
   updateBookmarkCount();
 }
 
+/* 라이브(서버) 모드 부트스트랩을 먼저 건다. 아래 placeholder 렌더가 무엇을 던지든
+   API fetch + WS 구독은 살아남아야 한다 — 실제로 renderHome 의 ReferenceError 하나로
+   사이트 전체가 빈칸이 된 사고가 있었다. refreshFromApi 가 전체를 다시 렌더한다. */
+if (IS_LIVE) {
+  refreshFromApi();
+  connectLiveSocket();
+}
+
 initCounts();
 mountIcons();
 renderProposals();
@@ -3746,11 +3763,6 @@ renderSamples();
 renderDecisions();
 renderHome();
 drawAllCharts();
-
-if (IS_LIVE) {
-  refreshFromApi();
-  connectLiveSocket();
-}
 /*__DOCS_VIEWER_JS__*/
 </script>
 <style>
@@ -4434,12 +4446,7 @@ function renderSim3d() {
 }
 
 /* ---------- 성과 지표 ---------- */
-function rateColor(r) {
-  if (r == null) return 'var(--text-dim)';
-  if (r >= 0.9) return 'var(--hl-green, #22a06b)';
-  if (r >= 0.7) return 'var(--accent)';
-  return '#d97706';
-}
+/* rateColor 는 renderCockpitSpectrum(스크립트 1)이 init 중 호출하므로 그쪽에 정의. */
 
 function dotGrid(results) {
   if (!results || !results.length) return '';
