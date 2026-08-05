@@ -660,7 +660,8 @@ uv pip install <패키지명>
     ② 버튼↔보드 접촉 배제 필요(원본 트윈은 버튼 하단이 보드에 눌러붙어 물리적으로 안 눌렸음 — 실물 버튼은 보드 구멍 관통 구조. **버튼 치수·스프링은 실기 원본 그대로**, 환경 난이도 불변)
     ③ 남는 실패 5% = 존 구석의 기하 도달불가 배치(press 자세가 팔 링크의 보드 2.5mm 관통을 요구 — 같은 SO-101 인 실기도 동일). pan 정렬→경유→단계 하강(매단계 IK 재계산)→재시도 3
   - [v] **8/5**: LED latch = 공짜 정답 라벨 자동 성공판정 — 수집기가 latch 성공 에피소드만 저장 (P1 계약과 동일)
-  - [ ] 100ep 합성 (존 다양화) — **8/5 in-flight** (seed 20260805, `data/episodes_s1`, `logs/s1_collect_100ep.log`). 2ep 스모크는 **로컬 LeRobotDataset 재로드 검증 통과**(v3.0·top+closeup 640×480·state/action 6·task 라벨); omen lerobot 0.6.1 로드 스모크는 실기 담당자 협업 잔여
+  - [v] **8/5**: 100ep 합성 완료 — `data/episodes_s1` **100ep/7,231frame** (시도 107, **yield 93%**, seed 20260805, 58MB). 전수 재로드 검증 통과: v3.0 · top+closeup 640×480 · state/action 6 · task "press the reset button". 실패 7건 = 기하 도달불가 배치(예측대로)
+  - [ ] omen lerobot 0.6.1 로드 스모크 — 실기 담당자 협업 (데이터셋 전달 경로 협의 포함, W4 핸드오프와 병합 가능)
 - W3 (8/19 ~ 8/25): ACT 학습 + 측정
   - [ ] ACT 학습 (obs = top+closeup+state6, 실기 train_config 하이퍼 참조: chunk 100, batch 8)
   - [ ] sim rollout 성공률 측정 (LED 판정 자동 채점, 4-seed 공정추정 프로토콜 재사용)
