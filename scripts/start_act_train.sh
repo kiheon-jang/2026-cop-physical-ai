@@ -79,9 +79,25 @@ export PYTORCH_ENABLE_MPS_FALLBACK=1
 
 cd "${ROOT}"
 
-nohup "${PY}" "${TRAIN_SCRIPT}" "${RESUME_ARG[@]+"${RESUME_ARG[@]}"}" "${FILTERED_ARGS[@]+"${FILTERED_ARGS[@]}"}" \
+# setsid(새 세션) 필수 — nohup 만으로는 부족하다.
+# 2026-08-05 규명: 12-run 연쇄 이상종료(~04:04 고정)의 원인은 ai.hermes.autoupdate
+# (launchd, 매일 04:00)가 업데이트 실패 → 롤백 → gateway 를 kickstart 로 재시작하면서
+# gateway 프로세스 그룹 전체에 SIGKILL 을 보내는 것. 이 스크립트가 hermes cron
+# (gateway 자식)에서 실행되면 nohup 학습 프로세스도 같은 그룹이라 동반 사살된다
+# (nohup 은 SIGHUP 만 무시, SIGKILL 은 못 막음). 새 세션 = 새 프로세스 그룹 → 생존.
+# macOS 에는 setsid CLI 가 없어 파이썬 wrapper(start_new_session)를 쓴다.
+nohup "${PY}" -c "
+import subprocess, sys
+p = subprocess.Popen(sys.argv[1:], start_new_session=True)
+print(p.pid, flush=True)
+" "${PY}" "${TRAIN_SCRIPT}" "${RESUME_ARG[@]+"${RESUME_ARG[@]}"}" "${FILTERED_ARGS[@]+"${FILTERED_ARGS[@]}"}" \
   >> "${LOG_FILE}" 2>&1 &
 
-NEW_PID=$!
+# wrapper 가 stdout 첫 줄에 실제 학습 pid 를 출력한다 — 잠깐 대기 후 회수.
+sleep 2
+NEW_PID="$(tail -n 5 "${LOG_FILE}" | grep -E '^[0-9]+$' | tail -n 1 || true)"
+if [[ -z "${NEW_PID}" ]]; then
+  NEW_PID=$!   # 폴백: wrapper pid (학습 pid 회수 실패 시에도 파이프라인은 계속)
+fi
 echo "${NEW_PID}" > "${PID_FILE}"
 echo "[start_act_train] 시작 pid=${NEW_PID} log=${LOG_FILE} args=$*"

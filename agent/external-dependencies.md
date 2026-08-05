@@ -62,6 +62,13 @@
     `COP_EPOCHS=42`(창 안 완주)로 우회했으나 **full-epoch(100) 공정비교 복원엔 04:04 killer 규명·제거 필요**.
     → `log show --predicate 'eventMessage contains "kill"'` / `launchctl list` / `ps` 권한 필요(macOS 주기
     유지보수·백업·스케줄 프로세스 후보). 현재 sandbox 차단.
+    - **✅ 2026-08-05 규명 완료 — 범인 = `ai.hermes.autoupdate`(launchd, 매일 04:00)**:
+      업데이트 시도(요즘 매일 실패→롤백) 후 gateway 를 kickstart 재시작하면서 **gateway
+      프로세스 그룹 전체 SIGKILL**. 야간 크론(gateway 자식)이 nohup 으로 띄운 학습이 같은
+      그룹이라 동반 사살(nohup 은 SIGHUP 만 무시). 증거: 백업 zip `pre-update-*-0400xx`,
+      gateway.log 04:03:52 재시작(8/5), 사망 시각 ~04:04 일치. **수정**: `start_act_train.sh`
+      가 학습을 `start_new_session`(새 세션 = 새 프로세스 그룹)으로 분리 — kickstart 가
+      gateway 그룹을 죽여도 학습 생존. 확증 실험 = 8/5 밤 S1 학습(30ep, 04:04 관통) 진행 중.
 
 ---
 

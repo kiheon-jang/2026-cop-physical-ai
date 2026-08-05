@@ -265,7 +265,7 @@ uv pip install <패키지명>
     (실기 담당자, soarm_lerobot)에서 진행 중이므로 경로 = Orin SSH 가 아니라 **omen 협업**.
     단, 실기 트랙 작업이 pick&place 가 아닌 S1 버튼누르기라 이 항목의 실효 검증은
     **Phase 3 W4 핸드오프로 이관**. Orin 온디바이스 배포는 시연 단계 항목으로 보류
-  - [ ] **full-epoch(100) apples-to-apples 공정비교** — 외부 의존 대기(04:04 벽시계 killer 진단권한 에스컬레이션). 현 결론은 42epoch 저학습 기준이라 방향은 더 강하지만 엄밀 비교는 미완. **Phase 3 착수로 우선순위 하향(보류)**
+  - [ ] **full-epoch(100) apples-to-apples 공정비교** — 현 결론은 42epoch 저학습 기준이라 방향은 더 강하지만 엄밀 비교는 미완. **Phase 3 착수로 우선순위 하향(보류)**. *8/5 갱신: 04:04 killer 원인 규명 완료(`ai.hermes.autoupdate` 04:00 → gateway kickstart 프로세스 그룹 SIGKILL — external-dependencies.md 참조), `start_act_train.sh` 세션 분리 fix 적용 → 이제 마음만 먹으면 full-epoch 가능*
   - 🔄 **2026-07-08 — 배치 다양성(floor) 사이클 ACT 재학습 착수(in-flight)**: 드라이버가 W1 타겟
     `episodes_cl_dr` 을 STAGE=완료/유지(50ep·0.7)로 닫고 **예약 사이클 `.next=episodes_floor`(바닥/받침대
     없는 파지 = 배치 커버리지↑)로 전환** → `episodes_floor`(50ep/3350f, 수집 yield 98%, 배치 x0.11~0.15)
