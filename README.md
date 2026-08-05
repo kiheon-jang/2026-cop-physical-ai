@@ -7,16 +7,21 @@
 
 ## 📌 프로젝트 목표
 
+> 상세 주차별 계획: [research/simulation/PHASE_ROADMAP.md](research/simulation/PHASE_ROADMAP.md)
+
 | 단계 | 목표 | 상태 |
 |------|------|------|
-| **Phase 1: Foundation** | SO-ARM101 조립 + LeRobot 환경 + 텔레오퍼레이션 | ✅ 완료 |
-| **Phase 2: Intelligence** | 데이터 수집 → ACT/Diffusion Policy 모방학습 → 인퍼런스 | 🔄 진행중 |
-| **Phase 3: Simulation** | Isaac Sim 강화학습 → Sim2Real | ⏳ 예정 |
-| **Phase 4: Expansion** | LeKiwi / XLeRobot 모바일 매니퓰레이터 확장 | ⏳ 예정 |
+| **Phase 0 (5월)** | MuJoCo 시뮬 환경 셋업 + 자동 데이터셋 | ✅ 완료 |
+| **Phase 1 (6월)** | 시뮬 데이터 합성 + ACT 사전학습 파이프라인 | ✅ 92% (Orin 배포만 시연 단계로 보류) |
+| **Phase 2 (7월)** | Sim2Real 검증 — sim pick&place **4-seed 1.0 결착** | 🔄 71% (실기 검증은 Phase 3 W4 이관) |
+| **Phase 3 (8월)** | **S1 리셋버튼 시뮬 (실기 트랙 정렬)** — 합성 데이터 + LED 자동판정 | 🔄 진행중 |
+| **Phase 4 (9월)** | RS232 결선 + 1차 기능 완성 | ⏳ 예정 |
+
+**투 트랙 체제 (2026-08-05~)**: 시뮬 트랙(이 레포, Mac) ↔ **실기 트랙**([deois/soarm_lerobot](https://github.com/deois/soarm_lerobot), omen · RTX 2080 Ti) — 실기가 S1 리셋버튼을 실물로 진행, 시뮬이 합성 데이터·성공판정 검증으로 지원.
 
 ### 최종 학습 목표 태스크
-- 🎯 **1단계**: 물체 이동 (Pick & Place)
-- 🎯 **2단계**: PCB 제품의 리셋 & DIP S/W 조정
+- 🎯 **1단계**: 물체 이동 (Pick & Place) — **시뮬 결착 (4-seed 1.0)**
+- 🎯 **2단계**: PCB 제품의 리셋 & DIP S/W 조정 — **S1 리셋버튼 진행 중 (시뮬 + 실기)**
 - 🎯 **3단계**: PCB의 RS232 포트에 HHT(Hand Held Terminal) 꽂기
 
 ---

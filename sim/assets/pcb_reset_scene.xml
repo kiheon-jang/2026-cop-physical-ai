@@ -1,0 +1,57 @@
+<!-- sim/assets/pcb_reset_scene.xml — Phase 3 W1: S1 리셋버튼 트윈 (실기 정렬)
+
+     실기 트랙(soarm_lerobot) sim/assets/pcb_reset_scene.xml 이식 + 정합:
+       - 리셋 버튼에 눌림 메커니즘 추가 (슬라이드 조인트 + 스프링 복원) — 원본은 접촉 감지만 가능
+       - top / closeup 고정 카메라 2대 (실기 C920 광각 / Realtek 근접 배치 근사, 640×480@30 렌더)
+       - PCB 는 15×15cm 존 안에서 배치 무작위화 (samples/training/sim_pcb_reset.py 의 reset 훅)
+
+     경로: 팔 MJCF 는 SO-ARM100(중첩 레포)에서 include. compiler meshdir="assets" 는
+     메인 XML(이 파일) 기준으로 풀리므로 옆의 assets 심링크가 mesh 를 해결한다
+     (실기 레포와 동일한 방식). SO-ARM100 체크아웃 없이는 로드 불가.
+-->
+<mujoco model="pcb_reset_twin">
+  <include file="../../SO-ARM100/Simulation/SO101/so101_new_calib.xml"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <global azimuth="160" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge"
+             rgb1="0.29 0.30 0.32" rgb2="0.24 0.25 0.27" markrgb="0.8 0.8 0.8"
+             width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true"
+              texrepeat="5 5" reflectance="0.1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+    <!-- closeup 쪽 보조광 — 단일 직사광이면 보드가 팔 그림자에 묻힌다 (육안 검증 2026-08-05) -->
+    <light pos="0.5 -0.4 0.8" dir="-0.4 0.5 -1" diffuse="0.35 0.35 0.35"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
+    <!-- 실기 카메라 배치 근사 (2026-08-05, W1 — 실측 수신 시 조정):
+         top     = C920 광각 전경: 작업존 위 수직 하방, PCB 존 전체 + 팔 베이스가 잡히는 높이
+         closeup = Realtek 근접: 존 측면에서 PCB 존 중심(0.225, 0, 0.03)을 향함 -->
+    <camera name="top" pos="0.225 0 0.60" xyaxes="0 -1 0 1 0 0" fovy="52"/>
+    <camera name="closeup" pos="0.38 -0.16 0.12" zaxis="0.155 -0.16 0.09" fovy="48"/>
+
+    <!-- PCB: 실기 트윈과 동일 치수. 위치는 reset 훅이 15×15cm 존 안에서 무작위화 -->
+    <body name="pcb" pos="0.225 0.0 0.02">
+      <geom name="pcb_board" type="box" size="0.075 0.075 0.005" rgba="0.1 0.4 0.1 1"/>
+      <!-- 리셋 버튼: 슬라이드 조인트(z, 3mm 트래블) + 스프링 복원.
+           눌림 판정 = 조인트 변위 임계(sim_pcb_reset.PRESS_THRESHOLD) — 접촉이 아니라 실제 눌림. -->
+      <body name="reset_button" pos="0.0 0.0 0.008">
+        <joint name="reset_button_slide" type="slide" axis="0 0 1" range="-0.003 0"
+               stiffness="150" springref="0" damping="0.5"/>
+        <geom name="reset_button_geom" type="cylinder" size="0.004 0.003" rgba="0.6 0.1 0.1 1"
+              mass="0.002"/>
+      </body>
+      <!-- LED: 성공 표시 geom — 버튼 눌림 latch 시 초록 점등 (sim_pcb_reset 이 rgba 갱신).
+           실기 P1(녹색 LED 판정)과 같은 계약: 시뮬에선 latch 가 공짜 정답 라벨. -->
+      <geom name="led_geom" type="box" pos="0.03 0.0 0.006" size="0.004 0.004 0.002"
+            rgba="0.2 0.2 0.2 1"/>
+    </body>
+  </worldbody>
+</mujoco>

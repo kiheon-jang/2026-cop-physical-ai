@@ -1576,7 +1576,7 @@
     <!-- VIDEOS (R3-3 + MEDIA-3 + REORG) -->
     <div class="view hidden" id="view-videos">
       <div class="home-hero">
-        <h1>시각자료 · 진척 현황</h1>
+        <h1>시각자료 · 진척 현황 <span style="font-size:13px;font-weight:600;color:var(--text-dim)">(1단계 트랙 · Pick&amp;Place)</span></h1>
         <div class="sub" id="videos-sub">학습 진척 · 시뮬 동작 · 학습 입력 · 실제 하드웨어 · 학습 데이터셋. 진척 관점에서 정리.</div>
       </div>
 
@@ -1608,7 +1608,7 @@
     <!-- ====== R4: 3D 리플레이 ====== -->
     <div class="view hidden" id="view-sim3d">
       <div class="view-head">
-        <h2>3D 리플레이</h2>
+        <h2>3D 리플레이 <span style="font-size:12px;font-weight:600;color:var(--text-dim)">(1단계 트랙 · Pick&amp;Place)</span></h2>
         <div class="sub">MuJoCo 학습 씬과 동일한 1:1 모델로 수집 에피소드·정책 rollout 을 브라우저에서 재생.
           드래그 = 회전 · 휠 = 줌. 데이터는 야간 파이프라인이 측정할 때마다 자동 갱신.</div>
       </div>
@@ -1643,8 +1643,9 @@
     <!-- ====== R4: 성과 지표 ====== -->
     <div class="view hidden" id="view-results">
       <div class="view-head">
-        <h2>성과 지표 — Sim Pick&amp;Place</h2>
-        <div class="sub">rollout 측정 자동 축적 (야간 파이프라인). 성공 기준 = 큐브 +40mm 리프트, 10 rollout/측정.</div>
+        <h2>성과 지표 — Sim Pick&amp;Place <span style="font-size:12px;font-weight:600;color:var(--text-dim)">(1단계 트랙 · Phase 0~2 결착)</span></h2>
+        <div class="sub">rollout 측정 자동 축적 (야간 파이프라인). 성공 기준 = 큐브 +40mm 리프트, 10 rollout/측정.
+          2단계 S1 리셋버튼 지표는 Phase 3 W3 측정부터 별도 축적.</div>
       </div>
       <div class="kpi-row r4-kpis" id="results-kpis"></div>
       <div class="r4-card" id="results-pipeline"></div>
@@ -3309,12 +3310,13 @@ function renderCockpitGauge() {
     </svg>
     <div class="ck-gauge-center">
       <div class="ck-gauge-num"><span id="ck-gauge-val">${Math.round(sr*100)}</span><span class="u">%</span></div>
-      <div class="ck-gauge-cap">시뮬 Pick 성공률</div>
+      <div class="ck-gauge-cap">시뮬 Pick 성공률 (1단계 · 결착)</div>
     </div>`;
   const srP = Math.round(sr * 100), tgP = Math.round(target * 100);
   document.getElementById('ck-gauge').innerHTML =
-    `<div class="ck-eyebrow">CoP Physical AI · 시뮬레이션 성과</div>
-     <div class="ck-goal">SO-ARM101 로봇팔이 MuJoCo 시뮬에서 스스로 Pick&amp;Place를 배운다</div>
+    `<div class="ck-eyebrow">CoP Physical AI · 1단계 Pick&amp;Place — 결착 (Phase 0~2)</div>
+     <div class="ck-goal">SO-ARM101 로봇팔이 MuJoCo 시뮬에서 스스로 Pick&amp;Place를 배웠다 —
+       4-seed 전부 1.0 으로 결착. 지금은 <b>2단계 S1 리셋버튼</b>(Phase 3, 실기 정렬) 진행 중.</div>
      <div class="ck-gauge-wrap">
        <div class="ck-gauge-svg">${svg}</div>
        <div class="ck-journey">
@@ -3416,9 +3418,9 @@ function renderCockpitKPI() {
         : escapeHtml(kpi.current_phase_business || activePhase.business_label || '')}</div>
     </div>
     <div class="kpi">
-      <div class="l">무인 파이프라인 · 가동중</div>
+      <div class="l">무인 파이프라인 (1단계 트랙)</div>
       <div class="ck-miniloop">${loop}</div>
-      <div class="d">${escapeHtml(stage)}${ep ? ' · ' + ep : ''}</div>
+      <div class="d">${escapeHtml(stage)}${ep ? ' · ' + ep : ''} · S1 트랙 전환 준비</div>
     </div>
     <div class="kpi is-accent">
       <div class="l">공정추정 성공률</div>
@@ -3503,10 +3505,12 @@ function renderScheduleGap() {
 
   const adv = kpi.advanced_phase_label || kpi.current_phase_label || '-';
   const advPct = kpi.advanced_phase_progress != null ? ` (${Math.round(kpi.advanced_phase_progress * 100)}%)` : '';
+  const delayed = lag != null && lag > 0;
   const lagLine = kpi.calendar_phase_label
-    ? `달력상 ${escapeHtml(kpi.calendar_month || '')} 은 <b>${escapeHtml(kpi.calendar_phase_label)}</b> 구간.
-       실제 진척은 <b>${escapeHtml(adv)}${advPct}</b> 에 머물러 있다` +
-      (lag != null && lag > 0 ? ` — <span class="lag">${lag}단계 지연</span>.` : ' — 온스케줄.')
+    ? (delayed
+        ? `달력상 ${escapeHtml(kpi.calendar_month || '')} 은 <b>${escapeHtml(kpi.calendar_phase_label)}</b> 구간.
+           실제 진척은 <b>${escapeHtml(adv)}${advPct}</b> 에 머물러 있다 — <span class="lag">${lag}단계 지연</span>.`
+        : `달력상 ${escapeHtml(kpi.calendar_month || '')} 구간인 <b>${escapeHtml(adv)}${advPct}</b> 를 진행 중 — 온스케줄.`)
     : '';
 
   el.innerHTML = `
@@ -3528,7 +3532,7 @@ function renderScheduleGap() {
       <span>${escapeHtml(kpi.completion_date || '')} 완성</span>
     </div>
     ${lagLine ? `<div class="note">${lagLine}
-      ${why ? `<span class="why">막힌 지점: ${escapeHtml(why)}</span>` : ''}</div>` : ''}`;
+      ${delayed && why ? `<span class="why">잔여 항목 (보류·이관 포함): ${escapeHtml(why)}</span>` : ''}</div>` : ''}`;
 }
 
 /* 성공률 → 색. 스크립트 1(init)과 스크립트 3(성과 지표) 양쪽에서 쓰므로 여기서 정의.

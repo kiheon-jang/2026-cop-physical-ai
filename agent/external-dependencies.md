@@ -35,11 +35,10 @@
 
 ### 우선순위 2 — 의사결정 대기
 
-- [ ] [장기헌] **Orin Nano SSH 접속 정보 제공**
-  - 마감: 2026-06-22 (Phase 1 W4 모델 배포 전)
-  - 필요 정보: IP 또는 hostname / SSH 유저명 / Mac Mini와 동일 네트워크 여부
-  - 제공 시: `~/.ssh/config` + `scripts/deploy_to_orin.sh` 즉시 생성
-  - 미제공 시: Phase 1 W4 배포 단계 건너뜀, 모델은 git에만 push
+- [v] [장기헌] **Orin Nano SSH 접속 정보 제공** — 2026-08-05 전제 무효로 해소
+  - 실기 트랙이 omen(실기 담당자, deois/soarm_lerobot)에서 진행되어 실기 추론 경로가
+    Orin SSH → omen 협업으로 바뀜. Orin 온디바이스 배포는 10월 시연 항목으로 보류.
+  - (원 요구: 마감 6/22, IP/유저명/네트워크 — 44일 미수신 상태였음)
 
 - [ ] [CoP 위원회] **Phase 3/4 차년도 추진 여부 결정**
   - 마감: 2026-09-30

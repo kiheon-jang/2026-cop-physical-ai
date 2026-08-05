@@ -212,7 +212,7 @@ PHASES = [
     ]),
     ("Phase 1", "6월 시뮬 데이터 + ACT 사전학습", datetime.date(2026, 6, 1), datetime.date(2026, 6, 30), []),
     ("Phase 2", "7월 Sim2Real 검증", datetime.date(2026, 7, 1), datetime.date(2026, 7, 31), []),
-    ("Phase 3", "8월 PCB 조정 시뮬 학습", datetime.date(2026, 8, 1), datetime.date(2026, 8, 31), []),
+    ("Phase 3", "8월 S1 리셋버튼 시뮬 (실기 정렬)", datetime.date(2026, 8, 1), datetime.date(2026, 8, 31), []),
     ("Phase 4", "9월 RS232 결선 시뮬 학습", datetime.date(2026, 9, 1), datetime.date(2026, 9, 30), []),
     ("Phase 5", "10월 통합 시연", datetime.date(2026, 10, 1), datetime.date(2026, 10, 31), []),
 ]

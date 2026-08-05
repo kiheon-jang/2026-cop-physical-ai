@@ -83,7 +83,9 @@ PHASE_META: list[dict] = [
 # 프로젝트 비전 — 대시보드 히어로에 표시
 PROJECT_VISION = {
     "title": "CoP Physical AI",
-    "subtitle": "SO-ARM101 로봇팔 + MuJoCo 시뮬 기반 PCB 픽앤플레이스 모방학습 (Embodied AI 내재화)",
+    # 2026-08-05: Phase 3 재정의(실기 정렬)에 맞춰 갱신 — 1단계 pick&place 는 Phase 2 에서
+    # 결착(4-seed 1.0), 8월부터는 실기 트랙(omen)과 동일 작업인 S1 리셋버튼.
+    "subtitle": "SO-ARM101 로봇팔 + MuJoCo 시뮬 모방학습 — 1단계 Pick&Place 결착, 2단계 S1 리셋버튼 (실기 트랙 정렬)",
     "subtitle_secondary": "AI 자동화 운영 — 매일 23시 시뮬 빌드 · 23시 30분 학습 테스트 · 07시 일일 보고 · 일요 주간 정리",
     "demo_date": "2026-10-31",
     "completion_date": "2026-09-30",  # 작업 완료 기준 (D-day 표시)
@@ -91,10 +93,10 @@ PROJECT_VISION = {
     "phase_start_date": "2026-05-01",  # phase 진척률 분모 시작 (4월 = 사전학습 외부)
     "targets": [
         {
-            "label": "PCB 픽앤플레이스",
-            "metric": "성공률",
+            "label": "S1 — PCB 리셋버튼 누르기",
+            "metric": "시뮬 성공률",
             "target": "70%",
-            "context": "Phase 3 (8월) 평가 · 정비현장 자동화 가능성 입증",
+            "context": "Phase 3 (8월) 평가 · LED 자동판정 · 실기(omen) 트랙과 동일 작업",
             "icon": "wrench",
         },
         {

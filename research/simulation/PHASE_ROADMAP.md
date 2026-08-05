@@ -649,11 +649,11 @@ uv pip install <패키지명>
 > `"press the reset button"` · LeRobot v3 포맷(omen lerobot 0.6.1 로드 가능 확인 필수) ·
 > PCB 15×15cm 존 배치 다양화(7/22 배치 커버리지 실증 교훈 그대로).
 
-- W1 (8/5 ~ 8/11): 실기 트윈 씬 정합
-  - [ ] 실기 `pcb_reset_scene.xml` 기반 씬 이식 — 우리 SO-ARM100 로컬 자산으로 로드 스모크 (2026-08-05 통과: geom 33, pcb_board/reset_button/led 인식)
-  - [ ] 리셋 버튼 눌림 메커니즘 (슬라이드 조인트 + 스프링 복원 + 눌림 임계) — 현 트윈은 접촉 latch 뿐
-  - [ ] `top`/`closeup` 2 카메라 640×480 실기 배치 근사 (현 씬은 overhead 1대)
-  - [ ] PCB 15×15cm 존 배치 무작위화 reset 훅
+- W1 (8/5 ~ 8/11): 실기 트윈 씬 정합 — **2026-08-05 완료** (`sim/assets/pcb_reset_scene.xml` + `samples/training/sim_pcb_reset.py`, 자가검증 4/4 PASS)
+  - [v] **8/5**: 실기 `pcb_reset_scene.xml` 기반 씬 이식 — 메인 레포 `sim/assets/`(SO-ARM100 중첩 레포 밖, 실기 레포와 동일한 assets 심링크 방식). 로드 스모크: 팔 6축 + pcb_board/reset_button/led
+  - [v] **8/5**: 리셋 버튼 눌림 메커니즘 — 슬라이드 조인트(z, 3mm) + 스프링 복원(stiffness 150) + 변위 임계(-1.5mm). 자가검증: 눌림 latch → 스프링 복원 후에도 latch 유지, LED rgba 점등 반영
+  - [v] **8/5**: `top`/`closeup` 2 카메라 640×480 실기 배치 근사 — top = 존 수직 상방(홈 자세에서 PCB 전체+팔 베이스, 실기 C920 뷰 서술과 일치 육안 검증) / closeup = 존 측면 근접(버튼·LED·그리퍼 접근영역, 보조광 추가로 그림자 해소). 홈 자세 `HOME_QPOS` 도입(팔이 top 뷰를 가리던 문제 해소)
+  - [v] **8/5**: PCB 15×15cm 존 배치 무작위화 reset 훅 — x(0.15~0.30)×y(±0.075)+yaw ±10°, seed 결정론·존 경계 50회 검증
 - W2 (8/12 ~ 8/18): expert + 합성 데이터
   - [ ] closed-loop 버튼누르기 expert (Phase 1 grasp expert 자산 이식 — IK 접근 + 누름 + LED 확인)
   - [ ] LED latch = 공짜 정답 라벨로 에피소드 자동 성공판정 (P1 시뮬 검증 겸용)
