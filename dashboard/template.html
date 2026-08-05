@@ -243,6 +243,11 @@
     background: var(--text); border-radius: 1px; box-shadow: 0 0 0 3px var(--bg-sub); }
   .vh-progress .scale { display: flex; justify-content: space-between; margin-top: 6px;
     font-size: 9.5px; color: var(--text-dim); font-family: ui-monospace, monospace; letter-spacing: .4px; }
+  .vh-progress .note { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+    font-size: 12px; line-height: 1.6; color: var(--text-sub); }
+  .vh-progress .note b { color: var(--text); font-weight: 700; }
+  .vh-progress .note .lag { color: var(--action); font-weight: 800; }
+  .vh-progress .note .why { display: block; margin-top: 4px; color: var(--text-dim); font-size: 11.5px; }
 
   /* 핵심 목표 — hero 와 별도 카드 영역 */
   .targets-section { margin-bottom: 20px; }
@@ -1129,6 +1134,9 @@
       </div>
 
       <div class="kpi-row kpi-row-4" id="kpi-row"></div>
+
+      <!-- 일정(달력) 대비 실제 진척 — 어긋난 만큼이 지연이다 -->
+      <div class="vh-progress" id="schedule-gap"></div>
 
       <!-- 성공률 스펙트럼 (seed 분포 + 공정추정 + 목표) -->
       <div id="ck-spectrum"></div>
@@ -3377,6 +3385,9 @@ function renderCockpitKPI() {
     return i < steps.length - 1 ? node + `<div class="ck-ml"><i></i></div>` : node;
   }).join('');
   const ep = live.last_epoch ? `epoch ${live.last_epoch.epoch + 1}/100` : '';
+  // 달력 phase 와 실제 phase 가 몇 칸 벌어졌는지 (양수 = 지연)
+  const lag = kpi.schedule_lag_phases;
+  const lagTxt = (lag != null && lag > 0) ? `${lag}단계 지연` : '';
 
   document.getElementById('kpi-row').innerHTML = `
     <div class="kpi">
@@ -3385,9 +3396,11 @@ function renderCockpitKPI() {
       <div class="d">${escapeHtml(kpi.completion_date || v.completion_date || '2026-09-30')} 목표</div>
     </div>
     <div class="kpi">
-      <div class="l">현재 단계</div>
+      <div class="l">현재 단계 · 달력 대비</div>
       <div class="n" style="font-size:20px;">${escapeHtml(activePhase.name || '-')} · ${apPct}%</div>
-      <div class="d">${escapeHtml(kpi.current_phase_business || activePhase.business_label || '')}</div>
+      <div class="d">${kpi.calendar_phase_label
+        ? `달력상 ${escapeHtml(kpi.calendar_phase_label)}` + (lagTxt ? ` · <b style="color:var(--action)">${lagTxt}</b>` : ' · 온스케줄')
+        : escapeHtml(kpi.current_phase_business || activePhase.business_label || '')}</div>
     </div>
     <div class="kpi">
       <div class="l">무인 파이프라인 · 가동중</div>
@@ -3399,6 +3412,50 @@ function renderCockpitKPI() {
       <div class="n">${((D.rollout_metrics||{}).fair_estimate != null ? ((D.rollout_metrics.fair_estimate*100).toFixed(1)+'%') : '—')}</div>
       <div class="d">4-seed pooled · 목표 ${Math.round(((D.rollout_metrics||{}).target||0.9)*100)}%</div>
     </div>`;
+}
+
+/* 일정(달력) 대비 실제 진척 — "날짜는 여기까지 왔는데 진척은 저기서 멈췄다".
+   막대 = 실제 진척률, 세로 눈금 = 오늘까지의 시간 경과율. 벌어진 폭이 곧 지연. */
+function renderScheduleGap() {
+  const el = document.getElementById('schedule-gap');
+  if (!el) return;
+  const kpi = D.business_kpi || {};
+  const time = kpi.time_elapsed, prog = kpi.target_progress;
+  if (time == null || prog == null) { el.style.display = 'none'; return; }
+  el.style.display = '';
+
+  const gap = (kpi.progress_vs_time_gap != null ? kpi.progress_vs_time_gap : prog - time) * 100;
+  const gapCls = gap < -5 ? 'gap-warn' : 'gap-ok';
+  const gapTxt = (gap >= 0 ? '+' : '') + gap.toFixed(0) + '%p';
+  const lag = kpi.schedule_lag_phases;
+  const why = (kpi.next_actions || [])[0] || '';
+
+  const lagLine = kpi.calendar_phase_label
+    ? `달력상 ${escapeHtml(kpi.calendar_month || '')} 은 <b>${escapeHtml(kpi.calendar_phase_label)}</b> 구간.
+       실제 진척은 <b>${escapeHtml(kpi.current_phase_label || '-')}</b> 에 머물러 있다` +
+      (lag != null && lag > 0 ? ` — <span class="lag">${lag}단계 지연</span>.` : ' — 온스케줄.')
+    : '';
+
+  el.innerHTML = `
+    <div class="top">
+      <span class="l">${icon('activity')} 일정 대비 진척</span>
+      <span class="r">
+        <span>시간 경과<b>${Math.round(time * 100)}%</b></span>
+        <span>실제 진척<b>${Math.round(prog * 100)}%</b></span>
+        <span class="${gapCls}">격차<b>${gapTxt}</b></span>
+      </span>
+    </div>
+    <div class="bar">
+      <div class="fill" style="width:${Math.max(0, Math.min(100, prog * 100))}%"></div>
+      <div class="time-mark" style="left:${Math.max(0, Math.min(100, time * 100))}%"></div>
+    </div>
+    <div class="scale">
+      <span>${escapeHtml(kpi.phase_start_date || '')} 착수</span>
+      <span>오늘 · ${kpi.phase_elapsed_days != null ? kpi.phase_elapsed_days + '일 경과' : ''}</span>
+      <span>${escapeHtml(kpi.completion_date || '')} 완성</span>
+    </div>
+    ${lagLine ? `<div class="note">${lagLine}
+      ${why ? `<span class="why">막힌 지점: ${escapeHtml(why)}</span>` : ''}</div>` : ''}`;
 }
 
 /* 성공률 → 색. 스크립트 1(init)과 스크립트 3(성과 지표) 양쪽에서 쓰므로 여기서 정의.
@@ -3453,6 +3510,7 @@ function renderHome() {
   renderCockpitGauge();
   renderCockpitPoster();
   renderCockpitKPI();
+  renderScheduleGap();
   renderCockpitSpectrum();
 
   // 핵심 목표 카드 (유지)

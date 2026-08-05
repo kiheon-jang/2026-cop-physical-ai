@@ -255,6 +255,20 @@ def get_phase_progress(today):
     return {"title": title, "count": count, "percent": pct, "milestone": next_milestone}
 
 
+def read_dashboard_kpi():
+    """dashboard/data.json 의 business_kpi — PHASE_ROADMAP.md 체크박스 기준 '실제 진척'.
+
+    get_phase_progress() 는 달력 기준(구간 내 경과일)이라 진척률이 아니다. 둘을 나란히
+    보여줘야 "날짜는 여기까지 왔는데 진척은 저기서 멈췄다" 가 읽힌다. 계산은 build.py 단일
+    출처를 그대로 쓴다(중복 구현 금지). data.json 이 없거나 깨지면 빈 dict → 표에서 생략.
+    """
+    try:
+        data = json.loads((REPO_ROOT / "dashboard" / "data.json").read_text(encoding="utf-8"))
+        return data.get("business_kpi", {}) or {}
+    except (OSError, ValueError):
+        return {}
+
+
 # =============================================================================
 # 🆕 오늘의 한 줄 — Gemini API로 비전공자 친화 설명 자동 생성
 # =============================================================================
@@ -878,15 +892,30 @@ def update_readme_status(phase_progress, commits, header):
     recent_work = commits[0]["msg"] if commits else "작업 기록 없음"
     recent_work = recent_work[:60]
 
+    # 달력 기준 phase 만 쓰면 "8월이니 Phase 3" 으로 읽혀 지연이 감춰진다 → 실제 진척 병기.
+    kpi = read_dashboard_kpi()
+    actual_row = ""
+    if kpi.get("current_phase_label"):
+        lag = kpi.get("schedule_lag_phases")
+        bits = [kpi["current_phase_label"]]
+        if kpi.get("target_progress") is not None:
+            bits.append(f"진척 {round(kpi['target_progress'] * 100)}%")
+        if kpi.get("time_elapsed") is not None:
+            bits.append(f"시간 경과 {round(kpi['time_elapsed'] * 100)}%")
+        if lag:
+            bits.append(f"**{lag}단계 지연**")
+        actual_row = "| **실제 진척** | " + " · ".join(bits) + " |\n"
+
     new_section = f"""{start_marker}
 ## 📊 시뮬레이션 트랙 현황
 
 > 매일 07:00 자동 업데이트 (generate_daily_report.py)
+> **현재 Phase** = 달력 기준 구간 · **실제 진척** = PHASE_ROADMAP.md 체크박스 기준
 
 | 항목 | 내용 |
 |------|------|
-| **현재 Phase** | {phase_title} |
-| **마지막 업데이트** | {today_str} |
+| **현재 Phase (달력)** | {phase_title} |
+{actual_row}| **마지막 업데이트** | {today_str} |
 | **다음 마일스톤** | {milestone} |
 | **최근 작업** | {recent_work} |
 {end_marker}"""

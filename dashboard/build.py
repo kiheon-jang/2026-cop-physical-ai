@@ -616,6 +616,15 @@ def build_business_kpi(phases: list[dict]) -> dict:
 
     # 현재 진행 중 phase + 다음 미완료 항목 3개
     current = next((p for p in phases if p.get("status") == "진행"), None)
+
+    # 달력 기준 phase(오늘 월) vs 실제 진행 phase. 둘이 어긋난 정도가 곧 일정 지연이다.
+    # "날짜는 8월인데 진척은 6월 것에서 멈췄다" 를 한 화면에 같이 보여주기 위한 필드.
+    real_phases = [p for p in phases if not p.get("is_prep")]
+    order = [p.get("id") for p in real_phases]
+    calendar_phase = next((p for p in real_phases if p.get("month") == today.strftime("%Y-%m")), None)
+    lag = None
+    if calendar_phase and current and calendar_phase.get("id") in order and current.get("id") in order:
+        lag = order.index(calendar_phase["id"]) - order.index(current["id"])
     next_actions: list[str] = []
     if current:
         for w in current.get("weeks", []):
@@ -638,6 +647,11 @@ def build_business_kpi(phases: list[dict]) -> dict:
         "current_phase_id": current.get("id") if current else "",
         "current_phase_label": current.get("name") if current else "",
         "current_phase_business": current.get("business_label") if current else "",
+        "calendar_phase_id": calendar_phase.get("id") if calendar_phase else "",
+        "calendar_phase_label": calendar_phase.get("name") if calendar_phase else "",
+        "calendar_phase_business": calendar_phase.get("business_label") if calendar_phase else "",
+        "calendar_month": today.strftime("%Y-%m"),
+        "schedule_lag_phases": lag,  # 달력 phase − 실제 phase. 0=온스케줄, 2=2단계 지연
         "next_actions": next_actions,
         # 진척 vs 일정 비교: 시간 X% 지났는데 목표 Y% 달성 → 격차 표시
         "progress_vs_time_gap": round(target_progress - time_elapsed, 3),
