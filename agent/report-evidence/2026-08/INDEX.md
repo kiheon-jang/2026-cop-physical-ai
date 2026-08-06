@@ -18,3 +18,9 @@
   - **S1 데이터셋**: `episodes_s1` **100ep/7,231frame** · v3.0 · 30fps · top+closeup · LED latch 자동라벨.
   - 6종 회귀 PASS: 6dof 2501프레임 · camera 30프레임×2 · pick min_approach **0.3228327114m** 결정론 · joint_angle 최대오차 **0.0244°<1°** · collector 2/2 yield100% lift 42.1mm · **sim_pcb_reset(S1 트윈) 4/4 PASS**.
   - 무결성: 운영 `rollout_summary.json` md5 **5207f67b189645de1bb26c124873b683** 불변(7/22~8/04 동일, sr 1.0 act_floor/epoch_0041) · Phase 2 산출물 회귀/오염 0.
+
+## 2026-08-06
+- Phase 3 W3 — **S1 리셋버튼 ACT 학습 완주 + 4-seed LED-latch 롤아웃 = 성공률 0.925**(W3 dated 8/19~8/25 조기 완주): `agent/research-log/2026-08-06.md`, `research/simulation/2026-08-06_phase3-w3-s1-act-rollout.md` → 8월 보고서 [ACT 학습 / Phase 3 PCB(S1)] **핵심 성과** 섹션.
+  - **S1 ACT 학습**: PID 65874, `--epochs 30`, dataset `episodes_s1`(100ep/7,231f, top+closeup 2카메라) → ckpt `act_s1_sim/epoch_0029`, wall **38,065s(~10.6h)**, loss **0.0133**. **04:04 killer 관통**(`start_new_session` 분리, epoch_0019 06:11·epoch_0029 09:37 생존).
+  - **4-seed 롤아웃**(N=10, LED latch 자동채점): seed42 **0.90** · seed7 0.90 · seed123 **1.00** · seed2026 0.90 → **평균 0.925**(37/40), median press 2.1~3.7mm(임계 1.5mm 위). Phase 3 완료 기준 0.70 초과. 산출물 `research/simulation/inference_progress/rollout_summary_s1[_seed*].json` 4종 실측 교차검증 일치.
+  - 23:30 sim-test: sim_pcb_reset 4/4 PASS · 6dof 3회 2501프레임 · camera 30프레임×2 · pick(open-loop 알려진 0%, 참고).
