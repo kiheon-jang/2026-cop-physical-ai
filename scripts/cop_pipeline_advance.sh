@@ -50,10 +50,14 @@ else
   DATA_DIR="${ROOT}/data/episodes_cl"
 fi
 DS_BASE="${DATA_DIR##*/}"
+# S1(리셋버튼)은 pick-place 와 수집기·관측(2카메라)·측정기가 다르다 → 스테이지별 분기 (아래).
+[[ "${DS_BASE}" == "episodes_s1" ]] && IS_S1=1 || IS_S1=0
 
 # ── 체크포인트 디렉터리: 데이터셋별 격리 (episodes_cl 은 레거시 경로 유지) ──
 if [[ "${DS_BASE}" == "episodes_cl" ]]; then
   CKPT_DIR="${ROOT}/checkpoints/act"
+elif [[ "${IS_S1}" == 1 ]]; then
+  CKPT_DIR="${ROOT}/checkpoints/act_s1_sim"   # 수동 W3 학습이 이 경로 사용 (규칙상 act_s1 아님)
 else
   CKPT_DIR="${ROOT}/checkpoints/act_${DS_BASE#episodes_}"
 fi
@@ -61,6 +65,7 @@ fi
 # ── 씬: 데이터셋에 정합 (수집·측정이 같은 씬을 쓰도록 export) ──
 case "${DS_BASE}" in
   *floor*) COP_SCENE="${ROOT}/SO-ARM100/Simulation/SO101/scene_grasp_floor.xml" ;;
+  *s1*)    COP_SCENE="${ROOT}/sim/assets/pcb_reset_scene.xml" ;;  # S1 측정기는 twin 자체 로드 — 참고용
   *)       COP_SCENE="${ROOT}/SO-ARM100/Simulation/SO101/scene_grasp_pads.xml" ;;
 esac
 export COP_SCENE
@@ -157,6 +162,11 @@ fi
 # ── 3. 데이터 부족 → closed-loop 수집 시작 ──
 EP="$(data_episodes)"
 if [[ "${EP}" -lt "${TARGET_EP}" ]]; then
+  # S1 은 합성 데이터(고정 100ep) — pick-place 수집기로 채우면 episodes_s1 오염. 미실행 보류.
+  if [[ "${IS_S1}" == 1 ]]; then
+    echo "⚠ STAGE=보류  S1 합성 데이터 부족(${EP}<${TARGET_EP}ep) — S1 수집기=samples/training/sim_pcb_reset_collector.py (별도). pick-place 수집기 미실행 (episodes_s1 보호)."
+    exit 0
+  fi
   # 가드: info.json 이 존재하는데 0 이 나오면 일시적 읽기 실패 가능성 — 수집(=기존 데이터
   # 대피 후 재수집) 을 시작하지 않는다 (운영 데이터셋 보호).
   if [[ "${EP}" -eq 0 && -f "${DATA_DIR}/meta/info.json" ]]; then
@@ -174,6 +184,10 @@ if [[ ! -f "${TRAINED_MARK}" || "$(cat "${TRAINED_MARK}" 2>/dev/null || echo x)"
   echo "STAGE=학습시작  (${DS_BASE} ${EP}ep 로 ACT 재학습, ${EPOCHS}epoch → ${CKPT_DIR#${ROOT}/})"
   export COP_DATASET_ROOT="${DATA_DIR}"
   export COP_CKPT_DIR="${CKPT_DIR}"
+  if [[ "${IS_S1}" == 1 ]]; then          # S1 2카메라 계약 — 없으면 1카메라로 학습돼 데이터와 형상 불일치
+    export COP_CAMERA_KEYS="top,closeup"
+    export COP_DATASET_REPO_ID="local/pcb_reset_sim"
+  fi
   if bash "${ROOT}/scripts/start_act_train.sh" --epochs "${EPOCHS}" --no-resume; then
     echo "${DATA_SIG}" > "${TRAINED_PENDING}"   # 완료 검증(stage 2.5) 후 TRAINED_MARK 로 승격
   else
@@ -187,9 +201,14 @@ fi
 LATEST_CKPT="$(ls -d "${CKPT_DIR}"/epoch_*/ 2>/dev/null | sort | tail -1 | sed 's:/$::')"
 MODEL_SIG="${DS_BASE}:$(sig "${LATEST_CKPT}")"
 if [[ -n "${LATEST_CKPT}" && ( ! -f "${MEASURED_MARK}" || "$(cat "${MEASURED_MARK}" 2>/dev/null || echo x)" != "${MODEL_SIG}" ) ]]; then
-  echo "STAGE=측정  (최신 체크포인트 ${LATEST_CKPT##*/} rollout 성공률, closed-loop 정합 씬)"
+  echo "STAGE=측정  (최신 체크포인트 ${LATEST_CKPT##*/} rollout 성공률)"
   export COP_CKPT_DIR="${CKPT_DIR}"
-  if "${PY}" "${ROOT}/scripts/render_act_rollout.py" --rollouts 10 > "${ROLLOUT_LOG}" 2>&1; then
+  if [[ "${IS_S1}" == 1 ]]; then
+    MEASURE_ARGS=( "${ROOT}/scripts/render_act_rollout_s1.py" )        # LED latch 4-seed, S1 산출물
+  else
+    MEASURE_ARGS=( "${ROOT}/scripts/render_act_rollout.py" --rollouts 10 )
+  fi
+  if "${PY}" "${MEASURE_ARGS[@]}" > "${ROLLOUT_LOG}" 2>&1; then
     echo "${MODEL_SIG}" > "${MEASURED_MARK}"
     grep -iE "success_rate|성공률" "${ROLLOUT_LOG}" | tail -2 || tail -2 "${ROLLOUT_LOG}"
   else

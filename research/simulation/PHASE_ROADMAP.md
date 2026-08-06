@@ -148,7 +148,7 @@ uv pip install <패키지명>
 > - 토크(±6Nm도 실패)·개구폭(손끝 ~94mm, 50mm 들어감)·접촉모델(condim 3/4/6) 전부 반증.
 >   실물은 텔레오퍼레이션(사람 closed-loop)으로 3~5cm 물체를 바닥에서 잘 잡음 → open vs closed-loop 차이.
 > - **closed-loop expert(매 step 큐브추종 + 점진닫힘 + 재시도) 구현 → 30mm grasp 88%(FORCE6)/75%(FORCE3=12V 팔로워 실스펙). open-loop 0% → 해결.** `scripts/_grasp_closedloop.py`.
-> - pick-place는 실물 우선이 정공법(LeRobot 합의)이나 **6월 실물수집 미예정 → 6월은 sim 트랙(closed-loop 자동수집)이 메인.** sim의 결정적 가치는 Phase 3+ RS232 정밀삽입.
+> - pick-place는 실물 우선이 정공법(LeRobot 합의)이나 **6월 실물수집 미예정 → 6월은 sim 트랙(closed-loop 자동수집)이 메인.** sim의 결정적 가치는 Phase 3+ RS232 작업(케이블 분리).
 > - 정정 상세: 위 root-cause 문서 상단 정정 + 메모리(grasp-rootcause / sim-strategy / data-paths).
 
 - [v] ACT 학습 파이프라인 가동 검증 (smoke → 100 epoch MPS 학습, loss 곡선 정상)
@@ -175,7 +175,7 @@ uv pip install <패키지명>
 - ✅ 시뮬 grasp closed-loop 해법 확보 (30mm 88%/75%)
 - ✅ 시뮬 Pick 성공률: closed-loop 1사이클 측정 완료 = **70%(7/10, median lift 43.7mm)**.
   open-loop 0% → closed-loop 70% 입증. (정책 70% < expert 88% 모방격차, sim 90%+ 목표는 후속 데이터증대 여지.)
-  실물수집은 6월 미예정 → Phase 2(7월) 일정으로. sim의 결정적 가치는 Phase 3+ 정밀삽입.
+  실물수집은 6월 미예정 → Phase 2(7월) 일정으로. sim의 결정적 가치는 Phase 3+ RS232 작업.
 
 ---
 
@@ -673,9 +673,14 @@ uv pip install <패키지명>
     기본값 불변·하위호환, `ast.parse` OK) → W3 ACT 학습이 `episodes_s1`(2카메라)를
     읽도록 준비. [자가치유] 없음. 상세: `2026-08-05_phase3-w2-s1-synth-hold-w3-enabler.md`.
     **다음**: W2 잔여 omen 로드 스모크(실기 협업) / W3(8/19~) episodes_s1 ACT 학습→LED 채점 rollout.
-- W3 (8/19 ~ 8/25): ACT 학습 + 측정
-  - [ ] ACT 학습 (obs = top+closeup+state6, 실기 train_config 하이퍼 참조: chunk 100, batch 8)
-  - [ ] sim rollout 성공률 측정 (LED 판정 자동 채점, 4-seed 공정추정 프로토콜 재사용)
+- W3 (8/19 ~ 8/25): ACT 학습 + 측정 — **2026-08-06 조기 완주** (`scripts/render_act_rollout_s1.py`)
+  - [v] ACT 학습 (obs = top+closeup+state6) — 8/5 22:59~8/6 09:37 `episodes_s1`(2카메라) 30epoch
+    완주(`act_s1_sim/epoch_0029`, wall 10.6h, loss 0.0133). **04:04 killer 관통 확증**(`start_new_session`
+    분리로 gateway kickstart 그룹 SIGKILL 회피, epoch_0019 06:11·epoch_0029 09:37 생존).
+  - [v] sim rollout 성공률 측정 (LED latch 자동 채점, 4-seed 공정추정) — seed 42/7/123/2026 =
+    0.90/0.90/1.00/0.90 → **4-seed 평균 0.925**(37/40), nominal seed42 0.90, median press 2.1~3.7mm.
+    **완료 기준 70% 초과.** 실패 3/40 = 존 구석 기하 도달불가(expert 95% 동류). 상세:
+    `2026-08-06_phase3-w3-s1-act-rollout.md`.
 - W4 (8/26 ~ 8/31): sim2real 핸드오프
   - [ ] 합성 데이터셋 + sim-trained 정책 omen 전달 (실기 담당자 협업 — 실기 fine-tune 대조군)
   - [ ] P1 LED ROI 캘리브 지원 — 시뮬 top/closeup 프레임으로 ROI·임계값 검증 결과 공유
@@ -685,16 +690,16 @@ uv pip install <패키지명>
 
 ---
 
-## Phase 4 — RS232 HHT 결선 + 1차 기능 완성 (2026-09, 4주, 작업 완료 시점)
+## Phase 4 — RS232 HHT 케이블 분리 + 1차 기능 완성 (2026-09, 4주, 작업 완료 시점)
 
 > ⚠️ 옛 Phase 4(RS232) + 옛 Phase 5(1차 기능 완성) 통합. 9월 말 = 24주 작업 완료.
 
-- W1: RS232 커넥터 mesh + 핀 정밀 모델링 (±0.5mm), 정밀 삽입 시뮬 데이터 합성
+- W1: RS232 커넥터 mesh 모델링, 케이블 분리(꽂힌 케이블 빼기) 시뮬 데이터 합성
 - W2: DR 강화 + 학습, 실기 검증
 - W3: 최종 모델 선정 (ACT vs DP), 1차 통합 모델 미세조정
 - W4: 실기 검증 (PCB + RS232 통합), 실패 케이스 분석, 10월 시연 시나리오 확정
 
-**완료 기준**: 시뮬 결선 부분성공 50% + PCB 70% / RS232 부분성공 40% (보고서 목표값)
+**완료 기준**: 시뮬 분리 부분성공 50% + PCB 70% / RS232 부분성공 40% (보고서 목표값)
 
 ---
 

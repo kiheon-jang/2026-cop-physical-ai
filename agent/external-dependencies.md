@@ -68,7 +68,11 @@
       그룹이라 동반 사살(nohup 은 SIGHUP 만 무시). 증거: 백업 zip `pre-update-*-0400xx`,
       gateway.log 04:03:52 재시작(8/5), 사망 시각 ~04:04 일치. **수정**: `start_act_train.sh`
       가 학습을 `start_new_session`(새 세션 = 새 프로세스 그룹)으로 분리 — kickstart 가
-      gateway 그룹을 죽여도 학습 생존. 확증 실험 = 8/5 밤 S1 학습(30ep, 04:04 관통) 진행 중.
+      gateway 그룹을 죽여도 학습 생존.
+    - **✅ 2026-08-06 확증 완료 — 가설 확정, 항목 종결**: 8/5 밤 S1 학습(30ep)이 04:04 를
+      관통해 **완주**(epoch_0019 06:11 · epoch_0029 09:37 · 최종 loss 0.0133). `start_new_session`
+      분리 후 학습이 04:04 를 넘겨 생존 → 원인이 gateway 프로세스 그룹 동반 사살이었음이 확정.
+      full-epoch(100) 공정비교 복원 시 이 분리만으로 04:04 killer 회피 가능.
 
 ---
 

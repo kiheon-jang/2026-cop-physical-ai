@@ -73,9 +73,9 @@ PHASE_META: list[dict] = [
         "report_label": "ACT 학습",
     },
     {
-        "id": "phase4", "name": "Phase 4 — RS232 케이블 연결 · 1차 기능 완성", "month": "2026-09", "weeks": 4,
-        "business_label": "9월: RS232 케이블 연결 + 1차 기능 완성",
-        "outcome": "점검 단말기(HHT)를 PCB 의 RS232 포트에 정밀하게 꽂는 작업 자동화. S1 70% / RS232 40% 달성, 10월 시연 준비.",
+        "id": "phase4", "name": "Phase 4 — RS232 케이블 분리 · 1차 기능 완성", "month": "2026-09", "weeks": 4,
+        "business_label": "9월: RS232 케이블 분리 + 1차 기능 완성",
+        "outcome": "제어반 RS232 포트에 꽂혀 있는 점검 단말기(HHT) 케이블을 로봇팔이 빼는(분리) 작업 자동화. S1 70% / RS232 40% 달성, 10월 시연 준비.",
         "report_label": "DP 비교, 기능 완성",
     },
 ]
@@ -100,10 +100,10 @@ PROJECT_VISION = {
             "icon": "wrench",
         },
         {
-            "label": "RS232 케이블 연결",
+            "label": "RS232 케이블 분리",
             "metric": "부분 성공률",
             "target": "40%",
-            "context": "Phase 4 (9월) 평가 · 정밀 삽입 (±0.5mm)",
+            "context": "Phase 4 (9월) 평가 · 꽂힌 케이블 빼기(분리)",
             "icon": "plug",
         },
     ],
@@ -1279,6 +1279,10 @@ _SUMMARY_LABELS = {
     "rollout_summary_seed7.json": "seed 7 (nominal)",
     "rollout_summary_seed123.json": "seed 123 (nominal)",
     "rollout_summary_seed2026.json": "seed 2026 (nominal)",
+    "rollout_summary_s1.json": "S1 리셋버튼 (2단계 · LED · seed42)",
+    "rollout_summary_s1_seed7.json": "S1 리셋버튼 (2단계 · seed7)",
+    "rollout_summary_s1_seed123.json": "S1 리셋버튼 (2단계 · seed123)",
+    "rollout_summary_s1_seed2026.json": "S1 리셋버튼 (2단계 · seed2026)",
 }
 
 

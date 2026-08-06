@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoP Physical AI — 살아있는 파이프라인</title>
+<style>
+  :root{
+    --bg:#eef2f6; --surface:#ffffff; --surface-2:#f1f5f9;
+    --border:#e2e8f0; --border-2:#dde5ee;
+    --ink:#0f172a; --ink-2:#475569; --muted:#8a99ad;
+    --green:#16a34a; --green-bright:#22c55e; --green-soft:#dcfce7;
+    --amber:#f59e0b; --amber-soft:#fef3c7;
+    --red:#ef4444;
+    --track:#c4d0de;
+    --shadow:0 1px 2px rgba(15,23,42,.04), 0 12px 30px -12px rgba(15,23,42,.16);
+    --shadow-sm:0 1px 2px rgba(15,23,42,.05), 0 6px 16px -10px rgba(15,23,42,.14);
+    --radius:18px;
+    --glow: rgba(34,197,94,.16);
+    --font:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0a0f1a; --surface:#111a2b; --surface-2:#0f1727;
+      --border:#1e2b41; --border-2:#22314a;
+      --ink:#eaf1fb; --ink-2:#aebccf; --muted:#6b7c94;
+      --green:#22c55e; --green-bright:#34d399; --green-soft:rgba(34,197,94,.14);
+      --amber:#fbbf24; --amber-soft:rgba(251,191,36,.14);
+      --track:#2c3d57;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 18px 40px -18px rgba(0,0,0,.7);
+      --shadow-sm:0 1px 2px rgba(0,0,0,.4), 0 10px 24px -14px rgba(0,0,0,.6);
+      --glow: rgba(34,197,94,.22);
+    }
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font); line-height:1.6;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+  a{color:inherit; text-decoration:none}
+  h1,h2,h3{margin:0; line-height:1.15; letter-spacing:-.02em}
+  .tnum{font-variant-numeric:tabular-nums}
+
+  /* ============ NAV ============ */
+  .nav{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter:saturate(1.4) blur(12px);
+    background:color-mix(in srgb, var(--bg) 78%, transparent);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-in{
+    max-width:1200px; margin:0 auto; padding:14px 22px;
+    display:flex; align-items:center; gap:20px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-.02em; white-space:nowrap}
+  .brand .chip{
+    width:30px; height:30px; border-radius:9px;
+    background:linear-gradient(135deg,var(--green-bright),var(--green));
+    display:grid; place-items:center; box-shadow:0 6px 14px -6px var(--green);
+  }
+  .brand .chip svg{width:18px;height:18px}
+  .brand small{display:block; font-weight:600; font-size:11px; color:var(--muted); letter-spacing:.02em; margin-top:-2px}
+  .menu{
+    margin-left:auto; display:flex; gap:4px; align-items:center;
+    overflow-x:auto; scrollbar-width:none;
+  }
+  .menu::-webkit-scrollbar{display:none}
+  .menu a{
+    padding:7px 12px; border-radius:10px; font-size:13.5px; font-weight:600;
+    color:var(--ink-2); white-space:nowrap; transition:background .18s,color .18s;
+  }
+  .menu a:hover{background:var(--surface-2); color:var(--ink)}
+  .menu a.live{color:var(--green)}
+  .menu a.live::before{content:"● "; font-size:9px; vertical-align:2px}
+
+  /* ============ LAYOUT ============ */
+  .wrap{max-width:1200px; margin:0 auto; padding:0 22px}
+  section{position:relative}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13px; font-weight:700; color:var(--green);
+    background:var(--green-soft); border:1px solid color-mix(in srgb,var(--green) 22%, transparent);
+    padding:6px 13px; border-radius:999px;
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green-bright);
+    box-shadow:0 0 0 0 var(--green-bright); animation:ping 2.2s ease-out infinite}
+  @keyframes ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--green-bright) 60%,transparent)}
+    70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+  .sec-head{max-width:640px; margin-bottom:34px}
+  .sec-kicker{font-size:13px; font-weight:800; color:var(--green); letter-spacing:.06em; text-transform:uppercase}
+  .sec-head h2{font-size:clamp(26px,4.4vw,40px); margin:12px 0 12px; font-weight:800}
+  .sec-head p{margin:0; color:var(--ink-2); font-size:16.5px}
+
+  /* ============ HERO ============ */
+  .hero{padding:52px 0 30px; position:relative; overflow:hidden}
+  #cursorGlow{
+    position:absolute; width:520px; height:520px; left:0; top:0;
+    border-radius:50%; pointer-events:none; z-index:0;
+    background:radial-gradient(circle, var(--glow), transparent 66%);
+    transform:translate(-50%,-50%); opacity:0; transition:opacity .5s;
+    will-change:transform;
+  }
+  .hero-grid{position:relative; z-index:1; display:grid; grid-template-columns:1fr; gap:30px}
+  .hero-copy{max-width:760px}
+  .hero h1{
+    font-size:clamp(32px,6vw,58px); font-weight:850; margin:20px 0 18px;
+    letter-spacing:-.03em;
+  }
+  .hero h1 .accent{
+    background:linear-gradient(120deg,var(--green),var(--green-bright));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero-sub{font-size:clamp(15.5px,2.2vw,18.5px); color:var(--ink-2); max-width:620px; margin:0 0 24px}
+  .chips{display:flex; flex-wrap:wrap; gap:10px}
+  .stat-chip{
+    display:flex; align-items:center; gap:10px; padding:10px 15px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    box-shadow:var(--shadow-sm); font-size:13.5px; font-weight:600; color:var(--ink-2);
+  }
+  .stat-chip b{font-size:19px; font-weight:800; color:var(--ink)}
+  .stat-chip .led-mini{width:9px;height:9px;border-radius:50%;flex:none}
+  .stat-chip.ok .led-mini{background:var(--green-bright); box-shadow:0 0 8px var(--green-bright)}
+  .stat-chip.run .led-mini{background:var(--green-bright); animation:blink 1.5s infinite}
+  .stat-chip.wait .led-mini{background:var(--amber)}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.28}}
+
+  /* ---- pipeline stage (hero visual) ---- */
+  .stage{
+    margin-top:8px; background:var(--surface); border:1px solid var(--border);
+    border-radius:24px; box-shadow:var(--shadow); padding:20px 18px 14px; position:relative;
+    overflow:hidden;
+  }
+  .stage::before{ /* soft top sheen */
+    content:""; position:absolute; inset:0 0 auto 0; height:120px;
+    background:linear-gradient(180deg, color-mix(in srgb,var(--green) 5%,transparent), transparent);
+    pointer-events:none;
+  }
+  .stage-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:2px 4px 6px; position:relative}
+  .stage-head .t{font-weight:800; font-size:14.5px}
+  .stage-head .flowlabel{font-size:13px; color:var(--muted); font-weight:600}
+  .legend{margin-left:auto; display:flex; gap:14px; font-size:12px; color:var(--ink-2); font-weight:600}
+  .legend span{display:inline-flex; align-items:center; gap:6px}
+  .legend i{width:9px;height:9px;border-radius:50%; display:inline-block}
+  .legend .g{background:var(--green-bright)} .legend .a{background:var(--amber)} .legend .r{background:var(--red)}
+
+  .svg-scroll{overflow-x:auto; overflow-y:hidden; scrollbar-width:none; -webkit-overflow-scrolling:touch}
+  .svg-scroll::-webkit-scrollbar{display:none}
+  .pipe-svg{display:block; width:100%; min-width:680px; height:auto}
+  .scroll-hint{display:none; text-align:center; font-size:11.5px; color:var(--muted); padding:2px 0 4px}
+
+  /* svg element styles */
+  .node-box{fill:var(--surface); stroke:var(--border-2); stroke-width:1.5; transition:filter .3s, stroke .3s}
+  .node .node-box{filter:drop-shadow(0 6px 14px rgba(15,23,42,.06))}
+  .node-title{fill:var(--ink); font-weight:800; font-size:19px; font-family:var(--font)}
+  .node-sub{fill:var(--muted); font-weight:600; font-size:12.5px; font-family:var(--font)}
+  .node-ico{stroke:var(--green); stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round}
+  .node{cursor:pointer}
+  .node:hover .node-box, .node.hot .node-box{stroke:var(--green); filter:drop-shadow(0 8px 20px var(--glow))}
+  .node .halo{fill:var(--green); opacity:0; transition:opacity .3s}
+  .node.hot .halo, .node:hover .halo{opacity:.10}
+  .node-badge{fill:var(--green-soft); stroke:none}
+  .node-badge-t{fill:var(--green); font-weight:800; font-size:11px; font-family:var(--font)}
+  .node.wait .node-ico{stroke:var(--amber)}
+  .node.wait .node-badge{fill:var(--amber-soft)} .node.wait .node-badge-t{fill:var(--amber)}
+
+  .spine-base{fill:none; stroke:var(--track); stroke-width:3; stroke-linecap:round}
+  .spine-flow{fill:none; stroke:var(--green-bright); stroke-width:3; stroke-linecap:round;
+    stroke-dasharray:2 12; opacity:.7; animation:dashflow 1.1s linear infinite}
+  .spine-loop{fill:none; stroke:var(--track); stroke-width:2.5; stroke-dasharray:6 8; opacity:.75}
+  @keyframes dashflow{to{stroke-dashoffset:-14}}
+  .loop-label{fill:var(--muted); font-weight:700; font-size:13px; font-family:var(--font); text-anchor:middle}
+  .loop-arrow{fill:var(--track)}
+
+  .packet{fill:var(--green-bright); filter:drop-shadow(0 0 5px var(--green-bright))}
+  .packet.loopp{fill:var(--amber); filter:drop-shadow(0 0 4px var(--amber))}
+
+  /* robot + pcb */
+  .pcb{fill:#0f5132; stroke:#0a3d26; stroke-width:1.5}
+  @media (prefers-color-scheme: dark){ .pcb{fill:#0d3d28; stroke:#093020} }
+  .pcb-trace{stroke:#2f8f5f; stroke-width:1.4; fill:none; opacity:.7}
+  .pcb-pad{fill:#d9b45b}
+  .pcb-label{fill:#bfe8cf; font-size:11px; font-weight:700; font-family:var(--font); text-anchor:middle}
+  .arm-seg{stroke:#3a4658; stroke-linecap:round; fill:none}
+  .arm-seg2{stroke:#4b5a70; stroke-linecap:round; fill:none}
+  .arm-joint{fill:#64748b; stroke:#1e293b; stroke-width:1}
+  .arm-joint.acc{fill:var(--green)}
+  .arm-tool{fill:#94a3b8; stroke:#475569; stroke-width:1}
+  .arm-mount{fill:#334155}
+  #armGroup{transform-box:fill-box; transform-origin:center bottom; transition:transform .2s cubic-bezier(.34,1.4,.5,1)}
+  #robot.active #armGroup{transform:translateY(8px)}
+  .btn-base{fill:#7f1d1d}
+  .btn-cap{fill:#ef4444; transform-box:fill-box; transform-origin:center; transition:transform .2s}
+  #robot.active .btn-cap{transform:translateY(3px) scaleY(.8); fill:#dc2626}
+  .btn-hi{fill:#fca5a5; opacity:.8}
+  #led{fill:#153a26; transition:fill .25s}
+  #ledGlow{fill:var(--green-bright); opacity:0; transition:opacity .3s}
+  #ledCheck{stroke:#052e16; stroke-width:2.4; fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:0; transition:opacity .2s}
+  #robot.active #led{fill:#34d399}
+  #robot.active #ledGlow{opacity:.55}
+  #robot.active #ledCheck{opacity:1}
+  .result-cap{fill:var(--ink-2); font-size:12.5px; font-weight:700; font-family:var(--font); text-anchor:middle}
+
+  /* ============ JOURNEY ============ */
+  .journey{padding:56px 0 20px}
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:18px}
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px; box-shadow:var(--shadow-sm); position:relative; overflow:hidden;
+    transition:transform .28s cubic-bezier(.34,1.2,.5,1), box-shadow .28s, border-color .28s;
+  }
+  .card:hover{transform:translateY(-5px); box-shadow:var(--shadow); border-color:color-mix(in srgb,var(--green) 30%,var(--border))}
+  .card .step-no{
+    font-size:12px; font-weight:800; letter-spacing:.08em; color:var(--muted);
+    display:flex; align-items:center; gap:8px;
+  }
+  .card .status{
+    margin-left:auto; font-size:11.5px; font-weight:800; padding:4px 9px; border-radius:999px;
+  }
+  .st-done{background:var(--green-soft); color:var(--green)}
+  .st-run{background:var(--green-soft); color:var(--green)}
+  .st-wait{background:var(--amber-soft); color:var(--amber)}
+  .card h3{font-size:20px; margin:14px 0 6px; font-weight:800}
+  .card .desc{font-size:14px; color:var(--ink-2); margin:0 0 18px; min-height:44px}
+  .prog{height:9px; border-radius:99px; background:var(--surface-2); overflow:hidden; position:relative}
+  .prog-fill{height:100%; width:0; border-radius:99px;
+    background:linear-gradient(90deg,var(--green),var(--green-bright));
+    transition:width 1.3s cubic-bezier(.4,0,.15,1)}
+  .prog-fill.wait{background:repeating-linear-gradient(45deg,var(--amber),var(--amber) 6px,transparent 6px,transparent 12px); opacity:.8}
+  .prog-row{display:flex; justify-content:space-between; align-items:baseline; margin-top:10px}
+  .prog-row .pv{font-size:24px; font-weight:850; letter-spacing:-.02em}
+  .prog-row .pl{font-size:12.5px; color:var(--muted); font-weight:600}
+  .card .glow-line{position:absolute; left:0; top:0; height:3px; width:100%;
+    background:linear-gradient(90deg,transparent,var(--green-bright),transparent);
+    transform:translateX(-100%); }
+  .card:hover .glow-line{animation:sweep 1.1s ease}
+  @keyframes sweep{to{transform:translateX(100%)}}
+
+  /* ============ METRICS ============ */
+  .metrics{padding:56px 0 20px}
+  .tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+  .tile{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px 20px; box-shadow:var(--shadow-sm); position:relative; overflow:hidden;
+    transition:transform .25s, box-shadow .25s;
+  }
+  .tile:hover{transform:translateY(-4px); box-shadow:var(--shadow)}
+  .tile .big{font-size:clamp(34px,5vw,46px); font-weight:850; letter-spacing:-.03em; line-height:1}
+  .tile .lab{font-size:13.5px; color:var(--ink-2); font-weight:700; margin-top:10px}
+  .tile .sub{font-size:12px; color:var(--muted); margin-top:3px}
+  .tile .spark{position:absolute; right:14px; top:14px; opacity:.9}
+  .ring-wrap{display:flex; align-items:center; gap:16px}
+  .ring{--p:63; width:78px; height:78px; flex:none}
+  .ring .bg{fill:none; stroke:var(--surface-2); stroke-width:9}
+  .ring .fg{fill:none; stroke:var(--green-bright); stroke-width:9; stroke-linecap:round;
+    stroke-dasharray:220; stroke-dashoffset:220; transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.15,1);
+    transform:rotate(-90deg); transform-origin:center}
+
+  /* ============ FLOW EXPLAIN ============ */
+  .flowx{padding:56px 0 20px}
+  .steps{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; counter-reset:s}
+  .fstep{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px 20px 20px; box-shadow:var(--shadow-sm); position:relative;
+    transition:transform .25s, box-shadow .25s;
+  }
+  .fstep:hover{transform:translateY(-4px); box-shadow:var(--shadow)}
+  .fstep .num{
+    width:38px; height:38px; border-radius:11px; display:grid; place-items:center;
+    background:var(--green-soft); color:var(--green); font-weight:850; font-size:16px;
+    counter-increment:s;
+  }
+  .fstep .num::before{content:counter(s)}
+  .fstep h3{font-size:17px; margin:14px 0 6px; font-weight:800}
+  .fstep p{margin:0; font-size:13.5px; color:var(--ink-2)}
+  .fstep .arrow{position:absolute; right:-13px; top:38px; color:var(--track); z-index:2}
+  .steps .fstep:last-child .arrow{display:none}
+  .flow-note{
+    margin-top:22px; text-align:center; font-size:15px; font-weight:700; color:var(--ink-2);
+  }
+  .flow-note b{color:var(--green)}
+
+  /* ============ FOOTER ============ */
+  footer{margin-top:60px; border-top:1px solid var(--border); background:var(--surface)}
+  .foot-in{max-width:1200px; margin:0 auto; padding:34px 22px; display:flex; flex-wrap:wrap; gap:20px; align-items:center}
+  .foot-in .menu{margin-left:0}
+  .foot-meta{margin-left:auto; text-align:right; font-size:12.5px; color:var(--muted)}
+  .foot-meta b{color:var(--ink-2)}
+
+  /* ============ REVEAL ============ */
+  .reveal{opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.2,.6,.2,1), transform .7s cubic-bezier(.2,.6,.2,1)}
+  .reveal.in{opacity:1; transform:none}
+
+  /* intro */
+  .hero-copy > *{opacity:0; transform:translateY(18px); animation:rise .8s cubic-bezier(.2,.7,.2,1) forwards}
+  .hero-copy > *:nth-child(1){animation-delay:.05s}
+  .hero-copy > *:nth-child(2){animation-delay:.14s}
+  .hero-copy > *:nth-child(3){animation-delay:.23s}
+  .hero-copy > *:nth-child(4){animation-delay:.32s}
+  .stage{opacity:0; transform:translateY(24px) scale(.99); animation:rise .9s .4s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes rise{to{opacity:1; transform:none}}
+  .node{opacity:0; transform:scale(.6); transform-box:fill-box; transform-origin:center;
+    animation:pop .6s cubic-bezier(.34,1.5,.5,1) forwards}
+  #nCollect{animation-delay:.65s} #nTrain{animation-delay:.8s} #nMeasure{animation-delay:.95s}
+  #robot{opacity:0; animation:fade .8s 1.05s ease forwards}
+  @keyframes pop{to{opacity:1; transform:scale(1)}}
+  @keyframes fade{to{opacity:1}}
+
+  @media (max-width:900px){
+    .cards,.tiles,.steps{grid-template-columns:repeat(2,1fr)}
+    .fstep .arrow{display:none}
+    .scroll-hint{display:block}
+  }
+  @media (max-width:560px){
+    .cards,.tiles,.steps{grid-template-columns:1fr}
+    .hero{padding:34px 0 20px}
+    .legend{display:none}
+    .foot-meta{margin-left:0; text-align:left}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important; scroll-behavior:auto !important}
+    .hero-copy > *,.stage,.node,#robot{opacity:1; transform:none}
+    .reveal{opacity:1; transform:none}
+    .spine-flow{opacity:.5}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top">
+      <span class="chip" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="8" width="14" height="11" rx="2"/><path d="M12 8V4M9 4h6M9 13h.01M15 13h.01M9 16h6"/>
+        </svg>
+      </span>
+      <span>CoP Physical AI<small>엘리베이터 정비 로봇</small></span>
+    </a>
+    <div class="menu">
+      <a href="#top">Overview</a>
+      <a href="#metrics">성과지표</a>
+      <a href="#journey">Phase 로드맵</a>
+      <a href="#">시뮬 영상</a>
+      <a href="#">3D 리플레이</a>
+      <a href="#">실기 트랙</a>
+      <a href="#" class="live">활동 타임라인</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div id="cursorGlow"></div>
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="dot"></span> 야간 파이프라인 가동 중 · 매일 자동 전진</span>
+        <h1>가상에서 먼저 배우고,<br><span class="accent">실물 로봇</span>으로 옮깁니다</h1>
+        <p class="hero-sub">
+          SO-ARM101 로봇팔에게 엘리베이터 제어반 정비를 가르칩니다.
+          밤마다 <b>수집 · 학습 · 측정</b>을 스스로 반복하며, 매일 한 걸음씩 실전에 가까워집니다.
+        </p>
+        <div class="chips">
+          <span class="stat-chip ok"><span class="led-mini"></span>1단계 완료 <b class="tnum">100%</b></span>
+          <span class="stat-chip run"><span class="led-mini"></span>2단계 진행 <b class="tnum">92.5%</b></span>
+          <span class="stat-chip wait"><span class="led-mini"></span>시연까지 <b class="tnum">D-55</b></span>
+        </div>
+      </div>
+
+      <!-- PIPELINE VISUAL -->
+      <div class="stage" aria-label="자동 파이프라인 다이어그램">
+        <div class="stage-head">
+          <span class="t">자동 학습 파이프라인</span>
+          <span class="flowlabel">수집 → 학습 → 측정 → 반복</span>
+          <div class="legend">
+            <span><i class="g"></i>완료·진행</span>
+            <span><i class="a"></i>대기·주의</span>
+            <span><i class="r"></i>실패</span>
+          </div>
+        </div>
+        <div class="svg-scroll">
+        <svg class="pipe-svg" id="pipeSvg" viewBox="0 0 1120 470" role="img" aria-label="수집·학습·측정 노드를 데이터가 흐르며 로봇팔이 리셋 버튼을 눌러 초록 LED가 켜지는 파이프라인">
+          <!-- loop path (return) -->
+          <path id="loopPath" class="spine-loop" d="M620,151 C 620,405 130,405 130,151"/>
+          <path class="loop-arrow" d="M130,151 l-6,14 l12,0 z"/>
+          <text class="loop-label" x="375" y="418">반복 · 다음 밤 다시 처음으로</text>
+
+          <!-- main spine: base + flowing -->
+          <path class="spine-base" d="M130,151 L620,151 C 730,151 780,300 890,318"/>
+          <path class="spine-flow" d="M130,151 L620,151 C 730,151 780,300 890,318"/>
+          <!-- hidden geometry path for packet motion (same as spine) -->
+          <path id="flowPath" d="M130,151 L620,151 C 730,151 780,300 890,318" fill="none" stroke="none"/>
+
+          <!-- ===== NODES ===== -->
+          <!-- 수집 -->
+          <g class="node" id="nCollect" data-cx="130">
+            <rect class="halo" x="40" y="98" width="180" height="106" rx="20"/>
+            <rect class="node-box" x="55" y="108" width="150" height="86" rx="16"/>
+            <g class="node-ico" transform="translate(74,128)">
+              <rect x="0" y="6" width="20" height="15" rx="2"/><path d="M4 6 L7 1 H13 L16 6"/><path d="M10 11 v6 M7 14 l3 3 3-3"/>
+            </g>
+            <text class="node-title" x="105" y="140">수집</text>
+            <text class="node-sub" x="105" y="160">데이터 모으기</text>
+            <rect class="node-badge" x="105" y="170" width="86" height="18" rx="9"/>
+            <text class="node-badge-t" x="148" y="183" text-anchor="middle">episodes ↑</text>
+          </g>
+          <!-- 학습 -->
+          <g class="node" id="nTrain" data-cx="375">
+            <rect class="halo" x="285" y="98" width="180" height="106" rx="20"/>
+            <rect class="node-box" x="300" y="108" width="150" height="86" rx="16"/>
+            <g class="node-ico" transform="translate(319,127)">
+              <rect x="3" y="3" width="16" height="16" rx="2"/><path d="M8 0v3M14 0v3M8 19v3M14 19v3M0 8h3M0 14h3M19 8h3M19 14h3"/><path d="M8 11h6"/>
+            </g>
+            <text class="node-title" x="350" y="140">학습</text>
+            <text class="node-sub" x="350" y="160">정책 훈련(ACT)</text>
+            <rect class="node-badge" x="350" y="170" width="86" height="18" rx="9"/>
+            <text class="node-badge-t" x="393" y="183" text-anchor="middle">epoch +1</text>
+          </g>
+          <!-- 측정 -->
+          <g class="node" id="nMeasure" data-cx="620">
+            <rect class="halo" x="530" y="98" width="180" height="106" rx="20"/>
+            <rect class="node-box" x="545" y="108" width="150" height="86" rx="16"/>
+            <g class="node-ico" transform="translate(564,127)">
+              <path d="M2 18 A9 9 0 1 1 18 18"/><path d="M10 18 L15 9"/><circle cx="10" cy="18" r="1.6" fill="currentColor" stroke="none"/>
+            </g>
+            <text class="node-title" x="595" y="140">측정</text>
+            <text class="node-sub" x="595" y="160">성공률 채점</text>
+            <rect class="node-badge" x="595" y="170" width="86" height="18" rx="9"/>
+            <text class="node-badge-t" x="638" y="183" text-anchor="middle">92.5%</text>
+          </g>
+
+          <!-- packet layer -->
+          <g id="packetLayer"></g>
+
+          <!-- ===== ROBOT + PCB RESULT ===== -->
+          <g id="robot">
+            <!-- PCB board -->
+            <rect class="pcb" x="770" y="322" width="300" height="96" rx="10"/>
+            <path class="pcb-trace" d="M786,340 h60 v22 h40 M960,338 v40 M1010,345 h44"/>
+            <path class="pcb-trace" d="M786,398 h120 M1000,398 h56"/>
+            <rect class="pcb-pad" x="800" y="392" width="10" height="10" rx="2"/>
+            <rect class="pcb-pad" x="820" y="392" width="10" height="10" rx="2"/>
+            <rect class="pcb-pad" x="1044" y="345" width="10" height="10" rx="2"/>
+            <text class="pcb-label" x="890" y="410">RESET</text>
+
+            <!-- reset button -->
+            <ellipse class="btn-base" cx="890" cy="352" rx="30" ry="20"/>
+            <g class="btn-cap-wrap">
+              <ellipse class="btn-cap" cx="890" cy="344" rx="30" ry="20"/>
+              <ellipse class="btn-hi" cx="882" cy="338" rx="12" ry="7"/>
+            </g>
+
+            <!-- LED -->
+            <circle id="ledGlow" cx="1000" cy="352" r="24"/>
+            <circle id="led" cx="1000" cy="352" r="12"/>
+            <path id="ledCheck" d="M994 352 l4 4 l7 -8"/>
+            <text class="result-cap" x="1000" y="392">성공 = 초록불</text>
+
+            <!-- robot arm -->
+            <rect class="arm-mount" x="905" y="44" width="66" height="20" rx="6"/>
+            <g id="armGroup">
+              <line class="arm-seg" x1="938" y1="62" x2="905" y2="185" stroke-width="16"/>
+              <line class="arm-seg2" x1="905" y1="185" x2="890" y2="308" stroke-width="12"/>
+              <circle class="arm-joint acc" cx="938" cy="62" r="9"/>
+              <circle class="arm-joint" cx="905" cy="185" r="8"/>
+              <rect class="arm-tool" x="880" y="304" width="20" height="24" rx="4"/>
+            </g>
+          </g>
+        </svg>
+        </div>
+        <div class="scroll-hint">← 좌우로 밀어 파이프라인 전체를 볼 수 있어요</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ JOURNEY ============ -->
+<section class="journey wrap" id="journey">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">Phase 로드맵</div>
+    <h2>세 걸음의 여정</h2>
+    <p>물건을 옮기는 법부터, 케이블을 꽂는 정밀 작업까지 — 로봇은 한 단계씩 어려운 과제로 올라갑니다.</p>
+  </div>
+  <div class="cards">
+    <div class="card reveal" data-progress="100" data-dec="0">
+      <span class="glow-line"></span>
+      <div class="step-no">STEP 01 · PICK &amp; PLACE <span class="status st-done">완료</span></div>
+      <h3>물건 집어 옮기기</h3>
+      <p class="desc">기본 중의 기본. 물체를 집어서 정확한 자리에 내려놓습니다. 모든 정밀 작업의 토대입니다.</p>
+      <div class="prog"><div class="prog-fill" data-w="100"></div></div>
+      <div class="prog-row"><span class="pv tnum" data-count="100" data-dec="0" data-suffix="%">0%</span><span class="pl">가상 성공률</span></div>
+    </div>
+    <div class="card reveal" data-progress="92.5" data-dec="1">
+      <span class="glow-line"></span>
+      <div class="step-no">STEP 02 · S1 리셋버튼 <span class="status st-run">진행 중</span></div>
+      <h3>PCB 리셋 버튼 누르기</h3>
+      <p class="desc">제어반의 빨간 리셋 버튼을 정확히 누릅니다. 버튼이 눌리면 초록 LED가 켜져 성공을 알립니다.</p>
+      <div class="prog"><div class="prog-fill" data-w="92.5"></div></div>
+      <div class="prog-row"><span class="pv tnum" data-count="92.5" data-dec="1" data-suffix="%">0%</span><span class="pl">가상 성공률 · 4-seed</span></div>
+    </div>
+    <div class="card reveal" data-progress="0">
+      <span class="glow-line"></span>
+      <div class="step-no">STEP 03 · RS232 <span class="status st-wait">예정</span></div>
+      <h3>RS232 케이블 연결</h3>
+      <p class="desc">±0.5mm 정밀 삽입. 가장 어려운 관문입니다. 9월 도전, 10월 실물 시연을 목표로 합니다.</p>
+      <div class="prog"><div class="prog-fill wait" data-w="8"></div></div>
+      <div class="prog-row"><span class="pv">예정</span><span class="pl">9월 도전 · 10월 시연</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ METRICS ============ -->
+<section class="metrics wrap" id="metrics">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">성과지표</div>
+    <h2>지금까지의 성과</h2>
+    <p>숫자는 매일 밤 자동으로 갱신됩니다. 사람이 손대지 않아도 파이프라인이 스스로 채워 넣습니다.</p>
+  </div>
+  <div class="tiles">
+    <div class="tile reveal">
+      <div class="big tnum" data-count="92.5" data-dec="1" data-suffix="%">0%</div>
+      <div class="lab">2단계 가상 성공률</div>
+      <div class="sub">PCB 리셋버튼(S1) · 4-seed 평균</div>
+    </div>
+    <div class="tile reveal">
+      <div class="big tnum" data-count="100" data-dec="0" data-suffix="%">0%</div>
+      <div class="lab">1단계 가상 성공률</div>
+      <div class="sub">Pick &amp; Place · 완료</div>
+    </div>
+    <div class="tile reveal">
+      <div class="big tnum" data-count="55" data-dec="0" data-prefix="D-">D-0</div>
+      <div class="lab">완성까지</div>
+      <div class="sub">실물 시연 목표 · 2026-09-30</div>
+    </div>
+    <div class="tile reveal">
+      <div class="ring-wrap">
+        <svg class="ring" id="schedRing" viewBox="0 0 78 78">
+          <circle class="bg" cx="39" cy="39" r="35"/>
+          <circle class="fg" id="ringFg" cx="39" cy="39" r="35"/>
+        </svg>
+        <div>
+          <div class="big tnum" data-count="63" data-dec="0" data-suffix="%">0%</div>
+          <div class="lab">일정 진척</div>
+        </div>
+      </div>
+      <div class="sub" style="margin-top:10px">전체 로드맵 기준</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FLOW EXPLAIN ============ -->
+<section class="flowx wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">How it works</div>
+    <h2>밤마다 스스로 도는 파이프라인</h2>
+    <p>사람이 지켜보지 않아도, 이 네 칸이 매일 저절로 한 바퀴 돕니다.</p>
+  </div>
+  <div class="steps">
+    <div class="fstep reveal">
+      <div class="num"></div><h3>수집</h3>
+      <p>로봇이 작업을 여러 번 시도하며 움직임 데이터를 모읍니다.</p>
+      <svg class="arrow" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+    <div class="fstep reveal">
+      <div class="num"></div><h3>학습</h3>
+      <p>모은 데이터로 더 정확한 동작을 스스로 배웁니다.</p>
+      <svg class="arrow" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+    <div class="fstep reveal">
+      <div class="num"></div><h3>측정</h3>
+      <p>얼마나 잘하는지 성공률로 채점해 실력을 확인합니다.</p>
+      <svg class="arrow" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+    <div class="fstep reveal">
+      <div class="num"></div><h3>반복</h3>
+      <p>결과를 반영해 다음 밤 다시 처음부터 돕니다.</p>
+    </div>
+  </div>
+  <div class="flow-note reveal">사람이 지켜보지 않아도, <b>매일 한 칸씩 전진</b>합니다.</div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="foot-in">
+    <div class="menu">
+      <a href="#top">Overview</a>
+      <a href="#metrics">성과지표</a>
+      <a href="#journey">Phase 로드맵</a>
+      <a href="#">시뮬 영상</a>
+      <a href="#">3D 리플레이</a>
+      <a href="#">실기 트랙</a>
+      <a href="#">활동 타임라인</a>
+    </div>
+    <div class="foot-meta">
+      <b>CoP Physical AI</b> · MuJoCo 시뮬 → 실물 SO-ARM101<br>
+      발주 · 현대엘리베이터 &nbsp;|&nbsp; 관측 시점 2026-08-06
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- cursor glow (interaction 1) ---------- */
+  var hero = document.querySelector('.hero');
+  var glow = document.getElementById('cursorGlow');
+  if(hero && glow && !reduce){
+    hero.addEventListener('pointermove', function(e){
+      var r = hero.getBoundingClientRect();
+      glow.style.opacity = 1;
+      glow.style.transform = 'translate('+(e.clientX-r.left)+'px,'+(e.clientY-r.top)+'px) translate(-50%,-50%)';
+    });
+    hero.addEventListener('pointerleave', function(){ glow.style.opacity = 0; });
+  }
+
+  /* ---------- pipeline packets + robot press (interaction: living flow) ---------- */
+  var svg = document.getElementById('pipeSvg');
+  var flow = document.getElementById('flowPath');
+  var loop = document.getElementById('loopPath');
+  var layer = document.getElementById('packetLayer');
+  var robot = document.getElementById('robot');
+  var nodes = [
+    {el:document.getElementById('nCollect'), cx:130},
+    {el:document.getElementById('nTrain'),   cx:375},
+    {el:document.getElementById('nMeasure'), cx:620}
+  ];
+  var pressCooldown = false;
+  function pressButton(){
+    if(pressCooldown || !robot) return;
+    pressCooldown = true;
+    robot.classList.add('active');
+    setTimeout(function(){ robot.classList.remove('active'); }, 620);
+    setTimeout(function(){ pressCooldown = false; }, 900);
+  }
+
+  if(svg && flow && loop && layer && !reduce){
+    var flowLen = flow.getTotalLength();
+    var loopLen = loop.getTotalLength();
+    var SVGNS = "http://www.w3.org/2000/svg";
+    var packets = [];
+    function addPacket(path, len, speed, offset, cls){
+      var c = document.createElementNS(SVGNS,'circle');
+      c.setAttribute('r','5');
+      c.setAttribute('class','packet'+(cls?' '+cls:''));
+      layer.appendChild(c);
+      packets.push({el:c, path:path, len:len, speed:speed, d:offset*len, isFlow:cls!=='loopp'});
+    }
+    addPacket(flow, flowLen, 165, 0.00);
+    addPacket(flow, flowLen, 165, 0.34);
+    addPacket(flow, flowLen, 165, 0.67);
+    addPacket(loop, loopLen, 140, 0.15, 'loopp');
+    addPacket(loop, loopLen, 140, 0.62, 'loopp');
+
+    var last = 0, started = false;
+    function tick(ts){
+      if(!last) last = ts;
+      var dt = Math.min((ts-last)/1000, 0.05); last = ts;
+      for(var i=0;i<packets.length;i++){
+        var p = packets[i];
+        p.d += p.speed*dt;
+        if(p.d >= p.len){
+          p.d -= p.len;
+          if(p.isFlow) pressButton();   // packet reached the button
+        }
+        var pt = p.path.getPointAtLength(p.d);
+        p.el.setAttribute('cx', pt.x);
+        p.el.setAttribute('cy', pt.y);
+      }
+      // node heat when a flow packet is near
+      for(var n=0;n<nodes.length;n++){
+        var hot=false;
+        for(var j=0;j<packets.length;j++){
+          if(!packets[j].isFlow) continue;
+          var q = packets[j].path.getPointAtLength(packets[j].d);
+          if(Math.abs(q.x-nodes[n].cx) < 44 && Math.abs(q.y-151) < 40){ hot=true; break; }
+        }
+        nodes[n].el.classList.toggle('hot', hot);
+      }
+      requestAnimationFrame(tick);
+    }
+    // start after intro draw-in
+    setTimeout(function(){ started=true; requestAnimationFrame(tick); }, 1100);
+  } else if(robot){
+    robot.classList.add('active'); // reduced-motion: show success state statically
+  }
+
+  /* mark 3rd node as waiting-ish color? keep green; measure stays green (active) */
+
+  /* ---------- scroll reveal + countup + progress (interaction 2) ---------- */
+  function runCount(el){
+    var target = parseFloat(el.getAttribute('data-count'));
+    var dec = parseInt(el.getAttribute('data-dec')||'0',10);
+    var pre = el.getAttribute('data-prefix')||'';
+    var suf = el.getAttribute('data-suffix')||'';
+    if(reduce){ el.textContent = pre+target.toFixed(dec)+suf; return; }
+    var dur = 1200, t0 = null;
+    function step(ts){
+      if(!t0) t0 = ts;
+      var k = Math.min((ts-t0)/dur, 1);
+      var e = 1-Math.pow(1-k,3); // easeOutCubic
+      el.textContent = pre + (target*e).toFixed(dec) + suf;
+      if(k<1) requestAnimationFrame(step); else el.textContent = pre+target.toFixed(dec)+suf;
+    }
+    requestAnimationFrame(step);
+  }
+
+  var seen = new WeakSet();
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(!en.isIntersecting || seen.has(en.target)) return;
+      seen.add(en.target);
+      en.target.classList.add('in');
+      // countups inside
+      en.target.querySelectorAll('[data-count]').forEach(runCount);
+      // progress bars inside
+      en.target.querySelectorAll('.prog-fill').forEach(function(f){
+        var w = f.getAttribute('data-w');
+        if(reduce){ f.style.width = w+'%'; }
+        else { requestAnimationFrame(function(){ f.style.width = w+'%'; }); }
+      });
+      // schedule ring
+      var ring = en.target.querySelector('#ringFg');
+      if(ring){
+        var pct = 63, dash = 220, off = dash*(1-pct/100);
+        if(reduce){ ring.style.strokeDashoffset = off; }
+        else setTimeout(function(){ ring.style.strokeDashoffset = off; }, 120);
+      }
+    });
+  }, {threshold:0.28});
+
+  document.querySelectorAll('.reveal').forEach(function(el,i){
+    el.style.transitionDelay = (Math.min(i,4)*70)+'ms';
+    io.observe(el);
+  });
+  // tiles/cards inside reveal grids also observed individually for their counts
+  document.querySelectorAll('.tile,.card').forEach(function(el){ io.observe(el); });
+
+  // hero chips counters are static text (already correct) — no action needed.
+})();
+</script>
+</body>
+</html>

@@ -32,8 +32,14 @@ scripts/cop_pipeline_advance.sh   ← 야간 cron(self-heal 스킬 §0)이 매 �
 5. 학습완료 & 미측정 → `render_act_rollout.py`
 6. 측정완료 → 수렴 판정
 
+- **S1(episodes_s1) 분기 추가(2026-08-06, W3 후)**: `DS_BASE==episodes_s1` 이면 IS_S1=1 →
+  ckpt=`checkpoints/act_s1_sim`(규칙상 act_s1 아님·수동 학습 경로), 측정=`render_act_rollout_s1.py`
+  (LED latch 4-seed), 학습 env=COP_CAMERA_KEYS=top,closeup + COP_DATASET_REPO_ID=local/pcb_reset_sim,
+  수집 스테이지=보류(합성 데이터 고정 100ep — pick-place 수집기로 채우면 오염). S1 은 데이터·모델이
+  이미 완성이라 정상 흐름 = **stage5 측정 1회 → stage6 완료/유지**(마커 `episodes_s1:<sig>` 사전 세팅으로
+  재학습 방지 = epoch_0029 보호). 실측 = 4-seed 공정추정 0.925.
 - 네이밍: 전부 `cop_` 접두(다른 프로젝트 잡과 격리). pid/log: `logs/cop_*`.
-- 데이터: `data/episodes_cl`(closed-loop). 기존 open-loop `data/episodes` 보존.
+- 데이터: **현재 타겟 `data/episodes_s1`(S1 리셋버튼, 2026-08-06 전환)**. 이전 `episodes_cl`/`episodes_floor` 보존.
 - **연결(2026-06-24 통합)**: 23:00 CoP 작업 크론(`--no-agent`, script=`cop_sim_env.py`)이 **git_pull 직후 이 드라이버를 직접 호출**한다. Claude 위임은 그 결과 문서화/보고/self-heal 만(파이프라인 재실행 X). 별도 크론·스킬 없음 → 충돌 0.
   검증(`cop_sim_env.py --pipeline-only`): git_pull_ok → STAGE=학습시작 → 학습 진행(loss 하강) 확인됨.
 - 출력 `STAGE=...` 상태블록 → research-log + 아침 메일에 append → "메일 빔" 재발 방지.
@@ -246,4 +252,4 @@ git push origin main
 `~/.hermes/scripts/cop_common.py::rebuild_dashboard_data` 변경 (hermes 업데이트로 유실 시 재적용):
 - `["python3", build.py, "--json-only"]` → **레포 `.venv/bin/python3` 로 `build.py` 풀빌드**(HTML+JSON), cwd=`dashboard/`, timeout 60→180.
 - 사유: R4 빌더(`build_web3d`/`build_dr_gallery`)가 pyarrow/PIL(.venv 전용) 사용 + 오프라인 단일파일(dashboard.html)도 매일 신선해야 함.
-- 파이프라인 데이터셋 타겟은 `logs/cop_dataset_target` 파일 (현재 `data/episodes_cl_dr`). 마커 형식 `"<ds>:<sig>"` — 상세 `research/simulation/2026-07-06_phase2-w1-pipeline-audit-dr-retrain-trigger.md`.
+- 파이프라인 데이터셋 타겟은 `logs/cop_dataset_target` 파일 (**현재 `data/episodes_s1`**, 2026-08-06 S1 전환). 마커 형식 `"<ds>:<sig>"` — 상세 `research/simulation/2026-07-06_phase2-w1-pipeline-audit-dr-retrain-trigger.md`.

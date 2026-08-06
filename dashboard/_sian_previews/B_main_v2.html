@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoP Physical AI — 관제 콘솔</title>
+<style>
+  /* ============ 미션 컨트롤 / 텔레메트리 (시안 B · v2) ============ */
+  :root{
+    --bg:#05070e;
+    --bg2:#080b15;
+    --panel:#0b101c;
+    --panel2:#0e1524;
+    --line:rgba(150,175,220,.10);
+    --line2:rgba(150,175,220,.18);
+    --ink:#e8eefb;
+    --mut:#8ea0bd;
+    --mut2:#5f7091;
+    --grn:#2ee6a0;
+    --grn-dim:#1c9c6d;
+    --cyn:#39c6f0;
+    --amb:#f8b64c;
+    --red:#ff6b6b;
+    --glow:rgba(57,198,240,.55);
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+    --mx:50%; --my:35%;      /* 커서 위치(그라디언트 추적) */
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  /* 커서 추적 배경 글로우 + 정밀 그리드 */
+  .bg-fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .bg-fx .glow{
+    position:absolute;inset:-20%;
+    background:
+      radial-gradient(420px 420px at var(--mx) var(--my), rgba(57,198,240,.16), transparent 60%),
+      radial-gradient(680px 520px at calc(100% - var(--mx)) calc(var(--my) + 10%), rgba(46,230,160,.10), transparent 65%);
+    transition:background .18s linear;
+  }
+  .bg-fx .grid{
+    position:absolute;inset:0;opacity:.55;
+    background-image:
+      linear-gradient(var(--line) 1px,transparent 1px),
+      linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:44px 44px;
+    -webkit-mask-image:radial-gradient(1200px 800px at var(--mx) var(--my), #000 0%, rgba(0,0,0,.35) 55%, transparent 85%);
+    mask-image:radial-gradient(1200px 800px at var(--mx) var(--my), #000 0%, rgba(0,0,0,.35) 55%, transparent 85%);
+    transition:-webkit-mask-image .2s linear;
+  }
+  .bg-fx .vignette{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 0%,transparent 40%,var(--bg) 100%)}
+  .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 22px}
+
+  /* ============ 부팅 오버레이 ============ */
+  #boot{
+    position:fixed;inset:0;z-index:100;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;
+    transition:opacity .6s ease, visibility .6s;
+  }
+  #boot.done{opacity:0;visibility:hidden}
+  .boot-inner{width:min(440px,86vw);font-family:var(--mono)}
+  .boot-brand{font-size:13px;letter-spacing:.32em;color:var(--cyn);margin-bottom:18px}
+  .boot-line{font-size:12.5px;color:var(--mut);margin:5px 0;display:flex;justify-content:space-between;opacity:0}
+  .boot-line b{color:var(--ink);font-weight:600}
+  .boot-line .ok{color:var(--grn)}
+  .boot-bar{height:3px;background:var(--line2);border-radius:3px;margin-top:22px;overflow:hidden}
+  .boot-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyn),var(--grn));box-shadow:0 0 12px var(--glow)}
+
+  /* ============ 상단 관제 바 ============ */
+  header{position:sticky;top:0;z-index:40;backdrop-filter:blur(12px);
+    background:linear-gradient(var(--bg),rgba(5,7,14,.72));border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;gap:20px;height:60px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:.02em;white-space:nowrap}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--grn);box-shadow:0 0 0 4px rgba(46,230,160,.15);animation:blink 2.4s infinite}
+  .brand span{color:var(--mut2);font-weight:500}
+  @keyframes blink{0%,92%,100%{opacity:1}94%{opacity:.25}}
+  nav.links{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+  nav.links a{color:var(--mut);text-decoration:none;font-size:12.5px;font-family:var(--mono);padding:7px 10px;border-radius:7px;transition:.15s;white-space:nowrap}
+  nav.links a:hover{color:var(--ink);background:var(--panel2)}
+  .sys-pill{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--grn);border:1px solid var(--line2);border-radius:999px;padding:6px 12px;white-space:nowrap}
+  .sys-pill .d{width:7px;height:7px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px var(--grn);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+  .menubtn{display:none;margin-left:auto;background:var(--panel2);border:1px solid var(--line2);color:var(--ink);border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:12px;cursor:pointer}
+
+  /* ============ 히어로 ============ */
+  .hero{padding:46px 0 30px;position:relative}
+  .hero-grid{display:grid;grid-template-columns:1.02fr 1fr;gap:34px;align-items:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--cyn);
+    border:1px solid var(--line2);border-radius:999px;padding:6px 13px;margin-bottom:20px}
+  .eyebrow .sq{width:6px;height:6px;background:var(--cyn);box-shadow:0 0 8px var(--cyn)}
+  h1{font-size:clamp(30px,5vw,52px);line-height:1.06;margin:0 0 16px;letter-spacing:-.02em;font-weight:800}
+  h1 .hl{background:linear-gradient(120deg,var(--grn),var(--cyn));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{color:var(--mut);font-size:16px;max-width:33em;margin:0 0 22px}
+  .lede b{color:var(--ink);font-weight:600}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .btn{font-family:var(--mono);font-size:13px;border-radius:10px;padding:12px 18px;cursor:pointer;border:1px solid transparent;text-decoration:none;display:inline-flex;align-items:center;gap:9px;transition:.16s}
+  .btn.primary{background:linear-gradient(120deg,var(--grn),var(--cyn));color:#03130e;font-weight:700;box-shadow:0 8px 30px -10px var(--glow)}
+  .btn.primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px -12px var(--glow)}
+  .btn.ghost{background:var(--panel);border-color:var(--line2);color:var(--ink)}
+  .btn.ghost:hover{border-color:var(--cyn);color:var(--cyn)}
+  .btn .ic{width:15px;height:15px;flex:none}
+
+  .chips{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:11.5px;color:var(--mut);border:1px solid var(--line);border-radius:9px;padding:9px 12px;background:var(--panel);min-width:112px}
+  .chip b{display:block;font-size:19px;color:var(--ink);font-weight:700;margin-top:3px}
+  .chip .u{color:var(--grn)}
+
+  /* ============ 관제 콘솔(로봇팔 + 텔레메트리) ============ */
+  .console{position:relative;border:1px solid var(--line2);border-radius:18px;
+    background:linear-gradient(180deg,var(--panel2),var(--panel));overflow:hidden;
+    box-shadow:0 30px 80px -40px #000, inset 0 1px 0 rgba(255,255,255,.03)}
+  .console .top{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--mut2)}
+  .console .top .lamp{width:8px;height:8px;border-radius:50%}
+  .lamp.g{background:var(--grn);box-shadow:0 0 8px var(--grn)}
+  .lamp.a{background:var(--amb)}
+  .lamp.r{background:var(--red)}
+  .console .top .rt{margin-left:auto;color:var(--grn)}
+  .stage-svg{display:block;width:100%;height:auto;background:
+    radial-gradient(80% 60% at 50% 30%,rgba(57,198,240,.06),transparent 70%)}
+  .stage-svg text{font-family:var(--mono)}
+  /* 3D 히어로 로봇팔 캔버스 (arm3d.js) — 옛 2D SVG 팔 자리/비율 유지 */
+  #hero3d{display:block;width:100%;aspect-ratio:460/312;touch-action:none;cursor:grab;
+    background:radial-gradient(80% 60% at 50% 30%,rgba(57,198,240,.07),transparent 70%),linear-gradient(180deg,#0a0f1c,#070b14)}
+  #hero3d:active{cursor:grabbing}
+
+  /* 텔레메트리 오버레이(콘솔 위 코너 위젯) */
+  .tele{position:absolute;font-family:var(--mono);pointer-events:none}
+  .tele.tl{top:52px;left:14px}
+  .tele.tr{top:52px;right:14px;text-align:right}
+  .tele .lab{font-size:9.5px;letter-spacing:.12em;color:var(--mut2)}
+  .tele .val{font-size:26px;font-weight:700;color:var(--ink);line-height:1.1}
+  .tele .val .s{font-size:14px;color:var(--grn)}
+  .spark{display:block;margin-top:4px}
+  .tele.tr .spark{margin-left:auto}
+
+  .console .foot{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
+  .runbtn{font-family:var(--mono);font-size:12px;border:1px solid var(--grn);color:var(--grn);background:rgba(46,230,160,.08);
+    border-radius:9px;padding:9px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;transition:.16s}
+  .runbtn:hover{background:rgba(46,230,160,.16);box-shadow:0 0 24px -6px var(--grn)}
+  .foot .status{font-family:var(--mono);font-size:11px;color:var(--mut)}
+  .foot .status b{color:var(--grn)}
+  .foot .playlab{font-family:var(--mono);font-size:11px;color:var(--grn);display:inline-flex;align-items:center;gap:7px}
+  .foot .playlab .d{width:7px;height:7px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px var(--grn);animation:pulse 1.6s infinite}
+
+  /* ============ 로그 콘솔 (실 학습로그 재생) ============ */
+  .logbox{margin-top:14px;border:1px solid var(--line);border-radius:12px;background:#070a12;font-family:var(--mono);font-size:11.5px;overflow:hidden}
+  .logbox .lh{display:flex;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);color:var(--mut2);font-size:10.5px;letter-spacing:.1em;flex-wrap:wrap}
+  .logbox .lh .rep{color:var(--grn);display:inline-flex;align-items:center;gap:6px}
+  .logbox .lh .rep .d{width:7px;height:7px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px var(--grn);animation:pulse 1.6s infinite}
+  .logbox .lh .sk{margin-left:auto}
+  .statstrip{display:flex;gap:0;flex-wrap:wrap;border-bottom:1px solid var(--line);font-family:var(--mono)}
+  .statstrip .st{flex:1;min-width:96px;padding:9px 12px;border-right:1px solid var(--line)}
+  .statstrip .st:last-child{border-right:0}
+  .statstrip .st .k{font-size:9px;letter-spacing:.1em;color:var(--mut2)}
+  .statstrip .st .v{font-size:16px;font-weight:700;color:var(--ink);margin-top:2px}
+  .statstrip .st .v.g{color:var(--grn)} .statstrip .st .v.c{color:var(--cyn)} .statstrip .st .v.a{color:var(--amb)}
+  .log{padding:10px 12px;height:120px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+  .log div{margin:2px 0;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .log .t{color:var(--mut2)}
+  .log .ok{color:var(--grn)} .log .cy{color:var(--cyn)} .log .am{color:var(--amb)} .log .ink{color:var(--ink)}
+
+  /* ============ 섹션 공통 ============ */
+  section.blk{padding:64px 0;border-top:1px solid var(--line);position:relative}
+  .sechead{display:flex;align-items:baseline;gap:14px;margin-bottom:30px;flex-wrap:wrap}
+  .sechead .idx{font-family:var(--mono);font-size:12px;color:var(--cyn);letter-spacing:.1em}
+  .sechead h2{font-size:clamp(22px,3.4vw,30px);margin:0;letter-spacing:-.01em;font-weight:750}
+  .sechead p{color:var(--mut);font-size:13.5px;margin:0}
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ============ 3단계 관제 카드 ============ */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{border:1px solid var(--line2);border-radius:14px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:18px;position:relative;overflow:hidden;transition:.2s}
+  .card:hover{transform:translateY(-4px);border-color:var(--line2)}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+  .card.done::before{background:var(--grn);box-shadow:0 0 16px var(--grn)}
+  .card.live::before{background:var(--amb);box-shadow:0 0 16px var(--amb)}
+  .card.next::before{background:var(--mut2)}
+  .card .ph{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing:.08em;display:flex;justify-content:space-between}
+  .badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:999px}
+  .badge.g{color:var(--grn);border:1px solid var(--grn-dim);background:rgba(46,230,160,.08)}
+  .badge.a{color:var(--amb);border:1px solid rgba(248,182,76,.4);background:rgba(248,182,76,.08)}
+  .badge.n{color:var(--mut);border:1px solid var(--line2)}
+  .card h3{font-size:17px;margin:12px 0 4px;font-weight:700}
+  .card .sub{color:var(--mut);font-size:13px;min-height:38px}
+  .card .metric{font-family:var(--mono);margin-top:14px;display:flex;align-items:baseline;gap:8px}
+  .card .metric .n{font-size:30px;font-weight:800}
+  .card.done .metric .n{color:var(--grn)} .card.live .metric .n{color:var(--amb)} .card.next .metric .n{color:var(--mut)}
+  .card .metric .k{font-size:11px;color:var(--mut2)}
+  .prog{height:6px;border-radius:6px;background:var(--line);margin-top:12px;overflow:hidden}
+  .prog i{display:block;height:100%;width:0;border-radius:6px;transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+  .card.done .prog i{background:linear-gradient(90deg,var(--grn-dim),var(--grn))}
+  .card.live .prog i{background:linear-gradient(90deg,#b9812a,var(--amb))}
+  .card.next .prog i{background:var(--mut2)}
+
+  /* ============ 성과 지표(게이지) ============ */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .gcard{border:1px solid var(--line2);border-radius:14px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:20px;text-align:center}
+  .gwrap{position:relative;width:132px;height:132px;margin:0 auto}
+  .gwrap svg{transform:rotate(-90deg)}
+  .gwrap .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .gwrap .ctr .big{font-family:var(--mono);font-size:25px;font-weight:800}
+  .gwrap .ctr .u{font-family:var(--mono);font-size:11px;color:var(--mut2)}
+  .gcard .cap{margin-top:12px;font-size:13px;color:var(--ink);font-weight:600}
+  .gcard .cap span{display:block;font-family:var(--mono);font-size:10.5px;color:var(--mut2);font-weight:400;margin-top:2px}
+
+  /* ============ 파이프라인 ============ */
+  .pipe{border:1px solid var(--line2);border-radius:16px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:26px 22px 30px;position:relative;overflow:hidden}
+  .pipe .lead{font-family:var(--mono);font-size:12px;color:var(--mut);margin-bottom:26px;display:flex;align-items:center;gap:9px}
+  .pipe .lead .d{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 10px var(--grn);animation:pulse 1.6s infinite}
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;align-items:center}
+  .node{position:relative;text-align:center;z-index:2}
+  .node .ring{width:64px;height:64px;border-radius:16px;margin:0 auto 12px;border:1px solid var(--line2);background:var(--panel);
+    display:flex;align-items:center;justify-content:center;position:relative;transition:.3s}
+  .node.hot .ring{border-color:var(--grn);box-shadow:0 0 26px -4px var(--grn);background:rgba(46,230,160,.07)}
+  .node .ring svg{width:30px;height:30px}
+  .node .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+  .node .dsc{font-family:var(--mono);font-size:10.5px;color:var(--mut2);margin-top:3px}
+  .track{position:absolute;left:0;right:0;top:32px;height:2px;z-index:1}
+  .track .base{position:absolute;left:12.5%;right:12.5%;top:0;height:2px;
+    background:repeating-linear-gradient(90deg,var(--line2) 0 7px,transparent 7px 15px);background-size:15px 2px;
+    animation:dash 1s linear infinite}
+  @keyframes dash{to{background-position:15px 0}}
+  .packet{position:absolute;top:-4px;left:12.5%;width:11px;height:11px;border-radius:50%;
+    background:var(--grn);box-shadow:0 0 14px var(--grn);z-index:3;
+    animation:travel 5.2s linear infinite}
+  @keyframes travel{
+    0%{left:12.5%;opacity:0}5%{opacity:1}
+    28%{left:37.5%}52%{left:62.5%}76%{left:87.5%}
+    92%{left:87.5%;opacity:1}100%{left:87.5%;opacity:0}}
+  .loopback{font-family:var(--mono);font-size:11px;color:var(--grn);text-align:center;margin-top:24px;display:flex;align-items:center;justify-content:center;gap:9px}
+  .loopback .arc{width:120px;height:1px;background:repeating-linear-gradient(90deg,var(--grn-dim) 0 6px,transparent 6px 12px);animation:dash 1s linear infinite}
+
+  /* ============ 탐색 메뉴 그리드(푸터) ============ */
+  footer{border-top:1px solid var(--line);padding:52px 0 40px;position:relative}
+  .mapgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:34px}
+  .mapgrid a{display:block;border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:15px;text-decoration:none;transition:.16s}
+  .mapgrid a:hover{border-color:var(--cyn);transform:translateY(-3px);background:var(--panel2)}
+  .mapgrid .k{font-family:var(--mono);font-size:10px;color:var(--cyn);letter-spacing:.1em}
+  .mapgrid .t{font-size:14px;color:var(--ink);font-weight:650;margin-top:6px}
+  .mapgrid .a{font-size:11.5px;color:var(--mut2);margin-top:2px}
+  .foot-b{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;color:var(--mut2);border-top:1px solid var(--line);padding-top:22px}
+  .foot-b b{color:var(--mut)}
+
+  /* ============ 토스트 ============ */
+  .toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(16px);z-index:120;
+    background:var(--panel2);border:1px solid var(--line2);color:var(--ink);font-family:var(--mono);font-size:12.5px;
+    padding:11px 18px;border-radius:11px;box-shadow:0 18px 50px -20px #000, 0 0 22px -10px var(--glow);
+    opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;display:flex;align-items:center;gap:9px}
+  .toast .d{width:7px;height:7px;border-radius:50%;background:var(--cyn);box-shadow:0 0 8px var(--cyn)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ============ 반응형 ============ */
+  @media(max-width:900px){
+    .hero-grid{grid-template-columns:1fr;gap:26px}
+    nav.links{display:none}
+    nav.links.open{display:flex;position:absolute;top:60px;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--line2);padding:12px;flex-direction:column;gap:2px}
+    .menubtn{display:block}
+    .metrics{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:640px){
+    .cards{grid-template-columns:1fr}
+    .metrics{grid-template-columns:repeat(2,1fr)}
+    .mapgrid{grid-template-columns:repeat(2,1fr)}
+    .flow .node .dsc{display:none}
+    .tele .val{font-size:20px}
+    h1{font-size:29px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .reveal{opacity:1;transform:none}
+    .bg-fx .grid,.bg-fx .glow{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- 배경 FX (커서 추적 그리드/글로우) -->
+<div class="bg-fx" aria-hidden="true">
+  <div class="glow"></div>
+  <div class="grid"></div>
+  <div class="vignette"></div>
+</div>
+
+<!-- 부팅 오버레이 -->
+<div id="boot" aria-hidden="true">
+  <div class="boot-inner">
+    <div class="boot-brand">◆ CoP // PHYSICAL AI — MISSION CONTROL</div>
+    <div class="boot-line" data-b><span>제어 콘솔 링크</span><b class="ok">CONNECTED</b></div>
+    <div class="boot-line" data-b><span>SO-101 (hdel_iot_01) 관절 캘리브레이션</span><b class="ok">OK</b></div>
+    <div class="boot-line" data-b><span>MuJoCo 시뮬레이션 코어</span><b class="ok">ONLINE</b></div>
+    <div class="boot-line" data-b><span>야간 파이프라인 스케줄러</span><b class="ok">ARMED</b></div>
+    <div class="boot-line" data-b><span>실측 rollout 재생 스트림</span><b class="ok">LOADED</b></div>
+    <div class="boot-bar"><i id="bootbar"></i></div>
+  </div>
+</div>
+
+<!-- 상단 관제 바 -->
+<header>
+  <div class="wrap nav">
+    <div class="brand"><i class="dot"></i>CoP<span>//</span>Physical&nbsp;AI</div>
+    <button class="menubtn" id="menubtn" aria-label="메뉴">☰ MENU</button>
+    <nav class="links" id="links">
+      <a href="#overview">Overview</a>
+      <a href="#metrics">성과지표</a>
+      <a href="#roadmap">Phase 로드맵</a>
+      <a href="#pipeline">야간 파이프라인</a>
+      <a href="#story">스토리</a>
+      <a href="#playground">플레이그라운드</a>
+      <a href="#map">사이트맵</a>
+    </nav>
+    <div class="sys-pill"><i class="d"></i>SYSTEM ONLINE</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ 히어로 ============ -->
+  <section class="hero" id="overview">
+    <div class="hero-grid">
+      <!-- 좌: 카피 -->
+      <div>
+        <span class="eyebrow"><i class="sq"></i>발주 · 현대엘리베이터 &nbsp;|&nbsp; SO-101 · hdel_iot_01</span>
+        <h1><span class="hl">엘리베이터 제어반</span>을, 로봇이 점검하기 위한 첫걸음.<br>로봇팔이 손끝을 배웁니다.</h1>
+        <p class="lede">가상 환경(MuJoCo)에서 매일 학습 데이터를 쌓고,<br>익힌 데이터를 실제 로봇팔로 옮깁니다.<br>병행하여 실기기에서 모션 학습을 통해 데이터를 쌓아 정확도를 높입니다.<br>로봇팔이 제어반의 전원 버튼을 눌러 리셋하고,<br>꽂혀 있는 케이블을 빼는(분리) 것을 목표로 합니다.</p>
+        <div class="cta">
+          <a class="btn primary" id="ctaStory" href="#story"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h9a3 3 0 0 1 3 3v11a2.5 2.5 0 0 0-2.5-2.5H4z"/><path d="M20 5h-4a3 3 0 0 0-3 3v11a2.5 2.5 0 0 1 2.5-2.5H20z"/></svg>스토리</a>
+          <a class="btn ghost" id="ctaPlay" href="#playground"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>플레이그라운드</a>
+        </div>
+        <div class="chips">
+          <div class="chip">1단계 · 집어옮기기<b><span class="u" data-count="100" data-dec="0">0</span>%</b></div>
+          <div class="chip">2단계 · 리셋버튼(S1)<b><span data-count="92.5" data-dec="1">0</span>%</b></div>
+          <div class="chip">시연까지<b>D-<span data-count="55" data-dec="0">0</span></b></div>
+        </div>
+      </div>
+
+      <!-- 우: 관제 콘솔 -->
+      <div class="console" id="console">
+        <div class="top">
+          <i class="lamp g"></i><i class="lamp a"></i><i class="lamp r"></i>
+          <span>&nbsp;CONSOLE / S1 · RESET-BUTTON · hdel_iot_01</span>
+          <span class="rt" id="clock">00:00:00</span>
+        </div>
+
+        <!-- 텔레메트리 오버레이 (실측) -->
+        <div class="tele tl">
+          <div class="lab">S1 성공률 · 4-seed</div>
+          <div class="val"><span data-count="92.5" data-dec="1">0</span><span class="s">%</span></div>
+          <svg class="spark" width="112" height="26" viewBox="0 0 112 26"><polyline id="spkSucc" fill="none" stroke="var(--grn)" stroke-width="1.6" stroke-linejoin="round" points=""/></svg>
+        </div>
+        <div class="tele tr">
+          <div class="lab">학습 손실 · 최종</div>
+          <div class="val"><span>0.013</span></div>
+          <svg class="spark" width="112" height="26" viewBox="0 0 112 26"><polyline id="spkLoss" fill="none" stroke="var(--cyn)" stroke-width="1.6" stroke-linejoin="round" points=""/></svg>
+        </div>
+
+        <!-- 로봇팔(SO-101) + PCB 무대 -->
+        <canvas id="hero3d" role="img" aria-label="SO-101 로봇팔(hdel_iot_01)이 초록 PCB 기판의 빨간 리셋 버튼을 누르는 실측 rollout 3D 재생 — 드래그로 회전, 휠로 확대"></canvas>
+
+        <div class="foot">
+          <span class="playlab"><i class="d"></i>재생 · 실측 rollout</span>
+          <button class="runbtn" id="playbtn" aria-label="재생/일시정지">❚❚ 일시정지</button>
+          <span class="status">프레임 <b id="framelbl">1/120</b> · 29fps · <span id="ledlab">LED ○</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 학습 로그 (실 train_log 재생) -->
+    <div class="logbox">
+      <div class="lh">
+        <span class="rep"><i class="d"></i>재생 (여태 학습분 반복 · 실데이터)</span>
+        <span>train.log · ACT · epoch 0→30</span>
+        <svg class="sk" width="150" height="24" viewBox="0 0 150 24"><polyline id="spkLossBig" fill="none" stroke="var(--cyn)" stroke-width="1.5" stroke-linejoin="round" points=""/></svg>
+      </div>
+      <div class="statstrip">
+        <div class="st"><div class="k">S1 성공률</div><div class="v g">92.5%</div></div>
+        <div class="st"><div class="k">1단계</div><div class="v g">100%</div></div>
+        <div class="st"><div class="k">시연까지</div><div class="v a">D-55</div></div>
+        <div class="st"><div class="k">총 에폭</div><div class="v c">31</div></div>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+  </section>
+
+  <!-- ============ Phase 로드맵 (3단계 관제 카드) ============ -->
+  <section class="blk" id="roadmap">
+    <div class="sechead reveal">
+      <span class="idx">02 / ROADMAP</span>
+      <h2>3단계 여정</h2>
+      <p>쉬운 동작부터 정밀 작업까지 — 한 단계씩 실제로 통과합니다.</p>
+    </div>
+    <div class="cards">
+      <div class="card done reveal">
+        <div class="ph">PHASE 01 <span class="badge g">● 완료</span></div>
+        <h3>물건 집어 옮기기</h3>
+        <div class="sub">Pick &amp; Place — 물체를 집어 정해진 곳에 놓기. 로봇팔의 기본기.</div>
+        <div class="metric"><span class="n" data-count="100" data-dec="0">0</span><span class="k">% 가상 성공률</span></div>
+        <div class="prog"><i data-w="100"></i></div>
+      </div>
+      <div class="card live reveal">
+        <div class="ph">PHASE 02 <span class="badge a">◐ 진행 중</span></div>
+        <h3>리셋 버튼 누르기 (S1)</h3>
+        <div class="sub">PCB의 빨간 버튼을 정확히 누르기. 성공하면 초록 LED 점등.</div>
+        <div class="metric"><span class="n" data-count="92.5" data-dec="1">0</span><span class="k">% 가상 시험 · 4-seed</span></div>
+        <div class="prog"><i data-w="92.5"></i></div>
+      </div>
+      <div class="card next reveal">
+        <div class="ph">PHASE 03 <span class="badge n">○ 예정</span></div>
+        <h3>RS232 케이블 분리</h3>
+        <div class="sub">꽂힌 케이블을 빼는(분리) 작업. 9월 도전 · 10월 실물 시연 목표.</div>
+        <div class="metric"><span class="n">40</span><span class="k">% 목표 · 9월 착수</span></div>
+        <div class="prog"><i data-w="12"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 성과 지표 (게이지) ============ -->
+  <section class="blk" id="metrics">
+    <div class="sechead reveal">
+      <span class="idx">03 / TELEMETRY</span>
+      <h2>성과 지표</h2>
+      <p>실측 숫자 — 가상 시뮬레이션 롤아웃 기준.</p>
+    </div>
+    <div class="metrics">
+      <div class="gcard reveal" data-g="100" data-col="grn"><div class="gwrap"></div><div class="cap">1단계 성공률<span>PICK &amp; PLACE</span></div></div>
+      <div class="gcard reveal" data-g="92.5" data-col="amb"><div class="gwrap"></div><div class="cap">2단계 성공률<span>S1 · RESET BUTTON</span></div></div>
+      <div class="gcard reveal" data-g="63" data-col="cyn"><div class="gwrap"></div><div class="cap">일정 진척<span>TO 2026-09-30</span></div></div>
+      <div class="gcard reveal" data-g="90" data-suffix="%↑" data-col="grn" data-manual="D-55"><div class="gwrap"></div><div class="cap">시연까지<span>D-DAY COUNTDOWN</span></div></div>
+    </div>
+  </section>
+
+  <!-- ============ 야간 파이프라인 ============ -->
+  <section class="blk" id="pipeline">
+    <div class="sechead reveal">
+      <span class="idx">04 / AUTONOMOUS LOOP</span>
+      <h2>매일 밤, 스스로 전진</h2>
+      <p>사람이 자는 동안 파이프라인이 돌아갑니다 — 수집 → 학습 → 측정 → 반복.</p>
+    </div>
+    <div class="pipe reveal">
+      <div class="lead"><i class="d"></i>NIGHTLY PIPELINE · 매 사이클마다 한 칸씩 자동 전진</div>
+      <div class="flow">
+        <div class="track"><div class="base"></div><div class="packet"></div></div>
+        <div class="node" data-n="0">
+          <div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyn)" stroke-width="1.7"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></div>
+          <div class="nm">수집</div><div class="dsc">시뮬 데이터</div>
+        </div>
+        <div class="node" data-n="1">
+          <div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyn)" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></div>
+          <div class="nm">학습</div><div class="dsc">ACT 정책</div>
+        </div>
+        <div class="node" data-n="2">
+          <div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyn)" stroke-width="1.7"><path d="M3 20h18M6 20V10M11 20V4M16 20v-8M21 20V8"/></svg></div>
+          <div class="nm">측정</div><div class="dsc">롤아웃 성공률</div>
+        </div>
+        <div class="node" data-n="3">
+          <div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="1.7"><path d="M3 12a9 9 0 1 1 3 6.7"/><path d="M3 21v-6h6"/></svg></div>
+          <div class="nm">반복</div><div class="dsc">다음 사이클</div>
+        </div>
+      </div>
+      <div class="loopback"><span class="arc"></span>측정 결과가 다음 수집으로 되먹임 — 자가 개선 루프<span class="arc"></span></div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ 푸터 · 관제 메뉴 ============ -->
+<footer id="map">
+  <div class="wrap">
+    <div class="mapgrid">
+      <a href="#overview"><div class="k">/ 01</div><div class="t">Overview</div><div class="a">프로젝트 개요</div></a>
+      <a href="#metrics"><div class="k">/ 02</div><div class="t">성과지표</div><div class="a">실측 텔레메트리</div></a>
+      <a href="#roadmap"><div class="k">/ 03</div><div class="t">Phase 로드맵</div><div class="a">3단계 여정</div></a>
+      <a href="#pipeline"><div class="k">/ 04</div><div class="t">야간 파이프라인</div><div class="a">자가 개선 루프</div></a>
+      <a href="#story" data-toast="스토리 페이지는 곧 공개됩니다"><div class="k">/ 05</div><div class="t">스토리</div><div class="a">곧 공개</div></a>
+      <a href="#playground" data-toast="플레이그라운드는 곧 공개됩니다"><div class="k">/ 06</div><div class="t">플레이그라운드</div><div class="a">곧 공개</div></a>
+      <a href="#overview"><div class="k">/ ▲</div><div class="t">맨 위로</div><div class="a">콘솔 복귀</div></a>
+      <a href="#overview"><div class="k">/ ●</div><div class="t">SYSTEM</div><div class="a">ONLINE</div></a>
+    </div>
+    <div class="foot-b">
+      <div>CoP // <b>Physical AI</b> · 현대엘리베이터 제어반 정비 자동화</div>
+      <div>SO-101 · MuJoCo · ACT · <b>SYSTEM ONLINE</b></div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ 실데이터 (인라인 임베드 · 외부 fetch 없음) ============ -->
+<script id="realdata">
+const REAL = {"train_log": [{"epoch": 0, "loss": 74.5122, "l1": 0.2656, "sec": 10}, {"epoch": 0, "loss": 2.832, "l1": 0.0627, "sec": 1362}, {"epoch": 1, "loss": 1.1658, "l1": 0.036, "sec": 1256}, {"epoch": 2, "loss": 0.6962, "l1": 0.0282, "sec": 1254}, {"epoch": 3, "loss": 0.4121, "l1": 0.0231, "sec": 1309}, {"epoch": 4, "loss": 0.2586, "l1": 0.0202, "sec": 1404}, {"epoch": 5, "loss": 0.177, "l1": 0.0174, "sec": 1486}, {"epoch": 6, "loss": 0.1327, "l1": 0.0155, "sec": 1366}, {"epoch": 7, "loss": 0.1043, "l1": 0.0141, "sec": 1388}, {"epoch": 8, "loss": 0.0864, "l1": 0.0135, "sec": 1250}, {"epoch": 9, "loss": 0.0736, "l1": 0.0125, "sec": 1246}, {"epoch": 10, "loss": 0.0632, "l1": 0.0116, "sec": 1240}, {"epoch": 11, "loss": 0.0551, "l1": 0.0109, "sec": 1240}, {"epoch": 12, "loss": 0.0487, "l1": 0.0105, "sec": 1241}, {"epoch": 13, "loss": 0.0437, "l1": 0.0101, "sec": 1240}, {"epoch": 14, "loss": 0.0396, "l1": 0.0096, "sec": 1237}, {"epoch": 15, "loss": 0.0352, "l1": 0.0091, "sec": 1240}, {"epoch": 16, "loss": 0.0326, "l1": 0.0088, "sec": 1237}, {"epoch": 17, "loss": 0.0298, "l1": 0.0088, "sec": 1240}, {"epoch": 18, "loss": 0.0273, "l1": 0.0083, "sec": 1229}, {"epoch": 19, "loss": 0.0252, "l1": 0.0081, "sec": 1239}, {"epoch": 20, "loss": 0.0233, "l1": 0.0079, "sec": 1239}, {"epoch": 21, "loss": 0.0215, "l1": 0.0076, "sec": 1241}, {"epoch": 22, "loss": 0.0203, "l1": 0.0075, "sec": 1236}, {"epoch": 23, "loss": 0.0187, "l1": 0.0072, "sec": 1234}, {"epoch": 24, "loss": 0.0178, "l1": 0.0072, "sec": 1235}, {"epoch": 25, "loss": 0.0168, "l1": 0.007, "sec": 1234}, {"epoch": 26, "loss": 0.0159, "l1": 0.0069, "sec": 1231}, {"epoch": 27, "loss": 0.0148, "l1": 0.0067, "sec": 1231}, {"epoch": 28, "loss": 0.0141, "l1": 0.0065, "sec": 1235}, {"epoch": 29, "loss": 0.0133, "l1": 0.0064, "sec": 1234}], "rollout": {"joints_shown": ["shoulder_lift", "elbow_flex", "wrist_flex", "gripper"], "led_frame": 46, "fps": 29.41, "n": 120, "success": true, "pcb": {"x": 0.2660934072833945, "y": -0.009168234037192151, "yaw_deg": 7.171958398227649}, "frames": [[-1.624, 1.429, 0.876, 0.006], [-1.678, 1.482, 0.864, 0.005], [-1.707, 1.491, 0.877, 0.006], [-1.684, 1.469, 0.873, 0.004], [-1.685, 1.456, 0.877, 0.002], [-1.694, 1.472, 0.873, 0.002], [-1.686, 1.457, 0.878, 0.001], [-1.67, 1.422, 0.9, 0.001], [-1.621, 1.374, 0.949, 0.0], [-1.557, 1.32, 1.017, -0.0], [-1.483, 1.263, 1.083, -0.001], [-1.405, 1.206, 1.136, -0.001], [-1.325, 1.147, 1.186, -0.0], [-1.243, 1.088, 1.235, -0.0], [-1.161, 1.028, 1.295, -0.002], [-1.077, 0.967, 1.353, -0.002], [-0.993, 0.906, 1.413, -0.001], [-0.908, 0.845, 1.468, -0.001], [-0.823, 0.783, 1.527, -0.001], [-0.736, 0.721, 1.587, -0.001], [-0.648, 0.658, 1.636, 0.0], [-0.559, 0.594, 1.699, 0.003], [-0.469, 0.53, 1.76, 0.002], [-0.378, 0.465, 1.817, 0.002], [-0.285, 0.4, 1.869, 0.001], [-0.192, 0.335, 1.863, 0.001], [-0.098, 0.269, 1.818, 0.003], [-0.001, 0.202, 1.757, 0.001], [0.098, 0.135, 1.713, 0.001], [0.199, 0.067, 1.676, 0.001], [0.287, 0.003, 1.641, -0.003], [0.298, -0.031, 1.653, -0.004], [0.278, -0.065, 1.636, -0.0], [0.25, -0.112, 1.586, 0.0], [0.252, -0.17, 1.524, 0.0], [0.254, -0.205, 1.498, -0.001], [0.258, -0.18, 1.479, -0.001], [0.259, -0.135, 1.461, 0.0], [0.266, -0.134, 1.446, -0.001], [0.264, -0.123, 1.439, -0.001], [0.269, -0.112, 1.425, -0.003], [0.27, -0.11, 1.419, -0.002], [0.277, -0.106, 1.412, -0.003], [0.276, -0.102, 1.401, -0.002], [0.277, -0.099, 1.402, -0.002], [0.278, -0.086, 1.386, -0.002], [0.28, -0.082, 1.383, -0.002], [0.279, -0.071, 1.375, -0.002], [0.28, -0.073, 1.374, -0.003], [0.288, -0.067, 1.362, -0.002], [0.287, -0.07, 1.362, -0.002], [0.287, -0.062, 1.355, -0.002], [0.287, -0.058, 1.347, -0.002], [0.289, -0.082, 1.372, -0.002], [0.291, -0.125, 1.425, -0.003], [0.294, -0.178, 1.492, -0.002], [0.293, -0.235, 1.552, -0.001], [0.295, -0.295, 1.602, 0.001], [0.299, -0.356, 1.649, 0.002], [0.303, -0.419, 1.698, 0.001], [0.304, -0.479, 1.757, 0.001], [0.306, -0.526, 1.806, 0.0], [0.315, -0.566, 1.83, 0.001], [0.308, -0.543, 1.806, -0.001], [0.3, -0.488, 1.776, 0.002], [0.278, -0.431, 1.742, 0.001], [0.274, -0.389, 1.7, -0.0], [0.266, -0.357, 1.671, 0.001], [0.262, -0.325, 1.644, -0.001], [0.257, -0.287, 1.61, 0.0], [0.252, -0.256, 1.584, -0.001], [0.248, -0.246, 1.577, -0.0], [0.257, -0.23, 1.559, -0.0], [0.251, -0.198, 1.518, -0.002], [0.251, -0.182, 1.509, -0.002], [0.267, -0.177, 1.496, -0.001], [0.265, -0.153, 1.454, -0.002], [0.258, -0.125, 1.458, -0.001], [0.276, -0.136, 1.44, -0.002], [0.274, -0.139, 1.448, -0.003], [0.286, -0.133, 1.435, -0.002], [0.285, -0.116, 1.411, -0.002], [0.282, -0.115, 1.413, -0.003], [0.279, -0.1, 1.403, -0.002], [0.291, -0.113, 1.407, 0.0], [0.285, -0.092, 1.384, -0.001], [0.303, -0.089, 1.389, -0.001], [0.295, -0.095, 1.382, -0.001], [0.294, -0.075, 1.367, 0.0], [0.295, -0.084, 1.378, -0.001], [0.294, -0.073, 1.357, -0.001], [0.301, -0.08, 1.357, -0.003], [0.3, -0.117, 1.398, -0.002], [0.29, -0.167, 1.457, 0.0], [0.303, -0.227, 1.527, 0.001], [0.316, -0.287, 1.603, 0.001], [0.303, -0.346, 1.682, 0.001], [0.274, -0.405, 1.754, 0.002], [0.274, -0.47, 1.802, 0.002], [0.319, -0.541, 1.842, 0.002], [0.364, -0.568, 1.845, -0.002], [0.369, -0.575, 1.822, -0.002], [0.356, -0.606, 1.847, -0.001], [0.364, -0.656, 1.901, -0.002], [0.361, -0.704, 1.924, -0.002], [0.355, -0.694, 1.897, 0.001], [0.35, -0.643, 1.858, -0.0], [0.327, -0.566, 1.797, 0.0], [0.324, -0.484, 1.733, -0.002], [0.319, -0.412, 1.684, -0.001], [0.32, -0.395, 1.681, -0.002], [0.32, -0.374, 1.672, -0.004], [0.315, -0.355, 1.629, -0.002], [0.319, -0.337, 1.595, -0.003], [0.32, -0.311, 1.579, -0.002], [0.324, -0.302, 1.56, -0.002], [0.323, -0.287, 1.551, -0.003], [0.317, -0.254, 1.537, -0.004], [0.33, -0.247, 1.508, -0.003], [0.325, -0.262, 1.511, -0.003]]}, "meta": {"device": "SO-101 (hdel_iot_01)", "motors": 6, "s1_success_4seed": 0.925, "phase1": 1.0, "epoch_minutes": 20.5, "total_epochs": 31}};
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var TL = REAL.train_log;
+
+  /* ---------- 부팅 시퀀스 ---------- */
+  var boot=document.getElementById("boot"), bar=document.getElementById("bootbar");
+  var blines=document.querySelectorAll("[data-b]");
+  function finishBoot(){ boot.classList.add("done"); startAll(); }
+  if(RM){ boot.style.transition="none"; finishBoot(); }
+  else{
+    blines.forEach(function(l,i){ setTimeout(function(){ l.style.transition="opacity .3s"; l.style.opacity="1"; }, 180+i*230); });
+    if(bar){ bar.style.transition="width 1.5s cubic-bezier(.4,0,.2,1)"; requestAnimationFrame(function(){ bar.style.width="100%"; }); }
+    setTimeout(finishBoot, 1750);
+  }
+
+  /* ---------- 커서 추적 배경 ---------- */
+  var root=document.documentElement;
+  if(!RM){
+    window.addEventListener("pointermove", function(e){
+      root.style.setProperty("--mx",(e.clientX/window.innerWidth*100)+"%");
+      root.style.setProperty("--my",(e.clientY/window.innerHeight*100)+"%");
+    }, {passive:true});
+  }
+
+  /* ---------- 시계 ---------- */
+  var clk=document.getElementById("clock");
+  function tick(){ if(!clk)return; var d=new Date();
+    clk.textContent=[d.getHours(),d.getMinutes(),d.getSeconds()].map(function(n){return(n<10?"0":"")+n}).join(":"); }
+  tick(); setInterval(tick,1000);
+
+  /* ---------- 카운트업 ---------- */
+  function countUp(el){
+    var target=parseFloat(el.getAttribute("data-count"));
+    var dec=parseInt(el.getAttribute("data-dec")||"0",10);
+    if(RM){ el.textContent=target.toFixed(dec); return; }
+    var start=performance.now(), dur=1300;
+    function step(now){
+      var p=Math.min((now-start)/dur,1), e=1-Math.pow(1-p,3);
+      el.textContent=(target*e).toFixed(dec);
+      if(p<1) requestAnimationFrame(step); else el.textContent=target.toFixed(dec);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ---------- 게이지 렌더 ---------- */
+  var colMap={grn:"var(--grn)",amb:"var(--amb)",cyn:"var(--cyn)"};
+  function buildGauge(card){
+    var wrap=card.querySelector(".gwrap");
+    var pct=parseFloat(card.getAttribute("data-g"));
+    var col=colMap[card.getAttribute("data-col")]||"var(--grn)";
+    var manual=card.getAttribute("data-manual");
+    var suffix=card.getAttribute("data-suffix");
+    var r=54, C=2*Math.PI*r;
+    wrap.innerHTML=
+      '<svg width="132" height="132" viewBox="0 0 132 132">'+
+      '<circle cx="66" cy="66" r="'+r+'" fill="none" stroke="var(--line2)" stroke-width="9"/>'+
+      '<circle class="arc" cx="66" cy="66" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="9" stroke-linecap="round" '+
+      'stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'" style="filter:drop-shadow(0 0 6px '+col+')"/></svg>'+
+      '<div class="ctr"><div class="big" style="color:'+col+'">'+(manual||"0")+'</div><div class="u">'+(suffix||(manual?"":"%"))+'</div></div>';
+    var arc=wrap.querySelector(".arc");
+    var big=wrap.querySelector(".big");
+    var off=C*(1-pct/100);
+    if(RM){ arc.style.strokeDashoffset=off; if(!manual) big.textContent=pct%1?pct.toFixed(1):pct.toFixed(0); return; }
+    arc.style.transition="stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)";
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ arc.style.strokeDashoffset=off; }); });
+    if(!manual){
+      var s=performance.now();
+      (function anim(now){ var p=Math.min((now-s)/1400,1),e=1-Math.pow(1-p,3);
+        big.textContent=(pct*e).toFixed(pct%1?1:0);
+        if(p<1)requestAnimationFrame(anim); else big.textContent=pct%1?pct.toFixed(1):pct.toFixed(0);
+      })(s);
+    }
+  }
+
+  /* ---------- 스파크라인: 데이터로 polyline points 생성 + draw ---------- */
+  function mapPoints(vals, w, h, pad){
+    var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), rng=(mx-mn)||1;
+    var n=vals.length, out=[];
+    for(var i=0;i<n;i++){
+      var x=(n===1)?0:(i/(n-1))*(w-1);
+      var y=(h-pad)-((vals[i]-mn)/rng)*(h-2*pad);
+      out.push(x.toFixed(1)+","+y.toFixed(1));
+    }
+    return out.join(" ");
+  }
+  function drawSpark(pl){
+    if(!pl)return;
+    if(RM){ return; }
+    var len=pl.getTotalLength();
+    pl.style.strokeDasharray=len; pl.style.strokeDashoffset=len;
+    pl.style.transition="stroke-dashoffset 1.4s ease .3s";
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ pl.style.strokeDashoffset=0; }); });
+  }
+  function buildSparks(){
+    // 손실 곡선(로그 스케일): 74.5 -> 0.013 급강하
+    var lossLog = TL.map(function(r){ return Math.log10(r.loss); });
+    var loss1=document.getElementById("spkLoss");
+    var loss2=document.getElementById("spkLossBig");
+    if(loss1){ loss1.setAttribute("points", mapPoints(lossLog,112,26,3)); }
+    if(loss2){ loss2.setAttribute("points", mapPoints(lossLog,150,24,3)); }
+    // 4-seed 성공(9,10,8,10 → %) 스파크
+    var succ=[90,100,80,100];
+    var sp=document.getElementById("spkSucc");
+    if(sp){ sp.setAttribute("points", mapPoints(succ,112,26,3)); }
+    [loss1,loss2,sp].forEach(drawSpark);
+  }
+
+  /* 로봇팔: 실측 rollout 3D 재생은 arm3d.js(canvas#hero3d)가 담당 */
+
+  /* ---------- 로그 콘솔: 실 train_log 재생 ---------- */
+  var logEl=document.getElementById("log");
+  function pad2(n){ return (n<10?"0":"")+n; }
+  function lossStr(v){ return v>=10? v.toFixed(1) : v>=1? v.toFixed(2) : v.toFixed(3); }
+  function lossCls(v){ return v>1? "am" : v<0.05? "ok" : "cy"; }
+  function addLogRow(r){
+    var d=document.createElement("div");
+    var mins=(r.sec/60);
+    function span(cls,txt){ var s=document.createElement("span"); if(cls)s.className=cls; s.textContent=txt; return s; }
+    d.appendChild(span("t","epoch "+pad2(r.epoch)+" "));
+    d.appendChild(document.createTextNode("· loss "));
+    d.appendChild(span(lossCls(r.loss), lossStr(r.loss)));
+    d.appendChild(document.createTextNode(" · l1 "));
+    d.appendChild(span("cy", r.l1.toFixed(4)));
+    d.appendChild(span("t", " · "+mins.toFixed(1)+"min"));
+    logEl.appendChild(d);
+    while(logEl.children.length>6) logEl.removeChild(logEl.firstChild);
+  }
+  var li=0, logTimer=null;
+  function feedLog(){
+    addLogRow(TL[li%TL.length]); li++;
+    logTimer=setTimeout(feedLog, 820);
+  }
+
+  /* ---------- CTA 토스트 (대상 페이지 곧 공개) ---------- */
+  var toastEl=null, toastTimer=null;
+  function toast(msg){
+    if(!toastEl){ toastEl=document.createElement("div"); toastEl.className="toast";
+      toastEl.innerHTML='<i class="d"></i><span></span>'; document.body.appendChild(toastEl); }
+    toastEl.querySelector("span").textContent=msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){ toastEl.classList.remove("show"); }, 2200);
+  }
+  function wireToast(el){
+    if(!el) return;
+    el.addEventListener("click", function(ev){
+      var href=el.getAttribute("href")||"";
+      var id=href.charAt(0)==="#"?href.slice(1):"";
+      if(id && !document.getElementById(id)){ ev.preventDefault();
+        toast(el.getAttribute("data-toast")|| (el.textContent.trim()+" — 곧 공개됩니다")); }
+    });
+  }
+  wireToast(document.getElementById("ctaStory"));
+  wireToast(document.getElementById("ctaPlay"));
+  document.querySelectorAll(".mapgrid a[data-toast]").forEach(wireToast);
+
+  /* ---------- 스크롤 리빌 + 지연 로드 ---------- */
+  var io=new IntersectionObserver(function(ents){
+    ents.forEach(function(en){
+      if(!en.isIntersecting) return;
+      var el=en.target;
+      el.classList.add("in");
+      var pi=el.querySelector(".prog i");
+      if(pi){ setTimeout(function(){ pi.style.width=pi.getAttribute("data-w")+"%"; },120); }
+      if(el.classList.contains("gcard") && !el.dataset.built){ el.dataset.built="1"; buildGauge(el); }
+      el.querySelectorAll("[data-count]").forEach(function(c){ if(!c.dataset.done){ c.dataset.done="1"; countUp(c);} });
+      io.unobserve(el);
+    });
+  },{threshold:0.25});
+  document.querySelectorAll(".reveal").forEach(function(e){ io.observe(e); });
+
+  /* ---------- 모바일 메뉴 ---------- */
+  var mb=document.getElementById("menubtn"), lk=document.getElementById("links");
+  if(mb) mb.addEventListener("click", function(){ lk.classList.toggle("open"); });
+  lk && lk.addEventListener("click", function(e){ if(e.target.tagName==="A") lk.classList.remove("open"); });
+
+  /* ---------- 전체 시작(부팅 후) ---------- */
+  function startAll(){
+    document.querySelectorAll(".hero [data-count], header [data-count]").forEach(function(c){ if(!c.dataset.done){ c.dataset.done="1"; countUp(c);} });
+    buildSparks();
+    if(RM){
+      // 감속 모드: 로그 마지막 줄들 채움 (팔은 arm3d.js가 정적 렌더)
+      for(var k=Math.max(0,TL.length-6);k<TL.length;k++) addLogRow(TL[k]);
+      return;
+    }
+    feedLog();
+  }
+})();
+</script>
+<!--INJECT:THREEJS-->
+<!--INJECT:REALTRAJ-->
+<!--INJECT:ARM3D-->
+</body>
+</html>
