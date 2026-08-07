@@ -65,11 +65,21 @@ def find_latest_checkpoint() -> Path | None:
     return ckpts[-1] if ckpts else None
 
 
-def run_rollout(twin, policy, device, rng, max_frames, collect_frames):
-    """단일 S1 rollout. (success, press_depth_m, led_frame, top_frames, traj, placement) 반환."""
+def run_rollout(twin, policy, device, rng, max_frames, collect_frames, dr=None):
+    """단일 S1 rollout. (success, press_depth_m, led_frame, top_frames, traj, placement) 반환.
+
+    dr!=None 이면 DR 섭동(조명/마찰/카메라노이즈) 하에서 측정 — 정책·환경치수 불변, 강건성 프록시.
+    """
     import torch
+    import mujoco
 
     placement = twin.reset(rng)          # 홈 자세 + 15×15cm 존 무작위화 + LED off
+    dr_noise_std = 0.0
+    if dr is not None:                   # DR: reset 마다 원본 복원 후 무작위화 (누적 방지)
+        dr["mod"].restore_baseline(twin.model, dr["baseline"])
+        applied = dr["mod"].randomize_scene(twin.model, dr["rng"], axes=dr["axes"])
+        mujoco.mj_setConst(twin.model, twin.data)
+        dr_noise_std = applied["camera_noise_std"]
     policy.reset()                       # ACT 액션 큐 초기화
     frames = []                          # 영상용 top 카메라 프레임
     traj = []                            # 3D 리플레이용 qpos6 (프레임당)
@@ -79,6 +89,9 @@ def run_rollout(twin, policy, device, rng, max_frames, collect_frames):
     for step in range(max_frames):
         top = twin.render("top")         # (480,640,3) uint8 — **반전 없음** (수집기와 동일)
         closeup = twin.render("closeup")
+        if dr is not None:               # 카메라 센서 노이즈 (top+closeup 둘 다)
+            top = dr["mod"].apply_camera_noise(top, dr_noise_std, dr["rng"])
+            closeup = dr["mod"].apply_camera_noise(closeup, dr_noise_std, dr["rng"])
         if collect_frames:
             frames.append(top.copy())
 
@@ -106,15 +119,18 @@ def run_rollout(twin, policy, device, rng, max_frames, collect_frames):
     return twin.led_on(), -min_btn, led_frame, frames, traj, placement
 
 
-def measure_seed(twin, policy, device, seed, rollouts, max_frames, video_rollouts):
+def measure_seed(twin, policy, device, seed, rollouts, max_frames, video_rollouts, dr_cfg=None):
     """한 seed 의 rollout 묶음. (results, trajectories, video_frames, placements) 반환."""
     rng = np.random.default_rng(seed)
+    dr = None
+    if dr_cfg is not None:               # DR rng는 존 rng와 분리 → 버튼 배치는 nominal과 동일, DR만 추가 섭동
+        dr = dict(dr_cfg); dr["rng"] = np.random.default_rng(seed + 777)
     results, trajectories, video_frames = [], [], []
     for i in range(rollouts):
         collect = i < video_rollouts
         try:
             ok, depth_m, led_f, frames, traj, placement = run_rollout(
-                twin, policy, device, rng, max_frames, collect)
+                twin, policy, device, rng, max_frames, collect, dr=dr)
         except Exception as e:  # 한 rollout 실패가 전체 측정을 죽이지 않게
             results.append({"rollout": i, "success": False, "press_depth_mm": 0.0,
                             "error": str(e)[:120]})
@@ -132,15 +148,19 @@ def measure_seed(twin, policy, device, seed, rollouts, max_frames, video_rollout
 
 
 def write_outputs(ckpt, seed, is_nominal, results, trajectories, video_frames,
-                  max_frames, wall_sec, device, press_threshold_mm, timestep):
+                  max_frames, wall_sec, device, press_threshold_mm, timestep, dr_axes=None):
     n_success = sum(r["success"] for r in results)
     rate = n_success / len(results) if results else 0.0
     median_press = statistics.median(r["press_depth_mm"] for r in results) if results else 0.0
     date_tag = time.strftime("%Y%m%d")
     seed_tag = "" if is_nominal else f"_seed{seed}"
+    is_dr = dr_axes is not None
+    dr_tag = ("_dr" if set(dr_axes) == {"light", "friction", "camera"}
+              else "_dr_" + "_".join(sorted(dr_axes))) if is_dr else ""
+    file_tag = dr_tag + seed_tag   # 예: _dr, _dr_seed7, _dr_camera (DR은 nominal 파일 불변)
 
     video_path = None
-    if video_frames:  # 영상은 nominal(seed42)만 — _seedN 영상은 대시보드가 어차피 스킵.
+    if video_frames and not is_dr:  # 영상은 nominal(seed42) & DR 아님만.
         # imageio import 는 여기서 — 측정 요약 JSON emit 이 영상 라이브러리에 볼모잡히지 않게.
         import imageio.v2 as imageio
         vp = OUT_DIR / f"inference_{RUN_TAG}_epoch_{ckpt.name.replace('epoch_', '')}_{date_tag}{seed_tag}.mp4"
@@ -163,25 +183,26 @@ def write_outputs(ckpt, seed, is_nominal, results, trajectories, video_frames,
         "median_lift_mm": round(median_press, 2),  # 대시보드 비교표 컬럼 호환 (S1=press 깊이)
         "press_threshold_mm": round(press_threshold_mm, 2),  # 트윈 PRESS_THRESHOLD 에서 파생 (하드코딩 아님)
         "max_frames": max_frames,
-        "dr": False,
+        "dr": is_dr,
+        "dr_axes": list(dr_axes) if is_dr else None,
         "video_path": video_path,
         "wall_clock_sec": round(wall_sec, 1),
         "device": device,  # 실제 해석된 device (요청값 아님)
         "results": results,
     }
-    summary_name = f"rollout_summary_s1{seed_tag}.json"
+    summary_name = f"rollout_summary_s1{file_tag}.json"
     (OUT_DIR / summary_name).write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # 불변 히스토리 요약 (측정마다 축적 — 성과 차트 데이터원, seed 전부)
     hist_dir = OUT_DIR / "history"
     hist_dir.mkdir(exist_ok=True)
-    hist_base = f"{time.strftime('%Y%m%d-%H%M%S')}_{RUN_TAG}_{ckpt.name}{seed_tag}"
+    hist_base = f"{time.strftime('%Y%m%d-%H%M%S')}_{RUN_TAG}_{ckpt.name}{file_tag}"
     (hist_dir / f"{hist_base}.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
-    # 3D 리플레이 궤적은 nominal(seed42)만 — build_web3d 가 (ckpt,checkpoint,날짜)로 dedupe 해
-    # 어차피 1건만 살아남는다. nominal 만 남기면 리플레이=영상 seed 일치 + history/ 비대화 방지.
-    if not is_nominal:
+    # 3D 리플레이 궤적은 nominal(seed42) & DR 아님만 — DR 은 강건성 측정이라 리플레이 대상 아님.
+    # build_web3d 가 (ckpt,checkpoint,날짜)로 dedupe → nominal 1건만 유지(리플레이=영상 seed 일치).
+    if not is_nominal or is_dr:
         return summary
     traj_payload = {
         "checkpoint": str(ckpt.relative_to(ROOT)),
@@ -210,6 +231,10 @@ def main(argv=None):
     p.add_argument("--seeds", type=str, default=DEFAULT_SEEDS, help="쉼표구분 seed 목록 (첫 seed=nominal)")
     p.add_argument("--device", choices=["cpu", "mps", "cuda"], default="cpu",
                    help="추론 device (기본 cpu; 학습 종료 후엔 mps 가 빠름)")
+    p.add_argument("--dr", action="store_true",
+                   help="Domain Randomization 하 강건성 측정 (재학습 아님 · 별도 rollout_summary_s1_dr.json)")
+    p.add_argument("--dr-axes", type=str, default="light,friction,camera",
+                   help="DR 무작위화 축 (쉼표: light,friction,camera). 부분집합=축별 ablation 파일.")
     args = p.parse_args(argv)
 
     import torch  # noqa: F401  (device 문자열 검증 및 build_model 내부에서 사용)
@@ -241,6 +266,17 @@ def main(argv=None):
     press_mm = abs(PRESS_THRESHOLD) * 1000        # 트윈 계약 상수에서 파생 (하드코딩 방지)
     timestep = float(twin.model.opt.timestep)
 
+    dr_cfg = None
+    if args.dr:                                    # DR 컨텍스트 (학습 아님 — 측정 시 시뮬만 섭동, 매 rollout 복원)
+        import sim_domain_randomization as dr_mod   # samples/training 은 위에서 path 추가됨
+        dr_axes = tuple(a.strip() for a in args.dr_axes.split(",") if a.strip())
+        bad = [a for a in dr_axes if a not in dr_mod.DR_AXES]
+        if bad:
+            print(json.dumps({"status": "error", "message": f"알 수 없는 DR 축: {bad} (허용 {list(dr_mod.DR_AXES)})"},
+                             ensure_ascii=False))
+            sys.exit(1)
+        dr_cfg = {"mod": dr_mod, "baseline": dr_mod.snapshot_baseline(twin.model), "axes": dr_axes}
+
     seeds = [int(s) for s in args.seeds.split(",") if s.strip()]
     if not seeds:  # 잘못된 --seeds 로 조용히 무작업 성공하지 않게 (크론 오설정 방어)
         print(json.dumps({"status": "error", "message": f"유효한 seed 없음: --seeds={args.seeds!r}"},
@@ -252,10 +288,11 @@ def main(argv=None):
         t0 = time.time()
         results, trajectories, video_frames = measure_seed(
             twin, policy, device, seed, args.rollouts, args.max_frames,
-            args.video_rollouts if is_nominal else 0)  # 영상은 nominal seed 만
+            args.video_rollouts if (is_nominal and not args.dr) else 0, dr_cfg=dr_cfg)
         summary = write_outputs(ckpt, seed, is_nominal, results, trajectories,
                                 video_frames, args.max_frames, time.time() - t0,
-                                str(device), press_mm, timestep)
+                                str(device), press_mm, timestep,
+                                dr_axes=(dr_cfg["axes"] if dr_cfg else None))
         summaries.append(summary)
         print(f"seed{seed}: 성공률 {summary['success_rate']} "
               f"({summary['success']}/{summary['rollouts']}) · {summary['wall_clock_sec']}s", flush=True)
@@ -265,6 +302,7 @@ def main(argv=None):
     fair = round(sum(rates) / len(rates), 3) if rates else None
     print(json.dumps({
         "status": "ok", "checkpoint": str(ckpt.relative_to(ROOT)),
+        "dr": bool(args.dr), "dr_axes": (list(dr_cfg["axes"]) if dr_cfg else None),
         "seeds": seeds, "per_seed": rates, "fair_estimate": fair,
         "success_rate": fair,  # 크론 드라이버 stage6 grep 호환 (= 4-seed 공정추정)
     }, ensure_ascii=False, indent=2))

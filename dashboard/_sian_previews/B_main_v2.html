@@ -530,7 +530,7 @@ const REAL = {"train_log": [{"epoch": 0, "loss": 74.5122, "l1": 0.2656, "sec": 1
     if(RM){ el.textContent=target.toFixed(dec); return; }
     var start=performance.now(), dur=1300;
     function step(now){
-      var p=Math.min((now-start)/dur,1), e=1-Math.pow(1-p,3);
+      var p=Math.max(0,Math.min((now-start)/dur,1)), e=1-Math.pow(1-p,3);
       el.textContent=(target*e).toFixed(dec);
       if(p<1) requestAnimationFrame(step); else el.textContent=target.toFixed(dec);
     }

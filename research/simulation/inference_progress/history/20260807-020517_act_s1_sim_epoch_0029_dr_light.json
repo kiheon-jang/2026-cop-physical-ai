@@ -1,0 +1,86 @@
+{
+  "status": "ok",
+  "task": "s1_reset_button",
+  "metric": "led_latch",
+  "checkpoint": "checkpoints/act_s1_sim/epoch_0029",
+  "ckpt_dir": "act_s1_sim",
+  "scene": "pcb_reset_scene.xml",
+  "measured_at": "2026-08-07T02:05:17",
+  "seed": 42,
+  "rollouts": 10,
+  "success": 6,
+  "success_rate": 0.6,
+  "median_press_mm": 1.82,
+  "median_lift_mm": 1.82,
+  "press_threshold_mm": 1.5,
+  "max_frames": 120,
+  "dr": true,
+  "dr_axes": [
+    "light"
+  ],
+  "video_path": null,
+  "wall_clock_sec": 62.6,
+  "device": "cpu",
+  "results": [
+    {
+      "rollout": 0,
+      "success": true,
+      "press_depth_mm": 4.28,
+      "led_frame": 109
+    },
+    {
+      "rollout": 1,
+      "success": false,
+      "press_depth_mm": 0.98,
+      "led_frame": null
+    },
+    {
+      "rollout": 2,
+      "success": true,
+      "press_depth_mm": 2.44,
+      "led_frame": 117
+    },
+    {
+      "rollout": 3,
+      "success": false,
+      "press_depth_mm": 0.13,
+      "led_frame": null
+    },
+    {
+      "rollout": 4,
+      "success": true,
+      "press_depth_mm": 1.62,
+      "led_frame": 113
+    },
+    {
+      "rollout": 5,
+      "success": true,
+      "press_depth_mm": 2.96,
+      "led_frame": 114
+    },
+    {
+      "rollout": 6,
+      "success": true,
+      "press_depth_mm": 3.67,
+      "led_frame": 109
+    },
+    {
+      "rollout": 7,
+      "success": false,
+      "press_depth_mm": 0.13,
+      "led_frame": null
+    },
+    {
+      "rollout": 8,
+      "success": true,
+      "press_depth_mm": 2.03,
+      "led_frame": 31
+    },
+    {
+      "rollout": 9,
+      "success": false,
+      "press_depth_mm": 0.13,
+      "led_frame": null
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "status": "ok",
+  "task": "s1_reset_button",
+  "metric": "led_latch",
+  "checkpoint": "checkpoints/act_s1_sim/epoch_0029",
+  "ckpt_dir": "act_s1_sim",
+  "scene": "pcb_reset_scene.xml",
+  "measured_at": "2026-08-07T01:57:17",
+  "seed": 42,
+  "rollouts": 2,
+  "success": 2,
+  "success_rate": 1.0,
+  "median_press_mm": 3.42,
+  "median_lift_mm": 3.42,
+  "press_threshold_mm": 1.5,
+  "max_frames": 120,
+  "dr": true,
+  "dr_axes": [
+    "light",
+    "friction",
+    "camera"
+  ],
+  "video_path": null,
+  "wall_clock_sec": 10.2,
+  "device": "cpu",
+  "results": [
+    {
+      "rollout": 0,
+      "success": true,
+      "press_depth_mm": 4.3,
+      "led_frame": 106
+    },
+    {
+      "rollout": 1,
+      "success": true,
+      "press_depth_mm": 2.54,
+      "led_frame": 35
+    }
+  ]
+}
