@@ -213,7 +213,7 @@ PHASES = [
     ("Phase 1", "6월 시뮬 데이터 + ACT 사전학습", datetime.date(2026, 6, 1), datetime.date(2026, 6, 30), []),
     ("Phase 2", "7월 Sim2Real 검증", datetime.date(2026, 7, 1), datetime.date(2026, 7, 31), []),
     ("Phase 3", "8월 S1 리셋버튼 시뮬 (실기 정렬)", datetime.date(2026, 8, 1), datetime.date(2026, 8, 31), []),
-    ("Phase 4", "9월 RS232 결선 시뮬 학습", datetime.date(2026, 9, 1), datetime.date(2026, 9, 30), []),
+    ("Phase 4", "9월 RS232 케이블 분리 시뮬 학습", datetime.date(2026, 9, 1), datetime.date(2026, 9, 30), []),
     ("Phase 5", "10월 통합 시연", datetime.date(2026, 10, 1), datetime.date(2026, 10, 31), []),
 ]
 
@@ -330,7 +330,7 @@ def get_headline_html(yesterday):
 {{
   "oneliner": "한 줄 요약 (50자 이내, 비전공자도 이해할 수 있게)",
   "detail": "어떤 의미냐면 - 으로 시작하는 2-3줄 쉬운 설명. 게임/일상 비유 활용 가능. HTML <br/> 태그로 줄바꿈.",
-  "why": "왜 중요한가? 10월 PCB 조정 + RS232 HHT 결선 시연 목표와 어떻게 연결되는지 1-2문장."
+  "why": "왜 중요한가? 10월 PCB 조정 + RS232 HHT 케이블 분리 시연 목표와 어떻게 연결되는지 1-2문장."
 }}
 
 조건:
@@ -363,7 +363,7 @@ def get_headline_html(yesterday):
     return {
         "oneliner": summary[:60] if summary else "어제 시뮬 작업 진행",
         "detail": "어제 자동 작업으로 시뮬레이션 환경이 한 단계 더 구축됐습니다.",
-        "why": "10월 PCB 조정 + RS232 HHT 결선 시연을 향한 매일의 작은 진척입니다.",
+        "why": "10월 PCB 조정 + RS232 HHT 케이블 분리 시연을 향한 매일의 작은 진척입니다.",
     }
 
 
