@@ -638,10 +638,10 @@
 
   function render(now){
     // 목표 결정
-    if(!userTook && !reduce){ var it=idleTarget(now); target.x=it.x; target.y=it.y; }
+    if(!userTook){ var it=idleTarget(now); target.x=it.x; target.y=it.y; }  // 항상 데모 애니(reduced-motion 이어도 팔이 멈춰보이지 않게)
 
     // 부드러운 추종 (스프링 느낌)
-    var k = reduce ? 1 : 0.20;
+    var k = 0.20;  // 항상 부드럽게 추종
     cur.x += (target.x-cur.x)*k;
     cur.y += (target.y-cur.y)*k;
 

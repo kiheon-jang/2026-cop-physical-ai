@@ -246,10 +246,10 @@ a{color:inherit;text-decoration:none}
       <svg class="robotsvg s1" id="robot" viewBox="0 0 600 700" role="img" aria-label="스크롤에 따라 동작이 바뀌는 로봇팔">
         <defs>
           <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#fbf7ef"/><stop offset=".5" stop-color="#e7dcc7"/><stop offset="1" stop-color="#cbbda2"/>
+            <stop offset="0" stop-color="#4a5568"/><stop offset=".5" stop-color="#3a4150"/><stop offset="1" stop-color="#242a35"/>
           </linearGradient>
           <linearGradient id="metal2" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#efe6d5"/><stop offset="1" stop-color="#c3b499"/>
+            <stop offset="0" stop-color="#454d5c"/><stop offset="1" stop-color="#2a3140"/>
           </linearGradient>
           <radialGradient id="halo" cx="50%" cy="42%" r="55%">
             <stop offset="0" stop-color="#5fd7f5" stop-opacity=".22"/><stop offset="1" stop-color="#5fd7f5" stop-opacity="0"/>
@@ -285,7 +285,7 @@ a{color:inherit;text-decoration:none}
           <rect x="255" y="452" width="215" height="40" rx="6" fill="#1f6b45"/>
           <rect x="255" y="452" width="215" height="12" rx="6" fill="#fff" opacity=".12"/>
           <!-- solder pads -->
-          <g fill="#d9c98a" opacity=".8"><circle cx="285" cy="482" r="3"/><circle cx="305" cy="482" r="3"/><circle cx="445" cy="482" r="3"/><circle cx="425" cy="482" r="3"/></g>
+          <g fill="#c9ccd6" opacity=".8"><circle cx="285" cy="482" r="3"/><circle cx="305" cy="482" r="3"/><circle cx="445" cy="482" r="3"/><circle cx="425" cy="482" r="3"/></g>
           <!-- reset button -->
           <circle cx="360" cy="470" r="17" fill="#7a1f1a"/>
           <circle id="btnTop" cx="360" cy="466" r="14" style="fill:var(--red)"/>
@@ -315,14 +315,14 @@ a{color:inherit;text-decoration:none}
         <rect x="112" y="300" width="76" height="210" rx="14" fill="url(#metal2)" style="stroke:var(--line)"/>
         <rect x="124" y="316" width="52" height="34" rx="8" fill="#000" opacity=".08"/>
         <circle cx="150" cy="300" r="26" fill="url(#metal)" style="stroke:var(--line)"/>
-        <circle cx="150" cy="300" r="9" fill="#b9a988"/>
+        <circle cx="150" cy="300" r="9" fill="#eef2f8"/>
 
         <g id="shoulder" data-joint transform="translate(150,300) rotate(-28)">
           <!-- upper arm -->
           <rect x="-6" y="-19" width="168" height="38" rx="19" fill="url(#metal)" style="stroke:var(--line)"/>
           <rect x="16" y="-9" width="120" height="7" rx="4" fill="#fff" opacity=".35"/>
           <g id="elbow" data-joint transform="translate(150,0) rotate(84)">
-            <circle r="20" fill="url(#metal)" style="stroke:var(--line)"/><circle r="7" fill="#b9a988"/>
+            <circle r="20" fill="url(#metal)" style="stroke:var(--line)"/><circle r="7" fill="#eef2f8"/>
             <!-- forearm -->
             <rect x="-4" y="-15" width="132" height="30" rx="15" fill="url(#metal)" style="stroke:var(--line)"/>
             <rect x="14" y="-7" width="92" height="6" rx="3" fill="#fff" opacity=".35"/>
@@ -331,8 +331,8 @@ a{color:inherit;text-decoration:none}
               <!-- effector -->
               <g id="effector" data-joint transform="translate(0,0)">
                 <rect x="-12" y="-4" width="26" height="26" rx="6" fill="url(#metal2)" style="stroke:var(--line)"/>
-                <g id="fingerL" data-joint transform="translate(0,-11)"><rect x="10" y="-4" width="9" height="34" rx="4" fill="#b9a988"/></g>
-                <g id="fingerR" data-joint transform="translate(0,11)"><rect x="10" y="-4" width="9" height="34" rx="4" fill="#b9a988"/></g>
+                <g id="fingerL" data-joint transform="translate(0,-11)"><rect x="10" y="-4" width="9" height="34" rx="4" fill="#eef2f8"/></g>
+                <g id="fingerR" data-joint transform="translate(0,11)"><rect x="10" y="-4" width="9" height="34" rx="4" fill="#eef2f8"/></g>
                 <circle cx="4" cy="9" r="4" style="fill:var(--terra)"/>
               </g>
             </g>
@@ -365,13 +365,100 @@ a{color:inherit;text-decoration:none}
     <article class="step" data-stage="3">
       <div class="no">03</div>
       <span class="badge b-next">● 예정</span>
-      <h3>가느다란 케이블을<br>구멍에 꽂습니다.</h3>
-      <p>RS232 통신 케이블을 포트에 삽입하는, 가장 어려운 정밀 작업입니다. 허용 오차는 <b>0.5mm</b> — 머리카락 몇 가닥 두께죠.</p>
-      <div class="kids">바늘에 실을 꿰는 것과 비슷해요. <b>9월에 도전</b>하고 <b>10월에 실제 시연</b>을 목표로 합니다.</div>
-      <div class="stat"><span class="big num b-next">±0.5<span style="font-size:.42em;color:var(--ink2)">mm</span></span><span class="lbl">요구 삽입 정밀도</span></div>
+      <h3>꽂혀 있는 케이블을<br>정확히 뽑습니다.</h3>
+      <p>포트에 꽂힌 RS232 통신 케이블을 분리(제거)하는, 가장 어려운 정밀 작업입니다. 허용 오차는 <b>0.5mm</b> — 머리카락 몇 가닥 두께죠.</p>
+      <div class="kids">손끝으로 정확히 집어 빼는 섬세한 작업이에요. <b>9월에 도전</b>하고 <b>10월에 실제 시연</b>을 목표로 합니다.</div>
+      <div class="stat"><span class="big num b-next">±0.5<span style="font-size:.42em;color:var(--ink2)">mm</span></span><span class="lbl">요구 분리 정밀도</span></div>
     </article>
   </div>
 </div>
+
+<!-- ========================= METRICS ========================= -->
+<section class="metrics" id="metrics">
+  <div style="max-width:none">
+    <p class="eyebrow up">지금까지의 성과</p>
+    <h2 class="sec-title up">숫자로 보는 진행 상황</h2>
+  </div>
+  <div class="mgrid">
+    <div class="mcard hl up">
+      <div class="cap"><span class="led g"></span>1단계</div>
+      <div class="val"><span class="num" data-count="100" data-dec="0">0</span><span class="unit">%</span></div>
+      <div class="foot">물건 집어 옮기기 · 가상 성공률</div>
+    </div>
+    <div class="mcard up">
+      <div class="cap"><span class="led a"></span>2단계 (진행 중)</div>
+      <div class="val"><span class="num" data-count="92.5" data-dec="1">0</span><span class="unit">%</span></div>
+      <div class="foot">리셋 버튼 누르기 · 4-seed 평균</div>
+    </div>
+    <div class="mcard up">
+      <div class="cap"><span class="led r"></span>시연까지</div>
+      <div class="val">D-<span class="num" data-count="55" data-dec="0">0</span></div>
+      <div class="foot">목표일 2026 · 09 · 30</div>
+    </div>
+    <div class="mcard up">
+      <div class="cap"><span class="led g"></span>전체 일정</div>
+      <div class="val"><span class="num" data-count="63" data-dec="0">0</span><span class="unit">%</span></div>
+      <div class="foot">3단계 로드맵 진척도</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= PIPELINE ========================= -->
+<section class="pipeline" id="pipeline">
+  <p class="eyebrow up">밤마다 스스로 도는 고리</p>
+  <h2 class="sec-title up">사람이 자는 동안에도, 로봇은 자랍니다.</h2>
+  <p class="sec-sub up">데이터를 <b>모으고 → 배우고 → 시험하고 → 다시 반복</b>합니다.
+    이 고리가 매일 밤 한 바퀴씩 돌며, 어제보다 조금 더 잘하는 로봇을 만듭니다.</p>
+
+  <div class="pipewrap up">
+    <svg class="pipesvg" viewBox="0 0 800 250" id="pipe" role="img" aria-label="수집·학습·측정·반복이 순환하는 자동 파이프라인">
+      <defs>
+        <path id="loop" d="M120 96 H680 C742 96 762 118 762 138 C762 170 726 186 680 186 H120 C58 186 38 164 38 142 C38 116 60 96 120 96 Z" fill="none"/>
+        <marker id="chk" markerWidth="10" markerHeight="10"></marker>
+      </defs>
+      <!-- track -->
+      <use href="#loop" style="stroke:var(--line)" stroke-width="14" stroke-linecap="round"/>
+      <use href="#loop" style="stroke:color-mix(in srgb,var(--terra) 55%,transparent)" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round"/>
+
+      <!-- stations -->
+      <g font-family="var(--sans)" text-anchor="middle">
+        <g class="station" data-st="0">
+          <circle cx="120" cy="96" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
+          <text x="120" y="101" font-size="20">📥</text>
+          <text x="120" y="60" font-size="15" style="fill:var(--ink)" font-weight="700">수집</text>
+        </g>
+        <g class="station" data-st="1">
+          <circle cx="400" cy="96" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
+          <text x="400" y="101" font-size="20">🧠</text>
+          <text x="400" y="60" font-size="15" style="fill:var(--ink)" font-weight="700">학습</text>
+        </g>
+        <g class="station" data-st="2">
+          <circle cx="680" cy="96" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
+          <text x="680" y="101" font-size="20">📊</text>
+          <text x="680" y="60" font-size="15" style="fill:var(--ink)" font-weight="700">측정</text>
+        </g>
+        <g class="station" data-st="3">
+          <circle cx="400" cy="186" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
+          <text x="400" y="192" font-size="20">🔁</text>
+          <text x="400" y="230" font-size="15" style="fill:var(--ink)" font-weight="700">반복</text>
+        </g>
+      </g>
+
+      <!-- flowing green checks -->
+      <g id="tokens">
+        <circle r="9" style="fill:var(--green)"><animateMotion dur="9s" repeatCount="indefinite" rotate="0"><mpath href="#loop"/></animateMotion></circle>
+        <path d="M-4 0 l3 3 l6 -7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,0)"><animateMotion dur="9s" repeatCount="indefinite"><mpath href="#loop"/></animateMotion></path>
+        <circle r="9" style="fill:var(--amber)"><animateMotion dur="9s" begin="-3s" repeatCount="indefinite"><mpath href="#loop"/></animateMotion></circle>
+        <circle r="9" style="fill:var(--green2)"><animateMotion dur="9s" begin="-6s" repeatCount="indefinite"><mpath href="#loop"/></animateMotion></circle>
+      </g>
+    </svg>
+    <div class="pipelegend">
+      <span><span class="led g"></span>정상 · 통과</span>
+      <span><span class="led a"></span>학습 중 · 주의</span>
+      <span style="font-family:var(--serif);font-style:italic">최근 완주: 2026-08-06 · S1 epoch 29 · 92.5%</span>
+    </div>
+  </div>
+</section>
 
 <!-- ========================= METRICS ========================= -->
 

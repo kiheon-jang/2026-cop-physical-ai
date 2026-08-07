@@ -1357,73 +1357,6 @@
             <div class="log" id="bmc-log"></div>
           </div>
         </section>
-
-        <!-- Phase 로드맵 -->
-        <section class="bmc-blk" id="bmc-roadmap">
-          <div class="sechead reveal">
-            <span class="idx">02 / ROADMAP</span>
-            <h2>3단계 여정</h2>
-            <p>쉬운 동작부터 정밀 작업까지 — 한 단계씩 실제로 통과합니다.</p>
-          </div>
-          <div class="bmc-cards">
-            <div class="bmc-card done reveal">
-              <div class="ph">PHASE 01 <span class="badge g">● 완료</span></div>
-              <h3>물건 집어 옮기기</h3>
-              <div class="sub">Pick &amp; Place — 물체를 집어 정해진 곳에 놓기. 로봇팔의 기본기.</div>
-              <div class="metric"><span class="n" data-bcount="100" data-dec="0">0</span><span class="k">% 가상 성공률</span></div>
-              <div class="prog"><i data-w="100"></i></div>
-            </div>
-            <div class="bmc-card live reveal">
-              <div class="ph">PHASE 02 <span class="badge a">◐ 진행 중</span></div>
-              <h3>리셋 버튼 누르기 (S1)</h3>
-              <div class="sub">PCB의 빨간 버튼을 정확히 누르기. 성공하면 초록 LED 점등.</div>
-              <div class="metric"><span class="n" data-bcount="92.5" data-dec="1">0</span><span class="k">% 가상 시험 · 4-seed</span></div>
-              <div class="prog"><i data-w="92.5"></i></div>
-            </div>
-            <div class="bmc-card next reveal">
-              <div class="ph">PHASE 03 <span class="badge n">○ 예정</span></div>
-              <h3>RS232 케이블 분리</h3>
-              <div class="sub">꽂힌 케이블을 빼는(분리) 작업. 9월 도전 · 10월 실물 시연 목표.</div>
-              <div class="metric"><span class="n">40</span><span class="k">% 목표 · 9월 착수</span></div>
-              <div class="prog"><i data-w="12"></i></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- 성과 지표 -->
-        <section class="bmc-blk" id="bmc-metrics">
-          <div class="sechead reveal">
-            <span class="idx">03 / TELEMETRY</span>
-            <h2>성과 지표</h2>
-            <p>실측 숫자 — 가상 시뮬레이션 롤아웃 기준.</p>
-          </div>
-          <div class="bmc-metrics">
-            <div class="gcard reveal" data-g="100" data-col="grn"><div class="gwrap"></div><div class="cap">1단계 성공률<span>PICK &amp; PLACE</span></div></div>
-            <div class="gcard reveal" data-g="92.5" data-col="amb"><div class="gwrap"></div><div class="cap">2단계 성공률<span>S1 · RESET BUTTON</span></div></div>
-            <div class="gcard reveal" data-g="63" data-col="cyn"><div class="gwrap"></div><div class="cap">일정 진척<span>TO 2026-09-30</span></div></div>
-            <div class="gcard reveal" data-g="90" data-suffix="%↑" data-col="grn" data-manual="D-55"><div class="gwrap"></div><div class="cap">시연까지<span>D-DAY COUNTDOWN</span></div></div>
-          </div>
-        </section>
-
-        <!-- 야간 파이프라인 -->
-        <section class="bmc-blk" id="bmc-pipeline">
-          <div class="sechead reveal">
-            <span class="idx">04 / AUTONOMOUS LOOP</span>
-            <h2>매일 밤, 스스로 전진</h2>
-            <p>사람이 자는 동안 파이프라인이 돌아갑니다 — 수집 → 학습 → 측정 → 반복.</p>
-          </div>
-          <div class="bmc-pipe reveal">
-            <div class="lead"><i class="d"></i>NIGHTLY PIPELINE · 매 사이클마다 한 칸씩 자동 전진</div>
-            <div class="flow">
-              <div class="track"><div class="base"></div><div class="packet"></div></div>
-              <div class="node"><div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyn)" stroke-width="1.7"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></div><div class="nm">수집</div><div class="dsc">시뮬 데이터</div></div>
-              <div class="node"><div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyn)" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></div><div class="nm">학습</div><div class="dsc">ACT 정책</div></div>
-              <div class="node"><div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyn)" stroke-width="1.7"><path d="M3 20h18M6 20V10M11 20V4M16 20v-8M21 20V8"/></svg></div><div class="nm">측정</div><div class="dsc">롤아웃 성공률</div></div>
-              <div class="node"><div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="1.7"><path d="M3 12a9 9 0 1 1 3 6.7"/><path d="M3 21v-6h6"/></svg></div><div class="nm">반복</div><div class="dsc">다음 사이클</div></div>
-            </div>
-            <div class="loopback"><span class="arc"></span>측정 결과가 다음 수집으로 되먹임 — 자가 개선 루프<span class="arc"></span></div>
-          </div>
-        </section>
       </div>
 
       <!-- 레거시 홈(관제탑 게이지) — 숨김 유지: 다른 렌더러/차트가 이 요소들을 참조하므로 제거 대신 hidden -->
@@ -2281,10 +2214,10 @@ a{color:inherit;text-decoration:none}
       <svg class=&quot;robotsvg s1&quot; id=&quot;robot&quot; viewBox=&quot;0 0 600 700&quot; role=&quot;img&quot; aria-label=&quot;스크롤에 따라 동작이 바뀌는 로봇팔&quot;>
         <defs>
           <linearGradient id=&quot;metal&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;1&quot; y2=&quot;1&quot;>
-            <stop offset=&quot;0&quot; stop-color=&quot;#fbf7ef&quot;/><stop offset=&quot;.5&quot; stop-color=&quot;#e7dcc7&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#cbbda2&quot;/>
+            <stop offset=&quot;0&quot; stop-color=&quot;#4a5568&quot;/><stop offset=&quot;.5&quot; stop-color=&quot;#3a4150&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#242a35&quot;/>
           </linearGradient>
           <linearGradient id=&quot;metal2&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;>
-            <stop offset=&quot;0&quot; stop-color=&quot;#efe6d5&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#c3b499&quot;/>
+            <stop offset=&quot;0&quot; stop-color=&quot;#454d5c&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#2a3140&quot;/>
           </linearGradient>
           <radialGradient id=&quot;halo&quot; cx=&quot;50%&quot; cy=&quot;42%&quot; r=&quot;55%&quot;>
             <stop offset=&quot;0&quot; stop-color=&quot;#5fd7f5&quot; stop-opacity=&quot;.22&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#5fd7f5&quot; stop-opacity=&quot;0&quot;/>
@@ -2320,7 +2253,7 @@ a{color:inherit;text-decoration:none}
           <rect x=&quot;255&quot; y=&quot;452&quot; width=&quot;215&quot; height=&quot;40&quot; rx=&quot;6&quot; fill=&quot;#1f6b45&quot;/>
           <rect x=&quot;255&quot; y=&quot;452&quot; width=&quot;215&quot; height=&quot;12&quot; rx=&quot;6&quot; fill=&quot;#fff&quot; opacity=&quot;.12&quot;/>
           <!-- solder pads -->
-          <g fill=&quot;#d9c98a&quot; opacity=&quot;.8&quot;><circle cx=&quot;285&quot; cy=&quot;482&quot; r=&quot;3&quot;/><circle cx=&quot;305&quot; cy=&quot;482&quot; r=&quot;3&quot;/><circle cx=&quot;445&quot; cy=&quot;482&quot; r=&quot;3&quot;/><circle cx=&quot;425&quot; cy=&quot;482&quot; r=&quot;3&quot;/></g>
+          <g fill=&quot;#c9ccd6&quot; opacity=&quot;.8&quot;><circle cx=&quot;285&quot; cy=&quot;482&quot; r=&quot;3&quot;/><circle cx=&quot;305&quot; cy=&quot;482&quot; r=&quot;3&quot;/><circle cx=&quot;445&quot; cy=&quot;482&quot; r=&quot;3&quot;/><circle cx=&quot;425&quot; cy=&quot;482&quot; r=&quot;3&quot;/></g>
           <!-- reset button -->
           <circle cx=&quot;360&quot; cy=&quot;470&quot; r=&quot;17&quot; fill=&quot;#7a1f1a&quot;/>
           <circle id=&quot;btnTop&quot; cx=&quot;360&quot; cy=&quot;466&quot; r=&quot;14&quot; style=&quot;fill:var(--red)&quot;/>
@@ -2350,14 +2283,14 @@ a{color:inherit;text-decoration:none}
         <rect x=&quot;112&quot; y=&quot;300&quot; width=&quot;76&quot; height=&quot;210&quot; rx=&quot;14&quot; fill=&quot;url(#metal2)&quot; style=&quot;stroke:var(--line)&quot;/>
         <rect x=&quot;124&quot; y=&quot;316&quot; width=&quot;52&quot; height=&quot;34&quot; rx=&quot;8&quot; fill=&quot;#000&quot; opacity=&quot;.08&quot;/>
         <circle cx=&quot;150&quot; cy=&quot;300&quot; r=&quot;26&quot; fill=&quot;url(#metal)&quot; style=&quot;stroke:var(--line)&quot;/>
-        <circle cx=&quot;150&quot; cy=&quot;300&quot; r=&quot;9&quot; fill=&quot;#b9a988&quot;/>
+        <circle cx=&quot;150&quot; cy=&quot;300&quot; r=&quot;9&quot; fill=&quot;#eef2f8&quot;/>
 
         <g id=&quot;shoulder&quot; data-joint transform=&quot;translate(150,300) rotate(-28)&quot;>
           <!-- upper arm -->
           <rect x=&quot;-6&quot; y=&quot;-19&quot; width=&quot;168&quot; height=&quot;38&quot; rx=&quot;19&quot; fill=&quot;url(#metal)&quot; style=&quot;stroke:var(--line)&quot;/>
           <rect x=&quot;16&quot; y=&quot;-9&quot; width=&quot;120&quot; height=&quot;7&quot; rx=&quot;4&quot; fill=&quot;#fff&quot; opacity=&quot;.35&quot;/>
           <g id=&quot;elbow&quot; data-joint transform=&quot;translate(150,0) rotate(84)&quot;>
-            <circle r=&quot;20&quot; fill=&quot;url(#metal)&quot; style=&quot;stroke:var(--line)&quot;/><circle r=&quot;7&quot; fill=&quot;#b9a988&quot;/>
+            <circle r=&quot;20&quot; fill=&quot;url(#metal)&quot; style=&quot;stroke:var(--line)&quot;/><circle r=&quot;7&quot; fill=&quot;#eef2f8&quot;/>
             <!-- forearm -->
             <rect x=&quot;-4&quot; y=&quot;-15&quot; width=&quot;132&quot; height=&quot;30&quot; rx=&quot;15&quot; fill=&quot;url(#metal)&quot; style=&quot;stroke:var(--line)&quot;/>
             <rect x=&quot;14&quot; y=&quot;-7&quot; width=&quot;92&quot; height=&quot;6&quot; rx=&quot;3&quot; fill=&quot;#fff&quot; opacity=&quot;.35&quot;/>
@@ -2366,8 +2299,8 @@ a{color:inherit;text-decoration:none}
               <!-- effector -->
               <g id=&quot;effector&quot; data-joint transform=&quot;translate(0,0)&quot;>
                 <rect x=&quot;-12&quot; y=&quot;-4&quot; width=&quot;26&quot; height=&quot;26&quot; rx=&quot;6&quot; fill=&quot;url(#metal2)&quot; style=&quot;stroke:var(--line)&quot;/>
-                <g id=&quot;fingerL&quot; data-joint transform=&quot;translate(0,-11)&quot;><rect x=&quot;10&quot; y=&quot;-4&quot; width=&quot;9&quot; height=&quot;34&quot; rx=&quot;4&quot; fill=&quot;#b9a988&quot;/></g>
-                <g id=&quot;fingerR&quot; data-joint transform=&quot;translate(0,11)&quot;><rect x=&quot;10&quot; y=&quot;-4&quot; width=&quot;9&quot; height=&quot;34&quot; rx=&quot;4&quot; fill=&quot;#b9a988&quot;/></g>
+                <g id=&quot;fingerL&quot; data-joint transform=&quot;translate(0,-11)&quot;><rect x=&quot;10&quot; y=&quot;-4&quot; width=&quot;9&quot; height=&quot;34&quot; rx=&quot;4&quot; fill=&quot;#eef2f8&quot;/></g>
+                <g id=&quot;fingerR&quot; data-joint transform=&quot;translate(0,11)&quot;><rect x=&quot;10&quot; y=&quot;-4&quot; width=&quot;9&quot; height=&quot;34&quot; rx=&quot;4&quot; fill=&quot;#eef2f8&quot;/></g>
                 <circle cx=&quot;4&quot; cy=&quot;9&quot; r=&quot;4&quot; style=&quot;fill:var(--terra)&quot;/>
               </g>
             </g>
@@ -2400,13 +2333,100 @@ a{color:inherit;text-decoration:none}
     <article class=&quot;step&quot; data-stage=&quot;3&quot;>
       <div class=&quot;no&quot;>03</div>
       <span class=&quot;badge b-next&quot;>● 예정</span>
-      <h3>가느다란 케이블을<br>구멍에 꽂습니다.</h3>
-      <p>RS232 통신 케이블을 포트에 삽입하는, 가장 어려운 정밀 작업입니다. 허용 오차는 <b>0.5mm</b> — 머리카락 몇 가닥 두께죠.</p>
-      <div class=&quot;kids&quot;>바늘에 실을 꿰는 것과 비슷해요. <b>9월에 도전</b>하고 <b>10월에 실제 시연</b>을 목표로 합니다.</div>
-      <div class=&quot;stat&quot;><span class=&quot;big num b-next&quot;>±0.5<span style=&quot;font-size:.42em;color:var(--ink2)&quot;>mm</span></span><span class=&quot;lbl&quot;>요구 삽입 정밀도</span></div>
+      <h3>꽂혀 있는 케이블을<br>정확히 뽑습니다.</h3>
+      <p>포트에 꽂힌 RS232 통신 케이블을 분리(제거)하는, 가장 어려운 정밀 작업입니다. 허용 오차는 <b>0.5mm</b> — 머리카락 몇 가닥 두께죠.</p>
+      <div class=&quot;kids&quot;>손끝으로 정확히 집어 빼는 섬세한 작업이에요. <b>9월에 도전</b>하고 <b>10월에 실제 시연</b>을 목표로 합니다.</div>
+      <div class=&quot;stat&quot;><span class=&quot;big num b-next&quot;>±0.5<span style=&quot;font-size:.42em;color:var(--ink2)&quot;>mm</span></span><span class=&quot;lbl&quot;>요구 분리 정밀도</span></div>
     </article>
   </div>
 </div>
+
+<!-- ========================= METRICS ========================= -->
+<section class=&quot;metrics&quot; id=&quot;metrics&quot;>
+  <div style=&quot;max-width:none&quot;>
+    <p class=&quot;eyebrow up&quot;>지금까지의 성과</p>
+    <h2 class=&quot;sec-title up&quot;>숫자로 보는 진행 상황</h2>
+  </div>
+  <div class=&quot;mgrid&quot;>
+    <div class=&quot;mcard hl up&quot;>
+      <div class=&quot;cap&quot;><span class=&quot;led g&quot;></span>1단계</div>
+      <div class=&quot;val&quot;><span class=&quot;num&quot; data-count=&quot;100&quot; data-dec=&quot;0&quot;>0</span><span class=&quot;unit&quot;>%</span></div>
+      <div class=&quot;foot&quot;>물건 집어 옮기기 · 가상 성공률</div>
+    </div>
+    <div class=&quot;mcard up&quot;>
+      <div class=&quot;cap&quot;><span class=&quot;led a&quot;></span>2단계 (진행 중)</div>
+      <div class=&quot;val&quot;><span class=&quot;num&quot; data-count=&quot;92.5&quot; data-dec=&quot;1&quot;>0</span><span class=&quot;unit&quot;>%</span></div>
+      <div class=&quot;foot&quot;>리셋 버튼 누르기 · 4-seed 평균</div>
+    </div>
+    <div class=&quot;mcard up&quot;>
+      <div class=&quot;cap&quot;><span class=&quot;led r&quot;></span>시연까지</div>
+      <div class=&quot;val&quot;>D-<span class=&quot;num&quot; data-count=&quot;55&quot; data-dec=&quot;0&quot;>0</span></div>
+      <div class=&quot;foot&quot;>목표일 2026 · 09 · 30</div>
+    </div>
+    <div class=&quot;mcard up&quot;>
+      <div class=&quot;cap&quot;><span class=&quot;led g&quot;></span>전체 일정</div>
+      <div class=&quot;val&quot;><span class=&quot;num&quot; data-count=&quot;63&quot; data-dec=&quot;0&quot;>0</span><span class=&quot;unit&quot;>%</span></div>
+      <div class=&quot;foot&quot;>3단계 로드맵 진척도</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= PIPELINE ========================= -->
+<section class=&quot;pipeline&quot; id=&quot;pipeline&quot;>
+  <p class=&quot;eyebrow up&quot;>밤마다 스스로 도는 고리</p>
+  <h2 class=&quot;sec-title up&quot;>사람이 자는 동안에도, 로봇은 자랍니다.</h2>
+  <p class=&quot;sec-sub up&quot;>데이터를 <b>모으고 → 배우고 → 시험하고 → 다시 반복</b>합니다.
+    이 고리가 매일 밤 한 바퀴씩 돌며, 어제보다 조금 더 잘하는 로봇을 만듭니다.</p>
+
+  <div class=&quot;pipewrap up&quot;>
+    <svg class=&quot;pipesvg&quot; viewBox=&quot;0 0 800 250&quot; id=&quot;pipe&quot; role=&quot;img&quot; aria-label=&quot;수집·학습·측정·반복이 순환하는 자동 파이프라인&quot;>
+      <defs>
+        <path id=&quot;loop&quot; d=&quot;M120 96 H680 C742 96 762 118 762 138 C762 170 726 186 680 186 H120 C58 186 38 164 38 142 C38 116 60 96 120 96 Z&quot; fill=&quot;none&quot;/>
+        <marker id=&quot;chk&quot; markerWidth=&quot;10&quot; markerHeight=&quot;10&quot;></marker>
+      </defs>
+      <!-- track -->
+      <use href=&quot;#loop&quot; style=&quot;stroke:var(--line)&quot; stroke-width=&quot;14&quot; stroke-linecap=&quot;round&quot;/>
+      <use href=&quot;#loop&quot; style=&quot;stroke:color-mix(in srgb,var(--terra) 55%,transparent)&quot; stroke-width=&quot;3&quot; stroke-dasharray=&quot;2 12&quot; stroke-linecap=&quot;round&quot;/>
+
+      <!-- stations -->
+      <g font-family=&quot;var(--sans)&quot; text-anchor=&quot;middle&quot;>
+        <g class=&quot;station&quot; data-st=&quot;0&quot;>
+          <circle cx=&quot;120&quot; cy=&quot;96&quot; r=&quot;30&quot; style=&quot;fill:var(--paper);stroke:var(--line)&quot; stroke-width=&quot;2&quot;/>
+          <text x=&quot;120&quot; y=&quot;101&quot; font-size=&quot;20&quot;>📥</text>
+          <text x=&quot;120&quot; y=&quot;60&quot; font-size=&quot;15&quot; style=&quot;fill:var(--ink)&quot; font-weight=&quot;700&quot;>수집</text>
+        </g>
+        <g class=&quot;station&quot; data-st=&quot;1&quot;>
+          <circle cx=&quot;400&quot; cy=&quot;96&quot; r=&quot;30&quot; style=&quot;fill:var(--paper);stroke:var(--line)&quot; stroke-width=&quot;2&quot;/>
+          <text x=&quot;400&quot; y=&quot;101&quot; font-size=&quot;20&quot;>🧠</text>
+          <text x=&quot;400&quot; y=&quot;60&quot; font-size=&quot;15&quot; style=&quot;fill:var(--ink)&quot; font-weight=&quot;700&quot;>학습</text>
+        </g>
+        <g class=&quot;station&quot; data-st=&quot;2&quot;>
+          <circle cx=&quot;680&quot; cy=&quot;96&quot; r=&quot;30&quot; style=&quot;fill:var(--paper);stroke:var(--line)&quot; stroke-width=&quot;2&quot;/>
+          <text x=&quot;680&quot; y=&quot;101&quot; font-size=&quot;20&quot;>📊</text>
+          <text x=&quot;680&quot; y=&quot;60&quot; font-size=&quot;15&quot; style=&quot;fill:var(--ink)&quot; font-weight=&quot;700&quot;>측정</text>
+        </g>
+        <g class=&quot;station&quot; data-st=&quot;3&quot;>
+          <circle cx=&quot;400&quot; cy=&quot;186&quot; r=&quot;30&quot; style=&quot;fill:var(--paper);stroke:var(--line)&quot; stroke-width=&quot;2&quot;/>
+          <text x=&quot;400&quot; y=&quot;192&quot; font-size=&quot;20&quot;>🔁</text>
+          <text x=&quot;400&quot; y=&quot;230&quot; font-size=&quot;15&quot; style=&quot;fill:var(--ink)&quot; font-weight=&quot;700&quot;>반복</text>
+        </g>
+      </g>
+
+      <!-- flowing green checks -->
+      <g id=&quot;tokens&quot;>
+        <circle r=&quot;9&quot; style=&quot;fill:var(--green)&quot;><animateMotion dur=&quot;9s&quot; repeatCount=&quot;indefinite&quot; rotate=&quot;0&quot;><mpath href=&quot;#loop&quot;/></animateMotion></circle>
+        <path d=&quot;M-4 0 l3 3 l6 -7&quot; fill=&quot;none&quot; stroke=&quot;#fff&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; transform=&quot;translate(0,0)&quot;><animateMotion dur=&quot;9s&quot; repeatCount=&quot;indefinite&quot;><mpath href=&quot;#loop&quot;/></animateMotion></path>
+        <circle r=&quot;9&quot; style=&quot;fill:var(--amber)&quot;><animateMotion dur=&quot;9s&quot; begin=&quot;-3s&quot; repeatCount=&quot;indefinite&quot;><mpath href=&quot;#loop&quot;/></animateMotion></circle>
+        <circle r=&quot;9&quot; style=&quot;fill:var(--green2)&quot;><animateMotion dur=&quot;9s&quot; begin=&quot;-6s&quot; repeatCount=&quot;indefinite&quot;><mpath href=&quot;#loop&quot;/></animateMotion></circle>
+      </g>
+    </svg>
+    <div class=&quot;pipelegend&quot;>
+      <span><span class=&quot;led g&quot;></span>정상 · 통과</span>
+      <span><span class=&quot;led a&quot;></span>학습 중 · 주의</span>
+      <span style=&quot;font-family:var(--serif);font-style:italic&quot;>최근 완주: 2026-08-06 · S1 epoch 29 · 92.5%</span>
+    </div>
+  </div>
+</section>
 
 <!-- ========================= METRICS ========================= -->
 
@@ -3169,10 +3189,10 @@ a{color:inherit;text-decoration:none}
 
   function render(now){
     // 목표 결정
-    if(!userTook &amp;&amp; !reduce){ var it=idleTarget(now); target.x=it.x; target.y=it.y; }
+    if(!userTook){ var it=idleTarget(now); target.x=it.x; target.y=it.y; }  // 항상 데모 애니(reduced-motion 이어도 팔이 멈춰보이지 않게)
 
     // 부드러운 추종 (스프링 느낌)
-    var k = reduce ? 1 : 0.20;
+    var k = 0.20;  // 항상 부드럽게 추종
     cur.x += (target.x-cur.x)*k;
     cur.y += (target.y-cur.y)*k;
 
