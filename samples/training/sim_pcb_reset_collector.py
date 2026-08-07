@@ -137,6 +137,22 @@ def main(root=None, episodes=100, seed=None):
     expert = PressExpert(twin)
     rng = np.random.default_rng(seed)
 
+    # --- DR 수집 (env-gated, 하위호환): COP_COLLECT_DR=1 이면 조명/마찰/카메라 무작위화하며 수집 ---
+    # 환경치수 불변 원칙 유지 — 버튼/스프링/존은 안 건드리고 조명/마찰/카메라 노이즈만 흔들고 매 reset 복원.
+    # DR rng 는 배치 rng 와 분리 스트림 → 버튼 배치 시퀀스는 nominal 수집과 동일(비교 가능).
+    # expert 는 버튼 실좌표 기반이라 시각 DR 이 시연 자체를 오염시키지 않는다(저장 영상 외형만 다양화).
+    dr_on = os.environ.get("COP_COLLECT_DR", "") == "1"
+    dr_mod = dr_baseline = dr_rng = None
+    dr_axes = ()
+    dr_noise_std = 0.0
+    if dr_on:
+        import sim_domain_randomization as dr_mod
+        dr_axes = tuple(a.strip() for a in os.environ.get(
+            "COP_COLLECT_DR_AXES", "light,friction,camera").split(",") if a.strip())
+        dr_baseline = dr_mod.snapshot_baseline(twin.model)
+        dr_rng = np.random.default_rng((seed or 0) + 99991)
+        print(f"[DR 수집] axes={dr_axes} (환경치수 불변 — 조명/마찰/카메라만 섭동·복원)", flush=True)
+
     cam_shape = (CAM_H, CAM_W, 3)
     features = {
         "observation.images.top": {"dtype": "video", "shape": cam_shape,
@@ -158,10 +174,15 @@ def main(root=None, episodes=100, seed=None):
 
     def record():
         d = twin.data
+        top = twin.render("top")
+        closeup = twin.render("closeup")
+        if dr_on:  # 카메라 센서 노이즈 (top+closeup 둘 다, 측정기와 동일 계약)
+            top = dr_mod.apply_camera_noise(top, dr_noise_std, dr_rng)
+            closeup = dr_mod.apply_camera_noise(closeup, dr_noise_std, dr_rng)
         frame_buffer.append({
             "task": TASK_LABEL,
-            "observation.images.top": twin.render("top"),
-            "observation.images.closeup": twin.render("closeup"),
+            "observation.images.top": top,
+            "observation.images.closeup": closeup,
             "observation.state": d.qpos[:6].astype(np.float32).copy(),
             "action": d.ctrl[:6].astype(np.float32).copy(),
         })
@@ -175,6 +196,11 @@ def main(root=None, episodes=100, seed=None):
         attempts += 1
         frame_buffer.clear()
         placement = twin.reset(rng)
+        if dr_on:  # reset 마다 원본복원 후 무작위화 (누적방지, render 측정기와 동일 순서)
+            dr_mod.restore_baseline(twin.model, dr_baseline)
+            applied = dr_mod.randomize_scene(twin.model, dr_rng, axes=dr_axes)
+            mujoco.mj_setConst(twin.model, twin.data)
+            dr_noise_std = applied["camera_noise_std"]
         ok, tries = expert.run_episode()
         if ok and frame_buffer:
             for fr in frame_buffer:
