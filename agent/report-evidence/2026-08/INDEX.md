@@ -24,3 +24,8 @@
   - **S1 ACT 학습**: PID 65874, `--epochs 30`, dataset `episodes_s1`(100ep/7,231f, top+closeup 2카메라) → ckpt `act_s1_sim/epoch_0029`, wall **38,065s(~10.6h)**, loss **0.0133**. **04:04 killer 관통**(`start_new_session` 분리, epoch_0019 06:11·epoch_0029 09:37 생존).
   - **4-seed 롤아웃**(N=10, LED latch 자동채점): seed42 **0.90** · seed7 0.90 · seed123 **1.00** · seed2026 0.90 → **평균 0.925**(37/40), median press 2.1~3.7mm(임계 1.5mm 위). Phase 3 완료 기준 0.70 초과. 산출물 `research/simulation/inference_progress/rollout_summary_s1[_seed*].json` 4종 실측 교차검증 일치.
   - 23:30 sim-test: sim_pcb_reset 4/4 PASS · 6dof 3회 2501프레임 · camera 30프레임×2 · pick(open-loop 알려진 0%, 참고).
+
+## 2026-08-07
+- Phase 3 W3 — **S1 4-seed 재측정 재현성 확인(0.925) + W4 hold + 23:30 헬스체크 3종 PASS**: `agent/research-log/2026-08-07.md`, `research/simulation/2026-08-07_phase3-w3-s1-remeasure-reproducibility-hold.md` → 8월 보고서 [ACT 학습 / Phase 3 PCB(S1) 재현성] 섹션.
+  - **S1 재측정**(드라이버 STAGE=측정, 23:01~23:03, N=10 LED-latch): seed42/7/123/2026 = 0.90/0.90/1.00/0.90 → **평균 0.925(37/40)**, 8/6 최초 측정과 완전 동일 = **결정론적 재현**. ckpt 승격 복제 `epoch_0029_measured_0.925.bak`.
+  - 23:30 sim-test 헬스체크: 6dof 2501프레임 9.9s · camera 30프레임×2 0.7s · pick min_approach **0.3228327114m** 결정론(open-loop 알려진 0%, 회귀 아님). MuJoCo 3.8.0 로드·step·렌더 전부 정상, 회귀 0.
