@@ -1714,19 +1714,9 @@ def render(data: dict, out: Path) -> Path:
     docs_js = (DASHBOARD_DIR / "docs_viewer.js").read_text(encoding="utf-8")
     html = html.replace(DOCS_VIEWER_CSS_MARKER, docs_css)
     html = html.replace(DOCS_VIEWER_JS_MARKER, docs_js)
-    # 시안 B 홈 히어로 3D 로봇팔 — arm3d.js 인라인 (마커 없으면 no-op, 하위호환)
-    arm3d_path = DASHBOARD_DIR / "_sian_previews" / "arm3d.js"
-    if "/*__ARM3D_JS__*/" in html and arm3d_path.exists():
-        html = html.replace("/*__ARM3D_JS__*/", arm3d_path.read_text(encoding="utf-8"))
-    # 시안 C(스토리)/D(플레이그라운드) 자립형 HTML 을 iframe data-srcdoc 속성값으로 임베드
-    # (속성 안이므로 & 와 " 만 이스케이프. 뷰 첫 진입 시 JS 가 srcdoc 으로 승격 = 지연 로드.)
-    def _esc_attr(s: str) -> str:
-        return s.replace("&", "&amp;").replace('"', "&quot;")
-    for marker, fname in (("STORY_SRC_ESCAPED", "C_scrolly.html"),
-                          ("PLAYGROUND_SRC_ESCAPED", "D_playground.html")):
-        p = DASHBOARD_DIR / "_sian_previews" / fname
-        if marker in html and p.exists():
-            html = html.replace(marker, _esc_attr(p.read_text(encoding="utf-8")))
+    # arm3d.js(홈 3D)·시안 C/D(스토리·플레이그라운드)는 template.html 에 직접 인라인/베이크됨
+    # (hermes 서버가 template.html 을 직접 서빙하므로 빌드 마커 주입만으론 서버뷰가 빈 화면).
+    # C/D·arm3d 수정 시: dashboard/bake_embeds.py 재실행 → template 갱신 → 이 빌드가 상속.
     out.write_text(html, encoding="utf-8")
     return out
 

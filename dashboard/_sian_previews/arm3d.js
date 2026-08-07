@@ -229,13 +229,15 @@
 
   /* ── 부팅: 씬 + 재생 루프 + 콘솔 라벨 갱신 ── */
   function initHero3D() {
+    if (global.__heroDone) return;              // 멱등: 성공 1회 (renderBmcHome 이 DATA 준비까지 재호출)
     var THREE = global.THREE;
     var DATA = global.DATA || {}, web3d = DATA.web3d || {};
     var CH = global.WEB3D_CHAIN || web3d.chain;
     var RT = global.REAL_TRAJ || pickHeroTraj(web3d);
-    if (!THREE || !RT || !CH) return;
+    if (!THREE || !RT || !CH) return;           // 서버모드=DATA(web3d) 아직이면 조용히 반환, 다음 호출 재시도
     var H = buildHero(THREE, CH, RT);
     if (!H) return;
+    global.__heroDone = true;
 
     var FR = RT.frames, FPS = RT.fps || 29.41, N = RT.n || FR.length, LEDF = RT.led_frame != null ? RT.led_frame : 1e9;
     var RM = global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -290,6 +292,7 @@
   if (typeof module !== "undefined" && module.exports) {
     module.exports = { buildHero: buildHero, applyFrame: applyFrame, setLED: setLED };
   } else if (typeof document !== "undefined") {
+    global.initHero3D = initHero3D;   // SPA 통합: DATA(web3d) 준비 후 renderBmcHome 이 재호출
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initHero3D);
     else initHero3D();
   }

@@ -218,31 +218,10 @@ a{color:inherit;text-decoration:none}
 <body>
 
 <div class="scan" aria-hidden="true"></div>
-<header class="topbar">
-  <div class="brand"><span class="dot"></span>CoP&nbsp;·&nbsp;Physical&nbsp;AI <small>현대엘리베이터</small></div>
-  <nav class="nav" aria-label="주요 메뉴">
-    <a href="#overview">Overview</a>
-    <a href="#metrics">성과지표</a>
-    <a href="#roadmap">Phase 로드맵</a>
-    <a href="#pipeline">파이프라인</a>
-    <a href="#more">시뮬·리플레이·실기</a>
-  </nav>
-  <button class="themetog" id="themeBtn" aria-label="라이트/다크 전환">◐ 테마</button>
-</header>
+
 
 <!-- ========================= HERO ========================= -->
-<section class="hero" id="overview">
-  <p class="kicker reveal d1">현대엘리베이터<span class="sep">·</span>SO-ARM101 로봇팔<span class="sep">·</span>Physical AI</p>
-  <h1 class="reveal d2">로봇에게 <span class="accent">손끝</span>을<br>가르칩니다.</h1>
-  <p class="lede reveal d3">엘리베이터 제어반을 정비하는 법을 <b>가상 세계에서 수천 번 연습</b>시키고,
-    그다음 진짜 로봇의 손으로 옮깁니다. 한 번에 한 동작씩, 조금씩 더 정교하게.</p>
-  <div class="herofoot reveal d4">
-    <span class="chip"><span class="led g"></span>1단계 완료 · 성공률 100%</span>
-    <span class="chip"><span class="led a"></span>2단계 진행 중 · 92.5%</span>
-    <span class="chip"><span class="led r"></span>3단계 예정 · D-55</span>
-  </div>
-  <div class="scrollcue reveal d5"><span class="mouse"></span>스크롤하며 세 단계의 여정을 따라오세요</div>
-</section>
+
 
 <!-- ========================= SCROLLYTELLING ========================= -->
 <div class="sec-head" id="roadmap">
@@ -395,110 +374,13 @@ a{color:inherit;text-decoration:none}
 </div>
 
 <!-- ========================= METRICS ========================= -->
-<section class="metrics" id="metrics">
-  <div style="max-width:none">
-    <p class="eyebrow up">지금까지의 성과</p>
-    <h2 class="sec-title up">숫자로 보는 진행 상황</h2>
-  </div>
-  <div class="mgrid">
-    <div class="mcard hl up">
-      <div class="cap"><span class="led g"></span>1단계</div>
-      <div class="val"><span class="num" data-count="100" data-dec="0">0</span><span class="unit">%</span></div>
-      <div class="foot">물건 집어 옮기기 · 가상 성공률</div>
-    </div>
-    <div class="mcard up">
-      <div class="cap"><span class="led a"></span>2단계 (진행 중)</div>
-      <div class="val"><span class="num" data-count="92.5" data-dec="1">0</span><span class="unit">%</span></div>
-      <div class="foot">리셋 버튼 누르기 · 4-seed 평균</div>
-    </div>
-    <div class="mcard up">
-      <div class="cap"><span class="led r"></span>시연까지</div>
-      <div class="val">D-<span class="num" data-count="55" data-dec="0">0</span></div>
-      <div class="foot">목표일 2026 · 09 · 30</div>
-    </div>
-    <div class="mcard up">
-      <div class="cap"><span class="led g"></span>전체 일정</div>
-      <div class="val"><span class="num" data-count="63" data-dec="0">0</span><span class="unit">%</span></div>
-      <div class="foot">3단계 로드맵 진척도</div>
-    </div>
-  </div>
-</section>
+
 
 <!-- ========================= PIPELINE ========================= -->
-<section class="pipeline" id="pipeline">
-  <p class="eyebrow up">밤마다 스스로 도는 고리</p>
-  <h2 class="sec-title up">사람이 자는 동안에도, 로봇은 자랍니다.</h2>
-  <p class="sec-sub up">데이터를 <b>모으고 → 배우고 → 시험하고 → 다시 반복</b>합니다.
-    이 고리가 매일 밤 한 바퀴씩 돌며, 어제보다 조금 더 잘하는 로봇을 만듭니다.</p>
 
-  <div class="pipewrap up">
-    <svg class="pipesvg" viewBox="0 0 800 250" id="pipe" role="img" aria-label="수집·학습·측정·반복이 순환하는 자동 파이프라인">
-      <defs>
-        <path id="loop" d="M120 96 H680 C742 96 762 118 762 138 C762 170 726 186 680 186 H120 C58 186 38 164 38 142 C38 116 60 96 120 96 Z" fill="none"/>
-        <marker id="chk" markerWidth="10" markerHeight="10"></marker>
-      </defs>
-      <!-- track -->
-      <use href="#loop" style="stroke:var(--line)" stroke-width="14" stroke-linecap="round"/>
-      <use href="#loop" style="stroke:color-mix(in srgb,var(--terra) 55%,transparent)" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round"/>
-
-      <!-- stations -->
-      <g font-family="var(--sans)" text-anchor="middle">
-        <g class="station" data-st="0">
-          <circle cx="120" cy="96" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
-          <text x="120" y="101" font-size="20">📥</text>
-          <text x="120" y="60" font-size="15" style="fill:var(--ink)" font-weight="700">수집</text>
-        </g>
-        <g class="station" data-st="1">
-          <circle cx="400" cy="96" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
-          <text x="400" y="101" font-size="20">🧠</text>
-          <text x="400" y="60" font-size="15" style="fill:var(--ink)" font-weight="700">학습</text>
-        </g>
-        <g class="station" data-st="2">
-          <circle cx="680" cy="96" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
-          <text x="680" y="101" font-size="20">📊</text>
-          <text x="680" y="60" font-size="15" style="fill:var(--ink)" font-weight="700">측정</text>
-        </g>
-        <g class="station" data-st="3">
-          <circle cx="400" cy="186" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
-          <text x="400" y="192" font-size="20">🔁</text>
-          <text x="400" y="230" font-size="15" style="fill:var(--ink)" font-weight="700">반복</text>
-        </g>
-      </g>
-
-      <!-- flowing green checks -->
-      <g id="tokens">
-        <circle r="9" style="fill:var(--green)"><animateMotion dur="9s" repeatCount="indefinite" rotate="0"><mpath href="#loop"/></animateMotion></circle>
-        <path d="M-4 0 l3 3 l6 -7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,0)"><animateMotion dur="9s" repeatCount="indefinite"><mpath href="#loop"/></animateMotion></path>
-        <circle r="9" style="fill:var(--amber)"><animateMotion dur="9s" begin="-3s" repeatCount="indefinite"><mpath href="#loop"/></animateMotion></circle>
-        <circle r="9" style="fill:var(--green2)"><animateMotion dur="9s" begin="-6s" repeatCount="indefinite"><mpath href="#loop"/></animateMotion></circle>
-      </g>
-    </svg>
-    <div class="pipelegend">
-      <span><span class="led g"></span>정상 · 통과</span>
-      <span><span class="led a"></span>학습 중 · 주의</span>
-      <span style="font-family:var(--serif);font-style:italic">최근 완주: 2026-08-06 · S1 epoch 29 · 92.5%</span>
-    </div>
-  </div>
-</section>
 
 <!-- ========================= FOOTER / MENU ========================= -->
-<footer class="foot" id="more">
-  <p class="eyebrow up">더 깊이 보기</p>
-  <h2 class="sec-title up">사이트 곳곳으로 이어집니다.</h2>
-  <div class="menu up">
-    <a class="mlink" href="#overview"><span class="t"><span class="led g"></span>Overview</span><span class="d">프로젝트 한눈에 보기</span><span class="arrow">→</span></a>
-    <a class="mlink" href="#metrics"><span class="t"><span class="led g"></span>성과지표</span><span class="d">실시간 성공률·진척도</span><span class="arrow">→</span></a>
-    <a class="mlink" href="#roadmap"><span class="t"><span class="led a"></span>Phase 로드맵</span><span class="d">3단계 여정과 일정</span><span class="arrow">→</span></a>
-    <a class="mlink" href="#"><span class="t"><span class="led a"></span>시뮬 영상</span><span class="d">MuJoCo 롤아웃 재생</span><span class="arrow">→</span></a>
-    <a class="mlink" href="#"><span class="t"><span class="led a"></span>3D 리플레이</span><span class="d">에피소드 인터랙티브 재생</span><span class="arrow">→</span></a>
-    <a class="mlink" href="#"><span class="t"><span class="led r"></span>실기 트랙</span><span class="d">실물 SO-ARM101 정렬</span><span class="arrow">→</span></a>
-    <a class="mlink" href="#pipeline"><span class="t"><span class="led g"></span>활동 타임라인</span><span class="d">야간 파이프라인 기록</span><span class="arrow">→</span></a>
-  </div>
-  <div class="copyright">
-    <span>CoP Physical AI · 현대엘리베이터 제어반 정비 자동화</span>
-    <span><em>MuJoCo 시뮬레이션 → 실물 이전</em> · SO-ARM101</span>
-  </div>
-</footer>
+
 
 <script>
 (function(){
