@@ -681,6 +681,14 @@ uv pip install <패키지명>
     0.90/0.90/1.00/0.90 → **4-seed 평균 0.925**(37/40), nominal seed42 0.90, median press 2.1~3.7mm.
     **완료 기준 70% 초과.** 실패 3/40 = 존 구석 기하 도달불가(expert 95% 동류). 상세:
     `2026-08-06_phase3-w3-s1-act-rollout.md`.
+  - 🔄 **2026-08-07 — 4-seed 재측정 재현성 확인 + W4 hold**: 드라이버 STAGE=측정, 수집/학습
+    재실행 없음. 동일 ckpt `act_s1_sim/epoch_0029` 재측정(23:01~23:03) → seed42/7/123/2026 =
+    0.90/0.90/1.00/0.90 **평균 0.925(37/40)**, 8/6 최초 측정과 완전 동일 = 결정론적 재현. ckpt
+    측정 승격 복제 `epoch_0029_measured_0.925.bak` 생성, 요약 4종 갱신(측정시각·ckpt명·wall_clock만).
+    실행 가능한 dated 항목 소진 → 다음 pending = W4 omen 핸드오프(외부 의존, 진입 불가). **관찰**:
+    S1 정책 DR 민감도(8/7 02:xx 산출물, aggregate ~0.45 · light 0.6/friction 0.8/camera 0.8) —
+    floor pick-place 정책(DR 강건)과 대조적, W4 Sim2Real 격차 보고 후보. [자가치유] 없음. 상세:
+    `2026-08-07_phase3-w3-s1-remeasure-reproducibility-hold.md`.
 - W4 (8/26 ~ 8/31): sim2real 핸드오프
   - [ ] 합성 데이터셋 + sim-trained 정책 omen 전달 (실기 담당자 협업 — 실기 fine-tune 대조군)
   - [ ] P1 LED ROI 캘리브 지원 — 시뮬 top/closeup 프레임으로 ROI·임계값 검증 결과 공유
