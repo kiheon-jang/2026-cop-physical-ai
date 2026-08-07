@@ -1714,6 +1714,10 @@ def render(data: dict, out: Path) -> Path:
     docs_js = (DASHBOARD_DIR / "docs_viewer.js").read_text(encoding="utf-8")
     html = html.replace(DOCS_VIEWER_CSS_MARKER, docs_css)
     html = html.replace(DOCS_VIEWER_JS_MARKER, docs_js)
+    # 시안 B 홈 히어로 3D 로봇팔 — arm3d.js 인라인 (마커 없으면 no-op, 하위호환)
+    arm3d_path = DASHBOARD_DIR / "_sian_previews" / "arm3d.js"
+    if "/*__ARM3D_JS__*/" in html and arm3d_path.exists():
+        html = html.replace("/*__ARM3D_JS__*/", arm3d_path.read_text(encoding="utf-8"))
     out.write_text(html, encoding="utf-8")
     return out
 

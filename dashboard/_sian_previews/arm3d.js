@@ -209,9 +209,30 @@
     else    { m.color.setHex(COL.ledOff); m.emissive.setHex(0x000000); m.emissiveIntensity = 0; }
   }
 
+  /* ── 라이브 D.web3d 에서 히어로 재생용 rollout 궤적 뽑기 (SPA 통합용) ──
+     standalone(B_main_3d)은 window.REAL_TRAJ 주입 → 그걸 우선 사용.
+     SPA(대시보드)는 window.DATA.web3d.policy_history 최신 측정의 성공 rollout 사용.
+     policy frame = [q0..q5, cube...] (len 9/13) — applyFrame 이 q[qposadr<6]만 읽어 큐브열 무시. */
+  function pickHeroTraj(web3d) {
+    if (!web3d) return null;
+    var ph = web3d.policy_history;
+    var m = (ph && ph.length) ? ph[ph.length - 1]
+          : (web3d.policy_rollouts ? { rollouts: [web3d.policy_rollouts], fps: web3d.policy_rollouts.fps } : null);
+    if (!m || !m.rollouts || !m.rollouts.length) return null;
+    var r = null;
+    for (var i = 0; i < m.rollouts.length; i++) { if (m.rollouts[i] && m.rollouts[i].success) { r = m.rollouts[i]; break; } }
+    if (!r) r = m.rollouts[0];
+    if (!r || !r.frames || !r.frames.length) return null;
+    return { frames: r.frames, fps: m.fps || r.fps || 29.4, n: r.frames.length,
+             led_frame: (r.led_frame != null ? r.led_frame : null), pcb: r.pcb || null };
+  }
+
   /* ── 부팅: 씬 + 재생 루프 + 콘솔 라벨 갱신 ── */
   function initHero3D() {
-    var THREE = global.THREE, RT = global.REAL_TRAJ, CH = global.WEB3D_CHAIN;
+    var THREE = global.THREE;
+    var DATA = global.DATA || {}, web3d = DATA.web3d || {};
+    var CH = global.WEB3D_CHAIN || web3d.chain;
+    var RT = global.REAL_TRAJ || pickHeroTraj(web3d);
     if (!THREE || !RT || !CH) return;
     var H = buildHero(THREE, CH, RT);
     if (!H) return;
