@@ -1341,21 +1341,6 @@
               </div>
             </div>
           </div>
-
-          <div class="bmc-logbox">
-            <div class="lh">
-              <span class="rep"><i class="d"></i>재생 (여태 학습분 반복 · 실데이터)</span>
-              <span>train.log · ACT · epoch 0→30</span>
-              <svg class="sk" width="150" height="24" viewBox="0 0 150 24"><polyline id="bmcSpkLossBig" fill="none" stroke="var(--cyn)" stroke-width="1.5" stroke-linejoin="round" points=""/></svg>
-            </div>
-            <div class="statstrip">
-              <div class="st"><div class="k">S1 성공률</div><div class="v g" id="bmcStatS1">92.5%</div></div>
-              <div class="st"><div class="k">1단계</div><div class="v g" id="bmcStatP1">100%</div></div>
-              <div class="st"><div class="k">시연까지</div><div class="v a" id="bmcStatDday">D-55</div></div>
-              <div class="st"><div class="k">총 에폭</div><div class="v c" id="bmcStatEp">31</div></div>
-            </div>
-            <div class="log" id="bmc-log"></div>
-          </div>
         </section>
       </div>
 
@@ -2549,13 +2534,14 @@ a{color:inherit;text-decoration:none}
     <div class="view hidden" id="view-playground">
       <div class="bmc-home" id="play-wrap" style="padding:20px 22px; margin:0; min-height:0">
         <div style="text-align:center; margin:0 0 14px">
-          <span class="bmc-eyebrow"><i class="sq"></i>3D 실기팔 · SO-101 · hdel_iot_01</span>
-          <h1 class="bmc-h1" style="font-size:clamp(23px,2.8vw,34px); margin:12px 0 8px">직접 돌려보는 실기 로봇팔</h1>
-          <p class="bmc-lede" style="margin:0 auto; max-width:46ch">드래그로 회전 · 휠로 확대. 실제 SO-101이 PCB 리셋 버튼을 누르는 실측 rollout을 3D로 재생합니다.</p>
+          <span class="bmc-eyebrow"><i class="sq"></i>직접 조종해보세요 · SO-101 · hdel_iot_01</span>
+          <h1 class="bmc-h1" style="font-size:clamp(23px,2.8vw,34px); margin:12px 0 8px">마우스로 로봇팔을 움직여 버튼을 누르세요</h1>
+          <p class="bmc-lede" style="margin:0 auto; max-width:48ch">마우스를 좌우로 움직이면 실기 SO-101이 따라 움직이고, <b>클릭</b>하면 리셋 버튼을 눌러 초록 LED가 켜집니다.</p>
         </div>
-        <div class="bmc-console" style="max-width:920px; margin:0 auto">
-          <div class="top"><i class="lamp g"></i><i class="lamp a"></i><i class="lamp r"></i><span>&nbsp;PLAYGROUND / SO-101 · 3D · 드래그=회전 · 휠=확대</span></div>
-          <canvas id="play3d" role="img" aria-label="SO-101 로봇팔 3D — 드래그 회전, 휠 확대" style="display:block; width:100%; height:min(56vh,500px); touch-action:none; cursor:grab; background:radial-gradient(80% 60% at 50% 30%,rgba(57,198,240,.07),transparent 70%),linear-gradient(180deg,#0a0f1c,#070b14)"></canvas>
+        <div class="bmc-console" style="max-width:920px; margin:0 auto; position:relative">
+          <div class="top"><i class="lamp g"></i><i class="lamp a"></i><i class="lamp r"></i><span>&nbsp;PLAYGROUND / SO-101 · 마우스 조종</span><span class="rt" style="margin-left:auto">버튼 누른 횟수 <b id="play-count">0</b></span></div>
+          <canvas id="play3d" role="img" aria-label="SO-101 로봇팔 3D — 마우스 좌우로 조종, 클릭으로 버튼 누름" style="display:block; width:100%; height:min(56vh,500px); touch-action:none; cursor:pointer; background:radial-gradient(80% 60% at 50% 30%,rgba(57,198,240,.07),transparent 70%),linear-gradient(180deg,#0a0f1c,#070b14)"></canvas>
+          <div id="play-hint" style="position:absolute; left:50%; bottom:16px; transform:translateX(-50%); font-family:var(--mono); font-size:12px; color:var(--ink); background:rgba(11,16,28,.82); border:1px solid var(--line2); border-radius:999px; padding:8px 15px; pointer-events:none; transition:opacity .3s">👆 마우스를 움직여 팔을 조종 · 클릭해서 누르기</div>
         </div>
       </div>
     </div>
@@ -2801,10 +2787,10 @@ function setRoute(r) {
     const fr = document.getElementById('story-frame');
     if (fr && !fr.getAttribute('srcdoc') && fr.dataset.srcdoc) fr.srcdoc = fr.dataset.srcdoc;
   }
-  // 플레이그라운드: native 3D 실기팔(#play3d) 마운트. DATA(web3d) 준비 안됐으면 잠깐 재시도.
+  // 플레이그라운드: native 3D 실기팔(#play3d) — 마우스로 조종+클릭 누름(궤도X). DATA 준비까지 재시도.
   if (r === 'playground' && window.mountArm3D) {
     (function tryMount(n){
-      if (window.mountArm3D('play3d')) return;
+      if (window.mountArm3D('play3d', { interactive: true, counterId: 'play-count', hintId: 'play-hint' })) return;
       if (n > 0) setTimeout(function(){ tryMount(n - 1); }, 500);
     })(12);
   }
@@ -5045,7 +5031,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
   };
 
   /* ── 씬 구성: web3d_chain 으로 팔 빌드 (sim3dBuildScene 이식) ── */
-  function buildHero(THREE, chain, RT, canvasId) {
+  function buildHero(THREE, chain, RT, canvasId, interactive) {
     var canvas = document.getElementById(canvasId || "hero3d");
     if (!canvas) return null;
     var W = canvas.clientWidth || 460, H = canvas.clientHeight || 312;
@@ -5184,19 +5170,21 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
       camera.lookAt(target);
     }
     applyCam();
-    var drag = null;
-    canvas.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); });
-    canvas.addEventListener("pointermove", function (e) {
-      if (!drag) return;
-      az -= (e.clientX - drag.x) * 0.008;
-      el = Math.min(1.45, Math.max(-0.15, el + (e.clientY - drag.y) * 0.006));
-      drag = { x: e.clientX, y: e.clientY }; applyCam();
-    });
-    canvas.addEventListener("pointerup", function () { drag = null; });
-    canvas.addEventListener("pointercancel", function () { drag = null; });
-    canvas.addEventListener("wheel", function (e) {
-      e.preventDefault(); dist = Math.min(1.6, Math.max(0.28, dist * (1 + e.deltaY * 0.001))); applyCam();
-    }, { passive: false });
+    if (!interactive) {  // 궤도(드래그 회전/휠 확대) — interactive(Playground)는 마우스로 팔을 직접 조종하므로 끔
+      var drag = null;
+      canvas.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); });
+      canvas.addEventListener("pointermove", function (e) {
+        if (!drag) return;
+        az -= (e.clientX - drag.x) * 0.008;
+        el = Math.min(1.45, Math.max(-0.15, el + (e.clientY - drag.y) * 0.006));
+        drag = { x: e.clientX, y: e.clientY }; applyCam();
+      });
+      canvas.addEventListener("pointerup", function () { drag = null; });
+      canvas.addEventListener("pointercancel", function () { drag = null; });
+      canvas.addEventListener("wheel", function (e) {
+        e.preventDefault(); dist = Math.min(1.6, Math.max(0.28, dist * (1 + e.deltaY * 0.001))); applyCam();
+      }, { passive: false });
+    }
 
     return {
       renderer: renderer, scene: scene, camera: camera, canvas: canvas,
@@ -5245,7 +5233,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
     var CH = global.WEB3D_CHAIN || web3d.chain;
     var RT = global.REAL_TRAJ || pickHeroTraj(web3d);
     if (!THREE || !RT || !CH) return false;     // 서버모드=DATA(web3d) 아직이면 반환, 다음 호출 재시도
-    var H = buildHero(THREE, CH, RT, canvasId);
+    var H = buildHero(THREE, CH, RT, canvasId, opts.interactive);
     if (!H) return false;
     global[flag] = true;
 
@@ -5273,6 +5261,26 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
       H.renderer.setSize(w, h, false); H.camera.aspect = w / h; H.camera.updateProjectionMatrix();
       H.applyCam(); draw();
     }).observe(H.canvas);
+
+    // ── Playground: 마우스로 팔 조종(스크럽) + 클릭으로 버튼 누름 (자동재생/궤도 없음) ──
+    if (opts.interactive) {
+      var maxF = (LEDF < N ? LEDF : N - 1);   // 프레임 0(홈)→maxF(버튼 눌림·LED 점등)
+      function show(i) { renderFrame(i); H.applyCam(); draw(); }
+      show(0);
+      var counterEl = opts.counterId ? document.getElementById(opts.counterId) : null;
+      var hintEl = opts.hintId ? document.getElementById(opts.hintId) : null, count = 0;
+      H.canvas.addEventListener("pointermove", function (e) {
+        var r = H.canvas.getBoundingClientRect();
+        var t = Math.max(0, Math.min((e.clientX - r.left) / (r.width || 1), 1));
+        show(Math.round(t * maxF));                     // 좌=쉬는 자세, 우로 갈수록 팔이 버튼으로 내려감
+        if (hintEl && !hintEl.__hid) { hintEl.__hid = true; hintEl.style.opacity = "0"; }
+      });
+      H.canvas.addEventListener("pointerdown", function () {
+        show(Math.min(N - 1, maxF + 3));                // 확실히 눌린 프레임(LED on)
+        count++; if (counterEl) counterEl.textContent = count;
+      });
+      return true;
+    }
 
     // prefers-reduced-motion: 버튼 누른(LED 점등) 정지 프레임
     if (RM) {

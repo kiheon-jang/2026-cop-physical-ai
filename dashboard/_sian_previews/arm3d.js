@@ -38,7 +38,7 @@
   };
 
   /* ── 씬 구성: web3d_chain 으로 팔 빌드 (sim3dBuildScene 이식) ── */
-  function buildHero(THREE, chain, RT, canvasId) {
+  function buildHero(THREE, chain, RT, canvasId, interactive) {
     var canvas = document.getElementById(canvasId || "hero3d");
     if (!canvas) return null;
     var W = canvas.clientWidth || 460, H = canvas.clientHeight || 312;
@@ -177,19 +177,21 @@
       camera.lookAt(target);
     }
     applyCam();
-    var drag = null;
-    canvas.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); });
-    canvas.addEventListener("pointermove", function (e) {
-      if (!drag) return;
-      az -= (e.clientX - drag.x) * 0.008;
-      el = Math.min(1.45, Math.max(-0.15, el + (e.clientY - drag.y) * 0.006));
-      drag = { x: e.clientX, y: e.clientY }; applyCam();
-    });
-    canvas.addEventListener("pointerup", function () { drag = null; });
-    canvas.addEventListener("pointercancel", function () { drag = null; });
-    canvas.addEventListener("wheel", function (e) {
-      e.preventDefault(); dist = Math.min(1.6, Math.max(0.28, dist * (1 + e.deltaY * 0.001))); applyCam();
-    }, { passive: false });
+    if (!interactive) {  // 궤도(드래그 회전/휠 확대) — interactive(Playground)는 마우스로 팔을 직접 조종하므로 끔
+      var drag = null;
+      canvas.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); });
+      canvas.addEventListener("pointermove", function (e) {
+        if (!drag) return;
+        az -= (e.clientX - drag.x) * 0.008;
+        el = Math.min(1.45, Math.max(-0.15, el + (e.clientY - drag.y) * 0.006));
+        drag = { x: e.clientX, y: e.clientY }; applyCam();
+      });
+      canvas.addEventListener("pointerup", function () { drag = null; });
+      canvas.addEventListener("pointercancel", function () { drag = null; });
+      canvas.addEventListener("wheel", function (e) {
+        e.preventDefault(); dist = Math.min(1.6, Math.max(0.28, dist * (1 + e.deltaY * 0.001))); applyCam();
+      }, { passive: false });
+    }
 
     return {
       renderer: renderer, scene: scene, camera: camera, canvas: canvas,
@@ -238,7 +240,7 @@
     var CH = global.WEB3D_CHAIN || web3d.chain;
     var RT = global.REAL_TRAJ || pickHeroTraj(web3d);
     if (!THREE || !RT || !CH) return false;     // 서버모드=DATA(web3d) 아직이면 반환, 다음 호출 재시도
-    var H = buildHero(THREE, CH, RT, canvasId);
+    var H = buildHero(THREE, CH, RT, canvasId, opts.interactive);
     if (!H) return false;
     global[flag] = true;
 
@@ -266,6 +268,26 @@
       H.renderer.setSize(w, h, false); H.camera.aspect = w / h; H.camera.updateProjectionMatrix();
       H.applyCam(); draw();
     }).observe(H.canvas);
+
+    // ── Playground: 마우스로 팔 조종(스크럽) + 클릭으로 버튼 누름 (자동재생/궤도 없음) ──
+    if (opts.interactive) {
+      var maxF = (LEDF < N ? LEDF : N - 1);   // 프레임 0(홈)→maxF(버튼 눌림·LED 점등)
+      function show(i) { renderFrame(i); H.applyCam(); draw(); }
+      show(0);
+      var counterEl = opts.counterId ? document.getElementById(opts.counterId) : null;
+      var hintEl = opts.hintId ? document.getElementById(opts.hintId) : null, count = 0;
+      H.canvas.addEventListener("pointermove", function (e) {
+        var r = H.canvas.getBoundingClientRect();
+        var t = Math.max(0, Math.min((e.clientX - r.left) / (r.width || 1), 1));
+        show(Math.round(t * maxF));                     // 좌=쉬는 자세, 우로 갈수록 팔이 버튼으로 내려감
+        if (hintEl && !hintEl.__hid) { hintEl.__hid = true; hintEl.style.opacity = "0"; }
+      });
+      H.canvas.addEventListener("pointerdown", function () {
+        show(Math.min(N - 1, maxF + 3));                // 확실히 눌린 프레임(LED on)
+        count++; if (counterEl) counterEl.textContent = count;
+      });
+      return true;
+    }
 
     // prefers-reduced-motion: 버튼 누른(LED 점등) 정지 프레임
     if (RM) {
