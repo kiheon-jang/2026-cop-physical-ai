@@ -14,7 +14,7 @@
 | 항목 | 내용 |
 |------|------|
 | **프로젝트명** | CoP Physical AI (현대엘리베이터 사내 CoP) |
-| **목표** | SO-ARM101 로봇팔로 PCB 정비 자동화 — 1단계 Pick&Place(결착) · 2단계 S1 리셋버튼(진행) · 3단계 RS232 케이블 연결 (10월 시연) |
+| **목표** | SO-ARM101 로봇팔로 PCB 정비 자동화 — 1단계 Pick&Place(결착) · 2단계 S1 리셋버튼(진행) · 3단계 RS232 케이블 분리 (10월 시연) |
 | **GitHub** | https://github.com/kiheon-jang/2026-cop-physical-ai |
 | **로컬 경로** | `/Volumes/MARK_DATA/dev/2026-cop-physical-ai` (실기 미러: `/Volumes/MARK_DATA/dev/soarm_lerobot`) |
 | **자동화 플랫폼** | Hermes Agent (Mac Mini M5, 24/7 로컬 운영) |
@@ -153,7 +153,7 @@ ls ~/Documents/second-brain/00_AI_Wiki/CoP_PhysicalAI/2026-05/
 | **Phase 1** | 2026-06 | 시뮬 사전학습 + ACT 파이프라인 | ✅ 92% (Orin 배포만 시연 단계로 보류) |
 | **Phase 2** | 2026-07 | Sim2Real 검증 — **pick&place 4-seed 1.0 결착** | 🔄 71% (실기 검증은 Phase 3 W4 이관) |
 | **Phase 3** | 2026-08 | **S1 리셋버튼 시뮬 (실기 정렬)** — W1/W2 완료, W3 학습 중 | 🔄 **진행중** |
-| **Phase 4** | 2026-09 | RS232 케이블 연결 + 1차 기능 완성 | ⏳ 대기 |
+| **Phase 4** | 2026-09 | RS232 케이블 분리 + 1차 기능 완성 | ⏳ 대기 |
 | **시연** | 2026-10 | 통합 시연 + 사내 발표 (phase 외부) | ⏳ 대기 |
 
 > Phase 번호 체계는 2026-05-01에 재정의됨. 2026-06-11에 작업 9월 완료 일정으로 단축 (Phase 5 → Phase 4 통합, 10월 = phase 외부 시연).

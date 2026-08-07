@@ -34,7 +34,7 @@ status_label: 진행중
 overview:
   cop_name: 2026 CoP Physical AI — 첫걸음
   activity_topic: SO-ARM101 기반 모방학습·강화학습 로보틱스 기술 내재화
-  final_goal: PCB 제품 조정 자동화 및 RS232 포트 HHT 자동 결선 시연 (10월)
+  final_goal: PCB 제품 조정 자동화 및 RS232 포트 HHT 케이블 자동 분리 시연 (10월)
 status:
   state: Phase 1(사전학습) 완료
   progress_pct: 75
