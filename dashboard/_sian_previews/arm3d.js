@@ -38,8 +38,8 @@
   };
 
   /* ── 씬 구성: web3d_chain 으로 팔 빌드 (sim3dBuildScene 이식) ── */
-  function buildHero(THREE, chain, RT) {
-    var canvas = document.getElementById("hero3d");
+  function buildHero(THREE, chain, RT, canvasId) {
+    var canvas = document.getElementById(canvasId || "hero3d");
     if (!canvas) return null;
     var W = canvas.clientWidth || 460, H = canvas.clientHeight || 312;
 
@@ -227,24 +227,27 @@
              led_frame: (r.led_frame != null ? r.led_frame : null), pcb: r.pcb || null };
   }
 
-  /* ── 부팅: 씬 + 재생 루프 + 콘솔 라벨 갱신 ── */
-  function initHero3D() {
-    if (global.__heroDone) return;              // 멱등: 성공 1회 (renderBmcHome 이 DATA 준비까지 재호출)
+  /* ── 부팅: 씬 + 재생 루프 + 콘솔 라벨 갱신 ──
+     canvasId 별 인스턴스(멀티: Overview #hero3d + Playground #play3d). opts.frameId/ledId/playId 로 라벨 연결. */
+  function mountArm3D(canvasId, opts) {
+    opts = opts || {}; canvasId = canvasId || "hero3d";
+    var flag = "__arm3d_" + canvasId;
+    if (global[flag]) return true;              // 멱등: 캔버스별 1회 (재호출은 DATA 준비까지 재시도)
     var THREE = global.THREE;
     var DATA = global.DATA || {}, web3d = DATA.web3d || {};
     var CH = global.WEB3D_CHAIN || web3d.chain;
     var RT = global.REAL_TRAJ || pickHeroTraj(web3d);
-    if (!THREE || !RT || !CH) return;           // 서버모드=DATA(web3d) 아직이면 조용히 반환, 다음 호출 재시도
-    var H = buildHero(THREE, CH, RT);
-    if (!H) return;
-    global.__heroDone = true;
+    if (!THREE || !RT || !CH) return false;     // 서버모드=DATA(web3d) 아직이면 반환, 다음 호출 재시도
+    var H = buildHero(THREE, CH, RT, canvasId);
+    if (!H) return false;
+    global[flag] = true;
 
     var FR = RT.frames, FPS = RT.fps || 29.41, N = RT.n || FR.length, LEDF = RT.led_frame != null ? RT.led_frame : 1e9;
     var RM = global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    var frameLbl = document.getElementById("framelbl"),
-        ledLab = document.getElementById("ledlab"),
-        playbtn = document.getElementById("playbtn");
+    var frameLbl = opts.frameId ? document.getElementById(opts.frameId) : null,
+        ledLab = opts.ledId ? document.getElementById(opts.ledId) : null,
+        playbtn = opts.playId ? document.getElementById(opts.playId) : null;
     var ledOn = false;
     function renderFrame(i) {
       applyFrame(H, FR[i]);
@@ -268,7 +271,7 @@
     if (RM) {
       renderFrame(LEDF < N ? LEDF : N - 1); H.applyCam(); draw();
       if (playbtn) playbtn.textContent = "▶ 재생";
-      return;
+      return true;
     }
 
     var playing = true, last = 0, acc = 0, frame = 0;
@@ -287,12 +290,19 @@
       draw();
     }
     requestAnimationFrame(loop);
+    return true;
+  }
+
+  /* Overview 히어로 (#hero3d) 래퍼 — 콘솔 라벨(framelbl/ledlab/playbtn) 연결 */
+  function initHero3D() {
+    return mountArm3D("hero3d", { frameId: "framelbl", ledId: "ledlab", playId: "playbtn" });
   }
 
   if (typeof module !== "undefined" && module.exports) {
-    module.exports = { buildHero: buildHero, applyFrame: applyFrame, setLED: setLED };
+    module.exports = { buildHero: buildHero, applyFrame: applyFrame, setLED: setLED, mountArm3D: mountArm3D };
   } else if (typeof document !== "undefined") {
     global.initHero3D = initHero3D;   // SPA 통합: DATA(web3d) 준비 후 renderBmcHome 이 재호출
+    global.mountArm3D = mountArm3D;    // Playground(#play3d) 등 추가 인스턴스용
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initHero3D);
     else initHero3D();
   }
