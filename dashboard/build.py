@@ -1718,6 +1718,15 @@ def render(data: dict, out: Path) -> Path:
     arm3d_path = DASHBOARD_DIR / "_sian_previews" / "arm3d.js"
     if "/*__ARM3D_JS__*/" in html and arm3d_path.exists():
         html = html.replace("/*__ARM3D_JS__*/", arm3d_path.read_text(encoding="utf-8"))
+    # 시안 C(스토리)/D(플레이그라운드) 자립형 HTML 을 iframe data-srcdoc 속성값으로 임베드
+    # (속성 안이므로 & 와 " 만 이스케이프. 뷰 첫 진입 시 JS 가 srcdoc 으로 승격 = 지연 로드.)
+    def _esc_attr(s: str) -> str:
+        return s.replace("&", "&amp;").replace('"', "&quot;")
+    for marker, fname in (("STORY_SRC_ESCAPED", "C_scrolly.html"),
+                          ("PLAYGROUND_SRC_ESCAPED", "D_playground.html")):
+        p = DASHBOARD_DIR / "_sian_previews" / fname
+        if marker in html and p.exists():
+            html = html.replace(marker, _esc_attr(p.read_text(encoding="utf-8")))
     out.write_text(html, encoding="utf-8")
     return out
 

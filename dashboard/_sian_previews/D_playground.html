@@ -7,50 +7,36 @@
 <meta name="description" content="로봇팔에게 엘리베이터 제어반 정비를 가르칩니다. 가상에서 배우고 실물로 옮깁니다. 지금 진행 중 — 2단계 리셋버튼 92.5%.">
 <style>
   /* ============ 테마 토큰 ============ */
-  :root{
-    --canvas:#fbf7ef; --canvas2:#f2ead9; --surface:#ffffff; --surface2:#fbf5ea;
-    --ink:#2a2540; --muted:#6f6785; --line:#ece1cf;
-    --green:#16b364; --green-ink:#0b7a41; --green-soft:#d8f6e5;
-    --amber:#f5a524; --amber-ink:#b06d00; --amber-soft:#fdeccb;
-    --red:#ff5d5d; --red-ink:#d13a3a; --red-soft:#ffe1e1;
-    --blue:#5b8def; --blue-soft:#dfeaff;
-    --purple:#9b7bf0; --purple-soft:#e9e1ff;
-    --pink:#f778c0; --pink-soft:#ffe0f2;
-    --pcb-a:#12a35d; --pcb-b:#0b7c46; --pad:#ffd166; --metal:#c9ccd6;
-    --pop:0 8px 0 -3px rgba(42,37,64,.10), 0 22px 40px -22px rgba(42,37,64,.55);
-    --pop-sm:0 5px 0 -2px rgba(42,37,64,.10), 0 12px 22px -14px rgba(42,37,64,.45);
-    --ring: rgba(91,141,239,.55);
+  /* B톤 통일(미션컨트롤 쿨다크) — 파스텔/퍼플 팔레트를 B 쿨다크로 고정 */
+  :root, :root[data-theme="light"], :root[data-theme="dark"]{
+    --canvas:#05070e; --canvas2:#080b15; --surface:#0b101c; --surface2:#0e1524;
+    --ink:#e8eefb; --muted:#8ea0bd; --line:rgba(150,175,220,.16);
+    --green:#2ee6a0; --green-ink:#5fd79a; --green-soft:rgba(46,230,160,.13);
+    --amber:#f8b64c; --amber-ink:#f8cf8a; --amber-soft:rgba(248,182,76,.13);
+    --red:#ff6b6b; --red-ink:#ff9b9b; --red-soft:rgba(255,107,107,.13);
+    --blue:#39c6f0; --blue-soft:rgba(57,198,240,.13);
+    --purple:#6ea8f0; --purple-soft:rgba(110,168,240,.13);
+    --pink:#39c6f0; --pink-soft:rgba(57,198,240,.13);
+    --pcb-a:#1c9c6d; --pcb-b:#0b7c46; --pad:#f8b64c; --metal:#3a4150;
+    --pop:0 8px 0 -3px rgba(0,0,0,.4), 0 22px 40px -22px rgba(0,0,0,.72);
+    --pop-sm:0 5px 0 -2px rgba(0,0,0,.36), 0 12px 22px -14px rgba(0,0,0,.6);
+    --ring: rgba(57,198,240,.55);
     --font:"Apple SD Gothic Neo","Pretendard",system-ui,-apple-system,"Segoe UI",Roboto,"Malgun Gothic",sans-serif;
-    color-scheme:light;
-  }
-  :root[data-theme="dark"]{
-    --canvas:#141220; --canvas2:#1c1930; --surface:#242038; --surface2:#2b263f;
-    --ink:#f3f0ff; --muted:#a99fce; --line:#352f4d;
-    --green:#2fd980; --green-ink:#7ff0b6; --green-soft:#12402c;
-    --amber:#fdb63c; --amber-ink:#ffd792; --amber-soft:#3d2f12;
-    --red:#ff6b6b; --red-ink:#ffb0b0; --red-soft:#3f1f24;
-    --blue:#7aa4ff; --blue-soft:#1e2a49;
-    --purple:#b79bff; --purple-soft:#2a2450;
-    --pink:#ff96d2; --pink-soft:#43203a;
-    --pcb-a:#16b869; --pcb-b:#0c8a4d; --pad:#ffd166; --metal:#aab0c4;
-    --pop:0 8px 0 -3px rgba(0,0,0,.45), 0 24px 44px -20px rgba(0,0,0,.7);
-    --pop-sm:0 5px 0 -2px rgba(0,0,0,.4), 0 14px 24px -14px rgba(0,0,0,.6);
-    --ring: rgba(122,164,255,.6);
     color-scheme:dark;
   }
   @media (prefers-color-scheme:dark){
     :root:not([data-theme="light"]){
-      --canvas:#141220; --canvas2:#1c1930; --surface:#242038; --surface2:#2b263f;
-      --ink:#f3f0ff; --muted:#a99fce; --line:#352f4d;
-      --green:#2fd980; --green-ink:#7ff0b6; --green-soft:#12402c;
-      --amber:#fdb63c; --amber-ink:#ffd792; --amber-soft:#3d2f12;
-      --red:#ff6b6b; --red-ink:#ffb0b0; --red-soft:#3f1f24;
-      --blue:#7aa4ff; --blue-soft:#1e2a49;
-      --purple:#b79bff; --purple-soft:#2a2450;
-      --pink:#ff96d2; --pink-soft:#43203a;
-      --pop:0 8px 0 -3px rgba(0,0,0,.45), 0 24px 44px -20px rgba(0,0,0,.7);
-      --pop-sm:0 5px 0 -2px rgba(0,0,0,.4), 0 14px 24px -14px rgba(0,0,0,.6);
-      --ring: rgba(122,164,255,.6);
+      --canvas:#05070e; --canvas2:#080b15; --surface:#0b101c; --surface2:#0e1524;
+      --ink:#e8eefb; --muted:#8ea0bd; --line:rgba(150,175,220,.16);
+      --green:#2ee6a0; --green-ink:#5fd79a; --green-soft:rgba(46,230,160,.13);
+      --amber:#f8b64c; --amber-ink:#f8cf8a; --amber-soft:rgba(248,182,76,.13);
+      --red:#ff6b6b; --red-ink:#ff9b9b; --red-soft:rgba(255,107,107,.13);
+      --blue:#39c6f0; --blue-soft:rgba(57,198,240,.13);
+      --purple:#6ea8f0; --purple-soft:rgba(110,168,240,.13);
+      --pink:#39c6f0; --pink-soft:rgba(57,198,240,.13);
+      --pop:0 8px 0 -3px rgba(0,0,0,.4), 0 22px 40px -22px rgba(0,0,0,.72);
+      --pop-sm:0 5px 0 -2px rgba(0,0,0,.36), 0 12px 22px -14px rgba(0,0,0,.6);
+      --ring: rgba(57,198,240,.55);
       color-scheme:dark;
     }
   }
@@ -465,8 +451,8 @@
       </article>
       <article class="jcard j3 reveal" data-fill="20">
         <div class="num">3</div>
-        <h3>케이블 연결</h3>
-        <div class="en">RS232 Insertion</div>
+        <h3>케이블 분리</h3>
+        <div class="en">RS232 Disconnect</div>
         <span class="badge plan"><i></i>예정 · 9월 도전 / 10월 시연</span>
         <div class="meter"><b></b></div>
         <div class="more">자세히</div>
