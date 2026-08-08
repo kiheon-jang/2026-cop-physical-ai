@@ -689,6 +689,15 @@ uv pip install <패키지명>
     S1 정책 DR 민감도(8/7 02:xx 산출물, aggregate ~0.45 · light 0.6/friction 0.8/camera 0.8) —
     floor pick-place 정책(DR 강건)과 대조적, W4 Sim2Real 격차 보고 후보. [자가치유] 없음. 상세:
     `2026-08-07_phase3-w3-s1-remeasure-reproducibility-hold.md`.
+  - 🔄 **2026-08-08 — S1 완주 후 hold + 무결성 전수 감사**: 드라이버 STAGE=완료/유지
+    (`episodes_s1` 100ep·성공률 0.925, 새 사이클 미트리거) → 수집/학습/측정 재실행 없음. dated
+    항목 W1~W3 전부 완료·다음 pending = W4 omen 핸드오프(외부 의존, 진입 불가) → hold 일. 야간
+    에이전트 **비파괴 무결성 전수 감사**: 마커 3자 정합(target=`data/episodes_s1`·trained_on=
+    `episodes_s1:1785931493`·measured=`episodes_s1:1786060554`)·학습 프로세스 없음·운영 4-seed
+    (ckpt `act_s1_sim/epoch_0029_measured_0.925.bak`) 42/7/123/2026 = 0.90/0.90/1.00/0.90
+    **평균 0.925(37/40)** 8/6·8/7 과 동일(`rollout_summary_s1.json` md5 `fbeef25775e5846ba2e3ce887afd1929`)·
+    datasets s1 100ep/7231f·floor·cl 각 50ep/3350f 불변 → **회귀/오염 0**. [자가치유] 없음. 상세:
+    `2026-08-08_phase3-w3-s1-hold-integrity-audit.md`.
 - W4 (8/26 ~ 8/31): sim2real 핸드오프
   - [ ] 합성 데이터셋 + sim-trained 정책 omen 전달 (실기 담당자 협업 — 실기 fine-tune 대조군)
   - [ ] P1 LED ROI 캘리브 지원 — 시뮬 top/closeup 프레임으로 ROI·임계값 검증 결과 공유
