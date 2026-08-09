@@ -20,7 +20,7 @@
 | **자동화 플랫폼** | Hermes Agent (Mac Mini M5, 24/7 로컬 운영) |
 | **시뮬레이터** | MuJoCo 3.x (Apple Silicon 네이티브) — Phase 0~2 |
 | **담당자** | 장기헌 (xaqwer@gmail.com) |
-| **현재 단계** | **Phase 3 - 진행중** —  (2026-08-08~) |
+| **현재 단계** | **Phase 3 - 진행중** —  (2026-08-10~) |
 
 ---
 
