@@ -29,3 +29,8 @@
 - Phase 3 W3 — **S1 4-seed 재측정 재현성 확인(0.925) + W4 hold + 23:30 헬스체크 3종 PASS**: `agent/research-log/2026-08-07.md`, `research/simulation/2026-08-07_phase3-w3-s1-remeasure-reproducibility-hold.md` → 8월 보고서 [ACT 학습 / Phase 3 PCB(S1) 재현성] 섹션.
   - **S1 재측정**(드라이버 STAGE=측정, 23:01~23:03, N=10 LED-latch): seed42/7/123/2026 = 0.90/0.90/1.00/0.90 → **평균 0.925(37/40)**, 8/6 최초 측정과 완전 동일 = **결정론적 재현**. ckpt 승격 복제 `epoch_0029_measured_0.925.bak`.
   - 23:30 sim-test 헬스체크: 6dof 2501프레임 9.9s · camera 30프레임×2 0.7s · pick min_approach **0.3228327114m** 결정론(open-loop 알려진 0%, 회귀 아님). MuJoCo 3.8.0 로드·step·렌더 전부 정상, 회귀 0.
+
+## 2026-08-09
+- Phase 3 W3 — **S1 hold 유지 + 무결성 감사 재확인(0.925 불변) + 23:30 렌더 헬스체크 3종 PASS**: `agent/research-log/2026-08-09.md`, `research/simulation/2026-08-09_phase3-w3-s1-hold-integrity-audit.md` → 8월 보고서 [ACT 학습 / Phase 3 PCB(S1) 안정성] 섹션.
+  - **무결성(비파괴)**: 운영 `rollout_summary_s1.json` md5 **fbeef25775e5846ba2e3ce887afd1929** 8/8 대비 불변 · `cop_dataset_target`=`data/episodes_s1` · train_act proc 없음 · 마커 3자 정합 → 회귀/오염 0. 4-seed 0.925(37/40) 유지.
+  - 23:30 sim-test 헬스체크: 6dof 2501프레임 · camera 30프레임×2(top 640×480+gripper 320×240) · pick min_approach **0.3228327114m**(open-loop 레거시 알려진 0%, 회귀 아님). MuJoCo 3.8.0 렌더 파이프라인 크래시 0. sim_data_collector SKIP(hold 오염 방지).
