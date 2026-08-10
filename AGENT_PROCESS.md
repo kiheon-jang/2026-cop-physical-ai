@@ -26,7 +26,7 @@
 |------|------|
 | **프로젝트명** | 사내 CoP Physical AI — 첫걸음 |
 | **목적** | SO-ARM101 로봇팔 기반 모방학습 → 강화학습 → 모바일 매니퓰레이터 |
-| **현재 단계** | **Phase 3 - 진행중** —  (2026-08-10~) |
+| **현재 단계** | **Phase 3 - 진행중** —  (2026-08-11~) |
 | **GitHub** | https://github.com/kiheon-jang/2026-cop-physical-ai |
 | **담당자** | 장기헌 (xaqwer@gmail.com) — 시뮬 트랙 |
 | **실기 트랙** | 실기 담당자(deois) · omen 머신(RTX 2080 Ti, lerobot 0.6.1) · https://github.com/deois/soarm_lerobot — **로컬 미러 `/Volumes/MARK_DATA/dev/soarm_lerobot`** (LFS 스킵 clone, `dashboard/build.py` 가 rebuild 마다 자동 `git pull` 하여 사이트 '실기 트랙' 뷰 갱신) |
