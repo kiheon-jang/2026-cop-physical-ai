@@ -712,6 +712,14 @@ uv pip install <패키지명>
     `rollout_summary_s1.json` md5 `fbeef25775e5846ba2e3ce887afd1929` 8/8·8/9 대비 불변·datasets s1
     100ep/7231f·floor·cl 각 50ep/3350f 불변 → **회귀/오염 0**. [자가치유] 없음. 상세:
     `2026-08-10_phase3-w3-s1-hold-integrity-audit.md`.
+  - 🔄 **2026-08-11 — hold 유지 + 무결성 감사 재확인**: 드라이버 STAGE=완료/유지(`episodes_s1`
+    100ep·0.925, 새 사이클 미트리거) → 재실행 없음. 오늘은 W1 dated 범위(8/5~8/11) 마지막 날이나
+    W1 전부 이미 `[v]` · dated W1~W3 완료 · 다음 pending = W4 omen 핸드오프(외부 의존) → hold.
+    비파괴 감사: 마커 3자 8/10 값과 바이트 일치(target=`data/episodes_s1`·trained_on=
+    `episodes_s1:1785931493`·measured=`episodes_s1:1786060554`)·학습 프로세스 없음·
+    `rollout_summary_s1.json` md5 `fbeef25775e5846ba2e3ce887afd1929` 8/8·8/9·8/10 대비 불변·
+    datasets s1 100ep/7231f·floor·cl 각 50ep/3350f 불변 → **회귀/오염 0**. [자가치유] 없음. 상세:
+    `2026-08-11_phase3-w3-s1-hold-integrity-audit.md`.
 - W4 (8/26 ~ 8/31): sim2real 핸드오프
   - [ ] 합성 데이터셋 + sim-trained 정책 omen 전달 (실기 담당자 협업 — 실기 fine-tune 대조군)
   - [ ] P1 LED ROI 캘리브 지원 — 시뮬 top/closeup 프레임으로 ROI·임계값 검증 결과 공유
