@@ -195,7 +195,7 @@
 
     return {
       renderer: renderer, scene: scene, camera: camera, canvas: canvas,
-      hinges: hinges, led: led, applyCam: applyCam
+      hinges: hinges, led: led, applyCam: applyCam, inner: inner, bodyGroup: bodyGroup, btn: btn
     };
   }
 
@@ -269,23 +269,119 @@
       H.applyCam(); draw();
     }).observe(H.canvas);
 
-    // ── Playground: 마우스로 팔 조종(스크럽) + 클릭으로 버튼 누름 (자동재생/궤도 없음) ──
+    // ── Playground: 팔끝이 커서를 추종(3D CCD IK, 실 관절범위+베이스 좌우) + 클릭=버튼 누름 ──
     if (opts.interactive) {
-      var maxF = (LEDF < N ? LEDF : N - 1);   // 프레임 0(홈)→maxF(버튼 눌림·LED 점등)
-      function show(i) { renderFrame(i); H.applyCam(); draw(); }
-      show(0);
       var counterEl = opts.counterId ? document.getElementById(opts.counterId) : null;
       var hintEl = opts.hintId ? document.getElementById(opts.hintId) : null, count = 0;
+
+      // rest 프레임(FR[0])으로 전 관절 시드
+      var ang = [0, 0, 0, 0, 0, 0];
+      H.hinges.forEach(function (h) { if (h.qposadr < 6) ang[h.qposadr] = FR[0][h.qposadr]; });
+      H.hinges.forEach(function (h) { if (h.qposadr < 6) h.pivot.quaternion.setFromAxisAngle(h.axisV, ang[h.qposadr]); });
+      H.applyCam(); H.scene.updateMatrixWorld(true); draw();
+
+      // 리치 관절 = base_pan(0)·shoulder_lift(1)·elbow(2)·wrist_flex(3). wrist_roll(4)·gripper(5) 고정.
+      var ikH = H.hinges.filter(function (h) { return h.qposadr <= 3; }).sort(function (a, b) { return a.qposadr - b.qposadr; });
+      var eff = H.inner[7] || H.inner[6] || H.inner[5];
+      var gripNodes = [H.inner[7], H.inner[6]].filter(Boolean);   // 집게 실제 메시(보드 관통·버튼 터치 판정용)
+      var buttonPos = new THREE.Vector3(); if (H.btn) H.btn.getWorldPosition(buttonPos);   // 빨간 리셋버튼 월드좌표
+      var wasTouching = false, aiming = false, BTN_SNAP = 0.09;   // BTN_SNAP=커서가 화면상 버튼 이만큼(NDC) 이내면 '조준' → 타깃을 실제 버튼으로 스냅. 성공=조준+팔 하강.
+
+      // 가동범위: base_pan(0)=플레이그라운드 좌우 자유(±YAW, 회전 감김만 방지). 1·2·3=녹화 프레임 자연범위+마진.
+      // 실기 S1 실측 범위 기반 — 베이스 팬은 실기서 거의 잠금(±0.5°)이라 좁게, 나머지는 녹화 프레임 min/max + 소폭 마진(자연 포즈 유지)
+      var YAW = 0.5, lim = { 0: { mn: -YAW, mx: YAW } };
+      [1, 2, 3, 4].forEach(function (q) {
+        var mn = 1e9, mx = -1e9;
+        for (var i = 0; i < FR.length; i++) { var v = FR[i][q]; if (v < mn) mn = v; if (v > mx) mx = v; }
+        lim[q] = { mn: mn - 0.15, mx: mx + 0.15 };
+      });
+
+      var BOARD_TOP = 0.026;  // 보드 윗면 world y — 자유이동 중 집게 최저점이 이 아래로 못 내려감(관통 방지).
+      var FLOOR_Y = 0.05;     // 타깃 1차 하한. 실측 튜닝 knob.
+      var planeC = new THREE.Vector3(0.15, 0.10, 0.0);   // 커서 투영 평면 중심(작업영역)
+
+      // 커서 → 카메라 정면 3D 평면 타깃(좌우=베이스 yaw, 상하=팔 리치)
+      var ray = new THREE.Raycaster(), planeN = new THREE.Vector3(), plane = new THREE.Plane(), hitP = new THREE.Vector3();
+      function cursorTarget(nx, ny) {
+        _btnN.copy(buttonPos).project(H.camera);                                   // 버튼 화면좌표
+        aiming = Math.hypot(nx - _btnN.x, ny - _btnN.y) < BTN_SNAP;                 // 커서가 버튼 조준 중?
+        if (aiming) return hitP.copy(buttonPos);                                    // 조준 → 실제 버튼으로 스냅(정확 터치)
+        ray.setFromCamera({ x: nx, y: ny }, H.camera);
+        H.camera.getWorldDirection(planeN);
+        plane.setFromNormalAndCoplanarPoint(planeN, planeC);
+        if (!ray.ray.intersectPlane(plane, hitP)) return null;
+        if (hitP.y < FLOOR_Y) hitP.y = FLOOR_Y;
+        return hitP;
+      }
+
+      // CCD: tip→base, 각 관절 축둘레 회전 + 가동범위 클램프
+      var wEnd = new THREE.Vector3(), wPiv = new THREE.Vector3(), wAx = new THREE.Vector3(),
+          vA = new THREE.Vector3(), vB = new THREE.Vector3(), vC = new THREE.Vector3(), wq = new THREE.Quaternion();
+      function ccd(tgt, iters) {
+        for (var it = 0; it < iters; it++) {
+          for (var k = ikH.length - 1; k >= 0; k--) {
+            var h = ikH[k];
+            H.scene.updateMatrixWorld(true);
+            eff.getWorldPosition(wEnd);
+            h.pivot.getWorldPosition(wPiv);
+            wAx.copy(h.axisV).applyQuaternion(h.pivot.getWorldQuaternion(wq)).normalize();
+            vA.subVectors(wEnd, wPiv); vB.subVectors(tgt, wPiv);
+            vA.addScaledVector(wAx, -vA.dot(wAx)); vB.addScaledVector(wAx, -vB.dot(wAx));   // 축⟂ 평면 투영
+            if (vA.lengthSq() < 1e-8 || vB.lengthSq() < 1e-8) continue;
+            vA.normalize(); vB.normalize();
+            var d = Math.max(-1, Math.min(1, vA.dot(vB))), da = Math.acos(d);
+            vC.crossVectors(vA, vB); if (vC.dot(wAx) < 0) da = -da;
+            var L = lim[h.qposadr];
+            ang[h.qposadr] = Math.max(L.mn, Math.min(L.mx, ang[h.qposadr] + da * 0.5));   // 가동범위 클램프
+            h.pivot.quaternion.setFromAxisAngle(h.axisV, ang[h.qposadr]);
+          }
+        }
+      }
+
+      // 집게 메시의 실제 최저 world y (관통 판정)
+      var _bb = new THREE.Box3(), _btnN = new THREE.Vector3();
+      function gripMinY() { _bb.makeEmpty(); for (var i = 0; i < gripNodes.length; i++) _bb.expandByObject(gripNodes[i]); return isFinite(_bb.min.y) ? _bb.min.y : 1e9; }
+
+      // 버튼 조준 시 재생할 '누름' 포즈 = 녹화 rollout 의 LED 점등 프레임(실기가 실제로 버튼 누른 관절config)
+      var PRESS = FR[LEDF < N ? LEDF : N - 1];
+
+      var pending = null, scheduled = false;
+      function solve() {
+        scheduled = false; if (!pending) return;
+        var touching = false;
+        if (aiming) {
+          // 버튼 조준 → 녹화된 '누름' 포즈로 부드럽게 이징 (실기가 실제 누른 관절 그대로 정확히 버튼 누름)
+          H.hinges.forEach(function (h) { if (h.qposadr < 6) { ang[h.qposadr] += (PRESS[h.qposadr] - ang[h.qposadr]) * 0.28; h.pivot.quaternion.setFromAxisAngle(h.axisV, ang[h.qposadr]); } });
+          touching = (Math.abs(ang[1] - PRESS[1]) + Math.abs(ang[2] - PRESS[2]) + Math.abs(ang[3] - PRESS[3])) < 0.14;   // 누름 포즈 수렴 = 실제 터치
+        } else {
+          // 버튼 밖 → 자유 커서 추종(IK) + 보드 관통 방지
+          ccd(pending, 12);
+          for (var pass = 0; pass < 3; pass++) {
+            H.scene.updateMatrixWorld(true);
+            var minY = gripMinY();
+            if (minY >= BOARD_TOP) break;
+            pending.y += (BOARD_TOP - minY) + 0.005; ccd(pending, 6);
+          }
+        }
+        if (touching && !wasTouching) {
+          setLED(H, true); count++; if (counterEl) counterEl.textContent = count;
+          if (ledLab) { ledLab.textContent = "LED ●"; ledLab.style.color = "var(--grn)"; }
+        } else if (!touching && wasTouching) {
+          setLED(H, false); if (ledLab) { ledLab.textContent = "LED ○"; ledLab.style.color = ""; }
+        }
+        wasTouching = touching;
+        draw();
+      }
       H.canvas.addEventListener("pointermove", function (e) {
         var r = H.canvas.getBoundingClientRect();
-        var t = Math.max(0, Math.min((e.clientX - r.left) / (r.width || 1), 1));
-        show(Math.round(t * maxF));                     // 좌=쉬는 자세, 우로 갈수록 팔이 버튼으로 내려감
+        var nx = ((e.clientX - r.left) / (r.width || 1)) * 2 - 1;
+        var ny = -(((e.clientY - r.top) / (r.height || 1)) * 2 - 1);
+        var t = cursorTarget(nx, ny); if (!t) return;
+        pending = t.clone();
+        if (!scheduled) { scheduled = true; requestAnimationFrame(solve); }
         if (hintEl && !hintEl.__hid) { hintEl.__hid = true; hintEl.style.opacity = "0"; }
       });
-      H.canvas.addEventListener("pointerdown", function () {
-        show(Math.min(N - 1, maxF + 3));                // 확실히 눌린 프레임(LED on)
-        count++; if (counterEl) counterEl.textContent = count;
-      });
+      // 클릭 성공 제거 — 성공은 오직 팔 끝이 버튼에 닿을 때(solve 의 터치 판정)
       return true;
     }
 

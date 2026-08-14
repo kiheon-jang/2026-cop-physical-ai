@@ -18,24 +18,43 @@
     --grid: #e6e6e6; --shadow: 0 1px 2px rgba(0,0,0,.04); --shadow-elev: 0 4px 18px rgba(0,0,0,.06);
   }
   [data-theme="dark"] {
-    --bg: #0d1411; --bg-sub: #141d19; --bg-elev: #182320;
-    --border: #1c2722; --border-strong: #283530;
-    --text: #f5f7f6; --text-sub: #b6c2bd; --text-dim: #7a8a84;
-    --accent: var(--hl-green-d); --accent-soft: rgba(0,179,119,.13); --accent-strong: #1ec27e;
-    --action: var(--hl-blue-d);  --action-soft: rgba(91,158,255,.14);
-    --grid: #1c2722; --shadow: 0 1px 2px rgba(0,0,0,.3); --shadow-elev: 0 8px 28px rgba(0,0,0,.32);
+    /* 쿨 미션컨트롤 톤 — 컨텐츠 뷰(#05070e/#0b101c/#39c6f0)와 통일 */
+    --bg: #070b14; --bg-sub: #0b101c; --bg-elev: #0e1524;
+    --border: rgba(150,175,220,.14); --border-strong: rgba(150,175,220,.26);
+    --text: #e8eefb; --text-sub: #8ea0bd; --text-dim: #5f7091;
+    --accent: #39c6f0; --accent-soft: rgba(57,198,240,.13); --accent-strong: #5fd7f5;
+    --action: #39c6f0;  --action-soft: rgba(57,198,240,.14);
+    --grid: rgba(150,175,220,.14); --shadow: 0 1px 2px rgba(0,0,0,.4); --shadow-elev: 0 10px 34px rgba(0,0,0,.5);
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Inter", "Pretendard", "Apple SD Gothic Neo", sans-serif;
     -webkit-font-smoothing: antialiased; }
+  /* 사이트 전체 배경 — 청사진 격자 + 커서 따라오는 라이트 (다크에서만) */
+  body[data-theme="dark"]::before { content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(150,175,220,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(150,175,220,.05) 1px, transparent 1px);
+    background-size: 44px 44px; }
+  /* 커서 라이트 — 최상단 오버레이 + screen 블렌드로 패널·메뉴 위까지 글로우(가려짐 없음) */
+  body[data-theme="dark"]::after { content:""; position:fixed; inset:0; z-index:9; pointer-events:none;
+    mix-blend-mode:screen;
+    background: radial-gradient(620px circle at var(--mx,72%) var(--my,16%), rgba(57,198,240,.15), rgba(46,230,160,.05) 34%, rgba(57,198,240,0) 60%); }
+  .dash-app { position: relative; z-index: 1; }
   a { color: inherit; text-decoration: none; }
 
   .dash-app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
 
-  .sidebar { background: var(--bg); border-right: 1px solid var(--border);
+  .sidebar { background: rgba(9,13,22,.55); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+    border-right: 1px solid var(--border);
     padding: 22px 18px; position: sticky; top: 0; height: 100vh;
     display: flex; flex-direction: column; }
+  body[data-theme="dark"] .sidebar::before { content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(rgba(150,175,220,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(150,175,220,.06) 1px, transparent 1px);
+    background-size: 44px 44px; }
+  .sidebar > * { position: relative; z-index: 1; }
   .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
   .brand-mark { width: 28px; height: 28px; border-radius: 7px;
     background: var(--accent); display: grid; place-items: center;
@@ -63,7 +82,7 @@
   .nav-item.active .count { background: var(--accent); color: #fff; }
 
   .sidebar-foot { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--border); }
-  .theme-toggle { display: flex; gap: 4px; background: var(--bg-sub); padding: 4px;
+  .theme-toggle { display: none; gap: 4px; background: var(--bg-sub); padding: 4px;
     border-radius: 8px; border: 1px solid var(--border); }
   .theme-toggle button { flex: 1; border: none; padding: 6px 8px; border-radius: 6px;
     background: transparent; cursor: pointer; font-size: 11px;
@@ -73,7 +92,7 @@
     font-family: ui-monospace, monospace; word-break: break-all; }
   .sidebar-meta .demo { color: var(--action); font-weight: 700; }
 
-  .main { background: var(--bg); min-width: 0; }
+  .main { background: transparent; min-width: 0; }
   .topbar { position: sticky; top: 0; z-index: 10; background: var(--bg);
     border-bottom: 1px solid var(--border); padding: 16px 28px;
     display: flex; align-items: center; gap: 12px; }
@@ -1100,7 +1119,7 @@
 </style>
   <style>/*__DOCS_VIEWER_CSS__*/</style>
 </head>
-<body data-theme="light">
+<body data-theme="dark">
 
 <div class="dash-app">
   <aside class="sidebar">
@@ -1115,22 +1134,22 @@
     <div class="nav">
       <a class="nav-item active" data-route="home" data-icon="dashboard"> Overview</a>
       <a class="nav-item" data-route="story" data-icon="bookOpen"> 스토리</a>
-      <a class="nav-item" data-route="playground" data-icon="bot"> 플레이그라운드</a>
       <a class="nav-item" data-route="tech" data-icon="bookOpen"> CoP 리뷰</a>
       <a class="nav-item" data-route="ops" data-icon="bot"> AI 자동화 운영</a>
       <a class="nav-item" data-route="apps" data-icon="calendar"> Phase 로드맵 <span class="count" id="cnt-apps">6</span></a>
-      <a class="nav-item" data-route="videos" data-icon="video"> 시뮬 영상 <span class="count" id="cnt-videos">0</span></a>
-      <a class="nav-item" data-route="sim3d" data-icon="bot"> 3D 리플레이 <span class="count" id="cnt-sim3d">0</span></a>
-      <a class="nav-item" data-route="results" data-icon="barChart"> 성과 지표</a>
-      <a class="nav-item" data-route="realtrack" data-icon="wrench"> 실기 트랙 <span class="count" id="cnt-realtrack">0</span></a>
-      <a class="nav-item" data-route="daily" data-icon="activity"> 활동 타임라인 <span class="count" id="cnt-daily">0</span></a>
-      <a class="nav-item" data-route="magazines" data-icon="clipboard"> 보고용 자료 <span class="count" id="cnt-magazines">0</span></a>
+      <a class="nav-item" data-route="playground" data-icon="bot"> 플레이그라운드</a>
     </div>
 
     <div class="nav-section-title nav-toggle" id="tools-toggle" onclick="toggleTools()">
       <span id="tools-caret">▾</span> 도구
     </div>
     <div class="nav" id="tools-nav">
+      <a class="nav-item" data-route="videos" data-icon="video"> 시뮬 영상 <span class="count" id="cnt-videos">0</span></a>
+      <a class="nav-item" data-route="sim3d" data-icon="bot"> 3D 리플레이 <span class="count" id="cnt-sim3d">0</span></a>
+      <a class="nav-item" data-route="results" data-icon="barChart"> 성과 지표</a>
+      <a class="nav-item" data-route="realtrack" data-icon="wrench"> 실기 트랙 <span class="count" id="cnt-realtrack">0</span></a>
+      <a class="nav-item" data-route="daily" data-icon="activity"> 활동 타임라인 <span class="count" id="cnt-daily">0</span></a>
+      <a class="nav-item" data-route="magazines" data-icon="clipboard"> 보고용 자료 <span class="count" id="cnt-magazines">0</span></a>
       <a class="nav-item" data-route="samples" data-icon="code"> 샘플 코드 상태 <span class="count" id="cnt-samples">0</span></a>
       <a class="nav-item" data-route="analytics" data-icon="barChart"> 분석</a>
       <a class="nav-item" data-route="bookmarks" data-icon="star"> 북마크 <span class="count" id="cnt-bookmarks">0</span></a>
@@ -1247,6 +1266,13 @@
   .bmc-home .badge.n{color:var(--mut);border:1px solid var(--line2)}
   .bmc-card h3{font-size:17px;margin:12px 0 4px;font-weight:700;color:var(--ink)}
   .bmc-card .sub{color:var(--mut);font-size:13px;min-height:38px}
+  .bmc-card .tc-why{color:var(--mut);font-size:12.5px;line-height:1.62;margin-top:10px}
+  .bmc-card .tc-why b{color:var(--ink);font-weight:700}
+  .bmc-card .apps-next{margin-top:10px;font-size:12.5px;color:var(--ink);border-left:2px solid var(--amb);padding-left:10px;line-height:1.55}
+  .bmc-card .apps-next b{color:var(--amb)}
+  .bmc-card .report-link{font-family:var(--mono);font-size:11.5px;color:var(--cyn);cursor:pointer}
+  .bmc-card .report-link:hover{text-decoration:underline}
+  .bmc-card .tc-why code{font-family:var(--mono);font-size:11px;background:var(--panel2);border:1px solid var(--line2);border-radius:4px;padding:1px 5px;color:var(--cyn)}
   .bmc-card .metric{font-family:var(--mono);margin-top:14px;display:flex;align-items:baseline;gap:8px}
   .bmc-card .metric .n{font-size:30px;font-weight:800}
   .bmc-card.done .metric .n{color:var(--grn)}
@@ -1303,13 +1329,9 @@
         <section class="bmc-hero" id="bmc-overview">
           <div class="bmc-hero-grid">
             <div>
-              <span class="bmc-eyebrow"><i class="sq"></i>발주 · 현대엘리베이터 &nbsp;|&nbsp; SO-101 · hdel_iot_01</span>
-              <h1 class="bmc-h1"><span class="hl">엘리베이터 제어반</span>을, 로봇이 점검하기 위한 첫걸음.<br>로봇팔이 손끝을 배웁니다.</h1>
+              <span class="bmc-eyebrow"><i class="sq"></i>CoP · Physical AI &nbsp;|&nbsp; SO-101 · hdel_iot_01</span>
+              <h1 class="bmc-h1"><span class="hl">엘리베이터 제어반</span>을,<br>로봇이 점검하기 위한 첫걸음.<br>로봇팔이 손끝을 배웁니다.</h1>
               <p class="bmc-lede">가상 환경(MuJoCo)에서 매일 학습 데이터를 쌓고,<br>익힌 데이터를 실제 로봇팔로 옮깁니다.<br>병행하여 실기기에서 모션 학습을 통해 데이터를 쌓아 정확도를 높입니다.<br>로봇팔이 제어반의 전원 버튼을 눌러 리셋하고,<br>꽂혀 있는 케이블을 빼는(분리) 것을 목표로 합니다.</p>
-              <div class="bmc-cta">
-                <a class="bmc-btn primary" id="bmcCtaStory" href="#story" onclick="setRoute('story');return false;"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h9a3 3 0 0 1 3 3v11a2.5 2.5 0 0 0-2.5-2.5H4z"/><path d="M20 5h-4a3 3 0 0 0-3 3v11a2.5 2.5 0 0 1 2.5-2.5H20z"/></svg>스토리</a>
-                <a class="bmc-btn ghost" id="bmcCtaPlay" href="#playground" onclick="setRoute('playground');return false;"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>플레이그라운드</a>
-              </div>
               <div class="bmc-chips">
                 <div class="bmc-chip">1단계 · 집어옮기기<b><span class="u" data-bcount="100" data-dec="0">0</span>%</b></div>
                 <div class="bmc-chip">2단계 · 리셋버튼(S1)<b><span data-bcount="92.5" data-dec="1">0</span>%</b></div>
@@ -1340,6 +1362,21 @@
                 <span class="status">프레임 <b id="framelbl">1/120</b> · 29fps · <span id="ledlab">LED ○</span></span>
               </div>
             </div>
+          </div>
+
+          <div class="bmc-logbox">
+            <div class="lh">
+              <span class="rep"><i class="d"></i>재생 (여태 학습분 반복 · 실데이터)</span>
+              <span>train.log · ACT · epoch 0→30</span>
+              <svg class="sk" width="150" height="24" viewBox="0 0 150 24"><polyline id="bmcSpkLossBig" fill="none" stroke="var(--cyn)" stroke-width="1.5" stroke-linejoin="round" points=""/></svg>
+            </div>
+            <div class="statstrip">
+              <div class="st"><div class="k">S1 성공률</div><div class="v g" id="bmcStatS1">92.5%</div></div>
+              <div class="st"><div class="k">1단계</div><div class="v g" id="bmcStatP1">100%</div></div>
+              <div class="st"><div class="k">시연까지</div><div class="v a" id="bmcStatDday">D-55</div></div>
+              <div class="st"><div class="k">총 에폭</div><div class="v c" id="bmcStatEp">31</div></div>
+            </div>
+            <div class="log" id="bmc-log"></div>
           </div>
         </section>
       </div>
@@ -1469,334 +1506,216 @@
 
     <!-- OPS — AI 자동화 운영 방법 -->
     <div class="view hidden" id="view-ops">
-      <div class="home-hero">
-        <h1 data-icon="bot" data-icon-after> AI 자동화 운영 방법</h1>
-        <div class="sub">수동 개입 없이 자율 운영되는 구조 — 로컬 Mac Mini 에서 Hermes AI 에이전트가 정해진 시각에 시뮬·테스트·보고를 자동 실행합니다.</div>
+      <style>
+      .b1{--c-cyn:#39c6f0;--c-grn:#2ee6a0;--c-amb:#f8b64c;--c-ink:#e8eefb;--c-ink2:#c2ccdb;--c-mut:#8ea0bd;--c-mut2:#5f6f8c;--c-panel:#0b101c;--c-panel2:#0e1626;--c-line:rgba(150,175,220,.16);--c-line2:rgba(150,175,220,.24);--c-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+        max-width:1200px;margin:0 auto;padding:6px 2px 40px}
+      .b1 .b1-head{margin:6px 0 16px}
+      .b1 .b1-eyebrow{font-family:var(--c-mono);font-size:11.5px;letter-spacing:.15em;color:var(--c-cyn)}
+      .b1 .b1-head h2{font-size:clamp(20px,2.6vw,27px);margin:6px 0 0;font-weight:750;letter-spacing:-.01em;color:var(--c-ink)}
+      .b1 .b1-head .sub{color:var(--c-mut);font-size:13px;margin:5px 0 0;max-width:70ch}
+      /* telemetry bar */
+      .b1 .tele{display:flex;gap:0;flex-wrap:wrap;border:1px solid var(--c-line2);border-radius:12px;background:var(--c-panel2);margin:16px 0 20px;overflow:hidden}
+      .b1 .tele .t{flex:1;min-width:120px;padding:12px 16px;border-right:1px solid var(--c-line)}
+      .b1 .tele .t:last-child{border-right:0}
+      .b1 .tele .t .k{font-family:var(--c-mono);font-size:9.5px;letter-spacing:.1em;color:var(--c-mut2)}
+      .b1 .tele .t .v{font-size:15px;font-weight:700;color:var(--c-ink);margin-top:3px;font-family:var(--c-mono)}
+      .b1 .tele .t .v.ok{color:var(--c-grn)} .b1 .tele .t .v.cy{color:var(--c-cyn)}
+      .b1 .tele .t .v .dot{width:7px;height:7px;border-radius:50%;background:var(--c-grn);display:inline-block;margin-right:6px;box-shadow:0 0 8px var(--c-grn);animation:b1blink 1.8s infinite}
+      @keyframes b1blink{0%,100%{opacity:1}50%{opacity:.35}}
+      /* graph + inspector */
+      .b1 .main{display:grid;grid-template-columns:1.55fr .95fr;gap:16px;align-items:stretch}
+      @media(max-width:900px){.b1 .main{grid-template-columns:1fr}}
+      .b1 .graph{position:relative;background:radial-gradient(120% 90% at 0% 50%,rgba(57,198,240,.05),transparent 55%),var(--c-panel);border:1px solid var(--c-line2);border-radius:14px;padding:18px 16px;min-height:360px;overflow:hidden}
+      .b1 .graph .glab{position:absolute;top:12px;left:16px;font-family:var(--c-mono);font-size:10px;letter-spacing:.1em;color:var(--c-mut2)}
+      .b1 .edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+      .b1 .cols{position:relative;z-index:1;display:grid;grid-template-columns:auto auto 1fr;gap:22px 34px;align-items:center;height:100%;margin-top:14px}
+      .b1 .nd{background:linear-gradient(180deg,var(--c-panel2),#0a1018);border:1px solid var(--c-line2);border-radius:10px;padding:9px 11px;cursor:pointer;font:inherit;color:inherit;text-align:left;transition:.16s;position:relative}
+      .b1 .nd:hover,.b1 .nd.sel{border-color:var(--c-cyn);box-shadow:0 0 0 3px rgba(57,198,240,.14)}
+      .b1 .nd .nt{font-size:12.5px;font-weight:700;color:var(--c-ink);display:flex;align-items:center;gap:7px}
+      .b1 .nd .nt i{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+      .b1 .nd .nsub{font-family:var(--c-mono);font-size:9.5px;color:var(--c-mut);margin-top:2px}
+      .b1 .nd.root{align-self:center} .b1 .nd.hub{align-self:center}
+      .b1 .nd.hub{border-color:rgba(57,198,240,.4);background:linear-gradient(180deg,#0f2030,#0a1018)}
+      .b1 .leaves{display:flex;flex-direction:column;gap:9px}
+      .b1 .nd .badge{position:absolute;top:-7px;right:8px;font-family:var(--c-mono);font-size:8.5px;background:#111c2e;border:1px solid var(--c-line2);border-radius:5px;padding:1px 6px;color:var(--c-cyn)}
+      /* inspector */
+      .b1 .insp{background:linear-gradient(180deg,var(--c-panel2),var(--c-panel));border:1px solid var(--c-line2);border-radius:14px;padding:18px}
+      .b1 .insp .ih{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+      .b1 .insp .ih i{width:9px;height:9px;border-radius:50%}
+      .b1 .insp h3{font-size:17px;margin:0;color:var(--c-ink);font-weight:750}
+      .b1 .insp .isub{font-family:var(--c-mono);font-size:10.5px;color:var(--c-mut);margin:2px 0 12px}
+      .b1 .insp .kv{display:grid;grid-template-columns:74px 1fr;gap:8px 10px;font-size:12px}
+      .b1 .insp .kv dt{font-family:var(--c-mono);font-size:9.5px;color:var(--c-cyn);letter-spacing:.05em;padding-top:2px}
+      .b1 .insp .kv dd{margin:0;color:var(--c-ink2);line-height:1.5}
+      .b1 .insp .kv dd code{font-family:var(--c-mono);font-size:10.5px;color:var(--c-cyn)}
+      .b1 .insp .roles{margin-top:14px;padding-top:13px;border-top:1px solid var(--c-line)}
+      .b1 .insp .roles .rh{font-family:var(--c-mono);font-size:10px;color:var(--c-mut2);margin-bottom:8px;letter-spacing:.06em}
+      .b1 .insp .roles .rr{display:flex;align-items:center;gap:8px;font-size:11.5px;padding:3px 0;color:var(--c-ink2)}
+      .b1 .insp .roles .rr .tag{font-family:var(--c-mono);font-size:9px;border-radius:4px;padding:1px 6px;flex:0 0 auto}
+      .b1 .insp .roles .rr .tag.a{color:#04140d;background:var(--c-grn)} .b1 .insp .roles .rr .tag.h{color:#1a1206;background:var(--c-amb)} .b1 .insp .roles .rr .tag.p{color:var(--c-mut);border:1px solid var(--c-line2)}
+      /* timeline */
+      .b1 .tl{margin-top:20px;background:var(--c-panel2);border:1px solid var(--c-line2);border-radius:12px;padding:16px 18px 22px}
+      .b1 .tl .tlh{font-family:var(--c-mono);font-size:10px;letter-spacing:.08em;color:var(--c-mut);margin-bottom:20px}
+      .b1 .tl .axis{position:relative;height:2px;background:var(--c-line2);border-radius:2px;margin:0 6px}
+      .b1 .tl .hr{position:absolute;top:8px;transform:translateX(-50%);font-family:var(--c-mono);font-size:9px;color:var(--c-mut2)}
+      .b1 .tl .ev{position:absolute;top:-6px;transform:translateX(-50%);width:12px;height:12px}
+      .b1 .tl .ev .m{width:11px;height:11px;border-radius:50%;background:var(--c-cyn);box-shadow:0 0 8px var(--c-cyn)}
+      .b1 .tl .ev .lb{position:absolute;top:-24px;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:var(--c-mono);font-size:9px;color:var(--c-ink2);background:#111c2e;border:1px solid var(--c-line2);border-radius:5px;padding:2px 6px}
+      .b1 .tl .ev.alt .lb{top:16px}
+      .b1 .tl .ev.heal .m{background:var(--c-grn);box-shadow:0 0 8px var(--c-grn)}
+      /* dataflow */
+      .b1 .flow{margin-top:16px}
+      .b1 .flow .fh{font-family:var(--c-mono);font-size:10px;letter-spacing:.08em;color:var(--c-mut);margin-bottom:10px}
+      .b1 .flow .row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+      .b1 .flow .st{font-family:var(--c-mono);font-size:10.5px;color:var(--c-ink2);background:var(--c-panel2);border:1px solid var(--c-line2);border-radius:7px;padding:5px 9px}
+      .b1 .flow .st.s{border-color:rgba(57,198,240,.4);color:var(--c-cyn)} .b1 .flow .st.e{border-color:rgba(46,230,160,.4);color:var(--c-grn)}
+      .b1 .flow .ar{color:var(--c-mut2)}
+      .b1 .flow .st code{font-family:inherit}
+      @media(prefers-reduced-motion:reduce){.b1 .tele .t .v .dot{animation:none}}
+      </style>
+      <div class="b1" id="b1-root">
+        <div class="b1-head">
+          <div class="b1-eyebrow">AUTONOMOUS OPS · 시스템 토폴로지</div>
+          <h2>사람이 자는 동안, 스스로 돕니다</h2>
+          <p class="sub">로컬 Mac Mini(24/7)에서 Hermes AI 에이전트가 하루 4번 시뮬·테스트·보고를 자동 실행. 노드를 클릭하면 상세가 열립니다.</p>
+        </div>
+        <div class="tele" id="b1-tele"></div>
+        <div class="main">
+          <div class="graph">
+            <span class="glab">SYSTEM TOPOLOGY · 뿌리 → 허브 → 서비스</span>
+            <svg class="edges" id="b1-edges" preserveAspectRatio="none"></svg>
+            <div class="cols">
+              <button class="nd root" data-k="root"><span class="nt"><i style="background:#8ea0bd"></i>Mac Mini</span><span class="nsub">24/7 · 로컬</span></button>
+              <button class="nd hub" data-k="hub"><span class="nt"><i style="background:#39c6f0"></i>Hermes Agent</span><span class="nsub">로컬 AI 에이전트</span></button>
+              <div class="leaves" id="b1-leaves"></div>
+            </div>
+          </div>
+          <div class="insp" id="b1-insp"></div>
+        </div>
+        <div class="tl">
+          <div class="tlh">하루 자동화 타임라인 · 00:00 ~ 24:00 KST</div>
+          <div class="axis" id="b1-axis"></div>
+        </div>
+        <div class="flow" id="b1-flow"></div>
       </div>
-
-      <!-- 1. 한 줄 결론 -->
-      <div class="ops-summary">
-        <p>이 프로젝트는 <b>수동 개입 없이 자율적으로 운영됩니다</b>. 로컬 Mac Mini 가 24시간 가동되며, <b>Hermes Agent (AI 에이전트)</b>가 하루 4번 정해진 시각에 시뮬 환경 구축 · 테스트 · 보고서 작성 · 메일 발송까지 수행합니다. CoP 담당자는 의사결정과 외부 의존 (부품 구매 · 3D 프린팅) 해결만 담당합니다.</p>
-      </div>
-
-      <!-- 2. 시스템 구성도 (트리) -->
-      <div class="section-head"><h3>시스템 구성</h3><div class="right">단일 로컬 머신 운영</div></div>
-      <div class="ops-tree">
-        <div class="root" data-icon="monitor" data-icon-after> Mac Mini (24/7 가동)</div>
-        <div class="branch">├─ <b>Hermes Agent</b><span class="desc">로컬 AI 에이전트 · Gemini 2.5 Flash 백엔드 (무료)</span></div>
-        <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 1 · 매일 23:00</span><span class="desc">시뮬 환경 단계별 구축 (MuJoCo)</span></div>
-        <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 2 · 매일 23:30</span><span class="desc">시뮬 테스트 + 메트릭 수집</span></div>
-        <div class="branch">│&nbsp;&nbsp;&nbsp;├─ <span class="cron">cron 3 · 매일 07:00</span><span class="desc">아침 보고 메일 자동 발송</span></div>
-        <div class="branch">│&nbsp;&nbsp;&nbsp;└─ <span class="cron">cron 4 · 매일 01:00</span><span class="desc">야간 잡 실패 시 자동 재시도 (self-heal)</span></div>
-        <div class="branch">├─ <b>Self-heal</b><span class="desc">실패 시 자가복구 기록 + 다음 cron 에서 재시도</span></div>
-        <div class="branch">├─ <b>Claude 위임</b><span class="desc">복잡한 추론은 <code style="font-family:inherit;font-size:12px">claude -p</code> 로 위임</span></div>
-        <div class="branch">├─ <b>Git auto-push</b><span class="desc">코드/로그/보고서 자동 commit + push</span></div>
-        <div class="branch">└─ <b>hermes-mark</b><span class="desc">이 대시보드 서버 (Fastify + Cloudflare Tunnel)</span></div>
-        <div class="branch">&nbsp;&nbsp;&nbsp;&nbsp;├─ chokidar<span class="desc">파일 변경 감지</span></div>
-        <div class="branch">&nbsp;&nbsp;&nbsp;&nbsp;├─ WebSocket<span class="desc">브라우저 라이브 갱신</span></div>
-        <div class="branch">&nbsp;&nbsp;&nbsp;&nbsp;└─ Cloudflare Tunnel<span class="desc">외부 도메인 노출 (cop-physical-ai.hermesmark.site)</span></div>
-      </div>
-
-      <!-- 3. cron 표 -->
-      <div class="section-head"><h3>크론 작업 — 매일 정해진 시각에 자동 실행</h3><div class="right">4개 잡 · KST 기준</div></div>
-      <table class="cron-table">
-        <thead>
-          <tr><th>시각</th><th>잡 이름</th><th>역할</th><th>결과물</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="when">매일 23:00</td>
-            <td>
-              <div class="role">시뮬 환경 단계별 구축</div>
-              <div class="desc">PHASE_ROADMAP 읽어 오늘 작업 단계 식별 → MuJoCo 코드 작성/실행</div>
-            </td>
-            <td class="desc">MuJoCo 환경 셋업, MJCF 모델 검증, 시뮬 스크립트 작성. Phase 0~4 단계별 진행.</td>
-            <td class="out"><code>research/simulation/*.md</code><br><code>samples/training/*.py</code></td>
-          </tr>
-          <tr>
-            <td class="when">매일 23:30</td>
-            <td>
-              <div class="role">시뮬 테스트 + 메트릭</div>
-              <div class="desc">23:00 작업 결과를 테스트하고 측정치 기록</div>
-            </td>
-            <td class="desc">Pick-Place 성공률, 추론 시간, 200ep 데이터셋 정합성 검증. 자가치유 로그 첨부.</td>
-            <td class="out"><code>agent/research-log/YYYY-MM-DD.md</code></td>
-          </tr>
-          <tr>
-            <td class="when">매일 07:00</td>
-            <td>
-              <div class="role">아침 보고 메일</div>
-              <div class="desc"><code style="font-family:inherit;font-size:12px">generate_daily_report.py</code> 실행 → 담당자·보고 수신자에게 메일 자동 발송</div>
-            </td>
-            <td class="desc">전일 작업 요약 + 진척 차트 + 자가치유 통계. CHANGELOG/README 자동 갱신 후 git push.</td>
-            <td class="out">이메일 (담당자 + 보고 수신자)<br><code>CHANGELOG.md</code></td>
-          </tr>
-          <tr>
-            <td class="when">일요 22:00</td>
-            <td>
-              <div class="role">주간 정리 + 보고용 증거</div>
-              <div class="desc">한 주 결과 정리 + 월별 보고서 후보 식별</div>
-            </td>
-            <td class="desc">주간 보고용 증거 (영상 · 메트릭 · 결정 기록) 분류. 다음 주 우선순위 정리.</td>
-            <td class="out"><code>agent/report-evidence/YYYY-MM/INDEX.md</code></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- 4. 1일 timeline -->
-      <div class="section-head"><h3>하루 자동화 흐름</h3><div class="right">00:00 ~ 24:00 KST</div></div>
-      <div class="day-timeline">
-        <div class="timeline-axis">
-          <div class="hour" data-hour="0" style="left:0%"></div>
-          <div class="hour" data-hour="6" style="left:25%"></div>
-          <div class="hour" data-hour="12" style="left:50%"></div>
-          <div class="hour" data-hour="18" style="left:75%"></div>
-          <div class="hour" data-hour="24" style="left:100%"></div>
-          <div class="timeline-event" style="left:29%">07:00 · 아침 보고 메일</div>
-          <div class="timeline-event alt" style="left:4.2%">매일 01:00 · 실패 재시도</div>
-          <div class="timeline-event" style="left:95.8%">23:00 · 시뮬 구축</div>
-          <div class="timeline-event alt" style="left:97.9%">23:30 · 테스트+메트릭</div>
-        </div>
-        <p style="font-size:12px; color:var(--text-sub); margin-top:14px; line-height:1.7;">
-          밤 시간대 (23:00, 23:30) 에 시뮬·학습 작업 → 실패하면 01:00 에 자동 재시도 → 결과를 다음 날 07:00 메일로 받음. <b>사람이 개입할 필요 없음</b> — 사고 (실패/차단) 발생 시 자가치유 메커니즘이 다음 cron 에서 자동 재시도.
-        </p>
-      </div>
-
-      <!-- 5. Hermes Agent 카드 -->
-      <div class="section-head"><h3>Hermes Agent — 24시간 운영 AI</h3><div class="right">로컬 + 무료 + 자가치유</div></div>
-      <div class="hermes-card">
-        <div class="head">
-          <h4>Hermes Agent</h4>
-          <span class="tag">로컬 AI 에이전트</span>
-          <span style="font-size:11px; color:var(--text-sub); margin-left:auto;">OpenClaw → Hermes 마이그레이션 2026-04-29 완료</span>
-        </div>
-        <div class="features">
-          <div class="f"><div class="l">호스트</div><div class="v">로컬 Mac Mini</div></div>
-          <div class="f"><div class="l">가동</div><div class="v">24/7 (재부팅 자동 복구)</div></div>
-          <div class="f"><div class="l">백엔드 모델</div><div class="v">Gemini 2.5 Flash <span style="color:var(--text-dim);font-weight:400">(무료)</span></div></div>
-          <div class="f"><div class="l">복잡 추론</div><div class="v">Claude 위임 <span style="color:var(--text-dim);font-weight:400">(<code>claude -p</code>)</span></div></div>
-          <div class="f"><div class="l">스킬</div><div class="v"><code>cop-physical-ai-self-heal</code></div></div>
-          <div class="f"><div class="l">권한</div><div class="v">gh CLI · git · file system · Python venv</div></div>
-        </div>
-        <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border); font-size:12px; color:var(--text-sub); line-height:1.7;">
-          <b style="color:var(--text)">자가치유 (Self-heal)</b> — 매 cron 작업 끝에 실패/차단 항목을 자동 기록. 예: Claude API rate limit · sandbox 권한 차단 · 파일 누락. <code>chore(self-heal)</code> commit 으로 남고, 다음 cron 에서 자동 재시도. 활동 타임라인의 <i class="heal-dot" aria-hidden="true"></i> 표시가 자가치유 발생 일수.
-        </div>
-      </div>
-
-      <!-- 6. 데이터 흐름 -->
-      <div class="section-head"><h3>데이터 흐름 — 학습이 어떻게 진행되는가</h3><div class="right">cron → 시뮬 → 학습 → 대시보드</div></div>
-      <div class="dataflow">
-        <div class="row">
-          <div class="step start">⏰ Hermes cron (23:00)</div>
-          <span class="arrow">→</span>
-          <div class="step">MuJoCo 시뮬 실행</div>
-          <span class="arrow">→</span>
-          <div class="step"><code>data/episodes/</code> (LeRobot Dataset)</div>
-          <span class="arrow">→</span>
-          <div class="step">ACT 학습 <span style="color:var(--text-dim);font-weight:400" id="ops-act-status">(시작 대기)</span></div>
-        </div>
-        <div class="row">
-          <div class="step start">⏰ Hermes cron (23:30)</div>
-          <span class="arrow">→</span>
-          <div class="step">메트릭 측정</div>
-          <span class="arrow">→</span>
-          <div class="step"><code>research-log/*.md</code></div>
-          <span class="arrow">→</span>
-          <div class="step">git push</div>
-        </div>
-        <div class="row">
-          <div class="step start" data-icon="folder" data-icon-after> 파일 변경</div>
-          <span class="arrow">→</span>
-          <div class="step">hermes-mark chokidar</div>
-          <span class="arrow">→</span>
-          <div class="step"><code>build.py</code> 자동 실행</div>
-          <span class="arrow">→</span>
-          <div class="step">WebSocket 푸시</div>
-          <span class="arrow">→</span>
-          <div class="step end" data-icon="globe" data-icon-after> 브라우저 라이브 갱신</div>
-        </div>
-        <div class="row">
-          <div class="step start" data-icon="edit" data-icon-after> Obsidian 월별 보고서</div>
-          <span class="arrow">→</span>
-          <div class="step"><code>build.py</code> 읽음</div>
-          <span class="arrow">→</span>
-          <div class="step">renderMarkdown</div>
-          <span class="arrow">→</span>
-          <div class="step end" data-icon="clipboard" data-icon-after> 보고용 자료 메뉴 임베드</div>
-        </div>
-      </div>
-
-      <!-- 7. 사람 vs AI 분담 -->
-      <div class="section-head"><h3>역할 분담 — 무엇이 자동이고 무엇이 사람의 일인가</h3></div>
-      <table class="who-table">
-        <thead><tr><th>영역</th><th>AI (자동)</th><th>사람</th><th>비고</th></tr></thead>
-        <tbody>
-          <tr><td>시뮬 코드 작성</td><td class="check">✓</td><td class="dash">—</td><td class="desc">Hermes + Claude 위임</td></tr>
-          <tr><td>시뮬 실행 + 메트릭 수집</td><td class="check">✓</td><td class="dash">—</td><td class="desc">매일 23:00, 23:30 cron</td></tr>
-          <tr><td>일일 research-log 작성</td><td class="check">✓</td><td class="dash">—</td><td class="desc">자가치유 포함 자동 작성</td></tr>
-          <tr><td>아침 보고 메일</td><td class="check">✓</td><td class="dash">—</td><td class="desc">매일 07:00 자동 발송</td></tr>
-          <tr><td>주간/월간 보고용 증거 식별</td><td class="check">✓</td><td class="dash">—</td><td class="desc">매주 일요 22:00</td></tr>
-          <tr><td>월별 활동보고서 초안</td><td class="partial">초안</td><td class="check">✓</td><td class="desc">사람이 수정·보완 (Obsidian)</td></tr>
-          <tr><td>의사결정 (시뮬레이터 등)</td><td class="partial">제안</td><td class="check">✓</td><td class="desc">AI 가 조사·제안 / 사람이 확정 (<code>research/decisions/</code>)</td></tr>
-          <tr><td>외부 의존 (부품 · 3D 프린팅)</td><td class="partial">식별</td><td class="check">✓</td><td class="desc">AI 가 차단 항목 식별 / 사람이 해결</td></tr>
-          <tr><td>디자인 · 톤 · 보고 방향</td><td class="dash">—</td><td class="check">✓</td><td class="desc">전적으로 사람</td></tr>
-          <tr><td>대시보드 (이 사이트)</td><td class="check">✓</td><td class="partial">설계</td><td class="desc">데이터 + 빌드 자동 / 디자인은 사람</td></tr>
-        </tbody>
-      </table>
     </div>
 
     <!-- TECH GUIDE -->
     <div class="view hidden" id="view-tech">
-      <div class="home-hero">
-        <h1 data-icon="bookOpen" data-icon-after> CoP 리뷰</h1>
-        <div class="sub">사용 기술, 학습 방법, 의사결정 근거를 한 페이지에 정리했습니다.</div>
-      </div>
-
-      <!-- 1. 이 페이지의 역할 (프로젝트 소개는 Overview 한 곳에만 — 중복 제거) -->
-      <div class="tech-summary">
-        <p><b>여기서 보는 것</b> — 이 프로젝트가 <b>기술적으로 어떻게 굴러가는지</b>: 학습이 이뤄지는
-        순서(플로우), 데이터가 어떻게 만들어지는지, 왜 이런 방식을 골랐는지(의사결정 근거).
-        프로젝트가 무엇인지는 <a href="#" onclick="setRoute('home');return false">Overview</a> 첫 화면에 있습니다.</p>
-      </div>
-
-      <!-- 2. 전체 흐름 플로우차트 -->
-      <div class="section-head"><h3>전체 흐름 (6 단계)</h3><div class="right" id="tech-progress">—</div></div>
-      <div class="flow-chart" id="flow-chart"></div>
-
-      <!-- 3. 사용 기술 카드 -->
-      <div class="section-head"><h3>사용 기술 — 무엇을, 왜, 어떻게</h3><div class="right">5가지 핵심</div></div>
-      <div class="tech-grid">
-        <div class="tech-card">
-          <div class="tc-head">
-            <h4>MuJoCo 3.8</h4>
-            <span class="role">가상 로봇팔 시뮬 엔진</span>
-            <span class="tc-license">Apache 2.0</span>
+      <style>
+      .a1{--c-cyn:#39c6f0;--c-grn:#2ee6a0;--c-amb:#f8b64c;--c-ink:#e8eefb;--c-ink2:#c2ccdb;--c-mut:#8ea0bd;--c-mut2:#5f6f8c;--c-panel:#0b101c;--c-panel2:#0e1626;--c-line:rgba(150,175,220,.16);--c-line2:rgba(150,175,220,.24);--c-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+        max-width:1180px;margin:0 auto;padding:6px 2px 40px}
+      .a1 .a1-top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:6px 0 30px}
+      .a1 .a1-eyebrow{font-family:var(--c-mono);font-size:11.5px;letter-spacing:.15em;color:var(--c-cyn)}
+      .a1 .a1-top h2{font-size:clamp(20px,2.6vw,27px);margin:0;font-weight:750;letter-spacing:-.01em;color:var(--c-ink)}
+      .a1 .a1-top .sub{color:var(--c-mut);font-size:13px;margin:0}
+      .a1 .a1-legend{margin-left:auto;display:flex;gap:12px;font-family:var(--c-mono);font-size:10.5px;color:var(--c-mut)}
+      .a1 .a1-legend i{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:1px}
+      /* rail */
+      .a1 .rail-wrap{position:relative;padding:8px 2% 4px}
+      .a1 .rail-line{position:absolute;left:calc(2% + 6.5%);right:calc(2% + 6.5%);top:34px;height:3px;border-radius:3px;z-index:0}
+      .a1 .rail{position:relative;z-index:1;display:flex;justify-content:space-between}
+      .a1 .node{flex:0 0 13%;background:none;border:0;padding:0;cursor:pointer;text-align:center;font:inherit;color:inherit}
+      .a1 .node .dot{width:30px;height:30px;border-radius:50%;margin:0 auto 9px;display:flex;align-items:center;justify-content:center;
+        font-family:var(--c-mono);font-weight:700;font-size:12px;transition:transform .2s,box-shadow .2s;position:relative}
+      .a1 .node.done .dot{background:var(--c-grn);color:#04140d}
+      .a1 .node.live .dot{background:var(--c-cyn);color:#03121a}
+      .a1 .node.plan .dot{background:transparent;border:2px solid var(--c-amb);color:var(--c-amb)}
+      .a1 .node.live .dot{animation:a1pulse 2.4s ease-in-out infinite}
+      @keyframes a1pulse{0%,100%{box-shadow:0 0 0 0 rgba(57,198,240,.5)}50%{box-shadow:0 0 0 7px rgba(57,198,240,0)}}
+      .a1 .node.sel .dot{transform:scale(1.18);box-shadow:0 0 0 4px rgba(150,175,220,.18)}
+      .a1 .node .nlab{font-size:11.5px;font-weight:650;color:var(--c-ink);line-height:1.25}
+      .a1 .node .nstk{font-family:var(--c-mono);font-size:9.5px;color:var(--c-mut);margin-top:2px}
+      .a1 .node.sel .nlab{color:var(--c-cyn)}
+      @media(prefers-reduced-motion:reduce){.a1 .node.live .dot{animation:none}}
+      /* decision switches */
+      .a1 .switches{display:flex;gap:9px;flex-wrap:wrap;margin:16px 2% 26px;padding-top:14px;border-top:1px dashed var(--c-line2)}
+      .a1 .switches .sw{font-family:var(--c-mono);font-size:11px;color:var(--c-ink2);background:var(--c-panel2);border:1px solid var(--c-line2);border-radius:8px;padding:7px 11px;cursor:pointer;transition:.16s;display:flex;flex-direction:column;align-items:flex-start;max-width:340px}
+      .a1 .switches .sw:hover{border-color:var(--c-cyn);color:var(--c-ink)}
+      .a1 .switches .sw .swtop{display:flex;gap:7px;align-items:baseline}
+      .a1 .switches .sw .di{color:var(--c-amb)}
+      .a1 .switches .sw .sd{color:var(--c-mut);font-size:10px}
+      .a1 .switches .sw .swd{max-height:0;overflow:hidden;transition:max-height .25s ease;color:var(--c-mut);font-size:10.5px;line-height:1.5}
+      .a1 .switches .sw.open{border-color:var(--c-cyn)}
+      .a1 .switches .sw.open .swd{max-height:90px;margin-top:7px}
+      /* body: inspector + cycle */
+      .a1 .body{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+      @media(max-width:820px){.a1 .body{grid-template-columns:1fr}}
+      .a1 .insp{background:linear-gradient(180deg,var(--c-panel2),var(--c-panel));border:1px solid var(--c-line2);border-radius:14px;padding:20px;min-height:190px}
+      .a1 .insp .ih{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+      .a1 .insp .ino{font-family:var(--c-mono);font-weight:700;font-size:12px;border-radius:6px;padding:3px 8px}
+      .a1 .insp .ist{margin-left:auto;font-family:var(--c-mono);font-size:10.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--c-line2)}
+      .a1 .insp h3{font-size:19px;margin:6px 0 3px;color:var(--c-ink);font-weight:750}
+      .a1 .insp .imon{font-family:var(--c-mono);font-size:11px;color:var(--c-mut)}
+      .a1 .insp p{color:var(--c-ink2);font-size:13.5px;line-height:1.6;margin:12px 0 14px;max-width:52ch}
+      .a1 .insp .chips{display:flex;gap:7px;flex-wrap:wrap}
+      .a1 .insp .chips span{font-family:var(--c-mono);font-size:11px;color:var(--c-ink);background:#111c2e;border:1px solid var(--c-line2);border-radius:6px;padding:4px 9px}
+      .a1 .insp.anim{animation:a1slide .22s ease}
+      @keyframes a1slide{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+      .a1 .cycle{background:var(--c-panel2);border:1px solid var(--c-line2);border-radius:14px;padding:18px 16px}
+      .a1 .cycle .ct{font-family:var(--c-mono);font-size:11px;letter-spacing:.06em;color:var(--c-cyn);margin-bottom:16px}
+      .a1 .cycle .ring{display:flex;flex-direction:column;gap:10px}
+      .a1 .cycle .cs{display:flex;align-items:center;gap:11px}
+      .a1 .cycle .cs .cn{width:24px;height:24px;border-radius:7px;background:#111c2e;border:1px solid var(--c-line2);display:flex;align-items:center;justify-content:center;color:var(--c-cyn);flex:0 0 auto}
+      .a1 .cycle .cs .cl{font-size:12.5px;color:var(--c-ink)}
+      .a1 .cycle .cs .cl b{color:var(--c-mut);font-weight:400;font-size:11px;display:block;font-family:var(--c-mono)}
+      .a1 .cycle .loopnote{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--c-line);font-size:11px;color:var(--c-mut);font-family:var(--c-mono)}
+      .a1 .cycle .spin{display:inline-block;color:var(--c-grn);animation:a1spin 3.4s linear infinite}
+      @keyframes a1spin{to{transform:rotate(360deg)}}
+      @media(prefers-reduced-motion:reduce){.a1 .cycle .spin{animation:none}}
+      /* stack strip */
+      .a1 .stack{margin-top:22px}
+      .a1 .stack .sh{font-family:var(--c-mono);font-size:11px;letter-spacing:.06em;color:var(--c-mut);margin-bottom:12px}
+      .a1 .stack .chips{display:flex;gap:9px;flex-wrap:wrap}
+      .a1 .stack .tc{background:var(--c-panel2);border:1px solid var(--c-line2);border-radius:11px;padding:0;cursor:pointer;overflow:hidden;transition:border-color .16s;font:inherit;color:inherit;text-align:left;flex:1 1 180px;min-width:170px}
+      .a1 .stack .tc:hover{border-color:var(--c-cyn)}
+      .a1 .stack .tc .th{padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+      .a1 .stack .tc .tn{font-weight:700;font-size:14px;color:var(--c-ink)}
+      .a1 .stack .tc .tr{font-size:11px;color:var(--c-mut)}
+      .a1 .stack .tc .tl{font-family:var(--c-mono);font-size:9.5px;color:var(--c-cyn);margin-top:3px}
+      .a1 .stack .tc .tx{max-height:0;overflow:hidden;transition:max-height .28s ease;border-top:0 solid var(--c-line)}
+      .a1 .stack .tc.open .tx{max-height:240px;border-top:1px solid var(--c-line)}
+      .a1 .stack .tc .tx-in{padding:11px 14px;font-size:12px;line-height:1.55}
+      .a1 .stack .tc .tx-in b{color:var(--c-cyn);font-family:var(--c-mono);font-size:10px;display:block;margin-bottom:2px;letter-spacing:.05em}
+      .a1 .stack .tc .tx-in p{margin:0 0 9px;color:var(--c-ink2)}
+      </style>
+      <div class="a1" id="a1-root">
+        <div class="a1-top">
+          <div>
+            <div class="a1-eyebrow">TECH REVIEW · 학습 파이프라인</div>
+            <h2>가상 셋업부터 실기 기능 완성까지</h2>
           </div>
-          <section class="why">
-            <h5>왜 선택?</h5>
-            <p>처음엔 NVIDIA Isaac Lab 검토 → Mac Mini (Apple Silicon ARM64) 미지원으로 불가 판정 (2026-05-01 결정 변경). MuJoCo 는 Apple Silicon 네이티브 + <code>pip install mujoco</code> 한 줄 설치 + Apache 2.0 오픈소스. 학습 알고리즘 검증에 충분히 가벼움.</p>
-          </section>
-          <section class="how">
-            <h5>어떻게 사용?</h5>
-            <p>SO-ARM101 MJCF 모델을 import → 헤드리스 렌더링으로 천장 카메라 영상 + 6축 관절 상태 수집. <code>sim_pick_place.py</code> 가 IK(역기구학) 로 큐브 위치 잡고 Pick-Place 동작 자동 생성. <code>sim_data_collector.py</code> 가 큐브 위치 ±20mm 랜덤 변동으로 200 에피소드 합성.</p>
-          </section>
-        </div>
-
-        <div class="tech-card">
-          <div class="tc-head">
-            <h4>SO-ARM101</h4>
-            <span class="role">오픈소스 6-DoF 로봇팔</span>
-            <span class="tc-license">CC-BY-SA</span>
+          <div class="a1-legend">
+            <span><i style="background:#2ee6a0"></i>완료</span>
+            <span><i style="background:#39c6f0"></i>진행</span>
+            <span><i style="background:transparent;border:2px solid #f8b64c;width:6px;height:6px"></i>예정</span>
           </div>
-          <section class="why">
-            <h5>왜 선택?</h5>
-            <p>TheRobotStudio 오픈소스 (BOM·STL·MJCF 공개) + HuggingFace LeRobot 공식 지원. 가격 적당 (≈ $500/대) 하고 Leader + Follower 페어로 사람이 직접 시연 (텔레오퍼레이션) 도 가능. 차후 PCB 작업처럼 정밀 시연이 필요할 때 데이터 수집 옵션 확보됨.</p>
-          </section>
-          <section class="how">
-            <h5>어떻게 사용?</h5>
-            <p>MJCF 모델 (<code>so101_new_calib.xml</code>) 로 시뮬과 실기 동일 캘리브레이션 유지. 6 관절: shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll, gripper. 실기 서보는 Feetech STS3215 (12V/7.4V). <span id="phase2-status-text">실기 검증은 Phase 2 (7월) 예정</span>.</p>
-          </section>
         </div>
-
-        <div class="tech-card">
-          <div class="tc-head">
-            <h4>HuggingFace LeRobot</h4>
-            <span class="role">로봇 학습 프레임워크</span>
-            <span class="tc-license">Apache 2.0</span>
+        <div class="rail-wrap">
+          <div class="rail-line" id="a1-line"></div>
+          <div class="rail" id="a1-rail"></div>
+        </div>
+        <div class="switches" id="a1-switches"></div>
+        <div class="body">
+          <div class="insp" id="a1-insp"></div>
+          <div class="cycle">
+            <div class="ct">학습 1 사이클 · 반복</div>
+            <div class="ring">
+              <div class="cs"><span class="cn">1</span><span class="cl">관측<b>천장카메라 480×640 + qpos6</b></span></div>
+              <div class="cs"><span class="cn">2</span><span class="cl">ACT 모델<b>Transformer 추론</b></span></div>
+              <div class="cs"><span class="cn">3</span><span class="cl">액션<b>6축 시퀀스 · chunk 100</b></span></div>
+              <div class="cs"><span class="cn">4</span><span class="cl">실행<b>로봇 구동 → 새 관측</b></span></div>
+            </div>
+            <div class="loopnote"><span class="spin">&#8635;</span> 큐브가 잡힐 때까지 관측→실행 반복</div>
           </div>
-          <section class="why">
-            <h5>왜 선택?</h5>
-            <p>데이터 포맷 (LeRobot Dataset) + 학습 알고리즘 (ACT / Diffusion Policy / π0) + 추론까지 end-to-end. 산업/연구 표준화 중. SO-ARM101 공식 지원, HuggingFace Hub 데이터셋 공유 가능 (선택). 자체 구현 대비 검증된 코드베이스.</p>
-          </section>
-          <section class="how">
-            <h5>어떻게 사용?</h5>
-            <p>200 에피소드 데이터를 LeRobot Dataset v3.0 포맷 (<code>local/cop-pickplace</code>, root=<code>data/episodes/</code>) 로 저장. parquet (관절 상태) + mp4 (카메라 영상) 분리 저장. 이 데이터셋이 그대로 ACT 학습 입력.</p>
-          </section>
         </div>
-
-        <div class="tech-card">
-          <div class="tc-head">
-            <h4>ACT</h4>
-            <span class="role">Action Chunking Transformer (모방학습)</span>
-            <span class="tc-license">2023, MIT</span>
-          </div>
-          <section class="why">
-            <h5>왜 선택?</h5>
-            <p>Diffusion Policy (DP) 대비 가볍고 빠름 → 1차 학습 적합. 트랜스포머가 다음 100 프레임 액션 묶음을 한 번에 예측 → 시간적 일관성 있는 동작 생성. Mac Mini 에서 학습 가능. DP 비교는 9월 (Phase 4) 예정.</p>
-          </section>
-          <section class="how">
-            <h5>어떻게 사용?</h5>
-            <p><code>scripts/train_act.py</code> 가 LeRobot 의 <code>ACTConfig</code> + <code>ACTPolicy</code> 호출. 입력 = 천장 카메라 + 6축 관절 (관측 n_obs_steps 과거 프레임). 출력 = 6축 액션 시퀀스 (chunk_size=100 미래 프레임). epoch 100, batch 8, 백그라운드 학습. <span id="act-status-text">학습 시작 대기</span>.</p>
-          </section>
+        <div class="stack">
+          <div class="sh">사용 기술 — 클릭하면 왜/어떻게</div>
+          <div class="chips" id="a1-stack"></div>
         </div>
-
-        <div class="tech-card">
-          <div class="tc-head">
-            <h4>모방학습 (Imitation Learning)</h4>
-            <span class="role">학습 방식 — "보고 따라하기"</span>
-          </div>
-          <section class="why">
-            <h5>왜 선택?</h5>
-            <p>강화학습 (Reinforcement Learning) 은 시행착오로 학습 → 실기 로봇 파손 위험 + 데이터 효율 낮음. PCB 작업처럼 "정확한 시연이 가능한" 작업은 모방학습이 적합. 시연 데이터 200건이면 1차 알고리즘 검증 충분.</p>
-          </section>
-          <section class="how">
-            <h5>어떻게 사용?</h5>
-            <p>시뮬 IK 가 "정답" 액션을 자동 생성 → 그 액션과 동시 카메라 관측을 짝지어 200 에피소드 저장 → ACT 모델이 "이 영상이 보일 때 이렇게 움직여라" 매핑 학습. 차년도(2027~)에 강화학습 추가하여 시뮬에 없는 상황 대응력 보강 예정.</p>
-          </section>
-        </div>
-      </div>
-
-      <!-- 4. 데이터셋 메타 -->
-      <div class="section-head"><h3>현재 학습 데이터셋</h3><div class="right" id="dataset-context-label">—</div></div>
-      <div class="dataset-stats" id="dataset-stats"></div>
-
-      <!-- 5. 학습 1 사이클 -->
-      <div class="section-head"><h3>AI 학습 1 사이클 — 어떻게 흉내내는가</h3><div class="right">관측 → 모델 → 액션 → 반복</div></div>
-      <div class="cycle-diagram">
-        <div class="cycle-step">
-          <div class="step-n">Step 1 — 관측</div>
-          <h5>Input: 영상 + 관절 위치</h5>
-          <p>천장 카메라 RGB 영상 (480×640) + 현재 6축 관절 위치 (qpos). 과거 <code>n_obs_steps</code> 프레임 분량 묶음.</p>
-        </div>
-        <div class="cycle-step">
-          <div class="step-n">Step 2 — ACT 모델</div>
-          <h5>Transformer 추론</h5>
-          <p>관측을 임베딩 → 트랜스포머 인코더-디코더 → "이 영상에서 다음 100 프레임 어떻게 움직일까?" 예측.</p>
-        </div>
-        <div class="cycle-step">
-          <div class="step-n">Step 3 — 액션</div>
-          <h5>Output: 6축 액션 시퀀스</h5>
-          <p>다음 chunk_size 프레임의 6축 ctrl 명령. 시뮬에서는 MuJoCo actuator 에 전달, 실기에서는 STS3215 서보에 전달.</p>
-        </div>
-        <div class="cycle-step">
-          <div class="step-n">Step 4 — 실행</div>
-          <h5>로봇이 액션 실행</h5>
-          <p>로봇이 액션을 실행 → 새 관측 (영상 + 관절 변화) → Step 1 로 돌아가 반복. 큐브가 그리퍼 안에 잡힐 때까지.</p>
-        </div>
-      </div>
-
-      <!-- 6. 의사결정 근거 -->
-      <div class="section-head"><h3>왜 이렇게 진행하나 — 의사결정 근거</h3><div class="right">기획 시점 2026-05 기준 · 현황은 Phase 로드맵 참조</div></div>
-      <ul class="rationale">
-        <li><b>왜 시뮬 합성 데이터?</b> 실기 로봇 24시간 가동 비용 큼. 시뮬은 일주일에 수백 에피소드 자동 합성 가능 → 데이터 비용 ↓, 알고리즘 검증 가속. 실기 텔레오퍼 데이터는 8월 현재 실기 트랙(omen)에서 S1 수집으로 실현 중.</li>
-        <li><b>왜 MuJoCo (Isaac Lab 아님)?</b> Mac Mini (Apple Silicon ARM64) 에서 Isaac Lab 미지원 (2026-05-01 결정 변경). MuJoCo 는 네이티브 + 즉시 설치. Isaac Lab 은 차년도 GPU 서버 도입 시 RL 학습용으로 전환.</li>
-        <li><b>왜 텔레오퍼 안 함 (시뮬만)?</b> 사람 시연은 정확하지만 시간/노동 비용 큼. IK 기반 시뮬 합성으로 빠르게 200ep 확보 → 1차 학습. 시뮬에 없는 변수 (조명, 마찰, 노이즈) 는 Domain Randomization 으로 보강.</li>
-        <li><b>왜 ACT (Diffusion Policy 아님)?</b> DP 보다 가볍고 빠름 → Mac Mini 에서 학습 가능. 트랜스포머가 시간 일관성 있는 chunk 단위 액션 예측 → 안정적. 정확도 부족 시 9월 (Phase 4) 에 DP 비교/전환.</li>
-        <li><b>왜 Pick-Place 부터?</b> 가장 단순한 정밀 작업. 성공하면 리셋 버튼 누르기 → RS232 케이블 분리(꽂힌 HHT 케이블 빼기)까지 단계 확장. 정비현장 핵심 반복 작업 자동화가 최종 목표.</li>
-        <li><b>왜 Sim-to-Real 단계 분리?</b> 시뮬 학습 결과를 실기에 옮길 때 "현실 격차" (Sim-to-Real gap) 존재. → 8월 현재 2단계 S1 에서 시뮬(합성 데이터)과 실기(omen 수집)를 같은 작업·관측으로 정렬해 격차를 좁히는 중.</li>
-      </ul>
-
-      <!-- 7. 차년도 계획 -->
-      <div class="section-head"><h3>차년도 (2027~) 계획</h3><div class="right">2027~</div></div>
-      <div class="future-box">
-        <p><b>강화학습 도입</b> — 모방학습으로 부족한 상황 대응력을 RL 로 보강. Isaac Lab + LeIsaac (NVIDIA) 로 전환, GPU 병렬 환경으로 대규모 학습. 인프라: AWS g5.2xlarge (≈ $1.21/hr) 또는 별도 GPU 서버.</p>
-        <p><b>GR00T N1.5 파인튜닝</b> — NVIDIA 의 VLA (Vision-Language-Action) 모델. 시뮬 데이터 → GR00T 파인튜닝 → 실기 배포 파이프라인. <code>--no-tune_diffusion_model</code> 플래그로 24GB VRAM 절약.</p>
-        <p><b>최종 배포 타겟</b> — NVIDIA Orin Nano Super (학습 불가, 추론 전용). 학습된 정책을 ONNX/TensorRT 로 최적화 → 임베디드 배포.</p>
-        <p><b>확장 옵션</b> — <b>LeKiwi</b> (이동체 매니퓰레이터) 또는 <b>XLeRobot</b> (확장형 모바일 로봇). PCB 작업 자동화 성공 시 정비현장 내 이동 작업으로 확장.</p>
       </div>
     </div>
 
-    <!-- VIDEOS (R3-3 + MEDIA-3 + REORG) -->
     <div class="view hidden" id="view-videos">
       <div class="home-hero">
         <h1>시뮬 영상</h1>
@@ -1894,11 +1813,73 @@
     </div>
 
     <div class="view hidden" id="view-apps">
-      <div class="home-hero">
-        <h1>Phase 로드맵 — 6개월 여정</h1>
-        <div class="sub"><b>여기서 보는 것</b> — 월별 계획과 실제 진행(주차별 체크리스트). 4월 준비 → 5~9월 작업 → 10월 시연.</div>
+      <style>
+      .c1{--c-cyn:#39c6f0;--c-grn:#2ee6a0;--c-amb:#f8b64c;--c-red:#ff6b6b;--c-ink:#e8eefb;--c-ink2:#c2ccdb;--c-mut:#8ea0bd;--c-mut2:#5f6f8c;--c-panel:#0b101c;--c-panel2:#0e1626;--c-line:rgba(150,175,220,.16);--c-line2:rgba(150,175,220,.24);--c-mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+        --lab:230px;max-width:1160px;margin:0 auto;padding:6px 2px 40px}
+      .c1 .c1-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:6px 0 16px}
+      .c1 .c1-eyebrow{font-family:var(--c-mono);font-size:11.5px;letter-spacing:.15em;color:var(--c-cyn)}
+      .c1 .c1-head h2{font-size:clamp(20px,2.6vw,27px);margin:6px 0 0;font-weight:750;letter-spacing:-.01em;color:var(--c-ink)}
+      .c1 .dday{margin-left:auto;font-family:var(--c-mono);font-size:12px;color:var(--c-amb);border:1px solid rgba(248,182,76,.4);background:rgba(248,182,76,.08);border-radius:999px;padding:6px 13px;align-self:center}
+      .c1 .dday b{color:var(--c-ink)}
+      .c1 .tl{position:relative;border:1px solid var(--c-line2);border-radius:12px;background:var(--c-panel);overflow:hidden}
+      .c1 .mhead{display:grid;grid-template-columns:var(--lab) 1fr;border-bottom:1px solid var(--c-line2);background:#0a1018}
+      .c1 .mhead .l{padding:11px 16px;font-family:var(--c-mono);font-size:10px;letter-spacing:.08em;color:var(--c-mut2)}
+      .c1 .mhead .mcols{display:grid;grid-template-columns:repeat(7,1fr)}
+      .c1 .mhead .mcols .mc{padding:11px 8px;font-family:var(--c-mono);font-size:11px;color:var(--c-mut);text-align:center;border-left:1px solid var(--c-line)}
+      .c1 .mhead .mcols .mc.demo{color:var(--c-amb);font-weight:700}
+      .c1 .row{display:grid;grid-template-columns:var(--lab) 1fr;align-items:center;cursor:pointer;border-bottom:1px solid var(--c-line);transition:background .16s;background:none;border-left:0;border-right:0;border-top:0;width:100%;font:inherit;color:inherit;text-align:left}
+      .c1 .row:hover{background:rgba(57,198,240,.05)}
+      .c1 .row.sel{background:rgba(57,198,240,.08)}
+      .c1 .row .lab{padding:12px 16px;min-width:0}
+      .c1 .row .lab .nm{font-size:13px;font-weight:700;color:var(--c-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:7px}
+      .c1 .row .lab .nm .car{color:var(--c-mut2);font-size:9px;transition:transform .2s}
+      .c1 .row.sel .lab .nm .car{transform:rotate(90deg)}
+      .c1 .row .lab .bl{font-size:10px;color:var(--c-mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .c1 .row .mcols{display:grid;grid-template-columns:repeat(7,1fr);height:100%;align-items:center}
+      .c1 .row .mcols .cell{border-left:1px solid var(--c-line);height:100%}
+      .c1 .row .bar{margin:0 7px;height:22px;border-radius:6px;background:#0a1018;border:1px solid var(--c-line);position:relative;overflow:hidden;display:flex;align-items:center}
+      .c1 .row .bar.plan{border-style:dashed;border-color:var(--c-amb)}
+      .c1 .row .bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:5px;transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+      .c1 .row .bar.done i{background:var(--c-grn)} .c1 .row .bar.live i{background:linear-gradient(90deg,var(--c-cyn),var(--c-grn))}
+      .c1 .row .bar .bp{position:relative;z-index:1;margin-left:auto;margin-right:8px;font-family:var(--c-mono);font-size:11px;font-weight:700;color:#04140d}
+      .c1 .row .bar.plan .bp{color:var(--c-amb);margin-left:8px}
+      /* detail */
+      .c1 .det{display:none;grid-column:1/-1;padding:2px 16px 18px calc(var(--lab));border-bottom:1px solid var(--c-line);background:#0a1018}
+      .c1 .det.open{display:block}
+      .c1 .det .dwrap{padding-top:14px}
+      .c1 .det .weeks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+      .c1 .det .wk .wt{display:flex;justify-content:space-between;font-family:var(--c-mono);font-size:10px;color:var(--c-mut)}
+      .c1 .det .wk .wn{font-size:11.5px;color:var(--c-ink);margin:5px 0 7px;line-height:1.3;min-height:30px}
+      .c1 .det .wk .b{height:5px;background:var(--c-line);border-radius:5px;overflow:hidden}
+      .c1 .det .wk .b i{display:block;height:100%;width:0;border-radius:5px;transition:width .9s cubic-bezier(.2,.7,.2,1)}
+      .c1 .det .next{margin-top:14px;font-size:12.5px;color:var(--c-ink);border-left:2px solid var(--c-cyn);padding-left:11px;line-height:1.5}
+      .c1 .det .next b{color:var(--c-cyn);font-family:var(--c-mono);font-size:10px;display:block;letter-spacing:.05em}
+      .c1 .det .oc{margin-top:12px;font-size:12.5px;color:var(--c-ink2);line-height:1.55}
+      .c1 .det .oc b{color:var(--c-ink)}
+      .c1 .det .rep{margin-top:12px;font-family:var(--c-mono);font-size:11px;color:var(--c-cyn);cursor:pointer;display:inline-block}
+      .c1 .det .rep:hover{text-decoration:underline}
+      /* today line */
+      .c1 .today{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--c-red);z-index:3;pointer-events:none}
+      .c1 .today .tlab{position:absolute;top:-1px;left:2px;font-family:var(--c-mono);font-size:9px;color:var(--c-red);background:var(--c-panel);padding:2px 5px;border-radius:0 4px 4px 0;white-space:nowrap}
+      .c1 .today.sweep{animation:c1sweep 1.1s ease both}
+      @keyframes c1sweep{from{transform:translateX(-40vw);opacity:0}to{transform:none;opacity:1}}
+      @media(prefers-reduced-motion:reduce){.c1 .today.sweep{animation:none}}
+      @media(max-width:760px){.c1{--lab:130px}.c1 .row .lab .bl{display:none}.c1 .mhead .mcols .mc{font-size:9px;padding:9px 2px}.c1 .row .bar .bp{font-size:9px}}
+      </style>
+      <div class="c1" id="c1-root">
+        <div class="c1-head">
+          <div>
+            <div class="c1-eyebrow">6-MONTH ROADMAP · TIMELINE</div>
+            <h2>계획 대비 실제 — 시간축에서 스캔</h2>
+          </div>
+          <div class="dday" id="c1-dday">시연까지 <b>D-—</b></div>
+        </div>
+        <div class="tl" id="c1-tl">
+          <div class="mhead"><div class="l">작업 · 월별 목표</div><div class="mcols" id="c1-mhead"></div></div>
+          <div id="c1-body"></div>
+          <div class="today" id="c1-today"><span class="tlab" id="c1-todaylab">TODAY</span></div>
+        </div>
       </div>
-      <div class="cards" id="apps-cards" style="grid-template-columns: 1fr; gap: 18px;"></div>
     </div>
 
     <!-- BLOCKERS = CoP 특수 메뉴 (외부 의존 차단) -->
@@ -1969,6 +1950,11 @@
   --terra:#39c6f0; --terra2:#5fd7f5; --terra-soft:rgba(57,198,240,.12);
   --green:#2ee6a0; --green2:#5fd79a; --amber:#f8b64c; --red:#ff6b6b;
   --shadow:0 22px 60px -28px rgba(0,0,0,.8);
+  /* bmc(오버뷰) 팔레트 별칭 — 정제형 지표/파이프라인 이식용 */
+  --cyn:#39c6f0; --grn:#2ee6a0; --grn-dim:rgba(46,230,160,.42); --amb:#f8b64c;
+  --panel:#0b101c; --panel2:#0e1626; --line2:rgba(150,175,220,.24);
+  --mut:#8ea0bd; --mut2:#5f6f8c;
+  --mono:&quot;SF Mono&quot;,&quot;JetBrains Mono&quot;,ui-monospace,Menlo,Consolas,monospace;
   color-scheme:dark;
 }
 @media (prefers-color-scheme:dark){
@@ -2166,6 +2152,42 @@ a{color:inherit;text-decoration:none}
 .robotsvg.s2 #successChip{opacity:1}
 #successChip{opacity:0; transition:opacity .5s .35s}
 .robotsvg text,.pipesvg text{font-family:var(--sans)}
+
+/* ===== bmc(오버뷰) 정제형 지표/파이프라인 이식 ===== */
+.bmc-home{max-width:1200px;margin:0 auto;padding:0 clamp(16px,6vw,90px)}
+.bmc-blk{padding:50px 0;border-top:1px solid var(--line);position:relative}
+.bmc-home .sechead{display:flex;align-items:baseline;gap:14px;margin-bottom:28px;flex-wrap:wrap}
+.bmc-home .sechead .idx{font-family:var(--mono);font-size:12px;color:var(--cyn);letter-spacing:.1em}
+.bmc-home .sechead h2{font-family:var(--myeong);font-size:clamp(22px,3.4vw,30px);margin:0;letter-spacing:-.01em;font-weight:750;color:var(--ink)}
+.bmc-home .sechead p{color:var(--mut);font-size:13.5px;margin:0}
+.bmc-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.bmc-home .gcard{border:1px solid var(--line2);border-radius:14px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:20px;text-align:center}
+.bmc-home .gwrap{position:relative;width:132px;height:132px;margin:0 auto}
+.bmc-home .gwrap svg{transform:rotate(-90deg)}
+.bmc-home .gwrap .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.bmc-home .gwrap .ctr .big{font-family:var(--mono);font-size:25px;font-weight:800}
+.bmc-home .gwrap .ctr .u{font-family:var(--mono);font-size:11px;color:var(--mut2)}
+.bmc-home .gcard .cap{margin-top:12px;font-size:13px;color:var(--ink);font-weight:600}
+.bmc-home .gcard .cap span{display:block;font-family:var(--mono);font-size:10.5px;color:var(--mut2);font-weight:400;margin-top:2px}
+.bmc-pipe{border:1px solid var(--line2);border-radius:16px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:26px 22px 30px;position:relative;overflow:hidden}
+.bmc-pipe .lead{font-family:var(--mono);font-size:12px;color:var(--mut);margin-bottom:26px;display:flex;align-items:center;gap:9px}
+.bmc-pipe .lead .d{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 10px var(--grn);animation:bmcpulse 1.6s infinite}
+.bmc-pipe .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;align-items:center}
+.bmc-pipe .node{position:relative;text-align:center;z-index:2}
+.bmc-pipe .node .ring{width:64px;height:64px;border-radius:16px;margin:0 auto 12px;border:1px solid var(--line2);background:var(--panel);display:flex;align-items:center;justify-content:center;position:relative;transition:.3s}
+.bmc-pipe .node .ring svg{width:30px;height:30px}
+.bmc-pipe .node .nm{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink)}
+.bmc-pipe .node .dsc{font-family:var(--mono);font-size:10.5px;color:var(--mut2);margin-top:3px}
+.bmc-pipe .track{position:absolute;left:0;right:0;top:32px;height:2px;z-index:1}
+.bmc-pipe .track .base{position:absolute;left:12.5%;right:12.5%;top:0;height:2px;background:repeating-linear-gradient(90deg,var(--line2) 0 7px,transparent 7px 15px);background-size:15px 2px;animation:bmcdash 1s linear infinite}
+.bmc-pipe .packet{position:absolute;top:-4px;left:12.5%;width:11px;height:11px;border-radius:50%;background:var(--grn);box-shadow:0 0 14px var(--grn);z-index:3;animation:bmctravel 5.2s linear infinite}
+.bmc-pipe .loopback{font-family:var(--mono);font-size:11px;color:var(--grn);text-align:center;margin-top:24px;display:flex;align-items:center;justify-content:center;gap:9px}
+.bmc-pipe .loopback .arc{width:120px;height:1px;background:repeating-linear-gradient(90deg,var(--grn-dim) 0 6px,transparent 6px 12px);animation:bmcdash 1s linear infinite}
+@keyframes bmcpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+@keyframes bmcdash{to{background-position:15px 0}}
+@keyframes bmctravel{0%{left:12.5%;opacity:0}5%{opacity:1}28%{left:37.5%}52%{left:62.5%}76%{left:87.5%}92%{left:87.5%;opacity:1}100%{left:87.5%;opacity:0}}
+@media(max-width:820px){.bmc-metrics{grid-template-columns:repeat(2,1fr)}.bmc-pipe .flow .node .dsc{display:none}}
+@media(prefers-reduced-motion:reduce){.bmc-pipe .packet,.bmc-pipe .track .base,.bmc-pipe .loopback .arc,.bmc-pipe .lead .d{animation:none}}
 </style>
 </head>
 <body>
@@ -2203,6 +2225,10 @@ a{color:inherit;text-decoration:none}
           </linearGradient>
           <linearGradient id=&quot;metal2&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;0&quot; y2=&quot;1&quot;>
             <stop offset=&quot;0&quot; stop-color=&quot;#454d5c&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#2a3140&quot;/>
+          </linearGradient>
+          <!-- SO-101 집게 검은 이동조 -->
+          <linearGradient id=&quot;soK2&quot; x1=&quot;0&quot; y1=&quot;0&quot; x2=&quot;1&quot; y2=&quot;1&quot;>
+            <stop offset=&quot;0&quot; stop-color=&quot;#242a35&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#0d0f16&quot;/>
           </linearGradient>
           <radialGradient id=&quot;halo&quot; cx=&quot;50%&quot; cy=&quot;42%&quot; r=&quot;55%&quot;>
             <stop offset=&quot;0&quot; stop-color=&quot;#5fd7f5&quot; stop-opacity=&quot;.22&quot;/><stop offset=&quot;1&quot; stop-color=&quot;#5fd7f5&quot; stop-opacity=&quot;0&quot;/>
@@ -2263,7 +2289,7 @@ a{color:inherit;text-decoration:none}
           <g style=&quot;stroke:var(--terra)&quot; stroke-width=&quot;2&quot; opacity=&quot;.85&quot;><line x1=&quot;344&quot; y1=&quot;500&quot; x2=&quot;410&quot; y2=&quot;500&quot;/><line x1=&quot;344&quot; y1=&quot;496&quot; x2=&quot;344&quot; y2=&quot;504&quot;/><line x1=&quot;410&quot; y1=&quot;496&quot; x2=&quot;410&quot; y2=&quot;504&quot;/></g>
         </g>
 
-        <!-- ===== ROBOT ARM (base at 150,300; reaches down-right) ===== -->
+        <!-- ===== ROBOT ARM (이전 메탈팔 · base 150,300 우하향) + SO-101 집게 ===== -->
         <!-- base -->
         <rect x=&quot;112&quot; y=&quot;300&quot; width=&quot;76&quot; height=&quot;210&quot; rx=&quot;14&quot; fill=&quot;url(#metal2)&quot; style=&quot;stroke:var(--line)&quot;/>
         <rect x=&quot;124&quot; y=&quot;316&quot; width=&quot;52&quot; height=&quot;34&quot; rx=&quot;8&quot; fill=&quot;#000&quot; opacity=&quot;.08&quot;/>
@@ -2281,12 +2307,18 @@ a{color:inherit;text-decoration:none}
             <rect x=&quot;14&quot; y=&quot;-7&quot; width=&quot;92&quot; height=&quot;6&quot; rx=&quot;3&quot; fill=&quot;#fff&quot; opacity=&quot;.35&quot;/>
             <g id=&quot;wrist&quot; data-joint transform=&quot;translate(120,0) rotate(22)&quot;>
               <circle r=&quot;15&quot; fill=&quot;url(#metal)&quot; style=&quot;stroke:var(--line)&quot;/>
-              <!-- effector -->
+              <!-- effector + SO-101 집게(흰 고정조 + 검은 이동조, 테이퍼 핑거) -->
               <g id=&quot;effector&quot; data-joint transform=&quot;translate(0,0)&quot;>
-                <rect x=&quot;-12&quot; y=&quot;-4&quot; width=&quot;26&quot; height=&quot;26&quot; rx=&quot;6&quot; fill=&quot;url(#metal2)&quot; style=&quot;stroke:var(--line)&quot;/>
-                <g id=&quot;fingerL&quot; data-joint transform=&quot;translate(0,-11)&quot;><rect x=&quot;10&quot; y=&quot;-4&quot; width=&quot;9&quot; height=&quot;34&quot; rx=&quot;4&quot; fill=&quot;#eef2f8&quot;/></g>
-                <g id=&quot;fingerR&quot; data-joint transform=&quot;translate(0,11)&quot;><rect x=&quot;10&quot; y=&quot;-4&quot; width=&quot;9&quot; height=&quot;34&quot; rx=&quot;4&quot; fill=&quot;#eef2f8&quot;/></g>
-                <circle cx=&quot;4&quot; cy=&quot;9&quot; r=&quot;4&quot; style=&quot;fill:var(--terra)&quot;/>
+                <rect x=&quot;-12&quot; y=&quot;-6&quot; width=&quot;30&quot; height=&quot;30&quot; rx=&quot;7&quot; fill=&quot;url(#metal2)&quot; style=&quot;stroke:var(--line)&quot;/>
+                <g id=&quot;fingerL&quot; data-joint transform=&quot;translate(14,-9)&quot;>
+                  <path d=&quot;M-2 -3 L34 -1.5 L50 2 L34 5.5 L-2 6 Z&quot; fill=&quot;#eef2f8&quot; style=&quot;stroke:#c4ccd8&quot;/>
+                  <g fill=&quot;#c9d2de&quot;><circle cx=&quot;9&quot; cy=&quot;1.6&quot; r=&quot;1.2&quot;/><circle cx=&quot;19&quot; cy=&quot;1.6&quot; r=&quot;1.2&quot;/><circle cx=&quot;29&quot; cy=&quot;1.6&quot; r=&quot;1.2&quot;/></g>
+                </g>
+                <g id=&quot;fingerR&quot; data-joint transform=&quot;translate(14,9)&quot;>
+                  <path d=&quot;M-2 3 L32 1.5 L48 -3 L32 -6 L-2 -6 Z&quot; fill=&quot;url(#soK2)&quot; style=&quot;stroke:var(--line)&quot;/>
+                  <g fill=&quot;#0a0c11&quot; opacity=&quot;.8&quot;><circle cx=&quot;9&quot; cy=&quot;-1.6&quot; r=&quot;1.1&quot;/><circle cx=&quot;19&quot; cy=&quot;-1.6&quot; r=&quot;1.1&quot;/><circle cx=&quot;29&quot; cy=&quot;-1.6&quot; r=&quot;1.1&quot;/></g>
+                </g>
+                <circle cx=&quot;2&quot; cy=&quot;0&quot; r=&quot;4&quot; style=&quot;fill:var(--terra)&quot;/>
               </g>
             </g>
           </g>
@@ -2326,92 +2358,41 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
-<!-- ========================= METRICS ========================= -->
-<section class=&quot;metrics&quot; id=&quot;metrics&quot;>
-  <div style=&quot;max-width:none&quot;>
-    <p class=&quot;eyebrow up&quot;>지금까지의 성과</p>
-    <h2 class=&quot;sec-title up&quot;>숫자로 보는 진행 상황</h2>
-  </div>
-  <div class=&quot;mgrid&quot;>
-    <div class=&quot;mcard hl up&quot;>
-      <div class=&quot;cap&quot;><span class=&quot;led g&quot;></span>1단계</div>
-      <div class=&quot;val&quot;><span class=&quot;num&quot; data-count=&quot;100&quot; data-dec=&quot;0&quot;>0</span><span class=&quot;unit&quot;>%</span></div>
-      <div class=&quot;foot&quot;>물건 집어 옮기기 · 가상 성공률</div>
+<!-- ========================= 성과 지표 · 야간 파이프라인 (오버뷰 정제형) ========================= -->
+<div class=&quot;bmc-home&quot;>
+  <section class=&quot;bmc-blk&quot; id=&quot;metrics&quot;>
+    <div class=&quot;sechead up&quot;>
+      <span class=&quot;idx&quot;>03 / TELEMETRY</span>
+      <h2>숫자로 보는 진행 상황</h2>
+      <p>실측 숫자 — 가상 시뮬레이션 롤아웃 기준.</p>
     </div>
-    <div class=&quot;mcard up&quot;>
-      <div class=&quot;cap&quot;><span class=&quot;led a&quot;></span>2단계 (진행 중)</div>
-      <div class=&quot;val&quot;><span class=&quot;num&quot; data-count=&quot;92.5&quot; data-dec=&quot;1&quot;>0</span><span class=&quot;unit&quot;>%</span></div>
-      <div class=&quot;foot&quot;>리셋 버튼 누르기 · 4-seed 평균</div>
+    <div class=&quot;bmc-metrics&quot;>
+      <div class=&quot;gcard up&quot; data-g=&quot;100&quot; data-col=&quot;grn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>1단계 성공률<span>PICK &amp;amp; PLACE</span></div></div>
+      <div class=&quot;gcard up&quot; data-g=&quot;92.5&quot; data-col=&quot;amb&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>2단계 성공률<span>S1 · RESET BUTTON</span></div></div>
+      <div class=&quot;gcard up&quot; data-g=&quot;63&quot; data-col=&quot;cyn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>일정 진척<span>TO 2026-09-30</span></div></div>
+      <div class=&quot;gcard up&quot; data-g=&quot;90&quot; data-col=&quot;grn&quot; data-manual=&quot;D-55&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>시연까지<span>D-DAY COUNTDOWN</span></div></div>
     </div>
-    <div class=&quot;mcard up&quot;>
-      <div class=&quot;cap&quot;><span class=&quot;led r&quot;></span>시연까지</div>
-      <div class=&quot;val&quot;>D-<span class=&quot;num&quot; data-count=&quot;55&quot; data-dec=&quot;0&quot;>0</span></div>
-      <div class=&quot;foot&quot;>목표일 2026 · 09 · 30</div>
-    </div>
-    <div class=&quot;mcard up&quot;>
-      <div class=&quot;cap&quot;><span class=&quot;led g&quot;></span>전체 일정</div>
-      <div class=&quot;val&quot;><span class=&quot;num&quot; data-count=&quot;63&quot; data-dec=&quot;0&quot;>0</span><span class=&quot;unit&quot;>%</span></div>
-      <div class=&quot;foot&quot;>3단계 로드맵 진척도</div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- ========================= PIPELINE ========================= -->
-<section class=&quot;pipeline&quot; id=&quot;pipeline&quot;>
-  <p class=&quot;eyebrow up&quot;>밤마다 스스로 도는 고리</p>
-  <h2 class=&quot;sec-title up&quot;>사람이 자는 동안에도, 로봇은 자랍니다.</h2>
-  <p class=&quot;sec-sub up&quot;>데이터를 <b>모으고 → 배우고 → 시험하고 → 다시 반복</b>합니다.
-    이 고리가 매일 밤 한 바퀴씩 돌며, 어제보다 조금 더 잘하는 로봇을 만듭니다.</p>
-
-  <div class=&quot;pipewrap up&quot;>
-    <svg class=&quot;pipesvg&quot; viewBox=&quot;0 0 800 250&quot; id=&quot;pipe&quot; role=&quot;img&quot; aria-label=&quot;수집·학습·측정·반복이 순환하는 자동 파이프라인&quot;>
-      <defs>
-        <path id=&quot;loop&quot; d=&quot;M120 96 H680 C742 96 762 118 762 138 C762 170 726 186 680 186 H120 C58 186 38 164 38 142 C38 116 60 96 120 96 Z&quot; fill=&quot;none&quot;/>
-        <marker id=&quot;chk&quot; markerWidth=&quot;10&quot; markerHeight=&quot;10&quot;></marker>
-      </defs>
-      <!-- track -->
-      <use href=&quot;#loop&quot; style=&quot;stroke:var(--line)&quot; stroke-width=&quot;14&quot; stroke-linecap=&quot;round&quot;/>
-      <use href=&quot;#loop&quot; style=&quot;stroke:color-mix(in srgb,var(--terra) 55%,transparent)&quot; stroke-width=&quot;3&quot; stroke-dasharray=&quot;2 12&quot; stroke-linecap=&quot;round&quot;/>
-
-      <!-- stations -->
-      <g font-family=&quot;var(--sans)&quot; text-anchor=&quot;middle&quot;>
-        <g class=&quot;station&quot; data-st=&quot;0&quot;>
-          <circle cx=&quot;120&quot; cy=&quot;96&quot; r=&quot;30&quot; style=&quot;fill:var(--paper);stroke:var(--line)&quot; stroke-width=&quot;2&quot;/>
-          <text x=&quot;120&quot; y=&quot;101&quot; font-size=&quot;20&quot;>📥</text>
-          <text x=&quot;120&quot; y=&quot;60&quot; font-size=&quot;15&quot; style=&quot;fill:var(--ink)&quot; font-weight=&quot;700&quot;>수집</text>
-        </g>
-        <g class=&quot;station&quot; data-st=&quot;1&quot;>
-          <circle cx=&quot;400&quot; cy=&quot;96&quot; r=&quot;30&quot; style=&quot;fill:var(--paper);stroke:var(--line)&quot; stroke-width=&quot;2&quot;/>
-          <text x=&quot;400&quot; y=&quot;101&quot; font-size=&quot;20&quot;>🧠</text>
-          <text x=&quot;400&quot; y=&quot;60&quot; font-size=&quot;15&quot; style=&quot;fill:var(--ink)&quot; font-weight=&quot;700&quot;>학습</text>
-        </g>
-        <g class=&quot;station&quot; data-st=&quot;2&quot;>
-          <circle cx=&quot;680&quot; cy=&quot;96&quot; r=&quot;30&quot; style=&quot;fill:var(--paper);stroke:var(--line)&quot; stroke-width=&quot;2&quot;/>
-          <text x=&quot;680&quot; y=&quot;101&quot; font-size=&quot;20&quot;>📊</text>
-          <text x=&quot;680&quot; y=&quot;60&quot; font-size=&quot;15&quot; style=&quot;fill:var(--ink)&quot; font-weight=&quot;700&quot;>측정</text>
-        </g>
-        <g class=&quot;station&quot; data-st=&quot;3&quot;>
-          <circle cx=&quot;400&quot; cy=&quot;186&quot; r=&quot;30&quot; style=&quot;fill:var(--paper);stroke:var(--line)&quot; stroke-width=&quot;2&quot;/>
-          <text x=&quot;400&quot; y=&quot;192&quot; font-size=&quot;20&quot;>🔁</text>
-          <text x=&quot;400&quot; y=&quot;230&quot; font-size=&quot;15&quot; style=&quot;fill:var(--ink)&quot; font-weight=&quot;700&quot;>반복</text>
-        </g>
-      </g>
-
-      <!-- flowing green checks -->
-      <g id=&quot;tokens&quot;>
-        <circle r=&quot;9&quot; style=&quot;fill:var(--green)&quot;><animateMotion dur=&quot;9s&quot; repeatCount=&quot;indefinite&quot; rotate=&quot;0&quot;><mpath href=&quot;#loop&quot;/></animateMotion></circle>
-        <path d=&quot;M-4 0 l3 3 l6 -7&quot; fill=&quot;none&quot; stroke=&quot;#fff&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; transform=&quot;translate(0,0)&quot;><animateMotion dur=&quot;9s&quot; repeatCount=&quot;indefinite&quot;><mpath href=&quot;#loop&quot;/></animateMotion></path>
-        <circle r=&quot;9&quot; style=&quot;fill:var(--amber)&quot;><animateMotion dur=&quot;9s&quot; begin=&quot;-3s&quot; repeatCount=&quot;indefinite&quot;><mpath href=&quot;#loop&quot;/></animateMotion></circle>
-        <circle r=&quot;9&quot; style=&quot;fill:var(--green2)&quot;><animateMotion dur=&quot;9s&quot; begin=&quot;-6s&quot; repeatCount=&quot;indefinite&quot;><mpath href=&quot;#loop&quot;/></animateMotion></circle>
-      </g>
-    </svg>
-    <div class=&quot;pipelegend&quot;>
-      <span><span class=&quot;led g&quot;></span>정상 · 통과</span>
-      <span><span class=&quot;led a&quot;></span>학습 중 · 주의</span>
-      <span style=&quot;font-family:var(--serif);font-style:italic&quot;>최근 완주: 2026-08-06 · S1 epoch 29 · 92.5%</span>
+  <section class=&quot;bmc-blk&quot; id=&quot;pipeline&quot;>
+    <div class=&quot;sechead up&quot;>
+      <span class=&quot;idx&quot;>04 / AUTONOMOUS LOOP</span>
+      <h2>사람이 자는 동안에도, 로봇은 자랍니다.</h2>
+      <p>사람이 자는 동안 파이프라인이 돌아갑니다 — 수집 → 학습 → 측정 → 반복.</p>
     </div>
-  </div>
-</section>
+    <div class=&quot;bmc-pipe up&quot;>
+      <div class=&quot;lead&quot;><i class=&quot;d&quot;></i>NIGHTLY PIPELINE · 매 사이클마다 한 칸씩 자동 전진</div>
+      <div class=&quot;flow&quot;>
+        <div class=&quot;track&quot;><div class=&quot;base&quot;></div><div class=&quot;packet&quot;></div></div>
+        <div class=&quot;node&quot;><div class=&quot;ring&quot;><svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;var(--cyn)&quot; stroke-width=&quot;1.7&quot;><path d=&quot;M3 7l9-4 9 4-9 4-9-4z&quot;/><path d=&quot;M3 7v10l9 4 9-4V7&quot;/><path d=&quot;M12 11v10&quot;/></svg></div><div class=&quot;nm&quot;>수집</div><div class=&quot;dsc&quot;>시뮬 데이터</div></div>
+        <div class=&quot;node&quot;><div class=&quot;ring&quot;><svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;var(--cyn)&quot; stroke-width=&quot;1.7&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/><path d=&quot;M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2&quot;/></svg></div><div class=&quot;nm&quot;>학습</div><div class=&quot;dsc&quot;>ACT 정책</div></div>
+        <div class=&quot;node&quot;><div class=&quot;ring&quot;><svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;var(--cyn)&quot; stroke-width=&quot;1.7&quot;><path d=&quot;M3 20h18M6 20V10M11 20V4M16 20v-8M21 20V8&quot;/></svg></div><div class=&quot;nm&quot;>측정</div><div class=&quot;dsc&quot;>롤아웃 성공률</div></div>
+        <div class=&quot;node&quot;><div class=&quot;ring&quot;><svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;var(--grn)&quot; stroke-width=&quot;1.7&quot;><path d=&quot;M3 12a9 9 0 1 1 3 6.7&quot;/><path d=&quot;M3 21v-6h6&quot;/></svg></div><div class=&quot;nm&quot;>반복</div><div class=&quot;dsc&quot;>다음 사이클</div></div>
+      </div>
+      <div class=&quot;loopback&quot;><span class=&quot;arc&quot;></span>측정 결과가 다음 수집으로 되먹임 — 자가 개선 루프<span class=&quot;arc&quot;></span></div>
+    </div>
+  </section>
+</div>
 
 <!-- ========================= METRICS ========================= -->
 
@@ -2432,9 +2413,9 @@ a{color:inherit;text-decoration:none}
   function markLoaded(){ root.classList.add('loaded'); }
   if(document.readyState!=='loading') markLoaded(); else window.addEventListener('DOMContentLoaded',markLoaded);
 
-  // theme toggle
+  // theme toggle (topbar 제거된 임베드 버전에선 themeBtn 없음 — 가드)
   var tBtn=document.getElementById('themeBtn');
-  tBtn.addEventListener('click',function(){
+  if(tBtn) tBtn.addEventListener('click',function(){
     var cur=root.getAttribute('data-theme');
     var dark=cur? cur==='dark' : matchMedia('(prefers-color-scheme:dark)').matches;
     root.setAttribute('data-theme', dark?'light':'dark');
@@ -2521,8 +2502,20 @@ a{color:inherit;text-decoration:none}
   });
   robot.style.cursor='pointer';
 
-  // reduced motion: freeze SMIL pipeline
-  if(reduce){ var pipe=document.getElementById('pipe'); if(pipe&amp;&amp;pipe.pauseAnimations) pipe.pauseAnimations(); }
+  // ---- bmc 게이지(성과지표) 빌드 — 오버뷰 정제형 원형 게이지 ----
+  var colMap={grn:&quot;var(--grn)&quot;,amb:&quot;var(--amb)&quot;,cyn:&quot;var(--cyn)&quot;};
+  function buildGauge(card){
+    var wrap=card.querySelector(&quot;.gwrap&quot;); if(!wrap)return;
+    var pct=parseFloat(card.getAttribute(&quot;data-g&quot;))||0, col=colMap[card.getAttribute(&quot;data-col&quot;)]||&quot;var(--grn)&quot;;
+    var manual=card.getAttribute(&quot;data-manual&quot;), suffix=card.getAttribute(&quot;data-suffix&quot;), r=54, C=2*Math.PI*r;
+    wrap.innerHTML='<svg width=&quot;132&quot; height=&quot;132&quot; viewBox=&quot;0 0 132 132&quot;><circle cx=&quot;66&quot; cy=&quot;66&quot; r=&quot;'+r+'&quot; fill=&quot;none&quot; stroke=&quot;var(--line2)&quot; stroke-width=&quot;9&quot;/><circle class=&quot;garc&quot; cx=&quot;66&quot; cy=&quot;66&quot; r=&quot;'+r+'&quot; fill=&quot;none&quot; stroke=&quot;'+col+'&quot; stroke-width=&quot;9&quot; stroke-linecap=&quot;round&quot; stroke-dasharray=&quot;'+C+'&quot; stroke-dashoffset=&quot;'+C+'&quot; style=&quot;filter:drop-shadow(0 0 6px '+col+')&quot;/></svg><div class=&quot;ctr&quot;><div class=&quot;big&quot; style=&quot;color:'+col+'&quot;>'+(manual||&quot;0&quot;)+'</div><div class=&quot;u&quot;>'+(suffix||(manual?&quot;&quot;:&quot;%&quot;))+'</div></div>';
+    var arc=wrap.querySelector(&quot;.garc&quot;), big=wrap.querySelector(&quot;.big&quot;), off=C*(1-pct/100);
+    if(reduce){ arc.style.strokeDashoffset=off; if(!manual)big.textContent=pct%1?pct.toFixed(1):pct.toFixed(0); return; }
+    arc.style.transition=&quot;stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)&quot;;
+    requestAnimationFrame(function(){requestAnimationFrame(function(){arc.style.strokeDashoffset=off;});});
+    if(!manual){ var s=null; (function anim(now){ if(s==null)s=now; var p=Math.min((now-s)/1400,1),e=1-Math.pow(1-p,3); big.textContent=(pct*e).toFixed(pct%1?1:0); if(p<1)requestAnimationFrame(anim); else big.textContent=pct%1?pct.toFixed(1):pct.toFixed(0); })(); }
+  }
+  document.querySelectorAll('.gcard').forEach(buildGauge);
 })();
 </script>
 </body>
@@ -2535,13 +2528,13 @@ a{color:inherit;text-decoration:none}
       <div class="bmc-home" id="play-wrap" style="padding:20px 22px; margin:0; min-height:0">
         <div style="text-align:center; margin:0 0 14px">
           <span class="bmc-eyebrow"><i class="sq"></i>직접 조종해보세요 · SO-101 · hdel_iot_01</span>
-          <h1 class="bmc-h1" style="font-size:clamp(23px,2.8vw,34px); margin:12px 0 8px">마우스로 로봇팔을 움직여 버튼을 누르세요</h1>
-          <p class="bmc-lede" style="margin:0 auto; max-width:48ch">마우스를 좌우로 움직이면 실기 SO-101이 따라 움직이고, <b>클릭</b>하면 리셋 버튼을 눌러 초록 LED가 켜집니다.</p>
+          <h1 class="bmc-h1" style="font-size:clamp(23px,2.8vw,34px); margin:12px 0 8px">팔 끝으로 빨간 버튼을 터치하세요</h1>
+          <p class="bmc-lede" style="margin:0 auto; max-width:48ch">마우스를 움직이면 실기 SO-101 팔 끝이 따라오고, <b>팔 끝을 빨간 리셋 버튼에 대면</b> 초록 LED가 켜집니다.</p>
         </div>
         <div class="bmc-console" style="max-width:920px; margin:0 auto; position:relative">
-          <div class="top"><i class="lamp g"></i><i class="lamp a"></i><i class="lamp r"></i><span>&nbsp;PLAYGROUND / SO-101 · 마우스 조종</span><span class="rt" style="margin-left:auto">버튼 누른 횟수 <b id="play-count">0</b></span></div>
+          <div class="top"><i class="lamp g"></i><i class="lamp a"></i><i class="lamp r"></i><span>&nbsp;PLAYGROUND / SO-101 · 마우스 조종</span><span class="rt" style="margin-left:auto">버튼 터치 성공 <b id="play-count">0</b></span></div>
           <canvas id="play3d" role="img" aria-label="SO-101 로봇팔 3D — 마우스 좌우로 조종, 클릭으로 버튼 누름" style="display:block; width:100%; height:min(56vh,500px); touch-action:none; cursor:pointer; background:radial-gradient(80% 60% at 50% 30%,rgba(57,198,240,.07),transparent 70%),linear-gradient(180deg,#0a0f1c,#070b14)"></canvas>
-          <div id="play-hint" style="position:absolute; left:50%; bottom:16px; transform:translateX(-50%); font-family:var(--mono); font-size:12px; color:var(--ink); background:rgba(11,16,28,.82); border:1px solid var(--line2); border-radius:999px; padding:8px 15px; pointer-events:none; transition:opacity .3s">👆 마우스를 움직여 팔을 조종 · 클릭해서 누르기</div>
+          <div id="play-hint" style="position:absolute; left:50%; bottom:16px; transform:translateX(-50%); font-family:var(--mono); font-size:12px; color:var(--ink); background:rgba(11,16,28,.82); border:1px solid var(--line2); border-radius:999px; padding:8px 15px; pointer-events:none; transition:opacity .3s">👆 마우스로 팔 조종 · 팔 끝을 빨간 버튼에 대면 성공</div>
         </div>
       </div>
     </div>
@@ -2697,8 +2690,16 @@ function setTheme(mode) {
   setTimeout(drawAllCharts, 0);
 }
 (function initTheme() {
-  if (STATE.theme) setTheme(STATE.theme);
-  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme('dark');
+  setTheme('dark');   // 다크 고정 — 라이트/다크 선택 불필요
+})();
+/* 커서 따라오는 배경 라이트 — --mx/--my 갱신(rAF 스로틀) */
+(function cursorLight() {
+  if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  var mx = 0, my = 0, raf = false, rootS = document.documentElement.style;
+  addEventListener('pointermove', function (e) {
+    mx = e.clientX; my = e.clientY;
+    if (!raf) { raf = true; requestAnimationFrame(function () { rootS.setProperty('--mx', mx + 'px'); rootS.setProperty('--my', my + 'px'); raf = false; }); }
+  }, { passive: true });
 })();
 
 /* ====== ROUTING ====== */
@@ -3166,6 +3167,32 @@ document.addEventListener('click', e => {
   }
 });
 
+/* ====== bmc(미션컨트롤) 공용 헬퍼 — tech/ops/apps 뷰 재구성용: 원형 게이지 + reveal 애니 ====== */
+function bmcBuildGauge(card) {
+  var wrap = card.querySelector('.gwrap'); if (!wrap) return;
+  var RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var colMap = { grn: 'var(--grn)', amb: 'var(--amb)', cyn: 'var(--cyn)' };
+  var pct = parseFloat(card.getAttribute('data-g')) || 0, col = colMap[card.getAttribute('data-col')] || 'var(--grn)';
+  var manual = card.getAttribute('data-manual'), suffix = card.getAttribute('data-suffix'), r = 54, C = 2 * Math.PI * r;
+  wrap.innerHTML = '<svg width="132" height="132" viewBox="0 0 132 132"><circle cx="66" cy="66" r="' + r + '" fill="none" stroke="var(--line2)" stroke-width="9"/><circle class="garc" cx="66" cy="66" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + C + '" style="filter:drop-shadow(0 0 6px ' + col + ')"/></svg><div class="ctr"><div class="big" style="color:' + col + '">' + (manual || '0') + '</div><div class="u">' + (suffix || (manual ? '' : '%')) + '</div></div>';
+  var arc = wrap.querySelector('.garc'), big = wrap.querySelector('.big'), off = C * (1 - pct / 100);
+  if (RM) { arc.style.strokeDashoffset = off; if (!manual) big.textContent = pct % 1 ? pct.toFixed(1) : pct.toFixed(0); return; }
+  arc.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)';
+  requestAnimationFrame(function () { requestAnimationFrame(function () { arc.style.strokeDashoffset = off; }); });
+  if (!manual) { var s = null; (function anim(now) { if (s == null) s = now; var p = Math.min((now - s) / 1400, 1), e = 1 - Math.pow(1 - p, 3); big.textContent = (pct * e).toFixed(pct % 1 ? 1 : 0); if (p < 1) requestAnimationFrame(anim); else big.textContent = pct % 1 ? pct.toFixed(1) : pct.toFixed(0); })(); }
+}
+function bmcInitView(rootEl) {
+  if (!rootEl) return;
+  var RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  rootEl.querySelectorAll('.gcard').forEach(bmcBuildGauge);
+  var reveals = rootEl.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && !RM) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
+    reveals.forEach(function (e) { io.observe(e); });
+  } else reveals.forEach(function (e) { e.classList.add('in'); });
+  rootEl.querySelectorAll('.prog i[data-w]').forEach(function (pi) { setTimeout(function () { pi.style.width = pi.getAttribute('data-w') + '%'; }, 160); });
+}
+
 /* ====== Apps view ====== */
 function groupClass(g) {
   if (g && g.indexOf('고객') >= 0) return 'g-customer';
@@ -3174,215 +3201,256 @@ function groupClass(g) {
   return '';
 }
 function renderApps() {
-  /* CoP 용 Phase 로드맵 카드 v3 — PHASE-1/2 재구성.
-     - 좌측 컬러 border 제거, status-badge + outcome 좌측 가는 줄로 대체
-     - weeks 압축: 완료/예정 한 줄씩, 현재만 강조
-     - 완료 phase 는 "결과" 톤으로 outcome 강조 */
-  const wrap = document.getElementById('apps-cards');
-  const phases = D.phases || [];
-  if (!phases.length) { wrap.innerHTML = '<div class="empty" style="grid-column:1/-1">Phase 데이터 없음. build.py 갱신 필요.</div>'; return; }
-  wrap.style.gridTemplateColumns = '1fr';
+  var root=document.getElementById('c1-root'); if(!root) return;
+  var phases=(D.phases||[]);
+  if(!phases.length){ document.getElementById('c1-body').innerHTML='<div class="empty" style="padding:20px">Phase 데이터 없음.</div>'; return; }
+  var RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var MONTHS=['04','05','06','07','08','09','10'];  // 7 columns, 10=DEMO
+  function mi(mon){ var m=(mon||'').split('-')[1]; return MONTHS.indexOf(m); }
+  // D-day
+  var t=new Date('2026-09-30T00:00:00'),now=new Date(); var dday=Math.max(0,Math.ceil((t-now)/86400000));
+  document.getElementById('c1-dday').innerHTML='시연까지 <b>D-'+dday+'</b>';
+  // month header
+  document.getElementById('c1-mhead').innerHTML=MONTHS.map(function(m){return '<div class="mc'+(m==='10'?' demo':'')+'">'+m+'월'+(m==='10'?' &#9873;':'')+'</div>';}).join('');
 
-  const reportsByMonth = {};
-  (D.monthly_reports || []).forEach(r => {
-    if (!reportsByMonth[r.month]) reportsByMonth[r.month] = [];
-    reportsByMonth[r.month].push(r);
+  var reportsByMonth={}; (D.monthly_reports||[]).forEach(function(r){ (reportsByMonth[r.month]=reportsByMonth[r.month]||[]).push(r); });
+  var body=document.getElementById('c1-body');
+  body.innerHTML=phases.map(function(ph,i){
+    var pct=Math.round((ph.progress||0)*100);
+    var lcls=ph.status==='완료'?'done':(ph.status==='진행'?'live':'plan');
+    var idx=mi(ph.month); if(idx<0) idx=0;
+    var cells='';
+    for(var j=0;j<7;j++){
+      if(j===idx){ cells+='<div class="cell"><div class="bar '+lcls+'"><i data-w="'+pct+'"></i><span class="bp">'+pct+'</span></div></div>'; }
+      else cells+='<div class="cell"></div>';
+    }
+    // weeks
+    var weeks=(ph.weeks||[]).map(function(w){ var wp=Math.round((w.progress||0)*100); var col=ph.status==='완료'?'var(--c-grn)':(ph.status==='진행'?'var(--c-cyn)':'var(--c-mut2)');
+      return '<div class="wk"><div class="wt"><span>'+escapeHtml(w.week||'')+'</span><span>'+(w.done||0)+'/'+(w.total||0)+'</span></div><div class="wn">'+escapeHtml(w.name||'')+'</div><div class="b"><i data-w="'+wp+'" style="background:'+col+'"></i></div></div>'; }).join('');
+    var nextUp='';
+    if(ph.status==='진행'){ var cwi=(ph.weeks||[]).findIndex(function(w){return (w.progress||0)>0&&(w.progress||0)<0.999;});
+      var tw=(ph.weeks||[])[cwi]||(ph.weeks||[]).find(function(w){return (w.progress||0)<0.999;});
+      var ni=tw?(tw.items||[]).find(function(it){return !it.checked;}):null;
+      if(ni) nextUp='<div class="next"><b>이번 주 할 일</b>&#9654; '+escapeHtml(ni.task.slice(0,140))+'</div>'; }
+    var outLab=ph.status==='완료'?'결과':(ph.status==='진행'?'목표':'예정 결과');
+    var oc=ph.outcome?'<div class="oc"><b>'+outLab+'.</b> '+escapeHtml(ph.outcome)+'</div>':'';
+    var reps=reportsByMonth[ph.month]||[]; var tr=reps[reps.length-1];
+    var rep=tr?'<span class="rep" onclick="event.stopPropagation();openReport(\''+escapeHtml(tr.id)+'\')">'+escapeHtml(ph.month)+' 활동보고서 &#8599;</span>':'';
+    return '<button class="row" data-i="'+i+'"><div class="lab"><div class="nm"><span class="car">&#9654;</span>'+escapeHtml(ph.name)+'</div><div class="bl">'+escapeHtml(ph.business_label||'')+'</div></div><div class="mcols">'+cells+'</div></button>'
+      + '<div class="det" data-i="'+i+'"><div class="dwrap"><div class="weeks">'+weeks+'</div>'+nextUp+oc+(rep?'<div style="margin-top:12px">'+rep+'</div>':'')+'</div></div>';
+  }).join('');
+
+  // fill bars
+  var bars=body.querySelectorAll('.bar i[data-w]');
+  bars.forEach(function(el,k){ setTimeout(function(){ el.style.width=el.getAttribute('data-w')+'%'; }, RM?0:200+k*90); });
+
+  // today line position: fraction across 7-month span (Apr1 .. Nov1)
+  var start=new Date('2026-04-01T00:00:00'), end=new Date('2026-11-01T00:00:00');
+  var frac=Math.max(0,Math.min(1,(now-start)/(end-start)));
+  var today=document.getElementById('c1-today');
+  today.style.left='calc((100% - var(--lab)) * '+frac.toFixed(4)+' + var(--lab))';
+  document.getElementById('c1-todaylab').textContent='TODAY · D-'+dday;
+  if(!RM){ today.classList.remove('sweep'); void today.offsetWidth; today.classList.add('sweep'); }
+
+  // row expand
+  root.querySelectorAll('.row').forEach(function(b){
+    b.addEventListener('click',function(){
+      var i=b.dataset.i, det=root.querySelector('.det[data-i="'+i+'"]');
+      var open=det.classList.contains('open');
+      root.querySelectorAll('.det').forEach(function(d){d.classList.remove('open');});
+      root.querySelectorAll('.row').forEach(function(r){r.classList.remove('sel');});
+      if(!open){ det.classList.add('open'); b.classList.add('sel');
+        det.querySelectorAll('.b i[data-w],.wk .b i[data-w]').forEach(function(el){ setTimeout(function(){ el.style.width=el.getAttribute('data-w')+'%'; },80); });
+      }
+    });
+  });
+  // default expand first 진행
+  var def=phases.findIndex(function(p){return p.status==='진행';}); if(def<0) def=0;
+  var dRow=root.querySelector('.row[data-i="'+def+'"]'); if(dRow) dRow.click();
+}
+
+function renderOps() {
+  var root=document.getElementById('b1-root'); if(!root) return;
+  var RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  // telemetry
+  document.getElementById('b1-tele').innerHTML =
+    '<div class="t"><div class="k">UPTIME</div><div class="v ok"><span class="dot"></span>24/7 OK</div></div>'
+    + '<div class="t"><div class="k">CRON / 일</div><div class="v cy">4</div></div>'
+    + '<div class="t"><div class="k">SELF-HEAL</div><div class="v ok">ON</div></div>'
+    + '<div class="t"><div class="k">서빙</div><div class="v cy">hermes-mark</div></div>';
+
+  // leaf nodes
+  var LEAVES = [
+    {k:'c1',cat:'cron',col:'#39c6f0',t:'cron · 23:00',sub:'시뮬 환경 구축',badge:'23:00'},
+    {k:'c2',cat:'cron',col:'#39c6f0',t:'cron · 23:30',sub:'테스트 + 메트릭',badge:'23:30'},
+    {k:'c3',cat:'cron',col:'#39c6f0',t:'cron · 07:00',sub:'아침 보고 메일',badge:'07:00'},
+    {k:'c4',cat:'cron',col:'#39c6f0',t:'cron · 일 22:00',sub:'주간 정리',badge:'주간'},
+    {k:'heal',cat:'heal',col:'#2ee6a0',t:'self-heal',sub:'실패 자가복구'},
+    {k:'claude',cat:'delegate',col:'#f8b64c',t:'claude -p 위임',sub:'복잡 추론'},
+    {k:'git',cat:'infra',col:'#39c6f0',t:'Git auto-push',sub:'코드·로그·보고서'},
+    {k:'serve',cat:'infra',col:'#39c6f0',t:'hermes-mark 서버',sub:'Fastify · Tunnel'},
+  ];
+  document.getElementById('b1-leaves').innerHTML = LEAVES.map(function(l){
+    return '<button class="nd" data-k="'+l.k+'">'+(l.badge?'<span class="badge">'+l.badge+'</span>':'')
+      +'<span class="nt"><i style="background:'+l.col+'"></i>'+escapeHtml(l.t)+'</span><span class="nsub">'+escapeHtml(l.sub)+'</span></button>';
+  }).join('');
+
+  // inspector content per node
+  var TM = D.training_metrics||{};
+  var actS = (function(){ var s=getTrainingStatus(); if(s==='running')return '진행 중 epoch '+(TM.current_epoch||'?'); if(s==='paused')return '일시 중지'; return '시작 대기'; })();
+  var ROLES = [
+    ['a','시뮬 코드 작성 · 실행 · 메트릭'],['a','일일 research-log 작성'],['a','아침 보고 메일 (07:00)'],['a','주간/월간 보고 증거 식별'],
+    ['h','월별 활동보고서 (AI 초안→사람 보완)'],['h','의사결정 (AI 제안→사람 확정)'],['h','외부 의존 부품·3D프린팅 (AI 식별→사람 해결)'],
+    ['p','디자인 · 톤 · 보고 방향'],['p','대시보드 설계 (데이터·빌드는 자동)'],
+  ];
+  var rolesHtml = '<div class="roles"><div class="rh">사람 vs AI — 역할 분담</div>'
+    + ROLES.map(function(r){ var lab={a:'AI 자동',h:'AI→사람',p:'사람'}[r[0]]; return '<div class="rr"><span class="tag '+r[0]+'">'+lab+'</span>'+escapeHtml(r[1])+'</div>'; }).join('') + '</div>';
+  var INSP = {
+    root:{c:'#8ea0bd',t:'Mac Mini',sub:'로컬 호스트 · 24/7',kv:[['호스트','로컬 Mac Mini (Apple Silicon)'],['가동','24/7 · 재부팅 자동 복구'],['역할','전 자동화의 물리 기반']]},
+    hub:{c:'#39c6f0',t:'Hermes Agent',sub:'로컬 AI 에이전트',kv:[['복잡추론','Claude 위임 <code>claude -p</code>'],['스킬','<code>cop-physical-ai-self-heal</code>'],['권한','gh · git · file system · venv']], roles:true},
+    c1:{c:'#39c6f0',t:'cron · 매일 23:00',sub:'시뮬 환경 단계별 구축',kv:[['역할','PHASE_ROADMAP 읽어 오늘 단계 식별 → MuJoCo 코드 작성·실행'],['결과물','<code>research/simulation/*.md</code>']]},
+    c2:{c:'#39c6f0',t:'cron · 매일 23:30',sub:'시뮬 테스트 + 메트릭',kv:[['역할','성공률·추론시간·데이터셋 정합 검증 · 자가치유 로그'],['결과물','<code>agent/research-log/*.md</code>']]},
+    c3:{c:'#39c6f0',t:'cron · 매일 07:00',sub:'아침 보고 메일',kv:[['역할','<code>generate_daily_report.py</code> → 담당자·수신자 메일 발송'],['결과물','이메일 · <code>CHANGELOG.md</code> · git push']]},
+    c4:{c:'#39c6f0',t:'cron · 일요 22:00',sub:'주간 정리 + 보고 증거',kv:[['역할','한 주 결과 정리 + 월별 보고서 후보 식별'],['결과물','<code>agent/report-evidence/YYYY-MM/</code>']]},
+    heal:{c:'#2ee6a0',t:'Self-heal',sub:'자가치유',kv:[['동작','매 cron 끝에 실패·차단 자동 기록'],['복구','<code>chore(self-heal)</code> commit → 다음 cron 자동 재시도'],['표시','활동 타임라인의 치유 표식 = 발생 일수']]},
+    claude:{c:'#f8b64c',t:'Claude 위임',sub:'복잡 추론 오프로딩',kv:[['동작','Hermes가 못 푸는 복잡 추론은 <code>claude -p</code>로 위임'],['현재 학습','ACT '+actS]]},
+    git:{c:'#39c6f0',t:'Git auto-push',sub:'자동 커밋',kv:[['동작','코드·로그·보고서 자동 commit + push'],['효과','대시보드 데이터 소스 항상 최신']]},
+    serve:{c:'#39c6f0',t:'hermes-mark 서버',sub:'이 대시보드',kv:[['스택','Fastify + chokidar(파일감지) + WebSocket(라이브)'],['노출','Cloudflare Tunnel → <code>cop-physical-ai.hermesmark.site</code>']]},
+  };
+  var inspEl=document.getElementById('b1-insp');
+  function setInsp(k){
+    var d=INSP[k]; if(!d) return;
+    inspEl.innerHTML='<div class="ih"><i style="background:'+d.c+'"></i><h3>'+escapeHtml(d.t)+'</h3></div>'
+      + '<div class="isub">'+escapeHtml(d.sub)+'</div>'
+      + '<dl class="kv">'+d.kv.map(function(r){return '<dt>'+escapeHtml(r[0])+'</dt><dd>'+r[1]+'</dd>';}).join('')+'</dl>'
+      + (d.roles?rolesHtml:'');
+    [].forEach.call(root.querySelectorAll('.nd'),function(n){ n.classList.toggle('sel', n.dataset.k===k); });
+  }
+  [].forEach.call(root.querySelectorAll('.nd'),function(n){
+    n.addEventListener('click',function(){ setInsp(n.dataset.k); });
+    n.addEventListener('mouseenter',function(){ setInsp(n.dataset.k); });
+  });
+  setInsp('hub');
+
+  // edges + packets (measure DOM after layout)
+  function drawEdges(){
+    var svg=document.getElementById('b1-edges'); if(!svg) return;
+    var gr=svg.parentElement.getBoundingClientRect();
+    svg.setAttribute('width',gr.width); svg.setAttribute('height',gr.height);
+    function ctr(k){ var el=root.querySelector('.nd[data-k="'+k+'"]'); if(!el)return null; var r=el.getBoundingClientRect(); return {x:r.left-gr.left, y:r.top-gr.top, w:r.width, h:r.height}; }
+    var rt=ctr('root'), hb=ctr('hub'); if(!rt||!hb) return;
+    var paths=[]; var packets=[];
+    function edge(a,b,i,col){
+      var x1=a.x+a.w, y1=a.y+a.h/2, x2=b.x, y2=b.y+b.h/2;
+      var mx=(x1+x2)/2;
+      var d='M'+x1+','+y1+' C'+mx+','+y1+' '+mx+','+y2+' '+x2+','+y2;
+      paths.push('<path id="b1e'+i+'" d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.3" opacity=".28"/>');
+      if(!RM) packets.push('<circle r="2.6" fill="'+col+'"><animateMotion dur="'+(2.4+i*0.22)+'s" repeatCount="indefinite" begin="'+(i*0.3)+'s"><mpath href="#b1e'+i+'"/></animateMotion></circle>');
+    }
+    edge(rt,hb,0,'#39c6f0');
+    LEAVES.forEach(function(l,j){ var lf=ctr(l.k); if(lf) edge(hb,lf,j+1,l.col); });
+    svg.innerHTML=paths.join('')+packets.join('');
+  }
+  requestAnimationFrame(function(){ requestAnimationFrame(drawEdges); });
+  if(!root.__b1resize){ root.__b1resize=1; window.addEventListener('resize',function(){ if(!document.getElementById('view-ops').classList.contains('hidden')) drawEdges(); }); }
+
+  // 24h timeline
+  var axis=document.getElementById('b1-axis');
+  var hrs=[0,6,12,18,24].map(function(h){ return '<span class="hr" style="left:'+(h/24*100)+'%">'+h+'시</span>'; }).join('');
+  var EV=[{h:1,t:'01:00 재시도',cls:'heal alt'},{h:7,t:'07:00 메일',cls:''},{h:23,t:'23:00 구축',cls:''},{h:23.5,t:'23:30 테스트',cls:'alt'}];
+  var evs=EV.map(function(e){ return '<span class="ev '+e.cls+'" style="left:'+(e.h/24*100)+'%"><span class="lb">'+escapeHtml(e.t)+'</span><span class="m"></span></span>'; }).join('');
+  axis.innerHTML=hrs+evs;
+
+  // dataflow
+  document.getElementById('b1-flow').innerHTML =
+    '<div class="fh">데이터 흐름 — 학습이 어떻게 진행되는가</div>'
+    + '<div class="row"><span class="st s">cron 23:00</span><span class="ar">&#8594;</span><span class="st">MuJoCo 시뮬</span><span class="ar">&#8594;</span><span class="st">episodes (LeRobot)</span><span class="ar">&#8594;</span><span class="st e">ACT 학습 · '+escapeHtml(actS)+'</span></div>'
+    + '<div class="row"><span class="st s">cron 23:30</span><span class="ar">&#8594;</span><span class="st">메트릭 측정</span><span class="ar">&#8594;</span><span class="st">research-log</span><span class="ar">&#8594;</span><span class="st e">git push</span></div>'
+    + '<div class="row"><span class="st s">파일 변경</span><span class="ar">&#8594;</span><span class="st">chokidar</span><span class="ar">&#8594;</span><span class="st">build.py</span><span class="ar">&#8594;</span><span class="st">WebSocket</span><span class="ar">&#8594;</span><span class="st e">브라우저 라이브</span></div>';
+}
+
+function renderTech() {
+  const phases = D.phases || {};
+  const byMonth = {}; (D.phases||[]).forEach(p => { byMonth[p.month] = p; });
+  const st = (mon) => { const p = byMonth[mon]; return p ? p.status : '예정'; };
+  const cls = (s) => s==='완료'?'done':(s==='진행'?'live':'plan');
+  const FLOW = [
+    {n:1,mon:'2026-05',title:'가상 로봇팔 셋업',stk:'MuJoCo 3.8',detail:'MuJoCo 3.8 + SO-ARM101 MJCF import. 천장 카메라·6축 관절 캘리브레이션. 헤드리스 렌더링으로 관측 파이프 구성.',chips:['MuJoCo 3.8','SO-ARM101 MJCF','캘리브레이션']},
+    {n:2,mon:'2026-06',title:'시연 데이터 합성',stk:'IK · 200ep',detail:'IK 기반 Pick-Place 자동 시연. 큐브 위치 ±20mm 랜덤으로 200 에피소드 / 12,400 프레임 합성. LeRobot Dataset v3.0 (parquet + mp4) 저장.',chips:['200 에피소드','12,400 프레임','Dataset v3.0','local/cop-pickplace']},
+    {n:3,mon:'2026-06',title:'ACT 학습 · 모방학습',stk:'LeRobot ACT',detail:'LeRobot ACT(Transformer)로 200ep 시연을 모방. 관측(영상+qpos6) → 다음 100프레임 액션 청크 예측. Mac Mini 백그라운드 학습(epoch 100, batch 8).',chips:['ACT Transformer','chunk 100','epoch 100','모방학습']},
+    {n:4,mon:'2026-07',title:'시뮬 검증',stk:'성공률 측정',detail:'학습된 모델이 시뮬에서 큐브를 잘 집는지 성공률로 측정. Sim2Real 정합 준비 단계.',chips:['큐브 파지율','Sim2Real 준비']},
+    {n:5,mon:'2026-08',title:'S1 리셋버튼 · 실기정렬',stk:'합성100ep+ACT',detail:'2단계 — PCB 리셋버튼 누르기. 실기 트랙(omen)과 동일 작업·관측으로 시뮬 정렬. 합성 100ep + ACT 학습 · LED 자동판정.',chips:['S1 리셋버튼','실기 정렬','LED 자동판정']},
+    {n:6,mon:'2026-09',title:'RS232 분리 + 1차 완성',stk:'S1 70·RS232 40',detail:'RS232 케이블 분리 — 가장 어려운 정밀작업(허용오차 ±0.5mm) + 1차 기능 완성. S1 70% · RS232 40% 목표. 작업 완료 후 10월 시연.',chips:['RS232 분리','±0.5mm','10월 시연']},
+  ];
+  const STACK = [
+    {name:'MuJoCo 3.8',role:'가상 로봇팔 시뮬 엔진',lic:'Apache 2.0',why:'처음엔 Isaac Lab 검토했으나 Mac Mini(Apple Silicon ARM64) 미지원. MuJoCo는 네이티브 + pip 한 줄 설치 + 경량.',how:'SO-ARM101 MJCF import → 헤드리스 렌더로 천장카메라+6축 관측 수집. IK로 Pick-Place 시연 자동 생성.'},
+    {name:'SO-ARM101',role:'오픈소스 6-DoF 로봇팔',lic:'CC-BY-SA',why:'TheRobotStudio 오픈소스 + LeRobot 공식 지원. ≈$500 · Leader+Follower 텔레오퍼레이션 가능.',how:'so101_new_calib.xml로 시뮬/실기 동일 캘리브. 6관절 + 그리퍼. 실기 서보 Feetech STS3215.'},
+    {name:'HF LeRobot',role:'로봇 학습 프레임워크',lic:'Apache 2.0',why:'데이터셋→학습(ACT/DP/π0)→추론 end-to-end 표준. SO-ARM101 공식 지원. 검증된 코드베이스.',how:'200ep를 LeRobot Dataset v3.0(parquet 관절 + mp4 영상)로 저장 → ACT 학습 입력.'},
+    {name:'ACT',role:'Action Chunking Transformer',lic:'2023 · MIT',why:'Diffusion Policy 대비 가볍고 빠름 → 1차 학습 적합. 다음 100프레임을 한 번에 예측 → 시간적 일관성.',how:'train_act.py가 ACTConfig/ACTPolicy 호출. 입력 카메라+6축, 출력 6축 시퀀스(chunk 100). epoch 100, batch 8.'},
+    {name:'모방학습',role:'"보고 따라하기"',lic:'Imitation',why:'강화학습은 실기 파손위험 + 데이터 저효율. 정확한 시연이 가능한 작업엔 모방학습이 적합.',how:'IK가 정답 액션 자동생성 → 카메라 관측과 짝지어 200ep 저장 → ACT가 "이 영상 보이면 이렇게" 매핑 학습.'},
+  ];
+  const DEC = [
+    {d:'2026-05-01',t:'Isaac Lab → MuJoCo',desc:'Mac Mini(ARM64) 미지원으로 Isaac Lab 불가 판정 → MuJoCo 전환(네이티브·경량).'},
+    {d:'학습 알고리즘',t:'ACT 우선 · DP 후순위',desc:'가볍고 빠른 ACT로 1차 검증. Diffusion Policy 비교는 9월(Phase 4).'},
+    {d:'학습 방식',t:'모방학습 채택',desc:'강화학습 실기 파손위험 회피. 정확 시연 가능 작업엔 모방학습이 정답.'},
+  ];
+
+  // rail nodes
+  const rail = document.getElementById('a1-rail');
+  const N = FLOW.length;
+  rail.innerHTML = FLOW.map((f,i)=>{
+    const c = cls(st(f.mon));
+    return '<button class="node '+c+'" data-i="'+i+'"><span class="dot">'+f.n+'</span><span class="nlab">'+escapeHtml(f.title)+'</span><span class="nstk">'+escapeHtml(f.stk)+'</span></button>';
+  }).join('');
+  // connector gradient by status
+  let lastDone=-1,lastProg=-1;
+  FLOW.forEach((f,i)=>{ const s=st(f.mon); if(s==='완료')lastDone=i; if(s==='진행')lastProg=i; });
+  const posOf = (i)=> (N<=1?0:(i/(N-1))*100);
+  const gEnd = posOf(Math.max(lastDone,0)), cEnd = posOf(Math.max(lastProg,lastDone,0));
+  document.getElementById('a1-line').style.background =
+    'linear-gradient(90deg,var(--c-grn) 0,var(--c-grn) '+gEnd+'%,var(--c-cyn) '+gEnd+'%,var(--c-cyn) '+cEnd+'%,var(--c-line2) '+cEnd+'%,var(--c-line2) 100%)';
+
+  // inspector
+  const insp = document.getElementById('a1-insp');
+  const STLAB = {done:'완료',live:'진행 중',plan:'예정'};
+  const STCOL = {done:'var(--c-grn)',live:'var(--c-cyn)',plan:'var(--c-amb)'};
+  function setInsp(i){
+    const f=FLOW[i], c=cls(st(f.mon));
+    insp.className='insp anim';
+    insp.innerHTML='<div class="ih"><span class="ino" style="background:'+STCOL[c]+';color:#04140d">'+f.n+'</span>'
+      + '<span class="imon">'+escapeHtml(f.mon)+'</span>'
+      + '<span class="ist" style="color:'+STCOL[c]+'">'+STLAB[c]+'</span></div>'
+      + '<h3>'+escapeHtml(f.title)+'</h3>'
+      + '<p>'+escapeHtml(f.detail)+'</p>'
+      + '<div class="chips">'+f.chips.map(x=>'<span>'+escapeHtml(x)+'</span>').join('')+'</div>';
+    void insp.offsetWidth;
+    [].forEach.call(rail.children,(n,k)=>n.classList.toggle('sel',k===i));
+  }
+  [].forEach.call(rail.children,(n)=>n.addEventListener('click',()=>setInsp(+n.dataset.i)));
+  // default: first 진행, else last
+  let def = FLOW.findIndex(f=>st(f.mon)==='진행'); if(def<0) def=N-1;
+  setInsp(def);
+
+  // decision switches
+  document.getElementById('a1-switches').innerHTML =
+    '<span style="font-family:var(--c-mono);font-size:10px;color:var(--c-mut2);align-self:center;margin-right:2px">의사결정 ▸</span>' +
+    DEC.map(d=>
+    '<button class="sw"><span class="swtop"><span class="di">&#9671;</span><span>'+escapeHtml(d.t)+'</span><span class="sd">· '+escapeHtml(d.d)+'</span></span><span class="swd">'+escapeHtml(d.desc)+'</span></button>'
+  ).join('');
+  [].forEach.call(document.getElementById('a1-switches').querySelectorAll('.sw'),(b)=>{
+    b.addEventListener('click',()=>b.classList.toggle('open'));
   });
 
-  const STATUS_LABEL = { '완료': '완료', '진행': '진행 중', '예정': '예정' };
-
-  wrap.innerHTML = phases.map(p => {
-    const pct = Math.round((p.progress || 0) * 100);
-    const statusClass = p.status === '완료' ? 'is-done' : (p.status === '진행' ? 'is-active' : 'is-plan');
-    const fillColor = p.status === '완료' ? '#22c55e' : (p.status === '진행' ? '#2563eb' : 'rgba(148,163,184,.4)');
-
-    // Weeks 압축 — 한 줄씩
-    let weeksHtml = '';
-    let nextUpHtml = '';
-    if (p.status === '완료') {
-      // 완료: 4 weeks 결과 한 줄씩
-      weeksHtml = `<div class="weeks-compact">
-        ${(p.weeks || []).map(w => `
-          <div class="wc-row is-done">
-            <span class="w-label">${escapeHtml(w.week)}</span>
-            <span class="w-date">${escapeHtml(w.date_range || '')}</span>
-            <span class="w-name">${escapeHtml(w.name || '')}</span>
-            <span class="w-status">✓ ${w.done}/${w.total}</span>
-          </div>
-        `).join('')}
-      </div>`;
-    } else if (p.status === '진행') {
-      // 진행: 4 weeks 한 줄씩, 현재 W 강조
-      const currentWeekIdx = (p.weeks || []).findIndex(w => (w.progress || 0) > 0 && (w.progress || 0) < 0.999);
-      weeksHtml = `<div class="weeks-compact">
-        ${(p.weeks || []).map((w, i) => {
-          const isDone = (w.progress || 0) >= 0.999;
-          const isCurrent = i === currentWeekIdx;
-          const cls = isDone ? 'is-done' : (isCurrent ? 'is-current' : '');
-          const statusTxt = isDone ? `✓ ${w.done}/${w.total}` : (isCurrent ? `진행 ${w.done}/${w.total}` : `${w.done}/${w.total}`);
-          return `
-            <div class="wc-row ${cls}">
-              <span class="w-label">${escapeHtml(w.week)}</span>
-              <span class="w-date">${escapeHtml(w.date_range || '')}</span>
-              <span class="w-name">${escapeHtml(w.name || '')}</span>
-              <span class="w-status">${statusTxt}</span>
-            </div>
-          `;
-        }).join('')}
-      </div>`;
-      // 다음 할 일 — 현재 또는 첫 미완 week 의 첫 미완 item
-      const targetWeek = (p.weeks || [])[currentWeekIdx] || (p.weeks || []).find(w => (w.progress || 0) < 0.999);
-      const nextItem = targetWeek ? (targetWeek.items || []).find(it => !it.checked) : null;
-      if (nextItem) {
-        nextUpHtml = `<div class="next-up"><b>다음:</b> ${escapeHtml(nextItem.task.slice(0, 140))}</div>`;
-      }
-    }
-    // 예정: weeks 숨김 (outcome 만)
-
-    const monthReports = reportsByMonth[p.month] || [];
-    const targetReport = monthReports[monthReports.length - 1];
-    const reportLink = targetReport
-      ? `<span class="report-link" onclick="openReport('${escapeHtml(targetReport.id)}')">${p.month} 활동보고서 →</span>`
-      : '';
-    const reportLabel = p.report_label
-      ? `<span>${escapeHtml(p.report_label)}</span>`
-      : '';
-
-    const outcomeLabel = p.status === '완료' ? '결과' : (p.status === '진행' ? '목표' : '예정 결과');
-    const outcomeHtml = p.outcome
-      ? `<div class="outcome"><b>${outcomeLabel}.</b> ${escapeHtml(p.outcome)}</div>`
-      : '';
-
-    return `
-      <div class="phase-card-v2 ${statusClass}" data-id="${p.id}" data-kind="phase">
-        <div class="pc-head">
-          <div>
-            <div class="biz-label">${escapeHtml(p.business_label || p.name)}</div>
-            <div class="tech-label">${escapeHtml(p.name)} · ${escapeHtml(p.date_range || '')}</div>
-          </div>
-          <div class="status-badge">${escapeHtml(STATUS_LABEL[p.status] || p.status)}</div>
-        </div>
-        <div class="progress-row">
-          <div class="progress-main"><div class="pf" style="width:${pct}%; background:${fillColor};"></div></div>
-          <div class="pct">${pct}% · ${p.done}/${p.total}</div>
-        </div>
-        ${outcomeHtml}
-        ${weeksHtml}
-        ${nextUpHtml}
-        <div class="pc-meta">
-          ${reportLabel}
-          ${reportLink}
-        </div>
-      </div>`;
-  }).join('');
+  // stack chips
+  document.getElementById('a1-stack').innerHTML = STACK.map(t=>
+    '<button class="tc"><div class="th"><span class="tn">'+escapeHtml(t.name)+'</span><span class="tr">'+escapeHtml(t.role)+'</span><span class="tl">'+escapeHtml(t.lic)+'</span></div>'
+    + '<div class="tx"><div class="tx-in"><b>왜 선택</b><p>'+escapeHtml(t.why)+'</p><b>어떻게 사용</b><p style="margin-bottom:0">'+escapeHtml(t.how)+'</p></div></div></button>'
+  ).join('');
+  [].forEach.call(document.getElementById('a1-stack').children,(b)=>{
+    b.addEventListener('click',()=>b.classList.toggle('open'));
+  });
 }
 
-/* ====== AI 자동화 운영 (OPS) — 정적 view 의 동적 텍스트 채움 (DYN-4) ====== */
-function renderOps() {
-  const actEl = document.getElementById('ops-act-status');
-  if (actEl) {
-    const s = getTrainingStatus();
-    const tm = D.training_metrics || {};
-    if (s === 'running') actEl.textContent = `(진행 중 · epoch ${tm.current_epoch || '?'})`;
-    else if (s === 'paused') actEl.textContent = `(일시 중지 · epoch ${tm.current_epoch || '?'})`;
-    else actEl.textContent = '(시작 대기)';
-  }
-}
-
-/* ====== Tech Guide view (GUIDE) ====== */
-function renderTech() {
-  // Phase status 매핑: 시뮬 셋업 → 시연 합성 → ACT 학습 → 시뮬 검증 → Sim2Real → PCB 자동화
-  const phases = D.phases || [];
-  const phaseByMonth = {};
-  phases.forEach(p => { phaseByMonth[p.month] = p; });
-  // 6 step 매핑: phase month → status
-  // flow detail 동적 — ACT 학습 step 은 training_metrics 상태 기반
-  const actDetail = (() => {
-    const s = getTrainingStatus();
-    const tm = D.training_metrics || {};
-    if (s === 'running') return `LeRobot ACT (Transformer) · 진행 중 epoch ${tm.current_epoch || '?'}, loss ${tm.current_loss != null ? tm.current_loss.toFixed(4) : '?'}`;
-    if (s === 'paused') return `LeRobot ACT (Transformer) · 일시 중지 (epoch ${tm.current_epoch || '?'})`;
-    return 'LeRobot ACT (Transformer) · 200 ep 학습 · 시작 대기';
-  })();
-  const FLOW = [
-    { idx: '①', month: '2026-05', title: '가상 로봇팔 셋업',           detail: 'MuJoCo 3.8 + SO-ARM101 MJCF · 카메라/관절 캘리브레이션' },
-    { idx: '②', month: '2026-06', title: '시뮬 시연 데이터 합성',      detail: 'IK 기반 Pick-Place 200 에피소드 / 12,400 프레임 · LeRobot Dataset v3.0' },
-    { idx: '③', month: '2026-06', title: 'ACT 학습 — 모방학습',          detail: actDetail },
-    { idx: '④', month: '2026-07', title: '시뮬 검증',                   detail: '학습된 모델이 시뮬에서 큐브 잘 집는가 (성공률 측정)' },
-    { idx: '⑤', month: '2026-08', title: '2단계 — S1 리셋버튼 (실기 정렬)', detail: '실기 트랙(omen)과 동일 작업·관측으로 시뮬 정렬 · 합성 100ep + ACT 학습 · LED 자동판정' },
-    { idx: '⑥', month: '2026-09', title: 'RS232 케이블 분리 + 1차 기능 완성', detail: 'S1 리셋버튼 70% · RS232 케이블 분리 부분 성공 40% (작업 완료, 10월 시연)' },
-  ];
-  const STATUS_TAG = { '완료': 'DONE', '진행': '진행 중', '예정': '예정' };
-  const wrap = document.getElementById('flow-chart');
-  if (wrap) {
-    wrap.innerHTML = FLOW.map((f, i) => {
-      const p = phaseByMonth[f.month];
-      const status = p ? p.status : '예정';
-      const cls = status === '완료' ? 'done' : (status === '진행' ? 'current' : 'plan');
-      return `
-        ${i > 0 ? '<div class="flow-arrow">↓</div>' : ''}
-        <div class="flow-step ${cls}">
-          <div class="idx">${f.idx}</div>
-          <div class="body">
-            <b>${escapeHtml(f.title)}</b>
-            <small>${escapeHtml(f.detail)}</small>
-          </div>
-          <span class="tag">${STATUS_TAG[status]}</span>
-        </div>`;
-    }).join('');
-  }
-  // 진행률 라벨
-  const done = phases.filter(p => p.status === '완료').length;
-  const active = phases.filter(p => p.status === '진행').length;
-  const tpEl = document.getElementById('tech-progress');
-  if (tpEl) tpEl.textContent = `완료 ${done} · 진행 ${active} · 예정 ${6 - done - active}`;
-
-  // DYN-3: 카드 안 시간 의존 텍스트 동적 채움
-  const actStatusEl = document.getElementById('act-status-text');
-  if (actStatusEl) actStatusEl.textContent = trainingStartTextOrStatus();
-  const phase2El = document.getElementById('phase2-status-text');
-  if (phase2El) {
-    const rt = D.real_track || {};
-    phase2El.textContent = rt.head
-      ? '실기 트랙(omen)에서 S1 리셋버튼 수집·학습 진행 중 — 실기 트랙 메뉴 참조'
-      : '실기 검증은 실기 트랙에서 진행';
-  }
-  const dsCtxEl = document.getElementById('dataset-context-label');
-  if (dsCtxEl) dsCtxEl.textContent = currentPhaseDatasetLabel();
-
-  // 데이터셋 메타 카드 — meta.dataset_episodes / meta.dataset_frames 또는 폴백
-  const meta = D.meta || {};
-  const stats = D.stats || {};
-  // 데이터셋 영상에서 메타 추출 (이미 build.py 가 emit)
-  const datasetVideo = (D.videos || []).find(v => v.kind === 'dataset');
-  const ep = datasetVideo?.episode_count || 200;
-  const frames = datasetVideo?.frame_count_total || 12400;
-  const fps = 30;
-  const dsEl = document.getElementById('dataset-stats');
-  if (dsEl) {
-    dsEl.innerHTML = `
-      <div class="ds-metrics">
-        <div class="m"><div class="n">${ep.toLocaleString()}</div><div class="l">에피소드</div></div>
-        <div class="m"><div class="n">${frames.toLocaleString()}</div><div class="l">총 프레임</div></div>
-        <div class="m"><div class="n">${fps}</div><div class="l">FPS</div></div>
-        <div class="m"><div class="n">6</div><div class="l">DoF (관절)</div></div>
-        <div class="m"><div class="n">640×480</div><div class="l">카메라 해상도</div></div>
-        <div class="m"><div class="n">v3.0</div><div class="l">LeRobot 포맷</div></div>
-      </div>
-      <div class="ds-features">
-        <h5>각 프레임에 저장된 것 (학습 입력/타겟)</h5>
-        <ul>
-          <li><code>observation.images.top</code> — 천장 카메라 RGB 영상 (480×640×3)</li>
-          <li><code>observation.state</code> — 6축 관절 위치 <span style="color:var(--text-dim)">(qpos, radian)</span></li>
-          <li><code>action</code> — 6축 제어 신호 <span style="color:var(--text-dim)">(ctrl, 모델이 학습할 정답)</span></li>
-          <li><code>timestamp</code> — 프레임 시각 <span style="color:var(--text-dim)">(30 fps 기준 ≈ 33ms 간격)</span></li>
-        </ul>
-      </div>
-    `;
-  }
-}
-
-/* ====== 학습 진척 (PROG — view-videos 안에 렌더) ====== */
 function renderTrainingProgress() {
   const wrap = document.getElementById('training-progress-wrap');
   if (!wrap) return;
@@ -5188,7 +5256,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 
     return {
       renderer: renderer, scene: scene, camera: camera, canvas: canvas,
-      hinges: hinges, led: led, applyCam: applyCam
+      hinges: hinges, led: led, applyCam: applyCam, inner: inner, bodyGroup: bodyGroup, btn: btn
     };
   }
 
@@ -5262,23 +5330,120 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
       H.applyCam(); draw();
     }).observe(H.canvas);
 
-    // ── Playground: 마우스로 팔 조종(스크럽) + 클릭으로 버튼 누름 (자동재생/궤도 없음) ──
+    // ── Playground: 팔끝이 커서를 추종(3D CCD IK, 실 관절범위+베이스 좌우) + 클릭=버튼 누름 ──
     if (opts.interactive) {
-      var maxF = (LEDF < N ? LEDF : N - 1);   // 프레임 0(홈)→maxF(버튼 눌림·LED 점등)
-      function show(i) { renderFrame(i); H.applyCam(); draw(); }
-      show(0);
       var counterEl = opts.counterId ? document.getElementById(opts.counterId) : null;
       var hintEl = opts.hintId ? document.getElementById(opts.hintId) : null, count = 0;
+
+      // rest 프레임(FR[0])으로 전 관절 시드
+      var ang = [0, 0, 0, 0, 0, 0];
+      H.hinges.forEach(function (h) { if (h.qposadr < 6) ang[h.qposadr] = FR[0][h.qposadr]; });
+      H.hinges.forEach(function (h) { if (h.qposadr < 6) h.pivot.quaternion.setFromAxisAngle(h.axisV, ang[h.qposadr]); });
+      H.applyCam(); H.scene.updateMatrixWorld(true); draw();
+
+      // 리치 관절 = base_pan(0)·shoulder_lift(1)·elbow(2)·wrist_flex(3). wrist_roll(4)·gripper(5) 고정.
+      var ikH = H.hinges.filter(function (h) { return h.qposadr <= 3; }).sort(function (a, b) { return a.qposadr - b.qposadr; });
+      var eff = H.inner[7] || H.inner[6] || H.inner[5];
+      var gripNodes = [H.inner[7], H.inner[6]].filter(Boolean);   // 집게 실제 메시(보드 관통·버튼 터치 판정용)
+      var buttonPos = new THREE.Vector3(); if (H.btn) H.btn.getWorldPosition(buttonPos);   // 빨간 리셋버튼 월드좌표
+      var wasTouching = false, aiming = false, BTN_SNAP = 0.09;   // BTN_SNAP=커서가 화면상 버튼 이만큼(NDC) 이내면 '조준' → 타깃을 실제 버튼으로 스냅. 성공=조준+팔 하강.
+
+      // 가동범위: base_pan(0)=플레이그라운드 좌우 자유(±YAW, 회전 감김만 방지). 1·2·3=녹화 프레임 자연범위+마진.
+      // 실기 S1 실측 범위 기반 — 베이스 팬은 실기서 거의 잠금(±0.5°)이라 좁게, 나머지는 녹화 프레임 min/max + 소폭 마진(자연 포즈 유지)
+      var YAW = 0.5, lim = { 0: { mn: -YAW, mx: YAW } };
+      [1, 2, 3, 4].forEach(function (q) {
+        var mn = 1e9, mx = -1e9;
+        for (var i = 0; i < FR.length; i++) { var v = FR[i][q]; if (v < mn) mn = v; if (v > mx) mx = v; }
+        lim[q] = { mn: mn - 0.15, mx: mx + 0.15 };
+      });
+
+      var BOARD_TOP = 0.026;  // 보드 윗면 world y — 손끝이 여기까지 내려가 버튼(중심 0.028)에 닿음. 이 아래로는 관통 방지.
+      var TOUCH_R = 0.022;    // 손끝이 버튼에 이만큼(2.2cm) 이내 실제 근접 시에만 성공.
+      var FLOOR_Y = 0.05;     // 타깃 1차 하한. 실측 튜닝 knob.
+      var planeC = new THREE.Vector3(0.15, 0.10, 0.0);   // 커서 투영 평면 중심(작업영역)
+
+      // 커서 → 카메라 정면 3D 평면 타깃(좌우=베이스 yaw, 상하=팔 리치)
+      var ray = new THREE.Raycaster(), planeN = new THREE.Vector3(), plane = new THREE.Plane(), hitP = new THREE.Vector3();
+      function cursorTarget(nx, ny) {
+        _btnN.copy(buttonPos).project(H.camera);                                   // 버튼 화면좌표
+        aiming = Math.hypot(nx - _btnN.x, ny - _btnN.y) < BTN_SNAP;                 // 커서가 버튼 조준 중?
+        if (aiming) return hitP.copy(buttonPos);                                    // 조준 → 실제 버튼으로 스냅(정확 터치)
+        ray.setFromCamera({ x: nx, y: ny }, H.camera);
+        H.camera.getWorldDirection(planeN);
+        plane.setFromNormalAndCoplanarPoint(planeN, planeC);
+        if (!ray.ray.intersectPlane(plane, hitP)) return null;
+        if (hitP.y < FLOOR_Y) hitP.y = FLOOR_Y;
+        return hitP;
+      }
+
+      // CCD: tip→base, 각 관절 축둘레 회전 + 가동범위 클램프
+      var wEnd = new THREE.Vector3(), wPiv = new THREE.Vector3(), wAx = new THREE.Vector3(),
+          vA = new THREE.Vector3(), vB = new THREE.Vector3(), vC = new THREE.Vector3(), wq = new THREE.Quaternion();
+      function ccd(tgt, iters) {
+        for (var it = 0; it < iters; it++) {
+          for (var k = ikH.length - 1; k >= 0; k--) {
+            var h = ikH[k];
+            H.scene.updateMatrixWorld(true);
+            eff.getWorldPosition(wEnd);
+            h.pivot.getWorldPosition(wPiv);
+            wAx.copy(h.axisV).applyQuaternion(h.pivot.getWorldQuaternion(wq)).normalize();
+            vA.subVectors(wEnd, wPiv); vB.subVectors(tgt, wPiv);
+            vA.addScaledVector(wAx, -vA.dot(wAx)); vB.addScaledVector(wAx, -vB.dot(wAx));   // 축⟂ 평면 투영
+            if (vA.lengthSq() < 1e-8 || vB.lengthSq() < 1e-8) continue;
+            vA.normalize(); vB.normalize();
+            var d = Math.max(-1, Math.min(1, vA.dot(vB))), da = Math.acos(d);
+            vC.crossVectors(vA, vB); if (vC.dot(wAx) < 0) da = -da;
+            var L = lim[h.qposadr];
+            ang[h.qposadr] = Math.max(L.mn, Math.min(L.mx, ang[h.qposadr] + da * 0.5));   // 가동범위 클램프
+            h.pivot.quaternion.setFromAxisAngle(h.axisV, ang[h.qposadr]);
+          }
+        }
+      }
+
+      // 집게 메시의 실제 최저 world y (관통 판정)
+      var _bb = new THREE.Box3(), _btnN = new THREE.Vector3();
+      function gripMinY() { _bb.makeEmpty(); for (var i = 0; i < gripNodes.length; i++) _bb.expandByObject(gripNodes[i]); return isFinite(_bb.min.y) ? _bb.min.y : 1e9; }
+
+      // 버튼 조준 시 재생할 '누름' 포즈 = 녹화 rollout 의 LED 점등 프레임(실기가 실제로 버튼 누른 관절config)
+      var PRESS = FR[LEDF < N ? LEDF : N - 1];
+
+      var pending = null, scheduled = false;
+      function solve() {
+        scheduled = false; if (!pending) return;
+        var touching = false;
+        if (aiming) {
+          // 버튼 조준 → 녹화된 '누름' 포즈로 부드럽게 이징 (실기가 실제 누른 관절 그대로 정확히 버튼 누름)
+          H.hinges.forEach(function (h) { if (h.qposadr < 6) { ang[h.qposadr] += (PRESS[h.qposadr] - ang[h.qposadr]) * 0.28; h.pivot.quaternion.setFromAxisAngle(h.axisV, ang[h.qposadr]); } });
+          touching = (Math.abs(ang[1] - PRESS[1]) + Math.abs(ang[2] - PRESS[2]) + Math.abs(ang[3] - PRESS[3])) < 0.14;   // 누름 포즈 수렴 = 실제 터치
+        } else {
+          // 버튼 밖 → 자유 커서 추종(IK) + 보드 관통 방지
+          ccd(pending, 12);
+          for (var pass = 0; pass < 3; pass++) {
+            H.scene.updateMatrixWorld(true);
+            var minY = gripMinY();
+            if (minY >= BOARD_TOP) break;
+            pending.y += (BOARD_TOP - minY) + 0.005; ccd(pending, 6);
+          }
+        }
+        if (touching && !wasTouching) {
+          setLED(H, true); count++; if (counterEl) counterEl.textContent = count;
+          if (ledLab) { ledLab.textContent = "LED ●"; ledLab.style.color = "var(--grn)"; }
+        } else if (!touching && wasTouching) {
+          setLED(H, false); if (ledLab) { ledLab.textContent = "LED ○"; ledLab.style.color = ""; }
+        }
+        wasTouching = touching;
+        draw();
+      }
       H.canvas.addEventListener("pointermove", function (e) {
         var r = H.canvas.getBoundingClientRect();
-        var t = Math.max(0, Math.min((e.clientX - r.left) / (r.width || 1), 1));
-        show(Math.round(t * maxF));                     // 좌=쉬는 자세, 우로 갈수록 팔이 버튼으로 내려감
+        var nx = ((e.clientX - r.left) / (r.width || 1)) * 2 - 1;
+        var ny = -(((e.clientY - r.top) / (r.height || 1)) * 2 - 1);
+        var t = cursorTarget(nx, ny); if (!t) return;
+        pending = t.clone();
+        if (!scheduled) { scheduled = true; requestAnimationFrame(solve); }
         if (hintEl && !hintEl.__hid) { hintEl.__hid = true; hintEl.style.opacity = "0"; }
       });
-      H.canvas.addEventListener("pointerdown", function () {
-        show(Math.min(N - 1, maxF + 3));                // 확실히 눌린 프레임(LED on)
-        count++; if (counterEl) counterEl.textContent = count;
-      });
+      // 클릭 성공 제거 — 성공은 오직 팔 끝이 버튼에 닿을 때(solve 의 터치 판정)
       return true;
     }
 

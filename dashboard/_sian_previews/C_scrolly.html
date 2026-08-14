@@ -16,6 +16,11 @@
   --terra:#39c6f0; --terra2:#5fd7f5; --terra-soft:rgba(57,198,240,.12);
   --green:#2ee6a0; --green2:#5fd79a; --amber:#f8b64c; --red:#ff6b6b;
   --shadow:0 22px 60px -28px rgba(0,0,0,.8);
+  /* bmc(오버뷰) 팔레트 별칭 — 정제형 지표/파이프라인 이식용 */
+  --cyn:#39c6f0; --grn:#2ee6a0; --grn-dim:rgba(46,230,160,.42); --amb:#f8b64c;
+  --panel:#0b101c; --panel2:#0e1626; --line2:rgba(150,175,220,.24);
+  --mut:#8ea0bd; --mut2:#5f6f8c;
+  --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
   color-scheme:dark;
 }
 @media (prefers-color-scheme:dark){
@@ -213,6 +218,42 @@ a{color:inherit;text-decoration:none}
 .robotsvg.s2 #successChip{opacity:1}
 #successChip{opacity:0; transition:opacity .5s .35s}
 .robotsvg text,.pipesvg text{font-family:var(--sans)}
+
+/* ===== bmc(오버뷰) 정제형 지표/파이프라인 이식 ===== */
+.bmc-home{max-width:1200px;margin:0 auto;padding:0 clamp(16px,6vw,90px)}
+.bmc-blk{padding:50px 0;border-top:1px solid var(--line);position:relative}
+.bmc-home .sechead{display:flex;align-items:baseline;gap:14px;margin-bottom:28px;flex-wrap:wrap}
+.bmc-home .sechead .idx{font-family:var(--mono);font-size:12px;color:var(--cyn);letter-spacing:.1em}
+.bmc-home .sechead h2{font-family:var(--myeong);font-size:clamp(22px,3.4vw,30px);margin:0;letter-spacing:-.01em;font-weight:750;color:var(--ink)}
+.bmc-home .sechead p{color:var(--mut);font-size:13.5px;margin:0}
+.bmc-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.bmc-home .gcard{border:1px solid var(--line2);border-radius:14px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:20px;text-align:center}
+.bmc-home .gwrap{position:relative;width:132px;height:132px;margin:0 auto}
+.bmc-home .gwrap svg{transform:rotate(-90deg)}
+.bmc-home .gwrap .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.bmc-home .gwrap .ctr .big{font-family:var(--mono);font-size:25px;font-weight:800}
+.bmc-home .gwrap .ctr .u{font-family:var(--mono);font-size:11px;color:var(--mut2)}
+.bmc-home .gcard .cap{margin-top:12px;font-size:13px;color:var(--ink);font-weight:600}
+.bmc-home .gcard .cap span{display:block;font-family:var(--mono);font-size:10.5px;color:var(--mut2);font-weight:400;margin-top:2px}
+.bmc-pipe{border:1px solid var(--line2);border-radius:16px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:26px 22px 30px;position:relative;overflow:hidden}
+.bmc-pipe .lead{font-family:var(--mono);font-size:12px;color:var(--mut);margin-bottom:26px;display:flex;align-items:center;gap:9px}
+.bmc-pipe .lead .d{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 10px var(--grn);animation:bmcpulse 1.6s infinite}
+.bmc-pipe .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;align-items:center}
+.bmc-pipe .node{position:relative;text-align:center;z-index:2}
+.bmc-pipe .node .ring{width:64px;height:64px;border-radius:16px;margin:0 auto 12px;border:1px solid var(--line2);background:var(--panel);display:flex;align-items:center;justify-content:center;position:relative;transition:.3s}
+.bmc-pipe .node .ring svg{width:30px;height:30px}
+.bmc-pipe .node .nm{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink)}
+.bmc-pipe .node .dsc{font-family:var(--mono);font-size:10.5px;color:var(--mut2);margin-top:3px}
+.bmc-pipe .track{position:absolute;left:0;right:0;top:32px;height:2px;z-index:1}
+.bmc-pipe .track .base{position:absolute;left:12.5%;right:12.5%;top:0;height:2px;background:repeating-linear-gradient(90deg,var(--line2) 0 7px,transparent 7px 15px);background-size:15px 2px;animation:bmcdash 1s linear infinite}
+.bmc-pipe .packet{position:absolute;top:-4px;left:12.5%;width:11px;height:11px;border-radius:50%;background:var(--grn);box-shadow:0 0 14px var(--grn);z-index:3;animation:bmctravel 5.2s linear infinite}
+.bmc-pipe .loopback{font-family:var(--mono);font-size:11px;color:var(--grn);text-align:center;margin-top:24px;display:flex;align-items:center;justify-content:center;gap:9px}
+.bmc-pipe .loopback .arc{width:120px;height:1px;background:repeating-linear-gradient(90deg,var(--grn-dim) 0 6px,transparent 6px 12px);animation:bmcdash 1s linear infinite}
+@keyframes bmcpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+@keyframes bmcdash{to{background-position:15px 0}}
+@keyframes bmctravel{0%{left:12.5%;opacity:0}5%{opacity:1}28%{left:37.5%}52%{left:62.5%}76%{left:87.5%}92%{left:87.5%;opacity:1}100%{left:87.5%;opacity:0}}
+@media(max-width:820px){.bmc-metrics{grid-template-columns:repeat(2,1fr)}.bmc-pipe .flow .node .dsc{display:none}}
+@media(prefers-reduced-motion:reduce){.bmc-pipe .packet,.bmc-pipe .track .base,.bmc-pipe .loopback .arc,.bmc-pipe .lead .d{animation:none}}
 </style>
 </head>
 <body>
@@ -250,6 +291,10 @@ a{color:inherit;text-decoration:none}
           </linearGradient>
           <linearGradient id="metal2" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stop-color="#454d5c"/><stop offset="1" stop-color="#2a3140"/>
+          </linearGradient>
+          <!-- SO-101 집게 검은 이동조 -->
+          <linearGradient id="soK2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#242a35"/><stop offset="1" stop-color="#0d0f16"/>
           </linearGradient>
           <radialGradient id="halo" cx="50%" cy="42%" r="55%">
             <stop offset="0" stop-color="#5fd7f5" stop-opacity=".22"/><stop offset="1" stop-color="#5fd7f5" stop-opacity="0"/>
@@ -310,7 +355,7 @@ a{color:inherit;text-decoration:none}
           <g style="stroke:var(--terra)" stroke-width="2" opacity=".85"><line x1="344" y1="500" x2="410" y2="500"/><line x1="344" y1="496" x2="344" y2="504"/><line x1="410" y1="496" x2="410" y2="504"/></g>
         </g>
 
-        <!-- ===== ROBOT ARM (base at 150,300; reaches down-right) ===== -->
+        <!-- ===== ROBOT ARM (이전 메탈팔 · base 150,300 우하향) + SO-101 집게 ===== -->
         <!-- base -->
         <rect x="112" y="300" width="76" height="210" rx="14" fill="url(#metal2)" style="stroke:var(--line)"/>
         <rect x="124" y="316" width="52" height="34" rx="8" fill="#000" opacity=".08"/>
@@ -328,12 +373,18 @@ a{color:inherit;text-decoration:none}
             <rect x="14" y="-7" width="92" height="6" rx="3" fill="#fff" opacity=".35"/>
             <g id="wrist" data-joint transform="translate(120,0) rotate(22)">
               <circle r="15" fill="url(#metal)" style="stroke:var(--line)"/>
-              <!-- effector -->
+              <!-- effector + SO-101 집게(흰 고정조 + 검은 이동조, 테이퍼 핑거) -->
               <g id="effector" data-joint transform="translate(0,0)">
-                <rect x="-12" y="-4" width="26" height="26" rx="6" fill="url(#metal2)" style="stroke:var(--line)"/>
-                <g id="fingerL" data-joint transform="translate(0,-11)"><rect x="10" y="-4" width="9" height="34" rx="4" fill="#eef2f8"/></g>
-                <g id="fingerR" data-joint transform="translate(0,11)"><rect x="10" y="-4" width="9" height="34" rx="4" fill="#eef2f8"/></g>
-                <circle cx="4" cy="9" r="4" style="fill:var(--terra)"/>
+                <rect x="-12" y="-6" width="30" height="30" rx="7" fill="url(#metal2)" style="stroke:var(--line)"/>
+                <g id="fingerL" data-joint transform="translate(14,-9)">
+                  <path d="M-2 -3 L34 -1.5 L50 2 L34 5.5 L-2 6 Z" fill="#eef2f8" style="stroke:#c4ccd8"/>
+                  <g fill="#c9d2de"><circle cx="9" cy="1.6" r="1.2"/><circle cx="19" cy="1.6" r="1.2"/><circle cx="29" cy="1.6" r="1.2"/></g>
+                </g>
+                <g id="fingerR" data-joint transform="translate(14,9)">
+                  <path d="M-2 3 L32 1.5 L48 -3 L32 -6 L-2 -6 Z" fill="url(#soK2)" style="stroke:var(--line)"/>
+                  <g fill="#0a0c11" opacity=".8"><circle cx="9" cy="-1.6" r="1.1"/><circle cx="19" cy="-1.6" r="1.1"/><circle cx="29" cy="-1.6" r="1.1"/></g>
+                </g>
+                <circle cx="2" cy="0" r="4" style="fill:var(--terra)"/>
               </g>
             </g>
           </g>
@@ -373,92 +424,41 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
-<!-- ========================= METRICS ========================= -->
-<section class="metrics" id="metrics">
-  <div style="max-width:none">
-    <p class="eyebrow up">지금까지의 성과</p>
-    <h2 class="sec-title up">숫자로 보는 진행 상황</h2>
-  </div>
-  <div class="mgrid">
-    <div class="mcard hl up">
-      <div class="cap"><span class="led g"></span>1단계</div>
-      <div class="val"><span class="num" data-count="100" data-dec="0">0</span><span class="unit">%</span></div>
-      <div class="foot">물건 집어 옮기기 · 가상 성공률</div>
+<!-- ========================= 성과 지표 · 야간 파이프라인 (오버뷰 정제형) ========================= -->
+<div class="bmc-home">
+  <section class="bmc-blk" id="metrics">
+    <div class="sechead up">
+      <span class="idx">03 / TELEMETRY</span>
+      <h2>숫자로 보는 진행 상황</h2>
+      <p>실측 숫자 — 가상 시뮬레이션 롤아웃 기준.</p>
     </div>
-    <div class="mcard up">
-      <div class="cap"><span class="led a"></span>2단계 (진행 중)</div>
-      <div class="val"><span class="num" data-count="92.5" data-dec="1">0</span><span class="unit">%</span></div>
-      <div class="foot">리셋 버튼 누르기 · 4-seed 평균</div>
+    <div class="bmc-metrics">
+      <div class="gcard up" data-g="100" data-col="grn"><div class="gwrap"></div><div class="cap">1단계 성공률<span>PICK &amp; PLACE</span></div></div>
+      <div class="gcard up" data-g="92.5" data-col="amb"><div class="gwrap"></div><div class="cap">2단계 성공률<span>S1 · RESET BUTTON</span></div></div>
+      <div class="gcard up" data-g="63" data-col="cyn"><div class="gwrap"></div><div class="cap">일정 진척<span>TO 2026-09-30</span></div></div>
+      <div class="gcard up" data-g="90" data-col="grn" data-manual="D-55"><div class="gwrap"></div><div class="cap">시연까지<span>D-DAY COUNTDOWN</span></div></div>
     </div>
-    <div class="mcard up">
-      <div class="cap"><span class="led r"></span>시연까지</div>
-      <div class="val">D-<span class="num" data-count="55" data-dec="0">0</span></div>
-      <div class="foot">목표일 2026 · 09 · 30</div>
-    </div>
-    <div class="mcard up">
-      <div class="cap"><span class="led g"></span>전체 일정</div>
-      <div class="val"><span class="num" data-count="63" data-dec="0">0</span><span class="unit">%</span></div>
-      <div class="foot">3단계 로드맵 진척도</div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- ========================= PIPELINE ========================= -->
-<section class="pipeline" id="pipeline">
-  <p class="eyebrow up">밤마다 스스로 도는 고리</p>
-  <h2 class="sec-title up">사람이 자는 동안에도, 로봇은 자랍니다.</h2>
-  <p class="sec-sub up">데이터를 <b>모으고 → 배우고 → 시험하고 → 다시 반복</b>합니다.
-    이 고리가 매일 밤 한 바퀴씩 돌며, 어제보다 조금 더 잘하는 로봇을 만듭니다.</p>
-
-  <div class="pipewrap up">
-    <svg class="pipesvg" viewBox="0 0 800 250" id="pipe" role="img" aria-label="수집·학습·측정·반복이 순환하는 자동 파이프라인">
-      <defs>
-        <path id="loop" d="M120 96 H680 C742 96 762 118 762 138 C762 170 726 186 680 186 H120 C58 186 38 164 38 142 C38 116 60 96 120 96 Z" fill="none"/>
-        <marker id="chk" markerWidth="10" markerHeight="10"></marker>
-      </defs>
-      <!-- track -->
-      <use href="#loop" style="stroke:var(--line)" stroke-width="14" stroke-linecap="round"/>
-      <use href="#loop" style="stroke:color-mix(in srgb,var(--terra) 55%,transparent)" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round"/>
-
-      <!-- stations -->
-      <g font-family="var(--sans)" text-anchor="middle">
-        <g class="station" data-st="0">
-          <circle cx="120" cy="96" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
-          <text x="120" y="101" font-size="20">📥</text>
-          <text x="120" y="60" font-size="15" style="fill:var(--ink)" font-weight="700">수집</text>
-        </g>
-        <g class="station" data-st="1">
-          <circle cx="400" cy="96" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
-          <text x="400" y="101" font-size="20">🧠</text>
-          <text x="400" y="60" font-size="15" style="fill:var(--ink)" font-weight="700">학습</text>
-        </g>
-        <g class="station" data-st="2">
-          <circle cx="680" cy="96" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
-          <text x="680" y="101" font-size="20">📊</text>
-          <text x="680" y="60" font-size="15" style="fill:var(--ink)" font-weight="700">측정</text>
-        </g>
-        <g class="station" data-st="3">
-          <circle cx="400" cy="186" r="30" style="fill:var(--paper);stroke:var(--line)" stroke-width="2"/>
-          <text x="400" y="192" font-size="20">🔁</text>
-          <text x="400" y="230" font-size="15" style="fill:var(--ink)" font-weight="700">반복</text>
-        </g>
-      </g>
-
-      <!-- flowing green checks -->
-      <g id="tokens">
-        <circle r="9" style="fill:var(--green)"><animateMotion dur="9s" repeatCount="indefinite" rotate="0"><mpath href="#loop"/></animateMotion></circle>
-        <path d="M-4 0 l3 3 l6 -7" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,0)"><animateMotion dur="9s" repeatCount="indefinite"><mpath href="#loop"/></animateMotion></path>
-        <circle r="9" style="fill:var(--amber)"><animateMotion dur="9s" begin="-3s" repeatCount="indefinite"><mpath href="#loop"/></animateMotion></circle>
-        <circle r="9" style="fill:var(--green2)"><animateMotion dur="9s" begin="-6s" repeatCount="indefinite"><mpath href="#loop"/></animateMotion></circle>
-      </g>
-    </svg>
-    <div class="pipelegend">
-      <span><span class="led g"></span>정상 · 통과</span>
-      <span><span class="led a"></span>학습 중 · 주의</span>
-      <span style="font-family:var(--serif);font-style:italic">최근 완주: 2026-08-06 · S1 epoch 29 · 92.5%</span>
+  <section class="bmc-blk" id="pipeline">
+    <div class="sechead up">
+      <span class="idx">04 / AUTONOMOUS LOOP</span>
+      <h2>사람이 자는 동안에도, 로봇은 자랍니다.</h2>
+      <p>사람이 자는 동안 파이프라인이 돌아갑니다 — 수집 → 학습 → 측정 → 반복.</p>
     </div>
-  </div>
-</section>
+    <div class="bmc-pipe up">
+      <div class="lead"><i class="d"></i>NIGHTLY PIPELINE · 매 사이클마다 한 칸씩 자동 전진</div>
+      <div class="flow">
+        <div class="track"><div class="base"></div><div class="packet"></div></div>
+        <div class="node"><div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyn)" stroke-width="1.7"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></div><div class="nm">수집</div><div class="dsc">시뮬 데이터</div></div>
+        <div class="node"><div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyn)" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></div><div class="nm">학습</div><div class="dsc">ACT 정책</div></div>
+        <div class="node"><div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cyn)" stroke-width="1.7"><path d="M3 20h18M6 20V10M11 20V4M16 20v-8M21 20V8"/></svg></div><div class="nm">측정</div><div class="dsc">롤아웃 성공률</div></div>
+        <div class="node"><div class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="1.7"><path d="M3 12a9 9 0 1 1 3 6.7"/><path d="M3 21v-6h6"/></svg></div><div class="nm">반복</div><div class="dsc">다음 사이클</div></div>
+      </div>
+      <div class="loopback"><span class="arc"></span>측정 결과가 다음 수집으로 되먹임 — 자가 개선 루프<span class="arc"></span></div>
+    </div>
+  </section>
+</div>
 
 <!-- ========================= METRICS ========================= -->
 
@@ -479,9 +479,9 @@ a{color:inherit;text-decoration:none}
   function markLoaded(){ root.classList.add('loaded'); }
   if(document.readyState!=='loading') markLoaded(); else window.addEventListener('DOMContentLoaded',markLoaded);
 
-  // theme toggle
+  // theme toggle (topbar 제거된 임베드 버전에선 themeBtn 없음 — 가드)
   var tBtn=document.getElementById('themeBtn');
-  tBtn.addEventListener('click',function(){
+  if(tBtn) tBtn.addEventListener('click',function(){
     var cur=root.getAttribute('data-theme');
     var dark=cur? cur==='dark' : matchMedia('(prefers-color-scheme:dark)').matches;
     root.setAttribute('data-theme', dark?'light':'dark');
@@ -568,8 +568,20 @@ a{color:inherit;text-decoration:none}
   });
   robot.style.cursor='pointer';
 
-  // reduced motion: freeze SMIL pipeline
-  if(reduce){ var pipe=document.getElementById('pipe'); if(pipe&&pipe.pauseAnimations) pipe.pauseAnimations(); }
+  // ---- bmc 게이지(성과지표) 빌드 — 오버뷰 정제형 원형 게이지 ----
+  var colMap={grn:"var(--grn)",amb:"var(--amb)",cyn:"var(--cyn)"};
+  function buildGauge(card){
+    var wrap=card.querySelector(".gwrap"); if(!wrap)return;
+    var pct=parseFloat(card.getAttribute("data-g"))||0, col=colMap[card.getAttribute("data-col")]||"var(--grn)";
+    var manual=card.getAttribute("data-manual"), suffix=card.getAttribute("data-suffix"), r=54, C=2*Math.PI*r;
+    wrap.innerHTML='<svg width="132" height="132" viewBox="0 0 132 132"><circle cx="66" cy="66" r="'+r+'" fill="none" stroke="var(--line2)" stroke-width="9"/><circle class="garc" cx="66" cy="66" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'" style="filter:drop-shadow(0 0 6px '+col+')"/></svg><div class="ctr"><div class="big" style="color:'+col+'">'+(manual||"0")+'</div><div class="u">'+(suffix||(manual?"":"%"))+'</div></div>';
+    var arc=wrap.querySelector(".garc"), big=wrap.querySelector(".big"), off=C*(1-pct/100);
+    if(reduce){ arc.style.strokeDashoffset=off; if(!manual)big.textContent=pct%1?pct.toFixed(1):pct.toFixed(0); return; }
+    arc.style.transition="stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)";
+    requestAnimationFrame(function(){requestAnimationFrame(function(){arc.style.strokeDashoffset=off;});});
+    if(!manual){ var s=null; (function anim(now){ if(s==null)s=now; var p=Math.min((now-s)/1400,1),e=1-Math.pow(1-p,3); big.textContent=(pct*e).toFixed(pct%1?1:0); if(p<1)requestAnimationFrame(anim); else big.textContent=pct%1?pct.toFixed(1):pct.toFixed(0); })(); }
+  }
+  document.querySelectorAll('.gcard').forEach(buildGauge);
 })();
 </script>
 </body>
