@@ -117,7 +117,7 @@ a{color:inherit;text-decoration:none}
 .eyebrow{display:inline-flex; align-items:center; gap:10px; font-family:var(--serif); font-style:italic; color:var(--terra); font-size:15px; letter-spacing:.04em}
 .eyebrow::before{content:""; width:34px; height:1px; background:var(--terra)}
 .sec-title{font-family:var(--myeong); font-weight:800; font-size:clamp(28px,4.4vw,52px); letter-spacing:-.01em; margin:.35em 0 .1em; line-height:1.1}
-.sec-sub{color:var(--ink2); max-width:52ch; font-size:clamp(15px,1.8vw,18px)}
+.sec-sub{color:var(--ink2); max-width:70ch; font-size:clamp(15px,1.8vw,18px); text-wrap:balance; word-break:keep-all}
 
 /* ---------- scrollytelling ---------- */
 .scrolly{position:relative; max-width:1200px; margin:40px auto 0; padding:0 clamp(16px,6vw,90px);
@@ -266,10 +266,10 @@ a{color:inherit;text-decoration:none}
 
 <!-- ========================= SCROLLYTELLING ========================= -->
 <div class="sec-head" id="roadmap">
-  <p class="eyebrow up">세 단계의 여정</p>
-  <h2 class="sec-title up">한 팔이, 세 가지 손동작을 배웁니다.</h2>
-  <p class="sec-sub up">왼쪽 로봇팔은 스크롤을 따라 <b>집기 → 버튼 누르기 → 케이블 분리</b>로 변신합니다.
-    오른쪽 글은 그 동작이 어떤 일인지 쉽게 풀어드립니다.</p>
+  <p class="eyebrow up">단계별 로드맵</p>
+  <h2 class="sec-title up">정비를 위한 움직임을, 세 단계로 익힙니다.</h2>
+  <p class="sec-sub up">스크롤을 내리면 로봇팔이 세 단계 동작을 차례로 재현합니다. <span style="white-space:nowrap"><b>기초 파지 → 리셋 버튼 → 케이블 분리</b></span>.
+    각 단계의 목표와 진행 상황을 함께 설명합니다.</p>
 </div>
 
 <div class="scrolly">
@@ -282,7 +282,7 @@ a{color:inherit;text-decoration:none}
         <div class="node" data-node="2" style="top:50%"></div>
         <div class="node" data-node="3" style="top:100%"></div>
       </div>
-      <div class="stage-chip" id="stageChip"><span class="tag">1단계</span> 물건 집어 옮기기</div>
+      <div class="stage-chip" id="stageChip"><span class="tag">1단계</span> 기초 파지</div>
 
       <svg class="robotsvg s1" id="robot" viewBox="0 0 600 700" role="img" aria-label="스크롤에 따라 동작이 바뀌는 로봇팔">
         <defs>
@@ -317,12 +317,11 @@ a{color:inherit;text-decoration:none}
         <!-- ===== SCENES ===== -->
         <!-- scene 1: pick & place cube -->
         <g class="scene scene-1">
-          <rect x="205" y="452" width="58" height="40" rx="5" fill="none" style="stroke:var(--green)" stroke-width="2.5" stroke-dasharray="6 6" opacity=".8"/>
-          <text x="234" y="446" text-anchor="middle" font-size="13" style="fill:var(--green)" font-family="var(--sans)">놓을 자리</text>
           <g id="cube">
             <rect x="345" y="404" width="48" height="48" rx="6" style="fill:var(--terra)"/>
             <rect x="345" y="404" width="48" height="16" rx="6" fill="#fff" opacity=".18"/>
           </g>
+          <text x="369" y="392" text-anchor="middle" font-size="13" style="fill:var(--green)" font-family="var(--sans)">집어 들기 ↑</text>
         </g>
 
         <!-- scene 2: PCB board + red button + green LED -->
@@ -398,18 +397,18 @@ a{color:inherit;text-decoration:none}
     <article class="step" data-stage="1">
       <div class="no">01</div>
       <span class="badge b-done">● 완료</span>
-      <h3>물건을 집어서<br>옮깁니다.</h3>
-      <p>가장 기본이 되는 손동작입니다. 눈으로 물건을 찾고, 손가락을 벌려 잡고, 정해진 자리에 살포시 내려놓습니다.</p>
-      <div class="kids">사람으로 치면 <b>블록을 집어 상자에 담는 놀이</b>예요. 로봇은 이걸 가상 세계에서 <b>수천 번</b> 반복해 완벽하게 익혔습니다.</div>
-      <div class="stat"><span class="big num b-done" data-count="100" data-dec="0">0</span><span class="lbl">가상 시험 성공률 (Pick &amp; Place)</span></div>
+      <h3>기초 파지 동작을<br>습득합니다.</h3>
+      <p>제어반 정비에 필요한 가장 기본적인 제어 능력입니다. 대상을 인식하고 집게를 정렬해 정확히 잡아 들어 올립니다.</p>
+      <div class="kids">대상을 정확히 잡아 들어 올리는 <b>파지</b> 과제입니다. 손끝 정렬·접근·파지의 기본기를 가상 환경에서 <b>수천 회</b> 반복해 확보했고, 이후 정밀 작업의 토대가 됩니다.</div>
+      <div class="stat"><span class="big num b-done" data-count="100" data-dec="0">0</span><span class="lbl">가상 시험 성공률 · 파지</span></div>
     </article>
 
     <article class="step" data-stage="2">
       <div class="no">02</div>
       <span class="badge b-live">● 진행 중</span>
       <h3>제어반의 리셋 버튼을<br>정확히 누릅니다.</h3>
-      <p>초록색 기판(PCB) 위의 작고 빨간 버튼을 손끝으로 누릅니다. 제대로 눌리면 옆의 초록 LED에 불이 들어옵니다 — 그게 성공 신호예요.</p>
-      <div class="kids">눌러야 할 버튼은 <b>손톱만 한 크기</b>. 조금만 빗나가도 실패라, 로봇은 지금도 밤마다 연습하며 <b>더 정확해지고</b> 있어요.</div>
+      <p>초록색 기판(PCB) 위의 작은 리셋 버튼을 손끝으로 누릅니다. 정상적으로 눌리면 옆의 초록 LED가 점등되어 성공을 확인합니다.</p>
+      <div class="kids">버튼 지름은 <b>수 mm</b> 수준으로, 미세한 오차도 실패로 이어집니다. <b>야간 자동 학습</b>으로 정확도를 지속적으로 높이고 있습니다.</div>
       <div class="stat"><span class="big num b-live" data-count="92.5" data-dec="1">0</span><span class="lbl">현재 가상 성공률 · 4개 조건 평균</span></div>
     </article>
 
@@ -417,8 +416,8 @@ a{color:inherit;text-decoration:none}
       <div class="no">03</div>
       <span class="badge b-next">● 예정</span>
       <h3>꽂혀 있는 케이블을<br>정확히 뽑습니다.</h3>
-      <p>포트에 꽂힌 RS232 통신 케이블을 분리(제거)하는, 가장 어려운 정밀 작업입니다. 허용 오차는 <b>0.5mm</b> — 머리카락 몇 가닥 두께죠.</p>
-      <div class="kids">손끝으로 정확히 집어 빼는 섬세한 작업이에요. <b>9월에 도전</b>하고 <b>10월에 실제 시연</b>을 목표로 합니다.</div>
+      <p>포트에 체결된 RS232 통신 케이블을 분리하는 고정밀 작업입니다. 허용 오차는 <b>0.5mm</b> 수준입니다.</p>
+      <div class="kids">케이블을 정밀하게 파지해 분리하는 고난도 과제입니다. <b>9월 착수</b>, <b>10월 실물 시연</b>을 목표로 합니다.</div>
       <div class="stat"><span class="big num b-next">±0.5<span style="font-size:.42em;color:var(--ink2)">mm</span></span><span class="lbl">요구 분리 정밀도</span></div>
     </article>
   </div>
@@ -433,7 +432,7 @@ a{color:inherit;text-decoration:none}
       <p>실측 숫자 — 가상 시뮬레이션 롤아웃 기준.</p>
     </div>
     <div class="bmc-metrics">
-      <div class="gcard up" data-g="100" data-col="grn"><div class="gwrap"></div><div class="cap">1단계 성공률<span>PICK &amp; PLACE</span></div></div>
+      <div class="gcard up" data-g="100" data-col="grn"><div class="gwrap"></div><div class="cap">1단계 성공률<span>GRASP &amp; LIFT</span></div></div>
       <div class="gcard up" data-g="92.5" data-col="amb"><div class="gwrap"></div><div class="cap">2단계 성공률<span>S1 · RESET BUTTON</span></div></div>
       <div class="gcard up" data-g="63" data-col="cyn"><div class="gwrap"></div><div class="cap">일정 진척<span>TO 2026-09-30</span></div></div>
       <div class="gcard up" data-g="90" data-col="grn" data-manual="D-55"><div class="gwrap"></div><div class="cap">시연까지<span>D-DAY COUNTDOWN</span></div></div>
@@ -443,8 +442,8 @@ a{color:inherit;text-decoration:none}
   <section class="bmc-blk" id="pipeline">
     <div class="sechead up">
       <span class="idx">04 / AUTONOMOUS LOOP</span>
-      <h2>사람이 자는 동안에도, 로봇은 자랍니다.</h2>
-      <p>사람이 자는 동안 파이프라인이 돌아갑니다 — 수집 → 학습 → 측정 → 반복.</p>
+      <h2>사람 개입 없이, 매일 밤 스스로 학습합니다.</h2>
+      <p>야간에 학습 파이프라인이 자동 실행됩니다 — 수집 → 학습 → 측정 → 반복.</p>
     </div>
     <div class="bmc-pipe up">
       <div class="lead"><i class="d"></i>NIGHTLY PIPELINE · 매 사이클마다 한 칸씩 자동 전진</div>
@@ -504,7 +503,7 @@ a{color:inherit;text-decoration:none}
       steps=[].slice.call(document.querySelectorAll('.step')),
       nodes=[].slice.call(document.querySelectorAll('.rail .node')),
       fill=document.getElementById('railFill'),
-      chipText=['1단계 · 물건 집어 옮기기','2단계 · 리셋 버튼 누르기','3단계 · 케이블 분리'],
+      chipText=['1단계 · 기초 파지','2단계 · 리셋 버튼 누르기','3단계 · 케이블 분리'],
       chipTag=['1단계','2단계','3단계'],
       cur=1;
   function setStage(i){
