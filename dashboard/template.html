@@ -1137,6 +1137,7 @@
       <a class="nav-item" data-route="tech" data-icon="bookOpen"> CoP 리뷰</a>
       <a class="nav-item" data-route="ops" data-icon="bot"> AI 자동화 운영</a>
       <a class="nav-item" data-route="apps" data-icon="calendar"> Phase 로드맵 <span class="count" id="cnt-apps">6</span></a>
+      <a class="nav-item" data-route="realtrack" data-icon="wrench"> 실기 트랙 <span class="count" id="cnt-realtrack">0</span></a>
       <a class="nav-item" data-route="playground" data-icon="bot"> 플레이그라운드</a>
     </div>
 
@@ -1147,7 +1148,6 @@
       <a class="nav-item" data-route="videos" data-icon="video"> 시뮬 영상 <span class="count" id="cnt-videos">0</span></a>
       <a class="nav-item" data-route="sim3d" data-icon="bot"> 3D 리플레이 <span class="count" id="cnt-sim3d">0</span></a>
       <a class="nav-item" data-route="results" data-icon="barChart"> 성과 지표</a>
-      <a class="nav-item" data-route="realtrack" data-icon="wrench"> 실기 트랙 <span class="count" id="cnt-realtrack">0</span></a>
       <a class="nav-item" data-route="daily" data-icon="activity"> 활동 타임라인 <span class="count" id="cnt-daily">0</span></a>
       <a class="nav-item" data-route="magazines" data-icon="clipboard"> 보고용 자료 <span class="count" id="cnt-magazines">0</span></a>
       <a class="nav-item" data-route="samples" data-icon="code"> 샘플 코드 상태 <span class="count" id="cnt-samples">0</span></a>
@@ -1475,6 +1475,33 @@
     </div>
 
     <!-- REALTRACK — 실기 트랙 (soarm_lerobot 미러, 매 빌드 pull) -->
+    <style>
+      .rt-status{display:flex;flex-wrap:wrap;gap:10px;margin:2px 0 22px}
+      .rt-status .chip{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;padding:8px 13px;border-radius:999px;border:1px solid var(--border);background:var(--bg-sub);color:var(--text-sub)}
+      .rt-status .chip .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+      .rt-status .chip.done .dot{background:#2ee6a0}
+      .rt-status .chip.now{color:var(--text);border-color:var(--accent)}
+      .rt-status .chip.now .dot{background:var(--accent);animation:bmcpulse 1.8s ease-in-out infinite}
+      .rt-status .chip.next .dot{background:var(--text-dim)}
+      @media(prefers-reduced-motion:reduce){.rt-status .chip.now .dot,.rt-step.now .tag .dot{animation:none}}
+      .rt-videos{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+      @media(max-width:720px){.rt-videos{grid-template-columns:1fr}}
+      .rt-videos figure{margin:0;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#000}
+      .rt-videos video{width:100%;display:block;aspect-ratio:4/3;background:#000}
+      .rt-videos figcaption{font-size:12px;color:var(--text-dim);padding:8px 12px;background:var(--bg-sub)}
+      .rt-plan{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px}
+      @media(max-width:820px){.rt-plan{grid-template-columns:1fr 1fr}}
+      @media(max-width:480px){.rt-plan{grid-template-columns:1fr}}
+      .rt-step{border:1px solid var(--border);border-radius:14px;background:var(--bg-sub);padding:16px}
+      .rt-step.now{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+      .rt-step .tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.3px;margin-bottom:9px}
+      .rt-step .tag .dot{width:8px;height:8px;border-radius:50%}
+      .rt-step.done .tag{color:#2ee6a0}.rt-step.done .tag .dot{background:#2ee6a0}
+      .rt-step.now .tag{color:var(--accent-strong)}.rt-step.now .tag .dot{background:var(--accent);animation:bmcpulse 1.8s ease-in-out infinite}
+      .rt-step.next .tag{color:var(--text-dim)}.rt-step.next .tag .dot{background:var(--text-dim)}
+      .rt-step h4{margin:0 0 6px;font-size:14.5px;font-weight:800}
+      .rt-step p{margin:0;font-size:12.5px;color:var(--text-sub);line-height:1.6}
+    </style>
     <div class="view hidden" id="view-realtrack">
       <div class="home-hero">
         <h1>실기 트랙 — S1 리셋버튼</h1>
@@ -4380,57 +4407,63 @@ function renderRealTrack() {
   const body = document.getElementById('rt-body');
   const cnt = document.getElementById('cnt-realtrack');
   const sub = document.getElementById('rt-sub');
-  if (cnt) cnt.textContent = rt.total_commits || 0;
+  if (cnt) { cnt.textContent = ''; cnt.style.display = 'none'; }
   if (!body) return;
   if (rt.missing || !rt.head) {
     body.innerHTML = `<div class="empty">실기 트랙 미러 없음 — <code>git clone ${escapeHtml(rt.url || '')}</code> 를 /Volumes/MARK_DATA/dev/soarm_lerobot 에 두면 다음 rebuild 부터 표시됩니다.</div>`;
     return;
   }
-  if (sub) sub.textContent = `${rt.machine || ''} · 최근 커밋 ${rt.last_commit_date || '?'} (${rt.head})` +
-    (rt.pulled_ok ? ' · pull 성공' : ' · ⚠ pull 실패(이전 상태 표시)');
+  const machName = String(rt.machine || 'omen').split(' — ')[0];
+  if (sub) sub.innerHTML = `<b>여기서 보는 것</b> — 실물 로봇으로 직접 배우는 트랙입니다. 지금 어디까지 왔고, 앞으로 어떻게 완성할지.`;
+
+  const activeDs = (rt.datasets || []).filter(d => !d.deprecated);
+  const epTotal = activeDs.reduce((a, d) => a + (d.episodes || 0), 0) || 10;
 
   const dsRows = (rt.datasets || []).map(d => `
-    <tr${d.deprecated ? ' style="opacity:.45"' : ''}>
-      <td><code>${escapeHtml(d.name)}</code>${d.deprecated ? ' <span style="font-size:10px">(보존용 — 카메라 라벨 뒤바뀜, 사용 금지)</span>' : ''}</td>
+    <tr${d.deprecated ? ' style="opacity:.4"' : ''}>
+      <td><code>${escapeHtml(d.name)}</code>${d.deprecated ? ' <span style="font-size:10px">(폐기 — 카메라 라벨 뒤바뀜)</span>' : ''}</td>
       <td>${d.episodes ?? '?'}ep</td><td>${(d.frames || 0).toLocaleString()}f</td><td>${d.fps ?? '?'}fps</td>
     </tr>`).join('');
   const polRows = (rt.policies || []).map(p => {
     const dead = p.behavior === 'act_s1';
-    return `<tr${dead ? ' style="opacity:.45"' : ''}>
-      <td><b>${escapeHtml(p.behavior)}</b>${dead ? ' <span style="font-size:10px">(카메라 라벨 교정 전 학습 — 롤아웃 금지)</span>' : ''}</td>
+    return `<tr${dead ? ' style="opacity:.4"' : ''}>
+      <td><b>${escapeHtml(p.behavior)}</b>${dead ? ' <span style="font-size:10px">(카메라 라벨 교정 전 — 롤아웃 금지)</span>' : ''}</td>
       <td>${escapeHtml(String(p.policy).toUpperCase())}</td><td>${(p.steps || 0).toLocaleString()} steps</td>
       <td><code style="font-size:10.5px">${escapeHtml(p.dataset)}</code></td>
     </tr>`;
   }).join('');
-  const commitRows = (rt.commits || []).map(c => `
-    <div class="commit-line"><b>${escapeHtml(c.sha)}</b><span style="color:var(--text-dim);margin:0 8px">${escapeHtml(c.date)}</span>${escapeHtml(c.msg)}</div>`).join('');
   const docLinks = (rt.docs || []).map(d =>
     `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener" style="display:block;font-size:12.5px;margin:3px 0"><code>${escapeHtml(d.path)}</code> ↗</a>`).join('');
 
   body.innerHTML = `
-    <div class="kpi-row kpi-row-4">
-      <div class="kpi"><div class="l">작업</div><div class="n" style="font-size:16px">${escapeHtml(rt.task || '')}</div>
-        <div class="d">성공판정 = P1 녹색 LED (OpenCV 규칙 기반)</div></div>
-      <div class="kpi"><div class="l">데이터</div><div class="n">${(rt.datasets || []).filter(d => !d.deprecated).reduce((a, d) => a + (d.episodes || 0), 0)}ep</div>
-        <div class="d">목표 ~80ep · top+closeup 640×480@30</div></div>
-      <div class="kpi"><div class="l">정책</div><div class="n">${(rt.policies || []).filter(p => p.behavior !== 'act_s1').length}</div>
-        <div class="d">ACT 20k steps · 롤아웃 성공률 미측정</div></div>
-      <div class="kpi is-accent"><div class="l">시뮬 정렬 (Phase 3)</div><div class="n" style="font-size:16px">같은 작업 · 같은 스키마</div>
-        <div class="d">시뮬이 메울 것: 합성 데이터(존 다양화) + LED 판정 검증</div></div>
+    <div class="rt-status">
+      <span class="chip done"><span class="dot"></span>실기 시연 데이터 수집 완료</span>
+      <span class="chip done"><span class="dot"></span>1차 정책 학습 완료</span>
+      <span class="chip now"><span class="dot"></span>시뮬 정렬 진행 중</span>
+      <span class="chip next"><span class="dot"></span>실물 롤아웃 검증 예정</span>
     </div>
 
-    <div class="section-head"><h3>데이터셋</h3><div class="right"><a href="${escapeHtml(rt.url)}" target="_blank" rel="noopener">github ↗</a></div></div>
-    <table class="r4-table"><thead><tr><th>repo_id</th><th>에피소드</th><th>프레임</th><th>fps</th></tr></thead><tbody>${dsRows}</tbody></table>
+    <div class="section-head"><h3>실제 로봇은 이렇게 움직입니다</h3><div class="right">위 · 근접 2뷰 · 실기 녹화</div></div>
+    <div class="rt-videos">
+      <figure><video autoplay muted loop playsinline controls preload="auto" src="${copStatic('assets/reports/realtrack/rt_top.mp4')}"></video><figcaption>위에서 본 시점 (top)</figcaption></figure>
+      <figure><video autoplay muted loop playsinline controls preload="auto" src="${copStatic('assets/reports/realtrack/rt_closeup.mp4')}"></video><figcaption>가까이 본 시점 (closeup)</figcaption></figure>
+    </div>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:8px">실물 SO-ARM 로봇이 제어반의 리셋 버튼을 누르는 실제 시연 영상입니다. (${epTotal}회 녹화 중 앞부분 · 웹용 경량본)</p>
 
-    <div class="section-head"><h3>학습된 정책</h3><div class="right">training_runs/</div></div>
-    <table class="r4-table"><thead><tr><th>행동</th><th>정책</th><th>학습량</th><th>데이터셋</th></tr></thead><tbody>${polRows}</tbody></table>
+    <div class="section-head" style="margin-top:28px"><h3>어떻게 진행하나</h3><div class="right">실기 ↔ 시뮬 정렬로 완성</div></div>
+    <div class="rt-plan">
+      <div class="rt-step done"><div class="tag"><span class="dot"></span>1 · 완료</div><h4>실기 데이터 수집</h4><p>실물 로봇으로 리셋 버튼 누르기를 위·근접 2대 카메라로 녹화했습니다. (${epTotal}회 시연)</p></div>
+      <div class="rt-step done"><div class="tag"><span class="dot"></span>2 · 완료</div><h4>정책 학습</h4><p>수집한 시연 영상으로 ACT 모델을 학습했습니다. 로봇이 카메라만 보고 버튼을 찾아 누르도록.</p></div>
+      <div class="rt-step now"><div class="tag"><span class="dot"></span>3 · 진행 중</div><h4>시뮬 정렬</h4><p>가상 시뮬을 실기와 같은 작업·카메라로 맞추고, 버튼 위치·조명을 다양하게 바꾼 합성 데이터로 보강합니다.</p></div>
+      <div class="rt-step next"><div class="tag"><span class="dot"></span>4 · 예정</div><h4>실기 검증 → 시연</h4><p>학습한 정책을 실물 로봇에서 실행하고, 녹색 LED 자동판정으로 성공률을 측정합니다. 10월 실물 시연 목표.</p></div>
+    </div>
 
-    <details class="video-archive" style="margin-top:18px">
-      <summary><b>전문 데이터</b> — 작업 기록 ${(rt.commits || []).length}건 · 기술 문서 (펼치기)</summary>
-      <div class="section-head"><h3>최근 커밋</h3><div class="right">자동 갱신 · ${escapeHtml(rt.checked_at || '')}</div></div>
-      <div class="tl-detail" style="max-height:420px;overflow-y:auto">${commitRows}</div>
-      <div class="section-head"><h3>문서</h3><div class="right">환경·spec·플랜</div></div>
-      <div>${docLinks}</div>
+    <details class="video-archive" style="margin-top:24px">
+      <summary><b>상세 데이터</b> — 데이터셋 · 학습 정책 · 문서 (펼치기)</summary>
+      <table class="r4-table" style="margin-top:10px"><thead><tr><th>데이터셋 (repo_id)</th><th>에피소드</th><th>프레임</th><th>fps</th></tr></thead><tbody>${dsRows}</tbody></table>
+      <table class="r4-table" style="margin-top:10px"><thead><tr><th>학습 정책</th><th>구조</th><th>학습량</th><th>데이터셋</th></tr></thead><tbody>${polRows}</tbody></table>
+      <div style="margin-top:12px">${docLinks}</div>
+      <div style="font-size:11.5px;color:var(--text-dim);margin-top:12px">출처: <a href="${escapeHtml(rt.url)}" target="_blank" rel="noopener">soarm_lerobot ↗</a> · ${escapeHtml(machName)} 미러 자동 동기화</div>
     </details>`;
 }
 
