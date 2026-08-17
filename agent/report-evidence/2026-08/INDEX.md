@@ -2,6 +2,11 @@
 
 > 8월 보고서 매핑: Phase 2 (Sim2Real) hold 지속 + Phase 3(PCB) 진입 검토.
 
+## 2026-08-17
+- Phase 3 W2 — **S1 hold 유지 + 무결성 감사(0.925 불변) + 23:30 렌더 3종 실기 실행 PASS**: `agent/research-log/2026-08-17.md`, `research/simulation/2026-08-17_phase3-w2-s1-hold-integrity-audit.md` → 8월 보고서 [ACT 학습 / Phase 3 PCB(S1) 안정성] 섹션.
+  - **무결성(비파괴)**: 운영 `rollout_summary_s1.json` md5 **fbeef25775e5846ba2e3ce887afd1929** 8/8~8/16 대비 불변 · `cop_dataset_target`=`data/episodes_s1`(`.next` 없음) · train_act proc 없음 → 회귀/오염 0. 4-seed 0.925(37/40) 유지.
+  - 23:30 sim-test 실행: pcb_reset self-check 4/4(PASS) · camera 30프레임×2(PASS) · 6dof 2501프레임 6관절 → mp4(PASS). md5 BEFORE=AFTER 불변 → 회귀 아님. data_collector SKIP(hold 오염 방지). MuJoCo 3.8.0 렌더 크래시 0.
+
 ## 2026-08-01
 - Phase 2 W2 — **sim 레버 결착 후 hold + 무결성 전수 감사 + 23:30 우선순위 5종 회귀**: `agent/research-log/2026-08-01.md`, `research/simulation/2026-08-01_phase2-w2-sim-lever-hold-integrity-audit.md` → 8월 보고서 [Sim2Real 안정성 / 파이프라인 견고성] 섹션.
   - 23:30 5종 독립 PASS: 6dof 2501프레임 · camera 30프레임×2 · pick min_approach **0.3228327114m** 결정론 · joint_angle 최대오차 **0.0244°<1°** · collector 2/2 yield100% lift **43.4/41.9mm**(격리 루트, 운영 무접촉).
