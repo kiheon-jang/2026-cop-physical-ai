@@ -64,3 +64,8 @@
 - Phase 3 W3 — **S1 hold 유지 + 무결성 감사 재확인(0.925 불변) + 23:30 렌더 헬스체크 3종 PASS**: `agent/research-log/2026-08-14.md`, `research/simulation/2026-08-14_phase3-w3-s1-hold-integrity-audit.md` → 8월 보고서 [ACT 학습 / Phase 3 PCB(S1) 안정성] 섹션.
   - **무결성(비파괴)**: 운영 `rollout_summary_s1.json` md5 **fbeef25775e5846ba2e3ce887afd1929** 8/8~8/13 대비 불변 · `cop_dataset_target`=`data/episodes_s1` · train_act proc 없음 · 마커 3자 정합(`.next` 없음) → 회귀/오염 0. 4-seed 0.925(37/40) 유지.
   - 23:30 sim-test 헬스체크: 6dof 2501프레임(3/3) · camera 30프레임×2 동기(2/2) · pick min_approach **0.3228327114m**(open-loop 레거시 결정론적 실패, 회귀 아님). MuJoCo 3.8.0 렌더 파이프라인 크래시 0. sim_data_collector SKIP(hold 오염 방지).
+
+## 2026-08-18
+- Phase 3 W2 (dated 종료일) — **S1 hold 유지 + 무결성 전수 감사(0.925 불변) + 23:30 렌더 헬스체크 3종 PASS**: `agent/research-log/2026-08-18.md`, `research/simulation/2026-08-18_phase3-w2-s1-hold-integrity-audit.md` → 8월 보고서 [ACT 학습 / Phase 3 PCB(S1) 안정성] 섹션.
+  - **무결성(비파괴)**: 운영 `rollout_summary_s1.json` md5 **fbeef25775e5846ba2e3ce887afd1929** 8/8~8/17 대비 불변 · `cop_dataset_target`=`data/episodes_s1`(`.next` 없음) · train_act proc 없음 · 마커 3자 정합 · datasets episodes_s1/floor/cl 불변 → 회귀/오염 0. 4-seed 0.925(37/40) 유지.
+  - 23:30 sim-test 헬스체크: pcb_reset self-check 4/4 PASS · 6dof 2501프레임 · pick min_approach 0.3228327114m(open-loop 레거시 결정론적 실패, 회귀 아님) · camera_verification no-op 스킵. 렌더 3종 실행 전후 md5 불변(부작용 0). MuJoCo 3.8.0 크래시 0.
