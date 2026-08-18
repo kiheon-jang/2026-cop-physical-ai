@@ -1,0 +1,1243 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>왜 피지컬 AI인가</title>
+<style>
+:root{
+  --bg:#05070e; --bg2:#080b15; --paper:#0b101c; --panel:#0e1626;
+  --ink:#e8eefb; --ink2:#8ea0bd; --mut2:#5f6f8c;
+  --line:rgba(150,175,220,.16); --line2:rgba(150,175,220,.09);
+  --cy:#39c6f0; --cy2:#5fd7f5; --gr:#2ee6a0; --am:#f8b64c; --rd:#ff6b6b;
+  --serif:"Nanum Myeongjo","AppleMyungjo",Georgia,serif;
+  --sans:-apple-system,"Pretendard","Apple SD Gothic Neo",system-ui,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,monospace;
+  --wrap:1120px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--sans);
+  font-size:16px; line-height:1.78; letter-spacing:-.01em;
+  word-break:keep-all; overflow-wrap:break-word;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(1100px 620px at 78% -8%, rgba(57,198,240,.09), transparent 62%),
+    radial-gradient(900px 520px at 4% 12%, rgba(46,230,160,.045), transparent 60%);
+}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 28px;position:relative;z-index:1}
+
+/* ── chrome ───────────────────────────────── */
+#prog{position:fixed;top:0;left:0;height:2px;width:0;z-index:60;
+  background:linear-gradient(90deg,var(--cy),var(--cy2));box-shadow:0 0 12px rgba(57,198,240,.5)}
+.badge{position:fixed;top:14px;right:16px;z-index:60;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;
+  color:var(--ink2);background:rgba(11,16,28,.72);
+  border:1px solid var(--line);border-radius:999px;padding:5px 11px;
+  backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+
+/* ── type ─────────────────────────────────── */
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.eyebrow i{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--cy);letter-spacing:.06em}
+.eyebrow s{width:34px;height:1px;background:var(--cy);opacity:.75;text-decoration:none;display:block}
+.eyebrow em{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink2);letter-spacing:.04em}
+
+h1{font-family:var(--serif);font-weight:400;line-height:1.16;letter-spacing:-.02em;
+  font-size:clamp(32px,6.6vw,64px);text-wrap:balance}
+.q{font-family:var(--serif);font-weight:400;line-height:1.32;letter-spacing:-.015em;
+  font-size:clamp(28px,3.7vw,44px);text-wrap:balance;color:var(--ink)}
+.q b{font-weight:400;color:var(--cy2)}
+h3{font-family:var(--serif);font-weight:400;font-size:clamp(20px,2.1vw,26px);line-height:1.4;text-wrap:balance}
+p{color:var(--ink2);text-wrap:pretty}
+.lede{font-size:clamp(16px,1.35vw,18.5px);color:#b9c8e2;max-width:76ch;line-height:1.85}
+.body-txt p{max-width:78ch;margin-bottom:15px;font-size:15.6px;line-height:1.92}
+.body-txt p:last-child{margin-bottom:0}
+.num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ── section frame ────────────────────────── */
+section.sec{padding:clamp(76px,9vw,132px) 0;border-top:1px solid var(--line2);position:relative}
+section.sec:nth-child(even){background:linear-gradient(180deg,var(--bg2),transparent 70%)}
+.blk{margin-top:clamp(34px,4vw,54px)}
+.tag{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.tag u{text-decoration:none;font-family:var(--mono);font-size:10px;letter-spacing:.18em;
+  color:var(--mut2);text-transform:uppercase}
+.tag i{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink2)}
+.tag s{flex:1;height:1px;background:var(--line2);text-decoration:none;display:block}
+.tag.pos i{color:var(--gr)} .tag.neg i{color:var(--am)}
+
+/* ── cards ────────────────────────────────── */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:22px 22px 20px;position:relative;overflow:hidden}
+.card::after{content:"";position:absolute;left:0;top:0;width:2px;height:100%;background:var(--cy);opacity:.45}
+.card.pos::after{background:var(--gr)} .card.neg::after{background:var(--am)}
+.card.flat::after{display:none}
+.card h4{font-family:var(--sans);font-weight:600;font-size:15.5px;color:var(--ink);
+  margin-bottom:9px;letter-spacing:-.01em;line-height:1.5}
+.card p{font-size:14.6px;line-height:1.8}
+.card .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--mut2);
+  display:block;margin-bottom:11px}
+.src{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing:.02em;
+  margin-top:13px;padding-top:11px;border-top:1px dashed var(--line2);display:block}
+.big{font-family:var(--mono);font-size:clamp(28px,3.4vw,40px);color:var(--cy2);
+  line-height:1;letter-spacing:-.02em;display:block;margin:4px 0 8px}
+.big.g{color:var(--gr)} .big.a{color:var(--am)} .big.r{color:var(--rd)}
+.unit{font-size:.5em;color:var(--ink2);letter-spacing:0}
+
+.note{border:1px solid rgba(248,182,76,.28);background:rgba(248,182,76,.05);
+  border-radius:12px;padding:20px 22px}
+.note h4{color:var(--am);font-size:14.5px;font-weight:600;margin-bottom:8px}
+.note p{color:#cfc0a4;font-size:14.6px}
+.note.cy{border-color:rgba(57,198,240,.26);background:rgba(57,198,240,.05)}
+.note.cy h4{color:var(--cy2)} .note.cy p{color:#a8c6dc}
+
+ul.li{list-style:none}
+ul.li li{position:relative;padding-left:17px;font-size:14.6px;color:var(--ink2);
+  line-height:1.78;margin-bottom:8px}
+ul.li li::before{content:"";position:absolute;left:2px;top:11px;width:5px;height:5px;
+  border-radius:50%;background:var(--cy);opacity:.7}
+ul.li li:last-child{margin-bottom:0}
+ul.li.g li::before{background:var(--gr)} ul.li.a li::before{background:var(--am)}
+ul.li b{color:var(--ink);font-weight:600}
+
+/* ── viz ──────────────────────────────────── */
+.viz{margin:clamp(30px,4vw,48px) 0;background:var(--paper);border:1px solid var(--line);
+  border-radius:14px;padding:clamp(20px,2.6vw,32px)}
+.viz svg{display:block;width:100%;height:auto;overflow:visible}
+.vcap{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing:.03em;
+  margin-top:16px;padding-top:14px;border-top:1px solid var(--line2)}
+text{font-family:var(--sans);fill:var(--ink2)}
+text.t-mono{font-family:var(--mono)}
+text.t-ink{fill:var(--ink)}
+text.t-mut{fill:var(--mut2)}
+text.t-cy{fill:var(--cy2)} text.t-gr{fill:var(--gr)} text.t-am{fill:var(--am)}
+
+/* animation primitives */
+.rv{opacity:0;transform:translateY(14px);
+  transition:opacity .75s cubic-bezier(.2,.7,.25,1) var(--d,0ms),transform .75s cubic-bezier(.2,.7,.25,1) var(--d,0ms)}
+.rv.in{opacity:1;transform:none}
+.bar{transform:scaleX(0);transform-origin:left center;transform-box:fill-box;
+  transition:transform 1.15s cubic-bezier(.18,.8,.24,1) var(--d,0ms)}
+.viz.in .bar{transform:scaleX(1)}
+.barv{transform:scaleY(0);transform-origin:bottom center;transform-box:fill-box;
+  transition:transform 1.1s cubic-bezier(.18,.8,.24,1) var(--d,0ms)}
+.viz.in .barv{transform:scaleY(1)}
+.draw{stroke-dasharray:var(--len,1400);stroke-dashoffset:var(--len,1400);
+  transition:stroke-dashoffset 1.5s cubic-bezier(.3,.7,.3,1) var(--d,0ms)}
+.viz.in .draw{stroke-dashoffset:0}
+.pop{opacity:0;transform:scale(.6);transform-origin:center;transform-box:fill-box;
+  transition:opacity .5s var(--d,0ms),transform .5s cubic-bezier(.2,1.5,.4,1) var(--d,0ms)}
+.viz.in .pop{opacity:1;transform:scale(1)}
+.fade{opacity:0;transition:opacity .7s var(--d,0ms)}
+.viz.in .fade{opacity:1}
+.donutval{stroke-dasharray:565.5;stroke-dashoffset:565.5;
+  transition:stroke-dashoffset 1.6s cubic-bezier(.25,.8,.3,1)}
+.viz.in .donutval{stroke-dashoffset:294.1}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 26s linear infinite;transform-origin:280px 205px}
+.spin-r{animation:spin 44s linear infinite reverse;transform-origin:280px 205px}
+
+/* ── hero ─────────────────────────────────── */
+.hero{padding:clamp(96px,13vw,180px) 0 clamp(60px,7vw,96px)}
+.hero .sub{margin-top:26px;font-size:clamp(15px,1.5vw,18px);color:var(--ink2);max-width:60ch;line-height:1.85}
+.spine{margin-top:clamp(46px,5.5vw,72px);border-top:1px solid var(--line2)}
+.spine a{display:grid;grid-template-columns:56px 1fr;gap:18px;align-items:baseline;
+  padding:15px 4px;border-bottom:1px solid var(--line2);text-decoration:none;
+  transition:background .25s,padding-left .25s}
+.spine a:hover{background:rgba(57,198,240,.045);padding-left:12px}
+.spine a i{font-family:var(--mono);font-size:11px;color:var(--mut2);font-style:normal;letter-spacing:.08em}
+.spine a span{font-family:var(--serif);font-size:clamp(15px,1.6vw,18.5px);color:var(--ink);line-height:1.5}
+.spine a em{display:block;font-family:var(--sans);font-style:normal;font-size:13px;color:var(--mut2);margin-top:3px}
+
+/* ── §4 debate ────────────────────────────── */
+.debate{position:relative;display:grid;grid-template-columns:1fr 1px 1fr;gap:0;margin-top:34px}
+.debate .rule{background:linear-gradient(180deg,transparent,var(--line),var(--line),transparent)}
+.debate .col{padding:0 clamp(12px,2vw,30px)}
+.debate .col:first-child{padding-left:0} .debate .col:last-child{padding-right:0}
+.debate .col>*{margin-bottom:14px} .debate .col>*:last-child{margin-bottom:0}
+.verdict{margin:34px auto 0;max-width:760px;text-align:center;position:relative;
+  border:1px solid rgba(57,198,240,.3);background:rgba(57,198,240,.055);
+  border-radius:12px;padding:24px 28px}
+.verdict::before{content:"";position:absolute;left:50%;top:-34px;width:1px;height:34px;background:var(--line)}
+.verdict p{font-family:var(--serif);font-size:clamp(17px,2vw,23px);color:var(--ink);line-height:1.55}
+.verdict u{display:block;text-decoration:none;font-family:var(--mono);font-size:10px;
+  letter-spacing:.18em;color:var(--cy);margin-bottom:12px}
+
+/* ── §8 ───────────────────────────────────── */
+.lead-card{border:1px solid rgba(57,198,240,.3);background:
+  linear-gradient(180deg,rgba(57,198,240,.07),rgba(57,198,240,.015));
+  border-radius:16px;padding:clamp(24px,3vw,38px)}
+.lead-card .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--cy);margin-bottom:12px}
+.lead-card h3{margin-bottom:18px}
+.sub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
+.sub-grid>div{border-top:1px solid var(--line);padding-top:15px}
+.sub-grid h5{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--cy2);
+  letter-spacing:.02em;margin-bottom:11px}
+.tl{position:relative;padding-left:26px}
+.tl::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:1px;
+  background:linear-gradient(180deg,var(--cy),rgba(57,198,240,.15))}
+.tl li{position:relative;list-style:none;margin-bottom:20px}
+.tl li:last-child{margin-bottom:0}
+.tl li::before{content:"";position:absolute;left:-24px;top:8px;width:11px;height:11px;
+  border-radius:50%;background:var(--bg);border:2px solid var(--cy)}
+.tl li:first-child::before{background:var(--cy);box-shadow:0 0 0 4px rgba(57,198,240,.14)}
+.tl b{display:block;font-size:14.5px;color:var(--ink);font-weight:600;margin-bottom:3px}
+.tl span{font-size:13.5px;color:var(--mut2);line-height:1.7}
+.ways{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.way{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}
+.way .n{font-family:var(--mono);font-size:10.5px;color:var(--mut2);letter-spacing:.14em;display:block;margin-bottom:9px}
+.way h4{font-size:14.5px;font-weight:600;margin-bottom:8px;color:var(--ink)}
+.way p{font-size:13.6px;line-height:1.75}
+.way dl{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line2);font-size:12.6px;line-height:1.7}
+.way dt{color:var(--gr);display:inline;font-family:var(--mono);font-size:10px;letter-spacing:.1em}
+.way dd{display:inline;color:var(--ink2)}
+.way dl div+div{margin-top:6px}
+.way dl div{display:block}
+.way .lim dt{color:var(--am)}
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;background:var(--panel)}
+.rules div{padding:22px 20px;border-right:1px solid var(--line2)}
+.rules div:last-child{border-right:0}
+.rules h5{font-family:var(--serif);font-weight:400;font-size:16.5px;color:var(--cy2);margin-bottom:9px}
+.rules p{font-size:13.4px;line-height:1.72}
+
+/* ── §10 checklist ────────────────────────── */
+.chk{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.chk section{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:24px}
+.chk section.ok{border-color:rgba(46,230,160,.25)}
+.chk section.pend{border-color:rgba(248,182,76,.25)}
+.chk h4{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;
+  letter-spacing:.02em;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line2)}
+.chk .ok h4{color:var(--gr)} .chk .pend h4{color:var(--am)}
+.chk li{list-style:none;position:relative;padding-left:26px;font-size:14.4px;
+  color:var(--ink2);line-height:1.78;margin-bottom:14px}
+.chk li:last-child{margin-bottom:0}
+.chk li::before{position:absolute;left:0;top:0;font-family:var(--mono);font-size:13px}
+.chk .ok li::before{content:"✓";color:var(--gr)}
+.chk .pend li::before{content:"○";color:var(--am)}
+.closing{margin-top:clamp(44px,5vw,72px);border-top:1px solid var(--line);padding-top:clamp(36px,4vw,56px)}
+.closing p{font-family:var(--serif);font-size:clamp(19px,2.5vw,30px);line-height:1.6;
+  color:var(--ink);max-width:34ch;text-wrap:balance}
+footer{padding:64px 0 90px;border-top:1px solid var(--line2)}
+footer p{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing:.05em}
+
+@media(max-width:900px){
+  .g3,.ways,.sub-grid,.rules{grid-template-columns:1fr}
+  .g2,.chk{grid-template-columns:1fr}
+  .rules div{border-right:0;border-bottom:1px solid var(--line2)}
+  .rules div:last-child{border-bottom:0}
+  .debate{grid-template-columns:1fr}
+  .debate .rule{display:none}
+  .debate .col{padding:0}
+  .debate .col:first-child{margin-bottom:14px}
+  .verdict::before{display:none}
+  .wrap{padding:0 20px}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  .rv{opacity:1;transform:none;transition:none}
+  .bar,.barv,.pop{transform:none;opacity:1;transition:none}
+  .draw{stroke-dashoffset:0;transition:none}
+  .fade{opacity:1;transition:none}
+  .donutval{stroke-dashoffset:294.1;transition:none}
+  .spin,.spin-r{animation:none}
+}
+</style>
+
+<div id="prog"></div>
+<div class="badge">시안 A · 논증 구조</div>
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>Physical AI</i><s></s><em>CoP 과제 설명</em></div>
+    <h1 class="rv" style="--d:60ms">왜 피지컬 AI인가</h1>
+    <p class="sub rv" style="--d:140ms">
+      승강기 설비의 점검과 정비는 현장에서 사람이 직접 수행하는 물리 작업입니다. 상태를 읽는 기술은
+      원격 모니터링으로 확장돼 왔지만, 설비에 직접 손을 대는 조치는 여전히 현장에 남아 있습니다.
+      그 조치 영역에 학습 기반 로봇 기술이 왜 필요한지, 지금 진행 중인 검증이 어떤 의미를
+      갖는지, 그리고 그것이 우리 사업에 어떻게 이어지는지를 정리한 것입니다.
+    </p>
+    <nav class="spine rv" style="--d:220ms">
+      <a href="#s1"><i>01</i><span>지금 무슨 변화가 일어나고 있고, 왜 지금인가?<em>AI가 화면 밖으로 나오고 있다</em></span></a>
+      <a href="#s2"><i>02</i><span>왜 이것이 우리 산업과 직접 관련되는가?<em>현장 물리 작업이라는 조건</em></span></a>
+      <a href="#s3"><i>03</i><span>감지 기술이 발전한 뒤에도, 왜 현장 조치는 사람의 방문으로 남아 있는가?<em>비어 있는 쪽은 조치 계층</em></span></a>
+      <a href="#s4"><i>04</i><span>무엇이 달라졌기에 이번에는 가능하다고 보는가?<em>프로그래밍이 아니라 학습 — 긍정과 반대 근거 병기</em></span></a>
+      <a href="#s5"><i>05</i><span>이 검증을 어떤 구조로 수행하는가?<em>시뮬레이션·실물 병행 구조</em></span></a>
+      <a href="#s6"><i>06</i><span>단순 작업이 실제 정비 자동화와 어떤 관계인가?<em>왜 버튼 누르기인가</em></span></a>
+      <a href="#s7"><i>07</i><span>고정된 로봇팔의 학습이 현장 이동 로봇에 도움이 되는가?<em>이어지는 것과 새로 풀어야 하는 것</em></span></a>
+      <a href="#s8"><i>08</i><span>현장 작업을 학습 가능한 데이터로 남기려면 어떤 방식이 맞는가?<em>데이터를 어떻게 확보할 것인가</em></span></a>
+      <a href="#s9"><i>09</i><span>지금까지 무엇이 확인됐는가?<em>현재 도달 지점</em></span></a>
+      <a href="#s10"><i>10</i><span>어디까지가 확인된 것이고, 무엇이 남아 있는가?<em>확인된 범위와 다음 단계</em></span></a>
+    </nav>
+  </div>
+</header>
+
+<!-- ══ 01 ══ -->
+<section class="sec" id="s1">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>01</i><s></s><em>전환</em></div>
+    <h2 class="q rv" style="--d:60ms">지금 무슨 변화가 일어나고 있고, <b>왜 지금인가?</b></h2>
+
+    <div class="viz rv" style="--d:120ms">
+      <svg viewBox="0 0 1000 250" role="img" aria-label="화면 안의 대화형 AI에서 물리 대상을 조작하는 AI로의 전환">
+        <!-- 좌: 화면 안 -->
+        <g class="fade" style="--d:100ms">
+          <rect x="40" y="34" width="380" height="150" rx="10" fill="#0e1626" stroke="rgba(150,175,220,.22)"/>
+          <rect x="40" y="34" width="380" height="26" rx="10" fill="rgba(150,175,220,.06)"/>
+          <circle cx="60" cy="47" r="4" fill="#5f6f8c"/><circle cx="74" cy="47" r="4" fill="#5f6f8c"/>
+          <rect x="66" y="80" width="180" height="20" rx="10" fill="rgba(150,175,220,.14)"/>
+          <rect x="200" y="110" width="180" height="20" rx="10" fill="rgba(57,198,240,.22)"/>
+          <rect x="66" y="140" width="120" height="20" rx="10" fill="rgba(150,175,220,.14)"/>
+          <text x="230" y="212" text-anchor="middle" font-size="14" class="t-mut">화면 안에서 묻고 답하는 AI</text>
+          <text x="230" y="234" text-anchor="middle" font-size="12" class="t-mono t-mut">TEXT · IMAGE</text>
+        </g>
+        <!-- 화살표 -->
+        <g class="fade" style="--d:420ms">
+          <line x1="452" y1="109" x2="536" y2="109" stroke="#39c6f0" stroke-width="1.4" stroke-dasharray="5 5"/>
+          <path d="M536,103 L550,109 L536,115 Z" fill="#39c6f0"/>
+        </g>
+        <!-- 우: 물리 대상 -->
+        <g class="fade" style="--d:700ms">
+          <rect x="580" y="34" width="380" height="150" rx="10" fill="#0e1626" stroke="rgba(57,198,240,.34)"/>
+          <!-- 제어반 -->
+          <rect x="836" y="62" width="94" height="96" rx="6" fill="rgba(150,175,220,.07)" stroke="rgba(150,175,220,.24)"/>
+          <circle cx="883" cy="94" r="13" fill="none" stroke="#2ee6a0" stroke-width="1.6"/>
+          <circle cx="883" cy="94" r="5" fill="#2ee6a0"/>
+          <rect x="856" y="122" width="54" height="7" rx="3.5" fill="rgba(150,175,220,.2)"/>
+          <rect x="856" y="136" width="34" height="7" rx="3.5" fill="rgba(150,175,220,.2)"/>
+          <!-- 로봇 팔 -->
+          <rect x="608" y="146" width="56" height="14" rx="4" fill="rgba(150,175,220,.24)"/>
+          <path d="M636,146 L700,90 L800,100 L836,94" fill="none" stroke="#5fd7f5" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="636" cy="146" r="6" fill="#0b101c" stroke="#5fd7f5" stroke-width="2.4"/>
+          <circle cx="700" cy="90" r="6" fill="#0b101c" stroke="#5fd7f5" stroke-width="2.4"/>
+          <circle cx="800" cy="100" r="5" fill="#0b101c" stroke="#5fd7f5" stroke-width="2.2"/>
+          <!-- 카메라 -->
+          <rect x="676" y="56" width="30" height="18" rx="4" fill="#0b101c" stroke="#39c6f0" stroke-width="1.4"/>
+          <circle cx="691" cy="65" r="4" fill="#39c6f0"/>
+          <path d="M706,60 L742,50 M706,70 L742,80" stroke="rgba(57,198,240,.4)" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="770" y="212" text-anchor="middle" font-size="14" class="t-cy">보고, 조작하고, 실제 대상을 움직이는 AI</text>
+          <text x="770" y="234" text-anchor="middle" font-size="12" class="t-mono t-mut">PHYSICAL AI</text>
+        </g>
+      </svg>
+      <p class="vcap">동일한 AI 기술이 출력하는 대상이 텍스트에서 물리적 동작으로 옮겨간다.</p>
+    </div>
+
+    <div class="tag rv"><u>근거</u><i>Evidence</i><s></s></div>
+    <div class="grid g3" data-stagger>
+      <div class="card rv"><span class="k">01</span>
+        <h4>화면 안에서 화면 밖으로</h4>
+        <p>지난 몇 년의 AI는 화면 안에서 묻고 답하는 AI였습니다. 지금 일어나는 변화는 카메라로 보고, 팔로 조작하고, 실제 대상을 움직이는 AI입니다. 이를 피지컬 AI라 부릅니다.</p>
+      </div>
+      <div class="card rv"><span class="k">02</span>
+        <h4>핵심은 하드웨어가 아니라 제어 방식</h4>
+        <p>로봇 팔 자체는 오래된 기술입니다. 달라진 것은 제어 방식입니다. 사람이 한 줄씩 작성한 프로그램 대신, 시연으로 학습한 정책이 동작합니다.</p>
+      </div>
+      <div class="card rv"><span class="k">03</span>
+        <h4>같은 방향으로의 동시 이동</h4>
+        <p>주요 제조사와 연구기관이 동시에 같은 방향으로 이동하고 있습니다. 한 곳의 시도가 아니라 산업 전반의 방향 전환으로 관측됩니다.</p>
+        <span class="src">NVIDIA GTC 2026 · Georgetown CSET</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 02 ══ -->
+<section class="sec" id="s2">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>02</i><s></s><em>적용 조건</em></div>
+    <h2 class="q rv" style="--d:60ms">왜 이것이 <b>우리 산업과 직접</b> 관련되는가?</h2>
+    <p class="lede rv blk" style="--d:120ms">
+      승강기 설비의 설치·점검·수리는 현장에서 이루어지는 물리 작업의 비중이 높습니다.
+      소프트웨어만으로 대체되지 않는 영역입니다. 화면 안에서 동작하는 AI는 이 업무에 직접 적용되지 않았으나,
+      물리 대상을 조작하는 AI는 직접 관련됩니다.
+    </p>
+
+    <div class="tag rv"><u>근거</u><i>Evidence</i><s></s></div>
+    <div class="grid g2" style="grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);align-items:center">
+      <div class="viz rv" style="margin:0">
+        <svg viewBox="0 0 300 300" role="img" aria-label="승강기 사고 사망자 중 작업 중이던 작업자 비율 48퍼센트">
+          <g transform="translate(150,150)">
+            <circle r="90" fill="none" stroke="rgba(150,175,220,.13)" stroke-width="26"/>
+            <circle class="donutval" r="90" fill="none" stroke="#f8b64c" stroke-width="26"
+                    stroke-linecap="butt" transform="rotate(-90)"/>
+          </g>
+          <text x="150" y="146" text-anchor="middle" class="t-mono" font-size="46" fill="#f8b64c">
+            <tspan class="num" data-to="48" data-sfx="%">0%</tspan>
+          </text>
+          <text x="150" y="174" text-anchor="middle" font-size="12.5" class="t-mut">작업 중이던 작업자</text>
+          <text x="150" y="288" text-anchor="middle" font-size="12" class="t-mono t-mut">승강기 사고 사망자 구성</text>
+        </svg>
+      </div>
+      <div>
+        <div class="card" style="border-color:rgba(248,182,76,.28)">
+          <h4>안전 논거</h4>
+          <p>승강기 사고 사망자의 48%는 이용자가 아니라 <b style="color:var(--am);font-weight:600">작업 중이던 작업자</b>입니다.
+            반복적이고 위험도가 있는 조작 구간을 설비가 수행할 수 있다면, 안전 측면의 개선 여지가 있습니다.</p>
+          <span class="src">한국승강기안전공단 사고 분석</span>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h4>기술적 조건</h4>
+          <p>현장이 매번 다르다는 조건 자체가 자동화의 기술적 난제였습니다. 이 조건을 어떻게 다루느냐가
+            접근 방식을 가릅니다.</p>
+        </div>
+      </div>
+    </div>
+    <p class="lede blk rv" style="max-width:70ch">
+      명분은
+      <b style="color:var(--ink);font-weight:600">작업 중 작업자의 안전</b>, 그리고
+      <b style="color:var(--ink);font-weight:600">현장이 매번 다르다는 기술적 조건</b>입니다.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 03 ══ -->
+<section class="sec" id="s3">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>03</i><s></s><em>공백의 위치</em></div>
+    <h2 class="q rv" style="--d:60ms">감지 기술이 빠르게 발전한 뒤에도, 왜 현장 조치는 <b>여전히 사람의 방문</b>으로 남아 있는가?</h2>
+
+    <div class="body-txt blk rv" style="--d:120ms">
+      <p>산업용 로봇이 자리 잡은 영역은 대상과 환경이 고정된 공정입니다. 같은 자세로 놓인 같은 부품을 같은 순서로 다루기 때문에, 한 번 맞춰 놓은 설정이 다음 작업에도 그대로 통합니다. 승강기 유지관리는 조건이 반대입니다. 기종과 연식, 설치 환경, 기계실 배치와 접근 경로가 현장마다 다르고, 같은 건물 안에서도 호기별로 달라집니다. 이 조건에서는 장비 자체의 가격보다 현장마다 다시 맞추는 통합 비용이 훨씬 크기 때문에, 기존 자동화 방식으로는 경제성이 성립하지 않았습니다.</p>
+      <p>그래서 지난 10여 년의 기술 투자는 상태를 읽는 계층, 즉 원격 모니터링과 예지보전에 집중됐습니다. 상태를 읽는 일은 센서와 통신망으로 확장할 수 있지만, 설비에 물리적으로 손을 대는 일은 현장마다 새로 풀어야 하는 문제로 남았습니다.</p>
+      <p>실제로 산업 현장에 배치된 로봇도 계기 판독, 열화상 촬영, 가스 측정 같은 점검 작업을 맡고 있으며, 밸브를 돌리거나 패널을 여는 조작은 아직 선택 사양 수준입니다. 즉 감지 계층과 조치 계층은 서로 다른 성숙 곡선 위에 있고, 지금 비어 있는 쪽은 조치 계층입니다.</p>
+    </div>
+
+    <div class="viz rv">
+      <svg viewBox="0 0 1000 320" role="img" aria-label="감지 계층과 조치 계층의 성숙도 대비">
+        <!-- 공백 구간 음영 -->
+        <rect class="fade" style="--d:900ms" x="420" y="34" width="510" height="212" fill="rgba(248,182,76,.045)"/>
+        <line class="fade" style="--d:900ms" x1="420" y1="34" x2="420" y2="246" stroke="rgba(248,182,76,.5)" stroke-width="1.2" stroke-dasharray="4 4"/>
+        <!-- 감지 계층 -->
+        <text x="0" y="24" font-size="13.5" class="t-cy" letter-spacing=".04em">감지 계층 — 상태를 읽는 일</text>
+        <text x="238" y="63" text-anchor="end" font-size="13" class="t-mut">설비 결함 사전 식별</text>
+        <rect x="250" y="46" width="680" height="20" rx="3" fill="rgba(150,175,220,.08)"/>
+        <rect class="bar" style="--d:120ms" x="250" y="46" width="544" height="20" rx="3" fill="#39c6f0" opacity=".82"/>
+        <text class="fade t-mono t-cy" style="--d:900ms" x="806" y="61" font-size="13">80%</text>
+        <text x="238" y="99" text-anchor="end" font-size="13" class="t-mut">돌발고장 제거</text>
+        <rect x="250" y="82" width="680" height="20" rx="3" fill="rgba(150,175,220,.08)"/>
+        <rect class="bar" style="--d:240ms" x="250" y="82" width="493" height="20" rx="3" fill="#39c6f0" opacity=".62"/>
+        <text class="fade t-mono t-cy" style="--d:1000ms" x="755" y="97" font-size="13">70~75%</text>
+        <!-- 구분선 -->
+        <line x1="0" y1="126" x2="1000" y2="126" stroke="rgba(150,175,220,.16)"/>
+        <!-- 조치 계층 -->
+        <text x="0" y="158" font-size="13.5" class="t-am" letter-spacing=".04em">조치 계층 — 설비에 손을 대는 일</text>
+        <text x="238" y="197" text-anchor="end" font-size="13" class="t-mut">원격으로 2분 내 해결</text>
+        <rect x="250" y="180" width="680" height="20" rx="3" fill="none" stroke="rgba(248,182,76,.42)" stroke-width="1.1" stroke-dasharray="5 4"/>
+        <rect class="bar" style="--d:360ms" x="250" y="180" width="170" height="20" rx="3" fill="#f8b64c" opacity=".55"/>
+        <text class="fade t-mono t-am" style="--d:1100ms" x="432" y="195" font-size="13">25%</text>
+        <text x="238" y="233" text-anchor="end" font-size="13" class="t-mut">최초 방문 해결률</text>
+        <rect x="250" y="216" width="680" height="20" rx="3" fill="none" stroke="rgba(248,182,76,.42)" stroke-width="1.1" stroke-dasharray="5 4"/>
+        <rect class="bar" style="--d:460ms" x="250" y="216" width="510" height="20" rx="3" fill="rgba(248,182,76,.12)"/>
+        <text class="fade t-mono t-am" style="--d:1200ms" x="772" y="231" font-size="13">75%</text>
+        <!-- 라벨 -->
+        <text class="fade t-am" style="--d:1250ms" x="675" y="278" text-anchor="middle" font-size="13" fill="#f8b64c">환경이 매번 달라 통합 비용이 지배하는 구간</text>
+        <line class="fade" style="--d:1250ms" x1="675" y1="248" x2="675" y2="262" stroke="rgba(248,182,76,.45)" stroke-width="1"/>
+      </svg>
+      <p class="vcap">위 레인은 채워진 막대, 아래 레인은 진단 이후가 비어 있는 점선 막대. 두 계층은 서로 다른 성숙 곡선 위에 있다.</p>
+    </div>
+
+    <div class="tag rv"><u>근거</u><i>Evidence</i><s></s></div>
+    <div class="grid g2" data-stagger>
+      <div class="card rv">
+        <h4>한 출처 안에서 드러나는 격차</h4>
+        <p>업계의 원격 모니터링 서비스 자료는 같은 문서에서 “설비 결함의 80%를 사전 식별”과 “원격으로 2분 내 해결되는 이슈는 25%”를 함께 명시합니다.
+          감지율과 원격 조치율의 격차가 하나의 출처 안에서 드러납니다.</p>
+        <span class="src">업계 원격 서비스 공개 자료</span>
+      </div>
+      <div class="card rv">
+        <h4>예지보전이 개선하는 것은 예측 가능성</h4>
+        <p>유지비 25~30% 절감, 돌발고장 70~75% 제거, 다운타임 35~45% 감소.
+          개선되는 것은 언제 손을 대야 하는지에 대한 예측 가능성이며, 손을 대는 일 자체는 그대로 남습니다.</p>
+        <span class="src">미 에너지부 FEMP · PNNL</span>
+      </div>
+      <div class="card rv">
+        <h4>채택률은 늘었으나 사후 대응은 그대로</h4>
+        <p>예지보전 채택률이 9%에서 18%로 늘어난 같은 조사에서, 사후 대응형 정비 36%는 변화가 없었습니다.</p>
+        <span class="src">Fluke Reliability 2026 조사</span>
+      </div>
+      <div class="card rv">
+        <h4>배치된 로봇의 실제 역할</h4>
+        <p>최초 방문 해결률 중앙값은 75%, 산업기계는 71%입니다(Aquant 2025).
+          현장에 배치된 4족 로봇(Spot·ANYmal)의 역할도 계기 판독·열화상·음향 점검 등 감지 작업입니다.</p>
+        <span class="src">Aquant 2025 · 배치 사례</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 04 ══ -->
+<section class="sec" id="s4">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>04</i><s></s><em>방법의 전환</em></div>
+    <h2 class="q rv" style="--d:60ms">무엇이 달라졌기에 <b>이번에는 가능하다</b>고 보는가?</h2>
+    <p class="lede blk rv" style="--d:120ms">
+      프로그래밍이 아니라 학습입니다. 시연을 보여주면 정책이 그 작업을 학습합니다.
+      ‘현장이 매번 다르다’는 조건이 더 이상 절대 장벽이 아니게 되는 지점이 여기입니다.
+      다만 이 주장은 반대 근거와 함께 놓여야 정확합니다.
+    </p>
+
+    <div class="debate">
+      <div class="col" data-stagger>
+        <div class="tag pos rv"><u>Evidence — for</u><i>긍정 근거</i><s></s></div>
+        <div class="card pos rv">
+          <span class="k">RT-1</span>
+          <h4>양보다 다양성</h4>
+          <span class="big g"><span class="num" data-to="76" data-sfx="%">0%</span> → <span class="num" data-to="54" data-sfx="%">0%</span></span>
+          <p>학습 데이터의 작업 <b>종류</b>를 25% 줄이자 미학습 과제 성공률이 76%에서 54%로 하락했습니다.
+            데이터 양보다 작업의 다양성이 일반화를 만든다는 근거입니다.</p>
+        </div>
+        <div class="card pos rv">
+          <span class="k">OpenVLA</span>
+          <h4>사전학습의 크기 우위</h4>
+          <span class="big g">+<span class="num" data-to="16.5" data-dec="1">0.0</span><span class="unit">%p</span></span>
+          <p>단순 시연 97만 건으로 사전학습한 모델이 8배 큰 모델보다 29개 과제 절대 성공률에서 16.5%p 앞섰습니다.</p>
+        </div>
+        <div class="card pos rv">
+          <span class="k">토요타연구소</span>
+          <h4>신규 과제 학습 비용 절감</h4>
+          <span class="big g"><span class="num" data-to="3">0</span>~<span class="num" data-to="5">0</span><span class="unit">배 적게</span></span>
+          <p>여러 작업을 미리 학습한 모델이 신규 과제 학습에 전용 데이터를 3~5배 적게 사용했습니다.
+            눈가림·무작위배정 대조시험으로 확인된 결과입니다.</p>
+        </div>
+      </div>
+      <div class="rule"></div>
+      <div class="col" data-stagger>
+        <div class="tag neg rv"><u>Evidence — against</u><i>반대 근거</i><s></s></div>
+        <div class="card neg rv">
+          <span class="k">AGNOSTOS</span>
+          <h4>완전히 새로운 과제에서는 무너진다</h4>
+          <span class="big a"><span class="num" data-to="17.5" data-dec="1" data-sfx="%">0.0%</span></span>
+          <p>완전히 새로운 과제 평가에서 최신 모델 15개 중 최고 성적이 17.5%였고,
+            모든 모델이 최소 8개 과제에서 0%를 기록했습니다.</p>
+        </div>
+        <div class="card neg rv">
+          <span class="k">LIBERO-PRO</span>
+          <h4>벤치마크 성적의 취약성</h4>
+          <span class="big a">90%+ → <span class="num" data-to="0" data-dec="1" data-sfx="%">0.0%</span></span>
+          <p>표준 벤치마크에서 90% 이상을 기록한 모델이 물체와 지시문만 바꾸면 0.0%로 하락했습니다.</p>
+        </div>
+        <div class="card neg rv">
+          <span class="k">RT-X</span>
+          <h4>저자들이 직접 명시한 한계</h4>
+          <p>해당 작업 데이터가 충분한 경우에는 외부 데이터를 섞는 것이 오히려 손해였고,
+            <b style="color:var(--am);font-weight:600">언제 도움이 되는지 예측할 기준은 아직 없다</b>고 저자들이 명시했습니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict rv">
+      <u>결론</u>
+      <p>이는 보장이 아니라, 현재까지 가장 근거 있는 접근입니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 05 ══ -->
+<section class="sec" id="s5">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>05</i><s></s><em>검증 구조</em></div>
+    <h2 class="q rv" style="--d:60ms">이 검증을 <b>어떤 구조</b>로 수행하는가?</h2>
+    <p class="lede blk rv" style="--d:120ms">
+      두 트랙이 대등하게 병행합니다. 우열이 아니라 역할 분담입니다.
+      실물은 실제 물리 조건을, 시뮬레이션은 데이터 규모와 동일 기준 평가를 담당합니다.
+    </p>
+
+    <div class="viz rv">
+      <svg viewBox="0 0 1000 300" role="img" aria-label="실물 트랙과 시뮬레이션 트랙이 동일 규격으로 합류하는 구조">
+        <!-- 실물 레일 -->
+        <path class="draw" style="--len:900;--d:100ms" d="M50,66 L560,66 C660,66 660,150 740,150 L950,150"
+              fill="none" stroke="#2ee6a0" stroke-width="2.2" stroke-linecap="round"/>
+        <!-- 시뮬 레일 -->
+        <path class="draw" style="--len:900;--d:260ms" d="M50,234 L560,234 C660,234 660,150 740,150 L950,150"
+              fill="none" stroke="#39c6f0" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="0"/>
+        <text x="50" y="42" font-size="13.5" class="t-gr" letter-spacing=".04em">실물 트랙 — 실제 물리 조건</text>
+        <text x="50" y="270" font-size="13.5" class="t-cy" letter-spacing=".04em">시뮬레이션 트랙 — 규모와 동일 기준 평가</text>
+        <!-- 실물 노드 -->
+        <g class="pop" style="--d:600ms">
+          <circle cx="180" cy="66" r="6" fill="#05070e" stroke="#2ee6a0" stroke-width="2.4"/>
+          <text x="180" y="100" text-anchor="middle" class="t-mono" font-size="16" fill="#2ee6a0">19</text>
+          <text x="180" y="118" text-anchor="middle" font-size="11.5" class="t-mut">에피소드</text>
+        </g>
+        <g class="pop" style="--d:700ms">
+          <circle cx="340" cy="66" r="6" fill="#05070e" stroke="#2ee6a0" stroke-width="2.4"/>
+          <text x="340" y="100" text-anchor="middle" class="t-mono" font-size="16" fill="#2ee6a0">15,235</text>
+          <text x="340" y="118" text-anchor="middle" font-size="11.5" class="t-mut">프레임</text>
+        </g>
+        <g class="pop" style="--d:800ms">
+          <circle cx="500" cy="66" r="6" fill="#05070e" stroke="#2ee6a0" stroke-width="2.4"/>
+          <text x="500" y="100" text-anchor="middle" class="t-mono" font-size="16" fill="#2ee6a0">2</text>
+          <text x="500" y="118" text-anchor="middle" font-size="11.5" class="t-mut">학습 정책</text>
+        </g>
+        <!-- 시뮬 노드 -->
+        <g class="pop" style="--d:640ms">
+          <circle cx="180" cy="234" r="6" fill="#05070e" stroke="#39c6f0" stroke-width="2.4"/>
+          <text x="180" y="212" text-anchor="middle" class="t-mono" font-size="16" fill="#5fd7f5">352</text>
+          <text x="180" y="194" text-anchor="middle" font-size="11.5" class="t-mut">에피소드</text>
+        </g>
+        <g class="pop" style="--d:740ms">
+          <circle cx="340" cy="234" r="6" fill="#05070e" stroke="#39c6f0" stroke-width="2.4"/>
+          <text x="340" y="212" text-anchor="middle" class="t-mono" font-size="16" fill="#5fd7f5">24,464</text>
+          <text x="340" y="194" text-anchor="middle" font-size="11.5" class="t-mut">프레임</text>
+        </g>
+        <g class="pop" style="--d:840ms">
+          <circle cx="500" cy="234" r="6" fill="#05070e" stroke="#39c6f0" stroke-width="2.4"/>
+          <text x="500" y="212" text-anchor="middle" font-size="11.5" class="t-mut">로봇 가동 시간 없이 생성</text>
+        </g>
+        <!-- 합류 -->
+        <g class="pop" style="--d:1000ms">
+          <circle cx="740" cy="150" r="10" fill="#05070e" stroke="#5fd7f5" stroke-width="2.6"/>
+          <circle cx="740" cy="150" r="4" fill="#5fd7f5"/>
+          <text x="790" y="198" text-anchor="middle" font-size="13.5" class="t-ink">동일 규격으로 기록</text>
+          <text x="790" y="220" text-anchor="middle" font-size="12.5" class="t-mut">카메라 2대(top·closeup) · 6축 · 동일 작업 라벨</text>
+          <text x="790" y="240" text-anchor="middle" font-size="12.5" class="t-mut">성공 판정 임계 1.5mm</text>
+          <text x="790" y="266" text-anchor="middle" font-size="12.5" class="t-cy">→ 데이터 혼합 학습 가능</text>
+        </g>
+      </svg>
+      <p class="vcap">두 트랙은 같은 규격으로 기록되므로 하나의 학습 자료로 합쳐진다.</p>
+    </div>
+
+    <div class="tag rv"><u>근거</u><i>Evidence</i><s></s></div>
+    <div class="grid g3" data-stagger>
+      <div class="card rv">
+        <h4>환경 불변 원칙</h4>
+        <p>시뮬레이션 환경은 실기 조건을 완화하지 않습니다. 버튼 치수, 배치 범위, 판정 기준을 실물과 동일하게 둡니다.
+          쉬운 조건에서 얻은 성공률은 근거가 되지 않기 때문입니다.</p>
+      </div>
+      <div class="card rv">
+        <h4>시뮬레이션이 필요한 실질적 이유</h4>
+        <p>3단계 케이블 분리처럼 실물로 수천 회 반복하기 어려운 작업을 안전하게 반복 검증할 수 있습니다.
+          반복 횟수가 근거의 강도를 결정합니다.</p>
+      </div>
+      <div class="card rv">
+        <h4>병행 구조의 외부 근거</h4>
+        <span class="big">+<span class="num" data-to="38" data-sfx="%">0%</span></span>
+        <p>시뮬레이션과 실물을 함께 학습시키면, 조건 차이가 있어도 실제 성능이 평균 38% 향상된 것으로 보고됩니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 06 ══ -->
+<section class="sec" id="s6">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>06</i><s></s><em>시험 과제의 의미</em></div>
+    <h2 class="q rv" style="--d:60ms">물건 집기, 버튼 누르기 같은 단순 작업이 <b>실제 정비 자동화와 어떤 관계</b>인가?</h2>
+
+    <div class="viz rv">
+      <svg viewBox="0 0 560 440" role="img" aria-label="환경 구성, 기준 동작 설계, 데이터 생성, 학습, 자동 평가로 이어지는 5단계 순환 절차">
+        <g class="spin-r">
+          <circle cx="280" cy="205" r="152" fill="none" stroke="rgba(150,175,220,.1)" stroke-width="1" stroke-dasharray="2 8"/>
+        </g>
+        <g class="spin">
+          <circle cx="280" cy="205" r="130" fill="none" stroke="rgba(57,198,240,.3)" stroke-width="1.4" stroke-dasharray="14 10"/>
+        </g>
+        <!-- 진행 화살표 -->
+        <g fill="#39c6f0" opacity=".8" class="fade" style="--d:500ms">
+          <path d="M-6,-5 L6,0 L-6,5 Z" transform="translate(356.4,99.8) rotate(36)"/>
+          <path d="M-6,-5 L6,0 L-6,5 Z" transform="translate(403.6,245.2) rotate(108)"/>
+          <path d="M-6,-5 L6,0 L-6,5 Z" transform="translate(280,335) rotate(180)"/>
+          <path d="M-6,-5 L6,0 L-6,5 Z" transform="translate(156.4,245.2) rotate(252)"/>
+          <path d="M-6,-5 L6,0 L-6,5 Z" transform="translate(203.6,99.8) rotate(324)"/>
+        </g>
+        <!-- 노드 -->
+        <g class="pop" style="--d:100ms"><circle cx="280" cy="75" r="30" fill="#0e1626" stroke="#39c6f0" stroke-width="1.6"/><text x="280" y="81" text-anchor="middle" class="t-mono t-cy" font-size="15">1</text></g>
+        <g class="pop" style="--d:200ms"><circle cx="403.6" cy="164.8" r="30" fill="#0e1626" stroke="#39c6f0" stroke-width="1.6"/><text x="403.6" y="170.8" text-anchor="middle" class="t-mono t-cy" font-size="15">2</text></g>
+        <g class="pop" style="--d:300ms"><circle cx="356.4" cy="310.2" r="30" fill="#0e1626" stroke="#39c6f0" stroke-width="1.6"/><text x="356.4" y="316.2" text-anchor="middle" class="t-mono t-cy" font-size="15">3</text></g>
+        <g class="pop" style="--d:400ms"><circle cx="203.6" cy="310.2" r="30" fill="#0e1626" stroke="#39c6f0" stroke-width="1.6"/><text x="203.6" y="316.2" text-anchor="middle" class="t-mono t-cy" font-size="15">4</text></g>
+        <g class="pop" style="--d:500ms"><circle cx="156.4" cy="164.8" r="30" fill="#0e1626" stroke="#39c6f0" stroke-width="1.6"/><text x="156.4" y="170.8" text-anchor="middle" class="t-mono t-cy" font-size="15">5</text></g>
+        <!-- 라벨 -->
+        <g class="fade" style="--d:600ms" font-size="13.5">
+          <text x="280" y="24" text-anchor="middle" class="t-ink">환경 구성</text>
+          <text x="441.7" y="152.5" class="t-ink">기준 동작 설계</text>
+          <text x="379.9" y="348" class="t-ink">데이터 생성</text>
+          <text x="180.1" y="348" text-anchor="end" class="t-ink">학습</text>
+          <text x="118.3" y="152.5" text-anchor="end" class="t-ink">자동 평가</text>
+        </g>
+        <!-- 중심 -->
+        <g class="fade" style="--d:800ms">
+          <text x="280" y="196" text-anchor="middle" font-size="15" fill="#5fd7f5" font-family="Nanum Myeongjo, AppleMyungjo, Georgia, serif">작업만 교체해 재사용</text>
+          <text x="280" y="222" text-anchor="middle" font-size="12" class="t-mut">새로운 작업을 설비에</text>
+          <text x="280" y="240" text-anchor="middle" font-size="12" class="t-mut">학습시키는 절차 한 벌</text>
+        </g>
+      </svg>
+      <p class="vcap">구축 대상은 로봇 장비가 아니라, 새로운 작업을 설비에 학습시키는 절차 한 벌이다.</p>
+    </div>
+
+    <div class="tag rv"><u>근거</u><i>Evidence</i><s></s></div>
+    <div class="grid g2" data-stagger>
+      <div class="card rv"><span class="k">답 01</span>
+        <h4>버튼 누르기는 절차의 시험 과제</h4>
+        <p>현재 구축 대상은 로봇 장비가 아니라 ‘새로운 작업을 설비에 학습시키는 절차 한 벌’입니다.
+          환경 구성 → 기준 동작 설계 → 데이터 생성 → 학습 → 자동 평가로 이어지는 절차이며,
+          버튼 누르기는 그 절차가 작동하는지 검증하는 시험 과제입니다. 대상은 실제 제어반입니다.</p>
+      </div>
+      <div class="card rv"><span class="k">답 02</span>
+        <h4>절차가 한 바퀴 완주한 증거</h4>
+        <p>성공 판정이 자동화되어 있고(LED 점등 기준), 동일 조건에서 다시 측정했을 때 결과가 완전히 일치했습니다.
+          사람의 육안 판단에 기대지 않는 평가가 성립했다는 뜻입니다.</p>
+      </div>
+      <div class="card rv"><span class="k">답 03</span>
+        <h4>절차가 실제로 이전됨</h4>
+        <p>동일한 절차가 물체 파지에서 제어반 리셋 버튼으로, 작업만 교체해 그대로 재사용됐습니다.
+          한 번 쓰고 버리는 설정이 아니라 이전 가능한 절차라는 근거입니다.</p>
+      </div>
+      <div class="card rv"><span class="k">답 04</span>
+        <h4>단순 과제 데이터 자체의 가치</h4>
+        <p>여러 작업을 미리 학습한 모델이 신규 과제 학습에 전용 데이터를 3~5배 적게 사용했습니다.
+          단순 과제의 데이터도 이후 과제의 학습 비용을 낮추는 자산이 됩니다.</p>
+      </div>
+    </div>
+
+    <div class="blk grid g2">
+      <div class="note cy rv">
+        <h4>지표 라벨</h4>
+        <p><span class="mono" style="color:var(--cy2);font-size:17px">1.000</span> ·
+           <span class="mono" style="color:var(--cy2);font-size:17px">0.925</span> —
+           이 값은 정비 자동화 성공률이 아니라, <b style="color:var(--ink);font-weight:600">학습·평가 절차가 작동한다는 증거</b>입니다.</p>
+      </div>
+      <div class="note rv">
+        <h4>반론 검토 — 이 수치의 한계</h4>
+        <p>조명·마찰·카메라 조건을 동시에 변화시키면 0.925가 <b style="color:var(--am);font-weight:600">0.45 수준으로 하락</b>합니다.
+          실물 설비에서의 자율 수행 성공률은 아직 측정 전입니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 07 ══ -->
+<section class="sec" id="s7">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>07</i><s></s><em>현장으로의 연결</em></div>
+    <h2 class="q rv" style="--d:60ms">고정된 로봇팔로 하는 이 학습이, 실제 현장을 이동하며 점검하는 로봇에 <b>실제로 도움이 되는가?</b></h2>
+    <p class="lede blk rv" style="--d:120ms">
+      현장 점검 로봇의 병목이 이동이 아니라 <b style="color:var(--ink);font-weight:600">조작</b>이라는 판단 아래,
+      조작 능력을 먼저 확보하는 순서를 택했습니다. 아래는 그 판단의 근거와, 그럼에도 새로 풀어야 하는 문제입니다.
+    </p>
+
+    <div class="tag rv"><u>근거</u><i>Evidence</i><s></s></div>
+    <div class="grid g3" data-stagger>
+      <div class="card rv">
+        <span class="k">근거 01 — 우리 과제와 직결</span>
+        <h4>고정 베이스 데이터가 이동 로봇의 접촉 작업을 살린다</h4>
+        <span class="big"><span class="num" data-to="0" data-sfx="%">0%</span> → <span class="num" data-to="95" data-sfx="%">0%</span></span>
+        <p>엘리베이터 버튼 호출 작업은 고정 베이스에서 수집한 조작 데이터 없이 0%,
+          함께 학습하면 95%였습니다.</p>
+        <span class="src">Mobile ALOHA · Stanford 2024</span>
+      </div>
+      <div class="card rv">
+        <span class="k">근거 02</span>
+        <h4>재학습 없이 이동 로봇으로 이식</h4>
+        <span class="big"><span class="num" data-to="70">0</span>~<span class="num" data-to="100">0</span><span class="unit">%</span></span>
+        <p>고정 베이스에서 학습한 조작 정책을 재학습 없이 이동 로봇에 올려 실기 70~100%를 달성했습니다.
+          이때 새로 푼 문제는 정책이 아니라 ‘베이스를 어디에 세울 것인가’였습니다.</p>
+        <span class="src">Mobi-π · Stanford 2025</span>
+      </div>
+      <div class="card rv">
+        <span class="k">근거 03</span>
+        <h4>4족 현장급 로봇의 문 개폐</h4>
+        <span class="big"><span class="num" data-to="38">0</span><span class="unit">/40 성공</span></span>
+        <p>학습된 정책이 실제 4족 현장급 로봇에서 문 개폐를 수행했습니다.
+          시뮬레이션 학습 후 실기 배포로 40회 중 38회 성공했습니다.</p>
+        <span class="src">ETH · CoRL 2024</span>
+      </div>
+    </div>
+
+    <div class="viz rv">
+      <svg viewBox="0 0 1000 340" role="img" aria-label="조작, 이동·인지, 현장 신뢰도·인증의 3계층 구조도">
+        <!-- 상단: 현장 신뢰도·인증 -->
+        <g class="fade" style="--d:500ms">
+          <rect x="30" y="20" width="940" height="82" rx="10" fill="rgba(150,175,220,.03)" stroke="rgba(150,175,220,.2)" stroke-dasharray="6 5"/>
+          <rect x="30" y="20" width="3" height="82" rx="1.5" fill="rgba(150,175,220,.3)"/>
+          <text x="60" y="52" font-size="16" class="t-ink">현장 신뢰도 · 인증</text>
+          <text x="60" y="78" font-size="13" class="t-mut">현장 투입 기준과 인증 요건 — 향후 단계</text>
+          <rect x="856" y="46" width="90" height="26" rx="13" fill="rgba(248,182,76,.1)" stroke="rgba(248,182,76,.4)"/>
+          <text x="901" y="63" text-anchor="middle" font-size="12" class="t-am">신규</text>
+        </g>
+        <!-- 중단: 이동·인지 -->
+        <g class="fade" style="--d:320ms">
+          <rect x="30" y="118" width="940" height="82" rx="10" fill="rgba(150,175,220,.03)" stroke="rgba(150,175,220,.2)" stroke-dasharray="6 5"/>
+          <rect x="30" y="118" width="3" height="82" rx="1.5" fill="rgba(150,175,220,.3)"/>
+          <text x="60" y="150" font-size="16" class="t-ink">이동 · 인지</text>
+          <text x="60" y="176" font-size="13" class="t-mut">베이스 배치, 시점 변화, 이동 플랫폼 진동, 주행 — 별도 트랙</text>
+          <rect x="856" y="144" width="90" height="26" rx="13" fill="rgba(248,182,76,.1)" stroke="rgba(248,182,76,.4)"/>
+          <text x="901" y="161" text-anchor="middle" font-size="12" class="t-am">신규</text>
+        </g>
+        <!-- 하단: 조작 -->
+        <g class="fade" style="--d:140ms">
+          <rect x="30" y="216" width="940" height="86" rx="10" fill="rgba(57,198,240,.07)" stroke="rgba(57,198,240,.42)"/>
+          <rect x="30" y="216" width="3" height="86" rx="1.5" fill="#39c6f0"/>
+          <text x="60" y="250" font-size="16" class="t-cy">조작</text>
+          <text x="60" y="276" font-size="13" class="t-mut">접촉 조작 정책, 데이터 수집·평가 절차 — 현재 확보 중</text>
+          <rect x="846" y="243" width="100" height="26" rx="13" fill="rgba(46,230,160,.1)" stroke="rgba(46,230,160,.42)"/>
+          <text x="896" y="260" text-anchor="middle" font-size="12" class="t-gr">이어짐</text>
+        </g>
+        <text x="30" y="330" font-size="12" class="t-mono t-mut">아래에서 위로 쌓이는 순서 — 지금 확보 중인 계층은 맨 아래</text>
+      </svg>
+      <p class="vcap">모델 가중치가 그대로 옮겨가는 것이 아니라, 절차와 데이터와 작업 정의가 이어진다.</p>
+    </div>
+
+    <div class="grid g2" data-stagger>
+      <div class="card pos rv">
+        <span class="k">이어지는 것</span>
+        <ul class="li g">
+          <li>조작 정책 자체</li>
+          <li>고정 데이터의 사전학습 가치</li>
+          <li>버튼·밸브·레버 조작의 원형</li>
+          <li>접촉 조작의 본질적 난제 — 정렬, 공차, 힘 제어</li>
+          <li>데이터 수집·평가 절차</li>
+        </ul>
+      </div>
+      <div class="card neg rv">
+        <span class="k">새로 풀어야 하는 것</span>
+        <ul class="li a">
+          <li><b>베이스 배치</b> — 정밀 작업은 베이스가 3cm만 틀어져도 성공률이 절반으로 하락</li>
+          <li>시점 변화</li>
+          <li>이동 플랫폼 진동에 따른 엔드이펙터 편차</li>
+          <li>인지 · 주행</li>
+          <li>현장 신뢰도 기준</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="tag rv"><u>반론 검토</u><i>Counterpoint</i><s></s></div>
+      <div class="note rv">
+        <h4>산업 현실 — 선행 사례가 없다는 사실</h4>
+        <p>수백 대가 배치된 대표 4족 점검 로봇의 공식 역량 목록에는 조작이 포함되어 있지 않습니다.
+          승강로 내부에서 운용되는 로봇은 설치 목적의 사례가 있으나, 점검·조작 목적의 선행 사례는 공개 자료에서 확인되지 않습니다.
+          이는 리스크인 동시에, 조작 역량을 먼저 확보하려는 이유이기도 합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 08 ══ -->
+<section class="sec" id="s8">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>08</i><s></s><em>데이터 확보</em></div>
+    <h2 class="q rv" style="--d:60ms">현장의 작업을 학습 가능한 데이터로 남기려면, <b>어떤 방식이 우리 환경에 맞는가?</b></h2>
+    <p class="lede blk rv" style="--d:120ms">
+      이 분야의 병목은 연산 자원이 아니라 실제 작업이 기록된 데이터라는 데 업계와 연구계의 진단이 일치합니다.
+      데이터를 확보하는 방법은 하나로 정해져 있지 않고, 촬영 기반·착용 장비 기반·로봇 직접 조작·시뮬레이션 증폭·공개 데이터 활용까지
+      여러 갈래가 병행되고 있습니다. 아래는 그 선택지를 정리한 것이며, 이 중 현재 가장 먼저 시도해 볼 만한 방향을 먼저 설명합니다.
+      장기적으로는 여러 방식을 단계적으로 결합하는 것이 현실적인 경로입니다.
+    </p>
+
+    <!-- 주력 -->
+    <div class="lead-card rv blk">
+      <div class="kicker">주력 방향</div>
+      <h3>스마트글라스 기반 1인칭 작업 기록</h3>
+      <p class="lede" style="max-width:80ch">
+        작업자가 안경형 기기를 착용하고 평소대로 작업하면 그 자체가 데이터가 됩니다.
+        별도의 촬영 담당자나 실험 세팅이 필요하지 않고, 업무 흐름을 멈추지 않으며, 현장 그대로의 조건이 기록됩니다.
+      </p>
+      <div class="sub-grid">
+        <div>
+          <h5>왜 유망한가</h5>
+          <ul class="li">
+            <li>업무 흐름을 멈추지 않고 현장 그대로의 조건이 기록됨</li>
+            <li>초기 투자 규모가 로봇 원격조종 설비 구축 대비 한 자릿수 낮음 — 소비자급 약 80만원, 산업용 인증 제품 약 500~700만원</li>
+            <li>실제로 일하게 될 환경에서 촬영된 데이터일수록 학습 가치가 크다는 점을 최신 연구들이 반복 확인</li>
+          </ul>
+        </div>
+        <div>
+          <h5>어떻게 동작하나</h5>
+          <ul class="li">
+            <li>안경형 기기가 1인칭 시야와 함께 머리·손의 3차원 움직임을 기록</li>
+            <li>축적된 기록은 먼저 작업 절차 표준화와 교육 자료로 쓰이며, 동시에 로봇 정책의 사전학습 자료가 됨</li>
+            <li>로봇 적용 단계에서는 사람 작업 데이터에 소량의 로봇 데이터를 더해 함께 학습</li>
+            <li>따라서 로봇 도입 시점과 무관하게 기록을 먼저 시작하는 것이 순서상 유리</li>
+          </ul>
+        </div>
+        <div>
+          <h5>하드웨어</h5>
+          <ul class="li">
+            <li>소비자급 안경형 기기 — 70g 내외, 상시 착용 가능한 무게</li>
+            <li>연구용 기록 기기 — 76g 내외, 8시간 연속 구동</li>
+            <li>산업용 인증 기기 — 방진·방수(IP66)와 내충격 규격, 무정전 배터리 교체 지원</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="tag rv blk"><u>근거</u><i>Evidence</i><s></s></div>
+    <div class="grid g3" data-stagger>
+      <div class="card rv"><span class="k">EgoMimic — 조지아텍 · Meta</span>
+        <h4>사람 영상 1시간이 로봇 시연 1시간보다 이득</h4>
+        <span class="big"><span class="num" data-to="34">0</span>~<span class="num" data-to="228">0</span><span class="unit">% 향상</span></span>
+        <p>안경 촬영 사람 영상 1시간 + 로봇 시연 2시간이, 로봇 시연만 3시간 사용한 방식을 능가했습니다.</p>
+      </div>
+      <div class="card rv"><span class="k">EgoZero</span>
+        <h4>로봇 데이터 없이도 성립</h4>
+        <span class="big"><span class="num" data-to="70" data-sfx="%">0%</span></span>
+        <p>로봇 데이터 없이 과제당 20분씩 촬영한 사람 시연만으로 7개 조작 과제에서 70% 성공률을 기록했습니다.</p>
+      </div>
+      <div class="card rv"><span class="k">Aina — Dexterity from Smart Lenses</span>
+        <h4>짧은 촬영으로도 도달</h4>
+        <span class="big"><span class="num" data-to="73">0</span>~<span class="num" data-to="86">0</span><span class="unit">%</span></span>
+        <p>과제당 약 10분 분량 촬영으로 9개 작업에서 73~86% 성공률을 확인했습니다.</p>
+      </div>
+      <div class="card rv"><span class="k">EgoBridge — NeurIPS 2025</span>
+        <h4>사람 영상과 로봇 데이터의 정렬</h4>
+        <span class="big">+<span class="num" data-to="44">0</span><span class="unit">%p</span></span>
+        <p>사람 영상과 로봇 데이터를 정렬해 실제 로봇 과제 성공률을 44%p 개선했습니다.</p>
+      </div>
+      <div class="card rv"><span class="k">EgoVerse — 조지아텍 · 스탠퍼드 · MIT · Meta Reality Labs</span>
+        <h4>‘같은 환경’이 결정적</h4>
+        <span class="big">최대 <span class="num" data-to="30" data-sfx="%">0%</span></span>
+        <p>사람 데이터 공동학습으로 최대 30% 향상. 특히 로봇이 일할 환경과 같은 곳에서 촬영된 데이터가 결정적이었습니다.</p>
+      </div>
+      <div class="card rv"><span class="k">PH2D / HAT — Apple · MIT · CMU</span>
+        <h4>소비자용 웨어러블 규모의 효과</h4>
+        <span class="big">약 <span class="num" data-to="2">0</span><span class="unit">배 개선</span></span>
+        <p>소비자용 웨어러블로 모은 사람 시연 2만 5천여 건으로, 처음 보는 물체·환경에 대한 일반화 성능이 약 2배 개선됐습니다.</p>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="tag rv"><u>반론 검토</u><i>Counterpoint</i><s></s></div>
+      <div class="note rv">
+        <h4>연구진이 명시한 한계</h4>
+        <p>3차원 손·손목 위치 라벨이 필요하고, 영상에는 힘 정보가 담기지 않습니다.
+          삽입·체결처럼 접촉과 힘 조절이 많은 작업은 아직 성공률이 낮습니다.
+          사람 영상이 로봇 데이터를 완전히 대체하는 것은 아니며, 필요한 로봇 데이터의 양을 크게 줄이는 역할입니다.</p>
+      </div>
+    </div>
+
+    <!-- 부가가치 + 경로 -->
+    <div class="blk grid g2" style="grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:start">
+      <div class="rv">
+        <div class="tag"><u>회수 경로</u><i>로봇 준비 전에도 회수됨</i><s></s></div>
+        <ul class="tl">
+          <li><b>기록 축적</b><span>작업자가 평소대로 일하며 1인칭 기록이 쌓인다</span></li>
+          <li><b>절차 표준화 · 교육 · 원격 지원</b><span>로봇 도입 이전 단계에서 먼저 회수되는 가치</span></li>
+          <li><b>로봇 사전학습</b><span>같은 기록이 정책의 사전학습 자료가 된다</span></li>
+          <li><b>소량 로봇 데이터 결합</b><span>필요한 로봇 데이터의 양이 크게 줄어든다</span></li>
+          <li><b>현장 적용</b><span>어느 경로를 택하든 출발점은 기록이다</span></li>
+        </ul>
+      </div>
+      <div class="rv">
+        <div class="tag"><u>부가 가치</u><i>과제 추진의 핵심 논거</i><s></s></div>
+        <div class="grid g2" style="gap:14px">
+          <div class="card flat" style="background:transparent"><h4>작업 절차 표준화</h4>
+            <p>같은 작업을 여러 사람이 어떻게 수행하는지 실제 기록으로 비교해 표준 절차와 편차를 확인합니다.</p></div>
+          <div class="card flat" style="background:transparent"><h4>교육</h4>
+            <p>신규 인력이 문서 대신 실제 작업 시점의 영상으로 학습해 숙련까지의 시간을 단축합니다.</p></div>
+          <div class="card flat" style="background:transparent"><h4>원격 지원</h4>
+            <p>현장에서 즉시 판단하기 어려운 상황에 1인칭 화면을 공유해 원격으로 지원합니다.</p></div>
+          <div class="card flat" style="background:transparent"><h4>노하우 전수</h4>
+            <p>오래 축적된 작업 판단이 개인의 경험으로만 남지 않고 조직의 기록으로 남습니다.</p></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <p>착용 기기로 기록한 166시간 작업 데이터로 작업 중 오류를 감지하고 개입 시점을 판단하는 AI를 학습한 사례가 있습니다.
+            농기계 제조사 AGCO는 착용형 기기 도입으로 검사 시간 30% 단축, 복잡 조립 공정 생산 시간 25% 단축, 신규 인력 교육 속도 3배 향상을 보고했고,
+            항공 분야에서는 착용형 작업 지시 적용으로 조립 오류 50% 감소, 작업 시간 25% 단축이 보고됐습니다.</p>
+          <span class="src">HoloAssist(Microsoft · ETH 취리히, ICCV 2023) · AGCO · 항공 분야 적용 사례</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 산점도 -->
+    <div class="viz rv">
+      <div class="grid g2" style="grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:center;gap:28px">
+        <svg viewBox="0 0 560 460" role="img" aria-label="수집 비용과 기록되는 정보의 폭에 따른 데이터 수집 방식 분포">
+          <!-- 축 -->
+          <line x1="70" y1="390" x2="530" y2="390" stroke="rgba(150,175,220,.28)"/>
+          <line x1="70" y1="390" x2="70" y2="50" stroke="rgba(150,175,220,.28)"/>
+          <g stroke="rgba(150,175,220,.07)">
+            <line x1="70" y1="308" x2="530" y2="308"/><line x1="70" y1="226" x2="530" y2="226"/>
+            <line x1="70" y1="144" x2="530" y2="144"/><line x1="70" y1="62" x2="530" y2="62"/>
+          </g>
+          <text x="70" y="412" font-size="11.5" class="t-mono t-mut">낮음</text>
+          <text x="530" y="412" text-anchor="end" font-size="11.5" class="t-mono t-mut">높음</text>
+          <text x="300" y="438" text-anchor="middle" font-size="12.5" class="t-mut">수집 비용 →</text>
+          <text transform="translate(30,220) rotate(-90)" text-anchor="middle" font-size="12.5" class="t-mut">기록되는 정보의 폭 →</text>
+          <!-- 점 -->
+          <g class="pop" style="--d:120ms">
+            <circle cx="169" cy="185" r="26" fill="rgba(57,198,240,.12)"/>
+            <circle cx="169" cy="185" r="14" fill="#39c6f0"/>
+            <text x="189" y="178" font-size="13" fill="#5fd7f5">스마트글라스</text>
+            <text x="189" y="196" font-size="11" class="t-mut">주력 방향</text>
+          </g>
+          <g class="pop" style="--d:240ms">
+            <circle cx="259" cy="159" r="9" fill="#0b101c" stroke="rgba(150,175,220,.55)" stroke-width="1.6"/>
+            <text x="275" y="157" font-size="12.5" class="t-mut">착용형 외골격</text>
+          </g>
+          <g class="pop" style="--d:300ms">
+            <circle cx="205" cy="242" r="9" fill="#0b101c" stroke="rgba(150,175,220,.55)" stroke-width="1.6"/>
+            <text x="221" y="248" font-size="12.5" class="t-mut">휴대형 그리퍼</text>
+          </g>
+          <g class="pop" style="--d:360ms">
+            <circle cx="457" cy="86" r="9" fill="#0b101c" stroke="rgba(150,175,220,.55)" stroke-width="1.6"/>
+            <text x="443" y="70" text-anchor="end" font-size="12.5" class="t-mut">로봇 직접 조작</text>
+          </g>
+          <g class="pop" style="--d:420ms">
+            <circle cx="115" cy="274" r="9" fill="#0b101c" stroke="rgba(150,175,220,.55)" stroke-width="1.6"/>
+            <text x="131" y="280" font-size="12.5" class="t-mut">시뮬레이션 합성</text>
+          </g>
+          <g class="pop" style="--d:480ms">
+            <circle cx="97" cy="324" r="9" fill="#0b101c" stroke="rgba(150,175,220,.55)" stroke-width="1.6"/>
+            <text x="113" y="330" font-size="12.5" class="t-mut">공개 데이터 · 파운데이션 모델</text>
+          </g>
+          <g class="pop" style="--d:540ms">
+            <circle cx="421" cy="152" r="9" fill="#0b101c" stroke="rgba(150,175,220,.55)" stroke-width="1.6"/>
+            <text x="411" y="126" text-anchor="end" font-size="12.5" class="t-mut">운영 중 데이터 축적</text>
+          </g>
+        </svg>
+        <div>
+          <h3 style="margin-bottom:14px">하나를 골라 확정하는 문제가 아니다</h3>
+          <p style="font-size:15px">
+            채움색으로 표시한 스마트글라스가 현재 가장 먼저 시도해 볼 만한 방향입니다.
+            나머지는 외곽선으로 두었습니다. 배제한 것이 아니라, 단계에 따라 결합할 선택지로 열어 둔 것입니다.
+          </p>
+          <p style="font-size:15px;margin-top:12px">
+            축은 상대적인 위치를 나타냅니다. 수집 비용이 낮을수록 왼쪽, 기록되는 정보의 폭이 넓을수록 위쪽입니다.
+          </p>
+        </div>
+      </div>
+      <p class="vcap">스마트글라스만 채움색 — 비중의 차이를 표시하되 선택지는 열어 둔다.</p>
+    </div>
+
+    <!-- 병행 6 -->
+    <div class="tag rv"><u>병행 가능한 다른 방식</u><i>Open options</i><s></s></div>
+    <div class="ways" data-stagger>
+      <div class="way rv"><span class="n">01</span>
+        <h4>착용형 외골격</h4>
+        <p>로봇 팔과 같은 관절 구조의 착용 장비로 관절 각도를 그대로 기록합니다. 로봇을 현장에 들이지 않고도 로봇 좌표계에 가까운 데이터를 확보합니다.
+          팔당 약 40만원 수준 장비로 원격조종 데이터에 대등한 성능이 보고됐습니다(AirExo).</p>
+        <dl><div><dt>적합</dt> <dd>동작 정밀도가 중요한 특정 작업 집중 기록</dd></div>
+          <div class="lim"><dt>한계</dt> <dd>착용 부담으로 상시 사용에는 부적합</dd></div></dl>
+      </div>
+      <div class="way rv"><span class="n">02</span>
+        <h4>휴대형 그리퍼 장치</h4>
+        <p>카메라와 위치 추적을 붙인 집게형 도구를 들고 작업합니다. 수집 속도가 빠르고 여러 로봇 기종으로 이식됩니다
+          (UMI/FastUMI, 54개 과제 10만 건 데이터셋).</p>
+        <dl><div><dt>적합</dt> <dd>집기·옮기기처럼 도구 형태가 단순한 작업</dd></div>
+          <div class="lim"><dt>한계</dt> <dd>힘·촉각 정보는 남지 않음</dd></div></dl>
+      </div>
+      <div class="way rv"><span class="n">03</span>
+        <h4>로봇 직접 조작(텔레오퍼레이션)</h4>
+        <p>사람이 로봇을 직접 조종해 데이터를 남기는 정통 방식입니다. 조작자가 로봇의 힘을 직접 느끼며 기록하므로 품질이 가장 높습니다.</p>
+        <dl><div><dt>적합</dt> <dd>최종 배치 직전 소량의 고품질 데이터로 마무리</dd></div>
+          <div class="lim"><dt>한계</dt> <dd>장비 비용과 숙련 시간 필요</dd></div></dl>
+      </div>
+      <div class="way rv"><span class="n">04</span>
+        <h4>시뮬레이션 합성</h4>
+        <p>소수의 실제 시연을 물체 위치·환경을 바꿔 자동 증식합니다. 200건 미만 시연에서 5만 건 이상 생성(MimicGen),
+          11시간에 78만 건 생성 후 실데이터 결합 시 40% 향상(GR00T N1)이 보고됐습니다.</p>
+        <dl><div><dt>적합</dt> <dd>이미 확보한 실제 데이터의 증폭</dd></div>
+          <div class="lim"><dt>한계</dt> <dd>접촉이 많거나 형태가 변하는 대상은 격차가 남음</dd></div></dl>
+      </div>
+      <div class="way rv"><span class="n">05</span>
+        <h4>공개 데이터 · 파운데이션 모델 활용</h4>
+        <p>공개 대규모 데이터와 사전학습 모델 위에 자체 데이터를 얹습니다. 21개 기관·22종 로봇·100만 건 이상 궤적으로
+          로봇 간 전이가 입증됐고(Open X-Embodiment), 새 작업 하나에 1~20시간 분량으로 미세조정이 가능합니다.</p>
+        <dl><div><dt>적합</dt> <dd>자체 데이터가 적은 초기 출발점</dd></div>
+          <div class="lim"><dt>한계</dt> <dd>우리 환경에 맞추는 데이터는 별도로 필요</dd></div></dl>
+      </div>
+      <div class="way rv"><span class="n">06</span>
+        <h4>운영 중 데이터 축적</h4>
+        <p>일정 수준의 시스템을 현장에 투입한 뒤, 운영하며 쌓이는 기록과 개입 이력으로 성능을 갱신합니다.
+          16대 규모 실증에서 평균 성공률 95%에 도달한 사례가 있습니다.</p>
+        <dl><div><dt>적합</dt> <dd>초기 도입 이후 단계</dd></div>
+          <div class="lim"><dt>한계</dt> <dd>먼저 투입 가능한 수준의 시스템이 전제</dd></div></dl>
+      </div>
+    </div>
+
+    <!-- 운영 원칙 -->
+    <div class="blk">
+      <div class="tag rv"><u>운영 원칙</u><i>기록에 앞서 정하는 것</i><s></s></div>
+      <div class="rules rv">
+        <div><h5>자발 참여</h5><p>촬영 참여 여부는 본인이 결정하며, 참여하지 않아도 어떤 불이익도 없습니다.</p></div>
+        <div><h5>신원 미수집</h5><p>기록은 작업 내용을 대상으로 하고, 개인을 식별할 수 있는 정보는 수집하지 않으며 얼굴 등은 비식별 처리합니다.</p></div>
+        <div><h5>평가·감시 목적 사용 금지</h5><p>수집된 기록은 근무 평가, 근태 관리, 징계 자료로 사용하지 않습니다. 사용 목적·범위·보관 기간을 사전에 명문화합니다.</p></div>
+        <div><h5>열람·삭제 보장</h5><p>본인이 자신의 기록을 언제든 확인할 수 있고, 삭제를 요청하면 지체 없이 처리합니다.</p></div>
+      </div>
+    </div>
+
+    <div class="blk body-txt rv">
+      <p>데이터 확보 방식은 하나를 골라 확정하는 문제가 아닙니다. 최신 로봇 모델들도 대량의 사람 작업 영상을 바닥에 깔고, 시뮬레이션으로 증폭한 뒤, 소량의 실제 데이터로 마무리하는 계층적 조합을 공통 방식으로 쓰고 있습니다. 다만 어떤 조합을 택하더라도 출발점은 같습니다. 우리 현장에서 실제로 일어나는 작업이 기록으로 남아 있어야 합니다. 그 기록은 로봇이 준비되기 전부터 절차 표준화와 교육, 원격 지원으로 회수되고, 준비된 뒤에는 그대로 학습의 밑천이 됩니다. 어떤 경로를 택할지는 열어 두되, 기록을 시작하는 일은 어느 경로에서도 먼저 필요합니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 09 ══ -->
+<section class="sec" id="s9">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>09</i><s></s><em>도달 지점</em></div>
+    <h2 class="q rv" style="--d:60ms">지금까지 <b>무엇이 확인됐는가?</b></h2>
+
+    <div class="viz rv">
+      <svg viewBox="0 0 1000 310" role="img" aria-label="3단계 진도 트랙과 합격선 0.70을 넘는 성공률">
+        <line x1="80" y1="240" x2="950" y2="240" stroke="rgba(150,175,220,.28)"/>
+        <text x="70" y="245" text-anchor="end" font-size="11.5" class="t-mono t-mut">0.0</text>
+        <text x="70" y="45" text-anchor="end" font-size="11.5" class="t-mono t-mut">1.0</text>
+        <!-- 합격선 -->
+        <line class="fade" style="--d:200ms" x1="80" y1="100" x2="950" y2="100" stroke="#f8b64c" stroke-width="1.2" stroke-dasharray="6 5" opacity=".85"/>
+        <text class="fade" style="--d:200ms" x="950" y="92" text-anchor="end" font-size="12" fill="#f8b64c">사전 설정 합격선 0.70</text>
+        <!-- 1단계 -->
+        <rect class="barv" style="--d:300ms" x="140" y="40" width="120" height="200" rx="4" fill="#2ee6a0" opacity=".8"/>
+        <text class="fade t-mono" style="--d:1100ms" x="200" y="28" text-anchor="middle" font-size="19" fill="#2ee6a0">1.000</text>
+        <text x="200" y="266" text-anchor="middle" font-size="13" class="t-ink">1단계 · 물체 파지</text>
+        <text x="200" y="288" text-anchor="middle" font-size="11.5" class="t-mono t-mut">4개 조건 × 10회 = 40/40</text>
+        <!-- 2단계 -->
+        <rect class="barv" style="--d:450ms" x="440" y="55" width="120" height="185" rx="4" fill="#39c6f0" opacity=".82"/>
+        <text class="fade t-mono" style="--d:1250ms" x="500" y="43" text-anchor="middle" font-size="19" fill="#5fd7f5">0.925</text>
+        <text x="500" y="266" text-anchor="middle" font-size="13" class="t-ink">2단계 · 제어반 리셋 버튼</text>
+        <text x="500" y="288" text-anchor="middle" font-size="11.5" class="t-mono t-mut">시뮬 4개 조건 평균 · 37/40</text>
+        <!-- 3단계 -->
+        <rect class="fade" style="--d:700ms" x="740" y="140" width="120" height="100" rx="4" fill="none" stroke="rgba(150,175,220,.3)" stroke-dasharray="5 5"/>
+        <text class="fade t-mut" style="--d:700ms" x="800" y="196" text-anchor="middle" font-size="12.5">9월 착수</text>
+        <text x="800" y="266" text-anchor="middle" font-size="13" class="t-mut">3단계</text>
+      </svg>
+      <p class="vcap">평가는 육안이 아니라 자동 판정 — 버튼이 기준 변위 이상 눌려 LED가 점등되어야 성공으로 집계된다.</p>
+    </div>
+
+    <div class="tag rv"><u>근거</u><i>Evidence</i><s></s></div>
+    <div class="grid g3" data-stagger>
+      <div class="card pos rv">
+        <span class="k">1단계 — 물체 파지</span>
+        <span class="big g"><span class="num" data-to="1" data-dec="3">0.000</span></span>
+        <p>4개 조건에서 각 10회, 총 40회 전부 성공했습니다.</p>
+      </div>
+      <div class="card rv">
+        <span class="k">2단계 — 제어반 리셋 버튼</span>
+        <span class="big"><span class="num" data-to="0.925" data-dec="3">0.000</span></span>
+        <p>시뮬레이션 4개 조건 평균 0.925(37/40)로, 사전 설정 합격선 0.70을 넘었습니다.
+          실물 트랙에서 동일 작업의 데이터 수집이 병행되고 있습니다.</p>
+      </div>
+      <div class="card rv">
+        <span class="k">재현성</span>
+        <h4>동일 조건 재측정 결과 완전 일치</h4>
+        <p>평가는 육안이 아니라 자동 판정으로 이루어집니다. 버튼이 기준 변위 이상 눌려 LED가 점등되어야 성공으로 집계됩니다.</p>
+      </div>
+    </div>
+
+    <div class="blk grid g3" data-stagger>
+      <div class="card flat rv"><span class="k">진척</span><span class="big"><span class="num" data-to="66.5" data-dec="1" data-sfx="%">0.0%</span></span></div>
+      <div class="card flat rv"><span class="k">시간 경과</span><span class="big"><span class="num" data-to="69.1" data-dec="1" data-sfx="%">0.0%</span></span></div>
+      <div class="card flat rv"><span class="k">지연 항목</span><span class="big g"><span class="num" data-to="0">0</span><span class="unit">건</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 10 ══ -->
+<section class="sec" id="s10">
+  <div class="wrap">
+    <div class="eyebrow rv"><i>10</i><s></s><em>범위와 다음 단계</em></div>
+    <h2 class="q rv" style="--d:60ms">어디까지가 확인된 것이고, <b>무엇이 남아 있는가?</b></h2>
+
+    <div class="chk blk rv">
+      <section class="ok">
+        <h4>확인된 것</h4>
+        <ul>
+          <li>학습·평가 절차의 작동과 재현성</li>
+          <li>시뮬레이션 기준 성공률</li>
+          <li>두 트랙의 동일 규격 정합</li>
+        </ul>
+      </section>
+      <section class="pend">
+        <h4>아직 확인되지 않은 것</h4>
+        <ul>
+          <li>실물 설비의 자율 수행 성공률은 아직 측정 전 — 실물 데이터 수집 진행 중</li>
+          <li>시뮬레이션 성공률은 환경 조건 변화 시 하락하며, 실제 현장 조건에서의 값은 미측정</li>
+          <li>현재 대상 범위는 제어반 앞 15×15cm 영역의 조작 구간. 현장 이동, 커버 개폐, 전원 차단 등 안전 절차, 대상 판단, 기종별 차이는 현재 범위에 포함되지 않음</li>
+          <li>현장 작업 분석에 기반한 대상 작업 정의를 정교화하는 작업이 필요</li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="viz rv">
+      <svg viewBox="0 0 1000 150" role="img" aria-label="9월 3단계 착수부터 10월 31일 사내 시연까지의 일정">
+        <line class="draw" style="--len:820;--d:100ms" x1="70" y1="70" x2="890" y2="70" stroke="#39c6f0" stroke-width="1.6"/>
+        <g class="pop" style="--d:400ms">
+          <circle cx="70" cy="70" r="7" fill="#39c6f0"/>
+          <text x="70" y="44" text-anchor="middle" font-size="13" class="t-ink">3단계 착수</text>
+          <text x="70" y="98" text-anchor="middle" class="t-mono" font-size="12" fill="#5fd7f5">9월</text>
+        </g>
+        <g class="pop" style="--d:520ms">
+          <circle cx="343" cy="70" r="7" fill="#0b101c" stroke="#39c6f0" stroke-width="2.4"/>
+          <text x="343" y="44" text-anchor="middle" font-size="13" class="t-ink">작업 완료</text>
+          <text x="343" y="98" text-anchor="middle" class="t-mono" font-size="12" fill="#5fd7f5">9/30</text>
+        </g>
+        <g class="pop" style="--d:760ms">
+          <circle cx="890" cy="70" r="7" fill="#0b101c" stroke="#39c6f0" stroke-width="2.4"/>
+          <text x="890" y="44" text-anchor="middle" font-size="13" class="t-ink">사내 시연</text>
+          <text x="890" y="98" text-anchor="middle" class="t-mono" font-size="12" fill="#5fd7f5">10/31</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="note cy rv">
+      <h4>역할 분담 원칙</h4>
+      <p>판단과 진단은 작업자가 수행하고, 정형화된 반복 조작 구간을 설비가 담당하는 구조를 전제로 합니다.</p>
+    </div>
+
+    <div class="closing rv">
+      <p>산출물은 장비가 아니라 검증된 학습 절차와 데이터입니다. 목표는 인력 대체가 아니라, 반복적 물리 작업의 자동화 기반을 사내에 확보하는 것입니다.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap"><p>CoP PHYSICAL AI · 왜 피지컬 AI인가</p></div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // stagger delays
+  document.querySelectorAll('[data-stagger]').forEach(function(g){
+    Array.prototype.forEach.call(g.children, function(c,i){
+      if(!c.style.getPropertyValue('--d')) c.style.setProperty('--d', (i*90)+'ms');
+    });
+  });
+
+  function fmt(v,d){
+    return d ? v.toFixed(d) : Math.round(v).toLocaleString('ko-KR');
+  }
+  function count(el){
+    var to = parseFloat(el.dataset.to),
+        dec = parseInt(el.dataset.dec||'0',10),
+        sfx = el.dataset.sfx||'', dur = 950;
+    if(reduce || !isFinite(to)){ el.textContent = fmt(to,dec)+sfx; return; }
+    var t0 = null;
+    function step(t){
+      if(t0===null) t0 = t;
+      var p = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-p,3);
+      el.textContent = fmt(to*e,dec)+sfx;
+      if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.classList.add('in');
+      if(e.target.classList.contains('num')) count(e.target);
+      io.unobserve(e.target);
+    });
+  },{threshold:0.15, rootMargin:'0px 0px -6% 0px'});
+
+  document.querySelectorAll('.rv,.viz,.num').forEach(function(el){ io.observe(el); });
+
+  // scroll progress
+  var bar = document.getElementById('prog'), ticking = false;
+  function tick(){
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (h>0 ? (window.scrollY/h)*100 : 0) + '%';
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ ticking = true; requestAnimationFrame(tick); }
+  }, {passive:true});
+  tick();
+})();
+</script>

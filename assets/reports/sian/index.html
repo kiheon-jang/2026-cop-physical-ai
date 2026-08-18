@@ -1,0 +1,66 @@
+<meta charset="utf-8">
+<title>왜 피지컬 AI인가 — 시안 4종</title>
+<style>
+:root{--bg:#05070e;--bg2:#080b15;--paper:#0b101c;--panel2:#0e1626;--ink:#e8eefb;--ink2:#8ea0bd;
+ --line:rgba(150,175,220,.16);--line2:rgba(150,175,220,.24);--cyn:#39c6f0;--mut2:#5f6f8c;
+ --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Segoe UI",system-ui,sans-serif;
+ --mono:"SF Mono","JetBrains Mono",ui-monospace,Menlo,monospace;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);word-break:keep-all;line-height:1.6;
+ min-height:100vh;padding:clamp(24px,6vw,64px) clamp(18px,5vw,48px)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+ background:radial-gradient(120% 80% at 12% -5%,rgba(57,198,240,.14),transparent 55%),
+ radial-gradient(90% 70% at 100% 0%,rgba(46,230,160,.08),transparent 55%),linear-gradient(var(--bg),var(--bg2))}
+.wrap{max-width:1000px;margin:0 auto}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:Georgia,serif;font-style:italic;
+ color:var(--cyn);font-size:14px;letter-spacing:.04em;margin-bottom:10px}
+.eyebrow::before{content:"";width:34px;height:1px;background:var(--cyn)}
+h1{font-family:"Nanum Myeongjo","AppleMyungjo",Georgia,serif;font-weight:800;
+ font-size:clamp(28px,5vw,44px);letter-spacing:-.01em;line-height:1.2}
+h1 em{font-style:normal;color:var(--cyn)}
+.lede{color:var(--ink2);font-size:clamp(14px,1.8vw,16px);margin-top:12px;max-width:62ch;text-wrap:balance}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:34px}
+a.card{display:flex;flex-direction:column;gap:9px;padding:22px 20px;border-radius:16px;
+ border:1px solid var(--line2);background:linear-gradient(180deg,var(--panel2),var(--paper));
+ color:inherit;text-decoration:none;transition:transform .25s,border-color .25s,box-shadow .25s}
+a.card:hover{transform:translateY(-4px);border-color:var(--cyn);box-shadow:0 14px 40px -18px rgba(57,198,240,.5)}
+.card .id{font-family:var(--mono);font-size:11px;color:var(--cyn);letter-spacing:.1em}
+.card h2{font-family:"Nanum Myeongjo","AppleMyungjo",Georgia,serif;font-size:20px;font-weight:800}
+.card p{font-size:12.5px;color:var(--ink2);line-height:1.6}
+.card .go{margin-top:auto;padding-top:8px;font-size:11.5px;color:var(--mut2);font-family:var(--mono)}
+.note{margin-top:30px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;
+ background:var(--paper);font-size:12.5px;color:var(--ink2)}
+.note b{color:var(--ink)}
+</style>
+<div class="wrap">
+  <div class="eyebrow">CoP Physical AI · 시안 검토</div>
+  <h1>왜 <em>피지컬 AI</em>인가 — 시안 4종</h1>
+  <p class="lede">내용(10개 섹션)은 네 가지 모두 동일합니다. 구성 형식만 다릅니다. 카드를 눌러 각각 스크롤해 보세요.</p>
+
+  <div class="grid">
+    <a class="card" href="A.html">
+      <span class="id">시안 A</span><h2>논증 구조</h2>
+      <p>각 섹션이 질문 → 근거 → 반론 검토로 전개. 논리를 따라가며 납득하게 하는 구성.</p>
+      <span class="go">열기 →</span>
+    </a>
+    <a class="card" href="B.html">
+      <span class="id">시안 B</span><h2>계층 구조</h2>
+      <p>감지 · 조작 · 이동/인지 계층이 페이지를 관통. 상단 계층 바가 현재 위치 표시.</p>
+      <span class="go">열기 →</span>
+    </a>
+    <a class="card" href="C.html">
+      <span class="id">시안 C</span><h2>지표 브리핑</h2>
+      <p>장면마다 핵심 지표 하나와 결론, 출처 구분. 가리키며 설명하기에 적합.</p>
+      <span class="go">열기 →</span>
+    </a>
+    <a class="card" href="D.html">
+      <span class="id">시안 D</span><h2>조건과 접근</h2>
+      <p>현장 조건과 기술적 접근을 좌우 대응. 중간에 긍정·반대 근거 병기로 전환.</p>
+      <span class="go">열기 →</span>
+    </a>
+  </div>
+
+  <div class="note">
+    <b>검토 포인트</b> — 네 시안 모두 (1) 감지 계층과 조치 계층의 구분, (2) 긍정 근거와 반대 근거 병기, (3) 현장 로봇으로 이어지는 것과 새로 풀어야 하는 것의 구분, (4) 데이터 확보 방식의 선택지와 운영 원칙 4개 항목, (5) 확인된 범위와 미확인 항목 구분을 포함합니다.
+  </div>
+</div>

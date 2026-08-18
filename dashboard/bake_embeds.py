@@ -39,6 +39,16 @@ def main() -> int:
         raise SystemExit(f"베이크 실패: story-frame data-srcdoc 매칭 {n}건 (1 기대)")
     print("C(스토리) baked into story-frame")
 
+    # 3) 왜 피지컬 AI인가 를 whypai-frame iframe srcdoc 에 베이크
+    why = ROOT / "_sian_previews" / "WHYPAI.html"
+    if why.exists():
+        wc = esc_attr(why.read_text(encoding="utf-8"))
+        wpat = re.compile(r'(id="whypai-frame"[^>]*?data-srcdoc=")[^"]*(")', re.DOTALL)
+        s, wn = wpat.subn(lambda m: m.group(1) + wc + m.group(2), s, count=1)
+        if wn != 1:
+            raise SystemExit(f"베이크 실패: whypai-frame data-srcdoc 매칭 {wn}건 (1 기대)")
+        print("WHYPAI(왜 피지컬 AI인가) baked into whypai-frame")
+
     TPL.write_text(s, encoding="utf-8")
     return 0
 
