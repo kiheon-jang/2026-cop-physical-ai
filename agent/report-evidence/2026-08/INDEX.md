@@ -2,6 +2,9 @@
 
 > 8월 보고서 매핑: Phase 2 (Sim2Real) hold 지속 + Phase 3(PCB) 진입 검토.
 
+## 2026-08-21
+- Phase 3 W3 (dated 3일차) — **S1 hold 유지 + 무결성 감사(0.925 불변) + 23:30 렌더 4종 PASS**: `agent/research-log/2026-08-21.md` → 8월 보고서 [ACT 학습 / Phase 3 PCB(S1) 안정성] 섹션. 운영 `rollout_summary_s1.json` md5 **fbeef25775e5846ba2e3ce887afd1929** 8/8~8/20 불변 · `cop_dataset_target`=`data/episodes_s1`(`.next` 없음) · train_act proc 없음 · datasets 불변 → 회귀 0. 렌더 pcb_reset 4/4·camera 30f×2·6dof 2501f PASS·pick_place legacy fail(비회귀).
+
 ## 2026-08-17
 - Phase 3 W2 — **S1 hold 유지 + 무결성 감사(0.925 불변) + 23:30 렌더 3종 실기 실행 PASS**: `agent/research-log/2026-08-17.md`, `research/simulation/2026-08-17_phase3-w2-s1-hold-integrity-audit.md` → 8월 보고서 [ACT 학습 / Phase 3 PCB(S1) 안정성] 섹션.
   - **무결성(비파괴)**: 운영 `rollout_summary_s1.json` md5 **fbeef25775e5846ba2e3ce887afd1929** 8/8~8/16 대비 불변 · `cop_dataset_target`=`data/episodes_s1`(`.next` 없음) · train_act proc 없음 → 회귀/오염 0. 4-seed 0.925(37/40) 유지.
