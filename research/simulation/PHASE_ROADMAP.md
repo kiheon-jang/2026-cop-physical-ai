@@ -806,6 +806,14 @@ uv pip install <패키지명>
     md5 `fbeef25775e5846ba2e3ce887afd1929` 8/8~8/20 대비 불변(seed42/7/123/2026 = 0.90/0.90/1.00/0.90
     평균 0.925)·DR/축별/시드별 요약 20종 status=ok·datasets s1 100ep/7231f·floor·cl 각 50ep/3350f 불변
     → **회귀/오염 0**. [자가치유] 없음. 상세: `2026-08-21_phase3-w3-hold-integrity-audit.md`.
+  - 🔄 **2026-08-22 — W3 dated 4일차 hold 유지 + 무결성 감사**: 드라이버 STAGE=완료/유지
+    (`episodes_s1` 100ep·0.925, 새 사이클 미트리거) → 재실행 없음. W3 dated 범위(8/19~8/25) 안이나
+    W3(ACT 학습+측정) 은 8/6 조기 완주 → dated W1~W3 실행가능 항목 전부 `[v]`, 잔여 W2 = omen lerobot
+    로드 스모크 1건뿐(외부 의존) · 다음 pending = W4(8/26~) omen 핸드오프(외부 의존) → hold. 비파괴
+    감사: 타겟 마커 `data/episodes_s1`(17B, `.next` 없음)·학습 프로세스 없음·`rollout_summary_s1.json`
+    md5 `fbeef25775e5846ba2e3ce887afd1929` 8/8~8/21 대비 불변(seed42/7/123/2026 = 0.90/0.90/1.00/0.90
+    평균 0.925)·datasets s1 100ep/7231f·floor·cl 각 50ep/3350f 불변 → **회귀/오염 0**. [자가치유] 없음.
+    상세: `2026-08-22_phase3-w3-hold-day4-integrity-audit.md`.
 - W4 (8/26 ~ 8/31): sim2real 핸드오프
   - [ ] 합성 데이터셋 + sim-trained 정책 omen 전달 (실기 담당자 협업 — 실기 fine-tune 대조군)
   - [ ] P1 LED ROI 캘리브 지원 — 시뮬 top/closeup 프레임으로 ROI·임계값 검증 결과 공유
