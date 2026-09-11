@@ -30,10 +30,14 @@ import os
 import numpy as np
 import mujoco as mj
 
-from sim_pcb_reset import CAM_W, CAM_H, FPS, CAMERA_NAMES, ZONE_X, ZONE_Y, ZONE_YAW_DEG, HOME_QPOS
+from sim_pcb_reset import CAM_W, CAM_H, FPS, CAMERA_NAMES, ZONE_X, ZONE_Y, ZONE_YAW_DEG
 
 BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SCENE_PATH = os.path.join(BASE, "sim/assets/rs232_unplug_scene.xml")
+
+# A7 RS232 전용 HOME: S1 HOME_QPOS 의 shoulder_lift -1.6(-91.67°)은 실기 펌웨어 위치한계(-89.54°) 밖이라 명령 불가 →
+# 하한으로 클립, 나머지 유지 (SPEC §1.2). S1 HOME 은 불변. 이 모듈의 HOME_QPOS 를 쓰는 reset·수집기·측정기 공통.
+HOME_QPOS = (0.0, -1.56274, 1.4, 0.9, 0.0, 0.0)
 
 TASK_LABEL = "unplug the rs232 cable"
 
@@ -370,5 +374,127 @@ def _self_check():  # noqa: C901
           f"(PARTIAL {UNPLUG_PARTIAL_M*1000:.2f}mm, FULL {UNPLUG_FULL_M*1000:.1f}mm, 보유력 {F_ret}N)")
 
 
+# 실기 정합 관절 한계 [rad] (SPEC §1.1): 팔 4축 = follower 캘리브 = 펌웨어 위치한계, wrist_roll·gripper = URDF. self-check [8] 기준값.
+REAL_JOINT_RANGE = {
+    "shoulder_pan": (-1.74379, 1.74379), "shoulder_lift": (-1.56274, 1.56274), "elbow_flex": (-1.68702, 1.68702),
+    "wrist_flex": (-1.63025, 1.63025), "wrist_roll": (-2.74385, 2.84121), "gripper": (-0.17453, 1.74533),
+}
+
+
+def _self_check_real():  # noqa: C901
+    """실기 정합 확장 [8][9][11]. [10]·[12](원본 대비) 는 원본 트윈이 필요해 check_vs_orig.py 에 있음."""
+    twin = Rs232UnplugTwin()
+    m, d = twin.model, twin.data
+    B = mj.mjtObj.mjOBJ_BODY
+    bn = lambda b: mj.mj_id2name(m, B, int(b))
+    home = np.array(HOME_QPOS)
+
+    # 8. 관절 한계 = 스펙 값 (range·ctrlrange), HOME 이 한계 안, 한계 밖 명령 시 한계에서 막힘.
+    #    검사용 모델 사본은 접촉을 꺼서(팔↔바닥·base 가 한계 도달을 가로막지 않게) 관절 한계만 본다.
+    #    (a) ctrlrange 클램프(=펌웨어 Goal 클램프) 켠 상태 (b) 클램프를 끈 사본 = 관절 range 자체가 정지시키는가.
+    for jn, r in REAL_JOINT_RANGE.items():
+        jid = mj.mj_name2id(m, mj.mjtObj.mjOBJ_JOINT, jn)
+        aid = mj.mj_name2id(m, mj.mjtObj.mjOBJ_ACTUATOR, jn)
+        assert m.jnt_limited[jid] and np.allclose(m.jnt_range[jid], r, rtol=0, atol=1e-9), (jn, m.jnt_range[jid])
+        assert m.actuator_ctrllimited[aid] and np.allclose(m.actuator_ctrlrange[aid], r, rtol=0, atol=1e-9), (jn, m.actuator_ctrlrange[aid])
+    lim = m.jnt_range[:6]
+    assert np.all(home >= lim[:, 0]) and np.all(home <= lim[:, 1]), f"HOME 이 한계 밖 {home}"
+    worst = {}
+    for clamp in (True, False):
+        m2 = mj.MjModel.from_xml_path(SCENE_PATH)
+        m2.opt.disableflags |= mj.mjtDisableBit.mjDSBL_CONTACT
+        if not clamp:
+            m2.actuator_ctrllimited[:6] = 0
+        beyond, gap = 0.0, 0.0
+        for j in range(6):
+            for side, sgn in ((0, -1.0), (1, 1.0)):
+                d2 = mj.MjData(m2)
+                d2.qpos[:6] = home
+                d2.ctrl[:6] = home
+                d2.ctrl[j] = lim[j, side] + sgn * 0.5          # 한계 밖 0.5rad 명령
+                for _ in range(int(2.0 / m2.opt.timestep)):
+                    mj.mj_step(m2, d2)
+                over = sgn * (d2.qpos[j] - lim[j, side])       # + = 한계 넘어감
+                beyond, gap = max(beyond, over), max(gap, -over)
+        worst[clamp] = (np.degrees(beyond), np.degrees(gap))
+    # 측정(2026-09-11): 클램프 켬 최대 0.013°, 클램프 끔(2.94N·m 로 한계를 밈) 소프트 한계 관통 최대 0.12°
+    assert worst[True][0] < 0.1 and worst[True][1] < 0.1, f"클램프 켬: 넘어감/미도달 {worst[True]}°"
+    assert worst[False][0] < 0.25 and worst[False][1] < 0.25, f"클램프 끔: 관절 range 가 못 막음 {worst[False]}°"
+    print(f"[8] 관절 한계 = 스펙 {len(REAL_JOINT_RANGE)}축 (range·ctrlrange), HOME 한계 안; 한계 밖 0.5rad 명령 2초 — "
+          f"ctrlrange 클램프: 최대 넘어감 {worst[True][0]:.3f}° 미도달 {worst[True][1]:.3f}° / "
+          f"클램프 끔(관절 range 만): 최대 관통 {worst[False][0]:.3f}° 미도달 {worst[False][1]:.3f}°")
+
+    # 9. base 충돌 활성. 검사 전용 MjData 로 운동학(mj_forward)만.
+    bc = mj.mj_name2id(m, B, "base_collision")
+    sh = mj.mj_name2id(m, B, "shoulder")
+    g_bc = [g for g in range(m.ngeom) if m.geom_bodyid[g] == bc]
+    assert len(g_bc) == 10 and all(m.geom_contype[g] and m.geom_conaffinity[g] and m.geom_group[g] == 3 for g in g_bc)
+    assert m.body_weldid[bc] == 0, "base_collision 이 world 고정 아님"
+    excl = {(int(s) >> 16, int(s) & 0xFFFF) for s in m.exclude_signature}
+    assert tuple(sorted((bc, sh))) in excl, "base_collision↔shoulder exclude 없음"
+    d9 = mj.MjData(m)
+
+    def base_hits():
+        mj.mj_forward(m, d9)
+        out = []
+        for c in d9.contact[:d9.ncon]:
+            b1, b2 = int(m.geom_bodyid[c.geom1]), int(m.geom_bodyid[c.geom2])
+            if bc in (b1, b2):
+                out.append((bn(b2 if b1 == bc else b1), float(c.dist)))
+        return out
+
+    pcb = twin._pcb_bid
+    m.body_quat[pcb] = (1, 0, 0, 0)
+    # (a) 강제 자세: pan 0, lift×elbow 13×13 × wrist_flex {하한,0,상한} 전 한계 안 격자 → 팔 링크↔base 관통 검출
+    m.body_pos[pcb][:2] = (0.30, 0.0)
+    arm_hit = {}
+    for lift in np.linspace(lim[1, 0], lim[1, 1], 13):
+        for elbow in np.linspace(lim[2, 0], lim[2, 1], 13):
+            for wf in (lim[3, 0], 0.0, lim[3, 1]):
+                d9.qpos[:6] = (0.0, lift, elbow, wf, 0.0, 0.0)
+                for b, dist in base_hits():
+                    if dist < -PENETRATION_TOL_M and b != "rs232_plug":
+                        arm_hit[b] = min(arm_hit.get(b, 0.0), dist)
+    assert "shoulder" not in arm_hit, "exclude 된 shoulder 가 base 와 접촉"
+    assert arm_hit, "한계 안 강제 자세 507개에서 팔 링크↔base 관통 0 — base 충돌 비활성?"
+    # (b) 후드↔base: PCB 를 존 밖 (0.0969, 0) 에 두면 후드 중심이 base 슬랩 안 → rs232_plug↔base 접촉. 정적 PCB·포트↔base 는 접촉 안 생김.
+    d9.qpos[:6] = home
+    m.body_pos[pcb][:2] = (0.0969, 0.0)
+    hb = base_hits()
+    hood_d = min((dist for b, dist in hb if b == "rs232_plug"), default=None)
+    assert hood_d is not None and hood_d < -PENETRATION_TOL_M, f"후드↔base 접촉 미검출 {hb}"
+    assert not any(b in ("pcb", "rs232_port", "rs232_port_2", "rs232_port_3") for b, _ in hb), hb
+    # (c) HOME 자세 pan 전범위 201점 sweep (PCB 원거리) → base 와의 접촉 0 (shoulder 가짜 접촉 포함)
+    m.body_pos[pcb][:2] = (0.30, 0.0)
+    sweep = []
+    for pan in np.linspace(lim[0, 0], lim[0, 1], 201):
+        d9.qpos[:6] = home
+        d9.qpos[0] = pan
+        sweep += base_hits()
+    assert not sweep, f"HOME pan sweep 에서 base 접촉 {sweep[:5]}"
+    print(f"[9] base 충돌 활성 — geom 10(박스 8+메시 2) contype/group3, world 고정, exclude base_collision↔shoulder; "
+          f"강제 자세 팔↔base 관통 {sorted((k, round(v*1e3, 1)) for k, v in arm_hit.items())} mm; "
+          f"후드↔base {hood_d*1e3:.1f}mm (정적 PCB·포트↔base 접촉 0); HOME pan sweep 201점 base 접촉 0 (shoulder 포함)")
+
+    # 11. HOME 중력 3초: 원래 자세 유지, 팔 관절 한계 제약 on/off 떨림 없음
+    twin.reset(np.random.default_rng(7))
+    n = int(3.0 / m.opt.timestep)
+    q, active, qv_last = [], [], 0.0
+    for k in range(n):
+        twin.step()
+        q.append(d.qpos[:6].copy())
+        active.append(any(d.efc_type[i] == mj.mjtConstraint.mjCNSTR_LIMIT_JOINT and d.efc_id[i] < 6 for i in range(d.nefc)))
+        if k >= n - int(1.0 / m.opt.timestep):
+            qv_last = max(qv_last, float(np.abs(d.qvel[:6]).max()))
+    dev = np.degrees(np.abs(np.array(q) - home).max(0))
+    toggles = int(np.abs(np.diff(np.array(active, int))).sum())
+    assert dev.max() < 0.5 and qv_last < 1e-3 and toggles == 0, f"HOME 불안정: 편차 {dev.round(3)}°, qvel {qv_last:.2e}, 한계 토글 {toggles}"
+    print(f"[11] HOME 중력 3초 — 관절별 최대 편차 {dev.round(3).tolist()}°, 마지막 1초 |qvel| 최대 {qv_last:.1e} rad/s, "
+          f"팔 관절 한계 제약 활성 스텝 {int(np.sum(active))}/{n}, on/off 토글 {toggles}")
+    twin.close()
+    print("sim_rs232_unplug 실기 정합 self-check: [8][9][11] PASS ([10][12] = check_vs_orig.py)")
+
+
 if __name__ == "__main__":
     _self_check()
+    _self_check_real()

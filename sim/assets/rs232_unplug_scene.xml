@@ -19,14 +19,17 @@
        근거·임계값은 sim_rs232_unplug.py 상단 주석.
 -->
 <mujoco model="rs232_unplug_twin">
-  <include file="../../SO-ARM100/Simulation/SO101/so101_new_calib.xml"/>
+  <!-- 실기 정합: 관절 한계·forcerange·base 충돌 적용 팔 사본 (so101_real.xml 머리 주석) -->
+  <include file="so101_real.xml"/>
 
   <!-- 파지 마찰: 기본 pyramidal cone·impratio 1 은 마찰 제약이 법선보다 물러 파지가 크리프로 미끄러진다.
        후드 solref/solimp(아래)만으론 핀치-당김 FULL 18/25, 첫 4mm 당김의 slip/TCP이동 중앙 0.32(최대 0.65) 가 남음.
        elliptic cone(실제 쿨롱 원추) + impratio 10(MuJoCo 문서의 파지 권장) 병행 시 충돌 없는 파지 자세 21/21 FULL,
        slip 비 최대 -0.03 (남는 4/25 는 파지 직전 자세가 moving_jaw 와 shoulder 자기충돌인 존 근단 배치). 이 씬 한정, S1 씬 불변.
        보유력 불변: 1N/s 램프 FULL 7.316N(기본 설정과 동일), 0.95× 3초 0.137mm. (2026-09-11 측정) -->
-  <option cone="elliptic" impratio="10"/>
+  <!-- E3 프레임 주기: timestep 1/510 s → 수집기 17스텝 = 1/30 s (실기 데이터셋 fps 30, meta/info.json).
+       원래 0.002×17 = 29.41Hz. 후드·슬라이드 solref timeconst 0.004 ≥ 2·dt(0.00392) 유지. -->
+  <option cone="elliptic" impratio="10" timestep="0.0019607843137254902"/>
 
   <visual>
     <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
@@ -63,6 +66,13 @@
       </body>
       <!-- 빈 포트(왼쪽, +y) — 실기에 있는 이웃 포트. 파지 시 장애물 -->
       <body name="rs232_port_2" pos="-0.075 0.018 0.01128">
+        <geom type="box" pos="0.0005 0 0" size="0.0005 0.0154 0.00628" rgba="0.7 0.7 0.72 1"/>
+        <geom type="box" pos="0.007 0 -0.00078" size="0.006 0.0095 0.0055" rgba="0.15 0.15 0.15 1"/>
+        <geom type="box" pos="-0.00295 0 0" size="0.00295 0.008165 0.00395" rgba="0.7 0.7 0.72 1"/>
+      </body>
+      <!-- D1 실기 포트 3개(S3(C/P)·S2·꽂힌 포트, 꽂힌 포트가 끝 — fidelity/frames/rt_closeup_01.png): 빈 포트 1개 추가,
+           rs232_port_2 와 동일 형상, 같은 36mm 피치(피치는 목측 34~41mm, 실측 필요). 보드 폭 안(0.054+0.0154 < 0.075). -->
+      <body name="rs232_port_3" pos="-0.075 0.054 0.01128">
         <geom type="box" pos="0.0005 0 0" size="0.0005 0.0154 0.00628" rgba="0.7 0.7 0.72 1"/>
         <geom type="box" pos="0.007 0 -0.00078" size="0.006 0.0095 0.0055" rgba="0.15 0.15 0.15 1"/>
         <geom type="box" pos="-0.00295 0 0" size="0.00295 0.008165 0.00395" rgba="0.7 0.7 0.72 1"/>
