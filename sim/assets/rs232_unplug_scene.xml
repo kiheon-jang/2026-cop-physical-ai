@@ -1,0 +1,110 @@
+<!-- sim/assets/rs232_unplug_scene.xml — Phase 4 W1: 3단계 RS232(HHT) 케이블 분리 트윈
+
+     환경 불변: 팔 include · 조명 · 바닥 · top/closeup 카메라 · PCB 치수(15×15cm, 두께 10mm)는
+     pcb_reset_scene.xml 과 동일. 리셋 버튼·LED 는 없음(분리 과제 전용).
+     PCB 배치 무작위화는 samples/training/sim_rs232_unplug.py 의 reset 훅(S1 존 상수 import).
+
+     실기 배치(영상 프레임 2026-09): PCB 팔 쪽 가장자리에 DE-9 포트 2개가 판면과 나란히 팔을 향함,
+     오른쪽(팔에서 보아 오른쪽 = 월드 -y) 포트에 베이지 후드 플러그가 꽂혀 있고 케이블은 후드 옆으로 빠짐.
+     → 분리 = 후드를 잡고 팔 쪽(PCB 로컬 -x)으로 수평으로 당김.
+
+     DE-9(E 쉘) 치수, PCB 로컬 좌표(보드 중심 원점, 상면 z=+0.005, 팔 쪽 가장자리 x=-0.075):
+       플랜지 30.81 × 12.55 mm, 두께 1mm, 플랜지 앞면 = 보드 가장자리, 하단 = 보드 상면
+         → 커넥터 중심선 z = 0.005 + 0.012550/2 = 0.01128
+       D 쉘 돌출 5.90mm (팔 쪽), 외형 16.33 × 7.90 mm (사다리꼴 → 박스)
+         출처: Adam Tech DXXX-SR 도면 DE09 행 (C=30.81, 높이 12.55, A=16.33, 7.90, 쉘 .232"=5.90mm)
+       포트 간격 36mm(플랜지 사이 ~5mm, 실기 근접 프레임 목측 — 실측 수신 시 조정)
+       플러그 후드 31 × 15.5 × 30 mm (DE-9 표준 백쉘 근사), 쉘 결합 5.9mm → 결합 시 플러그 플랜지 x=-0.0809
+     보유력: 슬라이드 조인트 frictionloss = 핀 9개 × 접점 분리력(쿨롱 마찰, 위치 무관).
+       근거·임계값은 sim_rs232_unplug.py 상단 주석.
+-->
+<mujoco model="rs232_unplug_twin">
+  <include file="../../SO-ARM100/Simulation/SO101/so101_new_calib.xml"/>
+
+  <!-- 파지 마찰: 기본 pyramidal cone·impratio 1 은 마찰 제약이 법선보다 물러 파지가 크리프로 미끄러진다.
+       후드 solref/solimp(아래)만으론 핀치-당김 FULL 18/25, 첫 4mm 당김의 slip/TCP이동 중앙 0.32(최대 0.65) 가 남음.
+       elliptic cone(실제 쿨롱 원추) + impratio 10(MuJoCo 문서의 파지 권장) 병행 시 충돌 없는 파지 자세 21/21 FULL,
+       slip 비 최대 -0.03 (남는 4/25 는 파지 직전 자세가 moving_jaw 와 shoulder 자기충돌인 존 근단 배치). 이 씬 한정, S1 씬 불변.
+       보유력 불변: 1N/s 램프 FULL 7.316N(기본 설정과 동일), 0.95× 3초 0.137mm. (2026-09-11 측정) -->
+  <option cone="elliptic" impratio="10"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <global azimuth="160" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge"
+             rgb1="0.29 0.30 0.32" rgb2="0.24 0.25 0.27" markrgb="0.8 0.8 0.8"
+             width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true"
+              texrepeat="5 5" reflectance="0.1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+    <light pos="0.5 -0.4 0.8" dir="-0.4 0.5 -1" diffuse="0.35 0.35 0.35"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
+    <camera name="top" pos="0.225 0 0.60" xyaxes="0 -1 0 1 0 0" fovy="52"/>
+    <camera name="closeup" pos="0.38 -0.16 0.12" zaxis="0.155 -0.16 0.09" fovy="48"/>
+
+    <body name="pcb" pos="0.225 0.0 0.02">
+      <geom name="pcb_board" type="box" size="0.075 0.075 0.005" rgba="0.1 0.4 0.1 1"/>
+
+      <!-- 꽂힌 포트(팔에서 보아 오른쪽, -y). 원점 = 플랜지 앞면 중심 -->
+      <body name="rs232_port" pos="-0.075 -0.018 0.01128">
+        <geom name="rs232_port_flange" type="box" pos="0.0005 0 0" size="0.0005 0.0154 0.00628"
+              rgba="0.7 0.7 0.72 1"/>
+        <geom name="rs232_port_housing" type="box" pos="0.007 0 -0.00078" size="0.006 0.0095 0.0055"
+              rgba="0.15 0.15 0.15 1"/>
+        <geom name="rs232_port_shell" type="box" pos="-0.00295 0 0" size="0.00295 0.008165 0.00395"
+              rgba="0.7 0.7 0.72 1"/>
+      </body>
+      <!-- 빈 포트(왼쪽, +y) — 실기에 있는 이웃 포트. 파지 시 장애물 -->
+      <body name="rs232_port_2" pos="-0.075 0.018 0.01128">
+        <geom type="box" pos="0.0005 0 0" size="0.0005 0.0154 0.00628" rgba="0.7 0.7 0.72 1"/>
+        <geom type="box" pos="0.007 0 -0.00078" size="0.006 0.0095 0.0055" rgba="0.15 0.15 0.15 1"/>
+        <geom type="box" pos="-0.00295 0 0" size="0.00295 0.008165 0.00395" rgba="0.7 0.7 0.72 1"/>
+      </body>
+
+      <!-- HHT 케이블 플러그. 원점 = 플러그 플랜지 앞면(결합 시 포트 쉘 끝 x=-0.0809).
+           슬라이드 축 = 커넥터 축(팔 방향, PCB 로컬 -x): 변위 + = 빠지는 방향.
+           range 하한 0 = 완전 결합(쉘 바닥닿음), 상한 40mm = 케이블 여유(쉘 5.9mm 완전 이탈 후 여유). -->
+      <body name="rs232_plug" pos="-0.0809 -0.018 0.01128">
+        <joint name="rs232_plug_slide" type="slide" axis="-1 0 0" range="0 0.040"
+               frictionloss="7.2" damping="0.5"
+               solimpfriction="0.9999 0.9999 0.001 0.5 2" solreffriction="0.004 1"
+               solreflimit="0.004 1"/>
+        <!-- solimp/solreffriction: MuJoCo frictionloss 는 소프트 제약이라 기본값(d=0.9, 0.02s)에선
+             보유력 이하 하중에도 크리프 속도 v≈(1-d)/d·(F/m)/(2/timeconst) 로 미끄러진다
+             (30g 플러그·0.8×보유력 → ≈0.2 m/s, self-check 실측 2초 43.8mm). 실물 쿨롱 정지마찰은
+             크리프가 없으므로 d→0.9999, timeconst=2×dt 로 정지마찰에 가깝게 한다 — 보유력 크기는 불변.
+             solreflimit: 기본 0.02s 면 40mm 한계(케이블 여유 대용)를 10.8N 당김에 9.6mm 넘어간다 → 2×dt. -->
+        <geom name="rs232_plug_shell" type="box" pos="0.00295 0 0" size="0.00295 0.0085 0.0042"
+              rgba="0.7 0.7 0.72 1" mass="0.002"/>
+        <geom name="rs232_plug_flange" type="box" pos="-0.0005 0 0" size="0.0005 0.0154 0.00628"
+              rgba="0.7 0.7 0.72 1" mass="0.003"/>
+        <!-- 후드 접촉 solref/solimp: MuJoCo 기본 소프트 접촉(0.02s, d 0.9~0.95)에선 그리퍼 파지가 크리프로
+             미끄러져 법선 5.85+20.65N(쿨롱 한계 ~26N)에도 접선력 0.5~0.7N 만 전달, 핀치-당김 FULL 0/25
+             (독립 검증 2026-09-11). 실물 경질 플라스틱 후드는 정지마찰로 버틴다 → timeconst 2×dt, d→0.99.
+             μ=1·frictionloss 7.2 불변, 이탈 힘 7.316N 불변(외력 램프). 위 option 과 함께 써야 slip 이 사라짐. priority=1 → 그리퍼(기본 0)와의 접촉에
+             후드 값이 혼합(평균) 없이 쓰임; 마찰은 양쪽 모두 기본 μ=1 이라 우선순위로 바뀌지 않음. -->
+        <geom name="rs232_plug_hood" type="box" pos="-0.016 0 0" size="0.015 0.0155 0.00775"
+              rgba="0.85 0.78 0.62 1" mass="0.020"
+              priority="1" solref="0.004 1" solimp="0.99 0.999 0.001 0.5 2"/>
+        <!-- 케이블: 시각 전용(충돌 없음), 후드 옆(-y)으로 빠짐 -->
+        <geom name="rs232_cable" type="capsule" fromto="-0.022 -0.0155 0 -0.022 -0.060 0" size="0.003"
+              contype="0" conaffinity="0" rgba="0.85 0.82 0.72 1" mass="0.005"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <!-- 플러그 ↔ 포트/보드 상호 충돌 배제 — 결합 상태에서 플러그 쉘은 포트 쉘과 겹쳐 끼워진 구조라
+       (S1 버튼↔보드와 같은 논리) 박스 접촉이 잡히면 슬라이드가 막힌다. 결합 마찰은 frictionloss 가 대신한다.
+       그리퍼(gripper / moving_jaw) ↔ 플러그 접촉은 배제하지 않는다(self-check 가 필터 확인). -->
+  <contact>
+    <exclude body1="pcb" body2="rs232_plug"/>
+    <exclude body1="rs232_port" body2="rs232_plug"/>
+  </contact>
+</mujoco>

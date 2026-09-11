@@ -1287,6 +1287,10 @@ _SUMMARY_LABELS = {
     "rollout_summary_s1_seed7.json": "S1 리셋버튼 (2단계 · seed7)",
     "rollout_summary_s1_seed123.json": "S1 리셋버튼 (2단계 · seed123)",
     "rollout_summary_s1_seed2026.json": "S1 리셋버튼 (2단계 · seed2026)",
+    "rollout_summary_rs232.json": "RS232 분리 (3단계 · 부분성공 · seed42)",
+    "rollout_summary_rs232_seed7.json": "RS232 분리 (3단계 · seed7)",
+    "rollout_summary_rs232_seed123.json": "RS232 분리 (3단계 · seed123)",
+    "rollout_summary_rs232_seed2026.json": "RS232 분리 (3단계 · seed2026)",
 }
 
 

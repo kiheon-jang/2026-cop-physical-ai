@@ -52,12 +52,21 @@ fi
 DS_BASE="${DATA_DIR##*/}"
 # S1(리셋버튼)은 pick-place 와 수집기·관측(2카메라)·측정기가 다르다 → 스테이지별 분기 (아래).
 [[ "${DS_BASE}" == "episodes_s1" ]] && IS_S1=1 || IS_S1=0
+# RS232(3단계 케이블 분리, Phase 4)도 S1 과 같은 합성·2카메라 계약. 목표 = 합성 100ep, 로드맵 완료 기준
+# '시뮬 분리 부분성공 50%' (측정기 success_rate = 부분성공 4-seed 공정추정과 같은 단위). env override 유지.
+[[ "${DS_BASE}" == "episodes_rs232" ]] && IS_RS232=1 || IS_RS232=0
+if [[ "${IS_RS232}" == 1 ]]; then
+  TARGET_EP="${COP_TARGET_EP:-100}"
+  TARGET_RATE="${COP_TARGET_RATE:-0.50}"
+fi
 
 # ── 체크포인트 디렉터리: 데이터셋별 격리 (episodes_cl 은 레거시 경로 유지) ──
 if [[ "${DS_BASE}" == "episodes_cl" ]]; then
   CKPT_DIR="${ROOT}/checkpoints/act"
 elif [[ "${IS_S1}" == 1 ]]; then
   CKPT_DIR="${ROOT}/checkpoints/act_s1_sim"   # 수동 W3 학습이 이 경로 사용 (규칙상 act_s1 아님)
+elif [[ "${IS_RS232}" == 1 ]]; then
+  CKPT_DIR="${ROOT}/checkpoints/act_rs232_sim"  # S1 act_s1_sim 과 같은 _sim 규약
 else
   CKPT_DIR="${ROOT}/checkpoints/act_${DS_BASE#episodes_}"
 fi
@@ -66,6 +75,7 @@ fi
 case "${DS_BASE}" in
   *floor*) COP_SCENE="${ROOT}/SO-ARM100/Simulation/SO101/scene_grasp_floor.xml" ;;
   *s1*)    COP_SCENE="${ROOT}/sim/assets/pcb_reset_scene.xml" ;;  # S1 측정기는 twin 자체 로드 — 참고용
+  *rs232*) COP_SCENE="${ROOT}/sim/assets/rs232_unplug_scene.xml" ;;  # RS232 측정기도 twin 자체 로드 — 참고용
   *)       COP_SCENE="${ROOT}/SO-ARM100/Simulation/SO101/scene_grasp_pads.xml" ;;
 esac
 export COP_SCENE
@@ -167,6 +177,10 @@ if [[ "${EP}" -lt "${TARGET_EP}" ]]; then
     echo "⚠ STAGE=보류  S1 합성 데이터 부족(${EP}<${TARGET_EP}ep) — S1 수집기=samples/training/sim_pcb_reset_collector.py (별도). pick-place 수집기 미실행 (episodes_s1 보호)."
     exit 0
   fi
+  if [[ "${IS_RS232}" == 1 ]]; then       # RS232 도 합성 전용 — pick-place 수집기로 채우면 episodes_rs232 오염
+    echo "⚠ STAGE=보류  RS232 합성 데이터 부족(${EP}<${TARGET_EP}ep) — RS232 수집기=samples/training/sim_rs232_unplug_collector.py (별도). pick-place 수집기 미실행 (episodes_rs232 보호)."
+    exit 0
+  fi
   # 가드: info.json 이 존재하는데 0 이 나오면 일시적 읽기 실패 가능성 — 수집(=기존 데이터
   # 대피 후 재수집) 을 시작하지 않는다 (운영 데이터셋 보호).
   if [[ "${EP}" -eq 0 && -f "${DATA_DIR}/meta/info.json" ]]; then
@@ -187,6 +201,9 @@ if [[ ! -f "${TRAINED_MARK}" || "$(cat "${TRAINED_MARK}" 2>/dev/null || echo x)"
   if [[ "${IS_S1}" == 1 ]]; then          # S1 2카메라 계약 — 없으면 1카메라로 학습돼 데이터와 형상 불일치
     export COP_CAMERA_KEYS="top,closeup"
     export COP_DATASET_REPO_ID="local/pcb_reset_sim"
+  elif [[ "${IS_RS232}" == 1 ]]; then     # RS232 2카메라 계약 (sim_rs232_unplug_collector.DATASET_REPO_ID)
+    export COP_CAMERA_KEYS="top,closeup"
+    export COP_DATASET_REPO_ID="local/rs232_unplug_sim"
   fi
   if bash "${ROOT}/scripts/start_act_train.sh" --epochs "${EPOCHS}" --no-resume; then
     echo "${DATA_SIG}" > "${TRAINED_PENDING}"   # 완료 검증(stage 2.5) 후 TRAINED_MARK 로 승격
@@ -205,6 +222,8 @@ if [[ -n "${LATEST_CKPT}" && ( ! -f "${MEASURED_MARK}" || "$(cat "${MEASURED_MAR
   export COP_CKPT_DIR="${CKPT_DIR}"
   if [[ "${IS_S1}" == 1 ]]; then
     MEASURE_ARGS=( "${ROOT}/scripts/render_act_rollout_s1.py" )        # LED latch 4-seed, S1 산출물
+  elif [[ "${IS_RS232}" == 1 ]]; then
+    MEASURE_ARGS=( "${ROOT}/scripts/render_act_rollout_rs232.py" )     # 플러그 변위 latch 4-seed, RS232 산출물
   else
     MEASURE_ARGS=( "${ROOT}/scripts/render_act_rollout.py" --rollouts 10 )
   fi

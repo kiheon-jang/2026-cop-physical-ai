@@ -839,13 +839,24 @@ uv pip install <패키지명>
 > 2026-09-11: 실기 트랙 협업을 기다리는 항목은 보류로 표시하고 W1 실행 항목을 추가해, 야간 에이전트가 RS232 착수로 넘어가게 함.
 
 - W1: RS232 커넥터 mesh 모델링, 케이블 분리(꽂힌 케이블 빼기) 시뮬 데이터 합성
-  - [ ] RS232 포트 + HHT 케이블 커넥터 MJCF 트윈 — `sim/assets/rs232_unplug_scene.xml`. `pcb_reset_scene.xml` 과 같은 카메라(top·closeup)·같은 15cm 배치 존을 쓰고, 커넥터는 DE-9(DB9) 표준 규격으로 1차 구성한 뒤 실기 실측이 확보되면 교체(환경 불변 원칙)
-  - [ ] 분리 성공 자동 판정 — 커넥터가 포트에서 기준 거리 이상 빠지면 성공, 부분성공 기준 포함. 수집기와 평가기가 같은 상수를 공유
-  - [ ] closed-loop 분리 expert — 접근 → 파지 → 후퇴, 20-seed 성공률 측정
-  - [ ] 합성 데이터 100ep 수집(`data/episodes_rs232`, LeRobot v3 · top/closeup) → `logs/cop_dataset_target.next` 예약으로 학습·측정 사이클 전환
+  - [v] RS232 포트 + HHT 케이블 커넥터 MJCF 트윈 — `sim/assets/rs232_unplug_scene.xml`. `pcb_reset_scene.xml` 과 같은 카메라(top·closeup)·같은 15cm 배치 존을 쓰고, 커넥터는 DE-9(DB9) 표준 규격으로 1차 구성한 뒤 실기 실측이 확보되면 교체(환경 불변 원칙) — **2026-09-11 완료**: `sim_rs232_unplug.py` self-check 7/7 PASS, 보유력 7.2N(이탈 시작 7.30N, DE-9 규격 대역 1.76~30.1N), 물리 파지-당김 21/21 FULL·jaw 열림 대조군 0/21
+  - [v] 분리 성공 자동 판정 — 커넥터가 포트에서 기준 거리 이상 빠지면 성공, 부분성공 기준 포함. 수집기와 평가기가 같은 상수를 공유 — **완료**: 슬라이드 변위 latch FULL 5.90mm(D 쉘 결합 깊이)·PARTIAL 2.95mm, 수집기·측정기 모두 트윈 상수 import
+  - [v] closed-loop 분리 expert — 접근 → 파지 → 후퇴, 20-seed 성공률 측정 — **완료**: 검증자 새 시드 1000~1019 **15/20=0.75**(합격선 0.75 경계, 1차 시도 0.70), 5000~5019 0.95, 7000~7099 0.85. 존 근단 PCB x<0.19 는 2/19 로 사실상 실패. 실패 렌더 분류 검증 1건 불합격(jam 원인 = 서보 토크 한계 아닌 shoulder 링크 간섭)
+  - [v] 합성 데이터 100ep 수집(`data/episodes_rs232`, LeRobot v3 · top/closeup) → `logs/cop_dataset_target.next` 예약으로 학습·측정 사이클 전환 — **완료**: 100ep/16,024frame, 시도 132, yield 0.758. 전환은 `.next` 대신 `logs/cop_dataset_target` 직접 변경(백업 보존) 후 드라이버로 학습 착수
+  - 🔄 **2026-09-11 — RS232 트윈·판정·expert·100ep 합성 완료 + ACT 학습 착수(진행 중)**: 트윈 self-check 7/7, expert 새 시드 0.75(합격선 경계)·7000~7099 0.85, `episodes_rs232` 100ep/16,024f(yield 0.758). 드라이버(`cop_pipeline_advance.sh` RS232 분기)로 ACT 42epoch 학습 착수 pid 31176 → `checkpoints/act_rs232_sim`, epoch0 3,166s·loss 1.877, ETA 9/13 02:00 KST(epoch0 외삽). 남은 이슈: 존 근단 x<0.19 도달불가, jam 원인 = shoulder 링크 간섭(분류 검증 실패), 야간 측정 300s timeout 초과 위험(미검증). 상세: `2026-09-11_phase4-w1-rs232-unplug.md`.
 - W2: DR 강화 + 학습, 실기 검증
+  - [ ] RS232 ACT 학습 (`data/episodes_rs232` → `checkpoints/act_rs232_sim`)
+  - [ ] RS232 4-seed 측정 (완전분리·부분성공)
+  - [ ] RS232 DR 합성 + 재학습
+  - [ ] *(외부 의존 보류 — 실기 트랙 협업)* RS232 실기 검증
 - W3: 최종 모델 선정 (ACT vs DP), 1차 통합 모델 미세조정
+  - [ ] Diffusion Policy 학습 + ACT 대비 비교 (Phase 2 W4 에서 이관)
+  - [ ] 최종 모델 선정
+  - [ ] PCB(S1) + RS232 통합 정책 미세조정
 - W4: 실기 검증 (PCB + RS232 통합), 실패 케이스 분석, 10월 시연 시나리오 확정
+  - [ ] *(외부 의존 보류 — 실기 트랙 협업)* PCB + RS232 통합 실기 검증
+  - [ ] 시뮬 실패 케이스 분석
+  - [ ] 10월 시연 시나리오 확정
 
 **완료 기준**: 시뮬 분리 부분성공 50% + PCB 70% / RS232 부분성공 40% (보고서 목표값)
 
