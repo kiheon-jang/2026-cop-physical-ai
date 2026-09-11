@@ -3624,7 +3624,7 @@ a{color:inherit;text-decoration:none}
     <div class=&quot;bmc-metrics&quot;>
       <div class=&quot;gcard up&quot; data-g=&quot;100&quot; data-col=&quot;grn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>1단계 성공률<span>GRASP &amp;amp; LIFT</span></div></div>
       <div class=&quot;gcard up&quot; data-g=&quot;92.5&quot; data-col=&quot;amb&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>2단계 성공률<span>S1 · RESET BUTTON</span></div></div>
-      <div class=&quot;gcard up&quot; data-g=&quot;63&quot; data-col=&quot;cyn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>일정 진척<span>TO 2026-09-30</span></div></div>
+      <div class=&quot;gcard up&quot; data-g=&quot;0&quot; data-col=&quot;cyn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>일정 진척<span>TO 2026-09-30</span></div></div>
       <div class=&quot;gcard up&quot; data-g=&quot;90&quot; data-col=&quot;grn&quot; data-manual=&quot;D-—&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>시연까지<span>D-DAY COUNTDOWN</span></div></div>
     </div>
   </section>
@@ -4046,18 +4046,14 @@ function setRoute(r) {
   if (r === 'story') {
     const fr = document.getElementById('story-frame');
     if (fr && !fr.getAttribute('srcdoc') && fr.dataset.srcdoc) {
-      // 스토리는 정적 문서라 '시연까지' 게이지를 부모가 business_kpi 값으로 채운다
-      fr.addEventListener('load', function () {
-        const dd = (D.business_kpi || {}).d_day_demo;
-        if (dd == null) return;
-        try {
-          fr.contentDocument.querySelectorAll('.gcard').forEach(function (c) {
-            const cap = c.querySelector('.cap'), big = c.querySelector('.ctr .big');
-            if (cap && big && cap.textContent.indexOf('시연까지') >= 0) big.textContent = 'D-' + dd;
-          });
-        } catch (e) { /* 동일 출처 srcdoc 이라 정상적으로는 도달하지 않음 */ }
-      }, { once: true });
-      fr.srcdoc = fr.dataset.srcdoc;
+      // 스토리는 정적 문서라 게이지 값을 넣기 전에 치환한다 — 로드 후 덮어쓰면 게이지 애니메이션이 다시 덮는다
+      const kpi = D.business_kpi || {};
+      let doc = fr.dataset.srcdoc;
+      if (kpi.d_day_demo != null)
+        doc = doc.replace(/(data-manual=")[^"]*("><div class="gwrap"><\/div><div class="cap">시연까지)/, '$1D-' + kpi.d_day_demo + '$2');
+      if (kpi.target_progress != null)
+        doc = doc.replace(/(data-g=")[^"]*("[^>]*><div class="gwrap"><\/div><div class="cap">일정 진척)/, '$1' + (kpi.target_progress * 100).toFixed(1) + '$2');
+      fr.srcdoc = doc;
     }
   }
   // 플레이그라운드: native 3D 실기팔(#play3d) — 마우스로 조종+클릭 누름(궤도X). DATA 준비까지 재시도.
