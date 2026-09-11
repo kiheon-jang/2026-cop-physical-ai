@@ -7408,24 +7408,31 @@ function renderResults() {
   const summaryEl = document.getElementById('results-summary');
   if (summaryEl) {
     const sr = latest.success_rate != null ? Math.round(latest.success_rate * 100) : null;
+    const s1 = rm.s1 || {};
+    const s1fair = s1.fair_estimate;
+    const s1target = s1.target != null ? s1.target : 0.70;
+    const s1ok = s1fair != null && s1fair >= s1target;
     summaryEl.innerHTML = `
       <div class="story-step done">
         <span class="tag">1단계 · 물체 파지 — 목표 달성</span><br>
         목표는 10회 중 9회 성공(90%)이었고, 최종 측정에서 <b>${sr != null ? sr + '%' : '—'}</b>
         (서로 다른 배치 40회 전부 성공)를 기록했습니다. 아래 차트는 그 경과입니다.
       </div>
-      <div class="story-step now">
-        <span class="tag">2단계 · 리셋버튼 — 학습 중</span><br>
-        시연 100회를 학습하는 단계입니다. 학습이 끝나면 <b>첫 측정 결과가 여기에</b> 추가됩니다.
-        목표는 10회 중 7회(70%) 이상이며, LED 점등으로 자동 판정합니다.
+      <div class="story-step ${s1ok ? 'done' : 'now'}">
+        <span class="tag">${s1ok ? '2단계 · 리셋버튼 — 시뮬 합격선 통과' : '2단계 · 리셋버튼 — 학습 중'}</span><br>
+        ${s1fair != null
+          ? `시뮬레이션 4개 조건 공정추정 <b>${(s1fair * 100).toFixed(1)}%</b>(${s1.success}/${s1.rollouts})를 기록했습니다.
+             합격선은 ${Math.round(s1target * 100)}%이며, 버튼이 기준 깊이 이상 눌려 LED가 점등되어야 성공으로 집계됩니다.`
+          : `시연 100회를 학습하는 단계입니다. 학습이 끝나면 <b>첫 측정 결과가 여기에</b> 추가됩니다.
+             목표는 10회 중 7회(70%) 이상이며, LED 점등으로 자동 판정합니다.`}
       </div>`;
   }
 
   document.getElementById('results-kpis').innerHTML = `
-    <div class="kpi"><div class="l">최신 성공률 (nominal·seed42)</div>
+    <div class="kpi"><div class="l">1단계 최신 성공률 (nominal·seed42)</div>
       <div class="n" style="color:${rateColor(latest.success_rate)}">${pct(latest.success_rate)}</div>
       <div class="d">${latest.success ?? '—'}/${latest.rollouts ?? '—'} rollout · median lift ${latest.median_lift_mm ?? '—'}mm</div></div>
-    <div class="kpi"><div class="l">4-seed 공정추정</div>
+    <div class="kpi"><div class="l">1단계 4-seed 공정추정</div>
       <div class="n" style="color:${rateColor(rm.fair_estimate)}">${pct(rm.fair_estimate)}</div>
       <div class="d">seed 42/7/123/2026 평균 — 단일시드 비관편향 보정</div></div>
     <div class="kpi"><div class="l">expert 기준선 대비</div>

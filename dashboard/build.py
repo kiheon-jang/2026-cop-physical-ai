@@ -1270,7 +1270,7 @@ INFER_DIR = REPO_ROOT / "research" / "simulation" / "inference_progress"
 LOGS_DIR = REPO_ROOT / "logs"
 
 _SUMMARY_LABELS = {
-    "rollout_summary.json": "운영 최신 (nominal · seed42)",
+    "rollout_summary.json": "1단계 파지 최신 (nominal · seed42)",
     "rollout_summary_baseline_cl.json": "Baseline CL 6/25 (nominal · seed42)",
     "rollout_summary_dr.json": "DR-on 프록시 (3축 동시)",
     "rollout_summary_dr_camera.json": "DR ablation: camera",
@@ -1359,12 +1359,26 @@ def build_rollout_metrics() -> dict:
     if baseline and baseline.get("success_rate") is not None:
         old_rates = [baseline["success_rate"]] + old_rates
     fair_prev = round(sum(old_rates) / len(old_rates), 3) if old_rates else None
+    # 2단계(S1 리셋버튼). latest/fair_estimate 는 1단계(파지) 화면들이 쓰므로 그대로 두고 별도로 노출한다.
+    # 공정추정 = DR 제외 nominal S1 4-seed 평균 (render_act_rollout_s1.py 가 stdout 으로만 내던 값과 같은 정의)
+    s1_rows = [c for c in comparisons
+               if c["success_rate"] is not None and not c["dr"]
+               and (c["name"] == "rollout_summary_s1.json" or c["name"].startswith("rollout_summary_s1_seed"))]
+    s1_fair = round(sum(c["success_rate"] for c in s1_rows) / len(s1_rows), 3) if s1_rows else None
     return {
         "comparisons": comparisons,
         "history": history,
         "latest": latest,
         "baseline": baseline,
         "fair_estimate": fair,          # 4-seed 공정추정 (7/4 프로토콜)
+        "s1": {
+            "latest": by_name.get("rollout_summary_s1.json"),
+            "fair_estimate": s1_fair,
+            "seeds": len(s1_rows),
+            "success": sum(c.get("success") or 0 for c in s1_rows),
+            "rollouts": sum(c.get("rollouts") or 0 for c in s1_rows),
+            "target": 0.70,             # Phase 3 완료 기준 (LED 자동 판정)
+        },
         "expert": {"force3": 0.75, "force6": 0.88},  # closed-loop expert 기준 (6/23 실측)
         "target": 0.90,
     }

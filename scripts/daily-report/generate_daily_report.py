@@ -110,9 +110,9 @@ def _send_upstream_failure_alert(failures):
     ok, err = send_email_smtp("xaqwer@gmail.com", subject, html)
     if ok:
         print("  ✅ alert 발송")
-    else:
-        print(f"  ❌ alert 발송 실패: {err}")
-    return 0  # Treat as successful watchdog run — script did its job.
+        return 0  # 알림이 전달됐으면 watchdog 역할 완료
+    print(f"  ❌ alert 발송 실패: {err}")
+    return 1  # 알림조차 못 보냈으면 크론에 error 로 드러나야 한다
 
 
 def _load_smtp_env_from_hermes():
