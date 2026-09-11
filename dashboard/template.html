@@ -1374,7 +1374,7 @@
             <div class="statstrip">
               <div class="st"><div class="k">S1 성공률 · 시뮬</div><div class="v g" id="bmcStatS1">92.5%</div></div>
               <div class="st"><div class="k">1단계 파지 성공률 · 시뮬</div><div class="v g" id="bmcStatP1">100%</div></div>
-              <div class="st"><div class="k">시연까지</div><div class="v a" id="bmcStatDday">D-55</div></div>
+              <div class="st"><div class="k">시연까지</div><div class="v a" id="bmcStatDday">D-—</div></div>
               <div class="st"><div class="k">총 에폭</div><div class="v c" id="bmcStatEp">31</div></div>
             </div>
             <div class="log" id="bmc-log"></div>
@@ -3193,7 +3193,7 @@ footer p{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing
 <head>
 <meta charset=&quot;utf-8&quot;>
 <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;>
-<title>CoP Physical AI — 로봇팔에 정비 동작을 학습시키는 과정</title>
+<title>CoP Physical AI — 로봇에게 손끝을 가르칩니다</title>
 <style>
 /* B톤 통일(미션컨트롤 쿨다크) — 모든 테마 블록을 B 팔레트로 고정. terra(강조)→시안. */
 :root, :root[data-theme=&quot;light&quot;], :root[data-theme=&quot;dark&quot;]{
@@ -3625,7 +3625,7 @@ a{color:inherit;text-decoration:none}
       <div class=&quot;gcard up&quot; data-g=&quot;100&quot; data-col=&quot;grn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>1단계 성공률<span>GRASP &amp;amp; LIFT</span></div></div>
       <div class=&quot;gcard up&quot; data-g=&quot;92.5&quot; data-col=&quot;amb&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>2단계 성공률<span>S1 · RESET BUTTON</span></div></div>
       <div class=&quot;gcard up&quot; data-g=&quot;63&quot; data-col=&quot;cyn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>일정 진척<span>TO 2026-09-30</span></div></div>
-      <div class=&quot;gcard up&quot; data-g=&quot;90&quot; data-col=&quot;grn&quot; data-manual=&quot;D-55&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>시연까지<span>D-DAY COUNTDOWN</span></div></div>
+      <div class=&quot;gcard up&quot; data-g=&quot;90&quot; data-col=&quot;grn&quot; data-manual=&quot;D-—&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>시연까지<span>D-DAY COUNTDOWN</span></div></div>
     </div>
   </section>
 
@@ -4045,7 +4045,20 @@ function setRoute(r) {
   }
   if (r === 'story') {
     const fr = document.getElementById('story-frame');
-    if (fr && !fr.getAttribute('srcdoc') && fr.dataset.srcdoc) fr.srcdoc = fr.dataset.srcdoc;
+    if (fr && !fr.getAttribute('srcdoc') && fr.dataset.srcdoc) {
+      // 스토리는 정적 문서라 '시연까지' 게이지를 부모가 business_kpi 값으로 채운다
+      fr.addEventListener('load', function () {
+        const dd = (D.business_kpi || {}).d_day_demo;
+        if (dd == null) return;
+        try {
+          fr.contentDocument.querySelectorAll('.gcard').forEach(function (c) {
+            const cap = c.querySelector('.cap'), big = c.querySelector('.ctr .big');
+            if (cap && big && cap.textContent.indexOf('시연까지') >= 0) big.textContent = 'D-' + dd;
+          });
+        } catch (e) { /* 동일 출처 srcdoc 이라 정상적으로는 도달하지 않음 */ }
+      }, { once: true });
+      fr.srcdoc = fr.dataset.srcdoc;
+    }
   }
   // 플레이그라운드: native 3D 실기팔(#play3d) — 마우스로 조종+클릭 누름(궤도X). DATA 준비까지 재시도.
   if (r === 'playground' && window.mountArm3D) {
@@ -4467,8 +4480,8 @@ function renderApps() {
   var MONTHS=['04','05','06','07','08','09','10'];  // 7 columns, 10=DEMO
   function mi(mon){ var m=(mon||'').split('-')[1]; return MONTHS.indexOf(m); }
   // D-day
-  var t=new Date('2026-09-30T00:00:00'),now=new Date(); var dday=Math.max(0,Math.ceil((t-now)/86400000));
-  document.getElementById('c1-dday').innerHTML='시연까지 <b>D-'+dday+'</b>';
+  var now=new Date(); var dday=(D.business_kpi||{}).d_day_demo;
+  document.getElementById('c1-dday').innerHTML='시연까지 <b>D-'+(dday!=null?Math.max(0,dday):'—')+'</b>';
   // month header
   document.getElementById('c1-mhead').innerHTML=MONTHS.map(function(m){return '<div class="mc'+(m==='10'?' demo':'')+'">'+m+'월'+(m==='10'?' &#9873;':'')+'</div>';}).join('');
 
@@ -6764,7 +6777,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 
   function applyScalars(){
     var D=window.DATA||{}, kpi=D.business_kpi||{};
-    var dday=(kpi.d_day!=null?kpi.d_day:55);
+    var dday=kpi.d_day_demo; if(dday==null) return;  // 시연(10/31)까지. d_day 는 기능 완성(9/30) 기준이라 '시연까지' 라벨과 맞지 않는다
     $all('.bmc-chip').forEach(function(c){ if(c.textContent.indexOf('시연까지')>=0){ var sp=c.querySelector('[data-bcount]'); if(sp)sp.setAttribute('data-bcount',String(dday)); } });
     var dd=document.getElementById('bmcStatDday'); if(dd)dd.textContent='D-'+dday;
     var gc=$all('.gcard'); if(gc[3])gc[3].setAttribute('data-manual','D-'+dday);

@@ -261,11 +261,11 @@ uv pip install <패키지명>
   - [v] **7/8~7/21**: 배치 다양성(floor) 재학습 **결착** — `episodes_floor` 50ep/3350f 로 ACT 재학습을 **12-run 만에 창 안 완주**(`act_floor/epoch_0041`, 42epoch, 3.76h, loss 0.0259). 이상종료 원인 순차 규명(FD 누수 → `persistent_workers` fix · num_workers=0 · RLIMIT · GPU OOM/jetsam 반증) 끝에 **고정 벽시계 04:04 외부 SIGKILL 확정**, 자가치유 `COP_EPOCHS=42` 로 창 회피. 상세: `2026-07-19_*`, `2026-07-21_floor-trained-first-rollout.md`
   - [v] **7/21**: floor-trained 첫 rollout 측정 — seed42 N=10 → **success 10/10, 성공률 1.0, median lift 66.0mm**(max_lift 0.056~0.068m, 임계 0.04m 여유). open-loop 0% → closed-loop 0.70 → **floor 1.0** 도약. 상세: `2026-07-21_floor-trained-first-rollout.md`
   - [v] **7/22**: floor-trained 4-seed 공정추정 — seed 42/7/123/2026 **전부 1.0**(66.0/65.3/60.0/64.9mm), **40/40 rollout 성공 · 실패 배치 0건**. baseline 0.825 / DR-trained 0.800 → floor-trained **1.000** 으로 7/7 결론의 처방을 실증 확증. 운영 `rollout_summary.json` md5 `5207f67b…` 전후 불변. 상세: `2026-07-22_floor-trained-4seed-fair-estimation.md`
-  - [ ] **Zero-shot 실기 추론 → Sim2Real 격차 측정** — *(2026-08-05 전제 갱신)* 실기가 omen
+  - [ ] *(외부 의존 보류 — Phase 3 W4 핸드오프로 이관)* **Zero-shot 실기 추론 → Sim2Real 격차 측정** — *(2026-08-05 전제 갱신)* 실기가 omen
     (실기 담당자, soarm_lerobot)에서 진행 중이므로 경로 = Orin SSH 가 아니라 **omen 협업**.
     단, 실기 트랙 작업이 pick&place 가 아닌 S1 버튼누르기라 이 항목의 실효 검증은
     **Phase 3 W4 핸드오프로 이관**. Orin 온디바이스 배포는 시연 단계 항목으로 보류
-  - [ ] **full-epoch(100) apples-to-apples 공정비교** — 현 결론은 42epoch 저학습 기준이라 방향은 더 강하지만 엄밀 비교는 미완. **Phase 3 착수로 우선순위 하향(보류)**. *8/5 갱신: 04:04 killer 원인 규명 완료(`ai.hermes.autoupdate` 04:00 → gateway kickstart 프로세스 그룹 SIGKILL — external-dependencies.md 참조), `start_act_train.sh` 세션 분리 fix 적용 → 이제 마음만 먹으면 full-epoch 가능*
+  - [ ] *(보류)* **full-epoch(100) apples-to-apples 공정비교** — 현 결론은 42epoch 저학습 기준이라 방향은 더 강하지만 엄밀 비교는 미완. **Phase 3 착수로 우선순위 하향(보류)**. *8/5 갱신: 04:04 killer 원인 규명 완료(`ai.hermes.autoupdate` 04:00 → gateway kickstart 프로세스 그룹 SIGKILL — external-dependencies.md 참조), `start_act_train.sh` 세션 분리 fix 적용 → 이제 마음만 먹으면 full-epoch 가능*
   - 🔄 **2026-07-08 — 배치 다양성(floor) 사이클 ACT 재학습 착수(in-flight)**: 드라이버가 W1 타겟
     `episodes_cl_dr` 을 STAGE=완료/유지(50ep·0.7)로 닫고 **예약 사이클 `.next=episodes_floor`(바닥/받침대
     없는 파지 = 배치 커버리지↑)로 전환** → `episodes_floor`(50ep/3350f, 수집 yield 98%, 배치 x0.11~0.15)
@@ -627,9 +627,9 @@ uv pip install <패키지명>
     `2026-08-04_phase2-w2-sim-lever-hold-integrity-audit.md`. **다음**: 남은 두 항목 모두 외부 의존 대기 —
     실기 W2 zero-shot(Orin SSH 미수신) / full-epoch(100) 공정비교(04:04 killer 진단권한 에스컬레이션 대기).
 - W3: 실기 fine-tune (10 에피소드)
-  - [ ] 실기 10 에피소드 수집 → fine-tune → 재측정 — 실기 확보 후 진입(W2 zero-shot 선행)
+  - [ ] *(외부 의존 보류 — 실기 트랙)* 실기 10 에피소드 수집 → fine-tune → 재측정 — 실기 확보 후 진입(W2 zero-shot 선행)
 - W4: Diffusion Policy 동일 절차 + ACT 비교
-  - [ ] Diffusion Policy 동일 절차 학습 + ACT 대비 비교
+  - [ ] *(Phase 4 W3 로 이관 — 최종 모델 선정 ACT vs DP)* Diffusion Policy 동일 절차 학습 + ACT 대비 비교
 
 **완료 기준**: 실기 Pick 성공률 60% (Sim2Real 격차 < 30%p)
 
@@ -661,7 +661,7 @@ uv pip install <패키지명>
     ③ 남는 실패 5% = 존 구석의 기하 도달불가 배치(press 자세가 팔 링크의 보드 2.5mm 관통을 요구 — 같은 SO-101 인 실기도 동일). pan 정렬→경유→단계 하강(매단계 IK 재계산)→재시도 3
   - [v] **8/5**: LED latch = 공짜 정답 라벨 자동 성공판정 — 수집기가 latch 성공 에피소드만 저장 (P1 계약과 동일)
   - [v] **8/5**: 100ep 합성 완료 — `data/episodes_s1` **100ep/7,231frame** (시도 107, **yield 93%**, seed 20260805, 58MB). 전수 재로드 검증 통과: v3.0 · top+closeup 640×480 · state/action 6 · task "press the reset button". 실패 7건 = 기하 도달불가 배치(예측대로)
-  - [ ] omen lerobot 0.6.1 로드 스모크 — 실기 담당자 협업 (데이터셋 전달 경로 협의 포함, W4 핸드오프와 병합 가능)
+  - [ ] *(외부 의존 보류 — 실기 트랙 협업)* omen lerobot 0.6.1 로드 스모크 — 실기 담당자 협업 (데이터셋 전달 경로 협의 포함, W4 핸드오프와 병합 가능)
   - 🔧 **2026-08-05 야간 — S1 합성 결착 문서화 + Phase 2 hold + W3 ACT 인에이블러**:
     낮 세션이 Phase 3 W1+W2 커밋 완료(56cd84f 트윈 4/4·7096f13 expert 95%·88c655c
     100ep 합성). 야간 드라이버 STAGE=완료/유지(`episodes_floor` 50ep·sr 1.0, Phase 2
@@ -825,9 +825,9 @@ uv pip install <패키지명>
     (pcb 4/4·cam 30f·6dof 2501f·pick 레거시 fail 비회귀). [자가치유] 없음.
     상세: `2026-08-23_phase3-w3-hold-day5-integrity-audit.md`.
 - W4 (8/26 ~ 8/31): sim2real 핸드오프
-  - [ ] 합성 데이터셋 + sim-trained 정책 omen 전달 (실기 담당자 협업 — 실기 fine-tune 대조군)
-  - [ ] P1 LED ROI 캘리브 지원 — 시뮬 top/closeup 프레임으로 ROI·임계값 검증 결과 공유
-  - [ ] Sim2Real 격차 보고 (sim 성공률 vs 실기 롤아웃)
+  - [ ] *(외부 의존 보류 — 실기 트랙 협업)* 합성 데이터셋 + sim-trained 정책 omen 전달 (실기 담당자 협업 — 실기 fine-tune 대조군)
+  - [ ] *(외부 의존 보류 — 실기 트랙 협업)* P1 LED ROI 캘리브 지원 — 시뮬 top/closeup 프레임으로 ROI·임계값 검증 결과 공유
+  - [ ] *(외부 의존 보류 — 실기 트랙 협업)* Sim2Real 격차 보고 (sim 성공률 vs 실기 롤아웃)
 
 **완료 기준**: 시뮬 버튼누르기 성공률 70% (LED 자동 판정) + 합성 데이터셋 omen 로드 확인
 
@@ -836,8 +836,13 @@ uv pip install <패키지명>
 ## Phase 4 — RS232 HHT 케이블 분리 + 1차 기능 완성 (2026-09, 4주, 작업 완료 시점)
 
 > ⚠️ 옛 Phase 4(RS232) + 옛 Phase 5(1차 기능 완성) 통합. 9월 말 = 24주 작업 완료.
+> 2026-09-11: 실기 트랙 협업을 기다리는 항목은 보류로 표시하고 W1 실행 항목을 추가해, 야간 에이전트가 RS232 착수로 넘어가게 함.
 
 - W1: RS232 커넥터 mesh 모델링, 케이블 분리(꽂힌 케이블 빼기) 시뮬 데이터 합성
+  - [ ] RS232 포트 + HHT 케이블 커넥터 MJCF 트윈 — `sim/assets/rs232_unplug_scene.xml`. `pcb_reset_scene.xml` 과 같은 카메라(top·closeup)·같은 15cm 배치 존을 쓰고, 커넥터는 DE-9(DB9) 표준 규격으로 1차 구성한 뒤 실기 실측이 확보되면 교체(환경 불변 원칙)
+  - [ ] 분리 성공 자동 판정 — 커넥터가 포트에서 기준 거리 이상 빠지면 성공, 부분성공 기준 포함. 수집기와 평가기가 같은 상수를 공유
+  - [ ] closed-loop 분리 expert — 접근 → 파지 → 후퇴, 20-seed 성공률 측정
+  - [ ] 합성 데이터 100ep 수집(`data/episodes_rs232`, LeRobot v3 · top/closeup) → `logs/cop_dataset_target.next` 예약으로 학습·측정 사이클 전환
 - W2: DR 강화 + 학습, 실기 검증
 - W3: 최종 모델 선정 (ACT vs DP), 1차 통합 모델 미세조정
 - W4: 실기 검증 (PCB + RS232 통합), 실패 케이스 분석, 10월 시연 시나리오 확정

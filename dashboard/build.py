@@ -656,13 +656,17 @@ def build_business_kpi(phases: list[dict]) -> dict:
     # "다음 액션"으로 표시됐다 — 2026-08-05 수정.
     next_actions: list[str] = []
     if advanced:
-        for w in advanced.get("weeks", []):
-            for it in w.get("items", []):
-                task = it.get("task", "")
-                if not it.get("checked") and "보류" not in task and "이관" not in task:
-                    next_actions.append(task[:120].rsplit(" ", 1)[0] + ("…" if len(task) > 120 else ""))
-                    if len(next_actions) >= 3:
-                        break
+        # 가장 앞선 진행 phase 의 남은 항목이 전부 보류·이관이면 다음 phase 에서 이어서 뽑는다 (2026-09-11).
+        for p in real_phases[real_phases.index(advanced):]:
+            for w in p.get("weeks", []):
+                for it in w.get("items", []):
+                    task = it.get("task", "")
+                    if not it.get("checked") and "보류" not in task and "이관" not in task:
+                        next_actions.append(task[:120].rsplit(" ", 1)[0] + ("…" if len(task) > 120 else ""))
+                        if len(next_actions) >= 3:
+                            break
+                if len(next_actions) >= 3:
+                    break
             if len(next_actions) >= 3:
                 break
 
