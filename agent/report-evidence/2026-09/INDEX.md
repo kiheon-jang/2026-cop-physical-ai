@@ -10,3 +10,11 @@
   - **ACT 재학습 in-flight**(20:27 착수): pid 55253, `--epochs 42 --no-resume`, `episodes_rs232` → `checkpoints/act_rs232_sim`. 23:30 시점 epoch 3 loss **0.0985** 정상 수렴(epoch0 1.90→), mps ~8.6GB·rss ~1.0GB 평탄, ETA ≈ 9/13 05:00 KST. 04:04 killer 회피(PGID 55253 gateway 분리).
   - **무결성 격리**: `cop_trained_on.marker`=`episodes_s1:1785931493`(불변, baseline S1 무손상) · `.pending`=`episodes_rs232:1789126035`(대기·미승격) · 학습 미완 → 승격/측정 보류(설계대로). 옛 환경 데이터 `data/episodes.bak-rs232-oldenv-20260911` 격리.
   - **미결(측정 대기)**: RS232 4-seed 성공률(부분성공·완전분리)은 9/13 학습 완주 후 측정. 야간 측정 300s timeout 초과 위험(40 rollout × 최대 10.4s ≈ 416s) — 그때 실측. jam 사유 오분류(서보 토크→shoulder 기하 간섭) 정정 필요.
+
+## 2026-09-13
+- Phase 4 W2 — **RS232 ACT 학습 완주(42 epoch, `epoch_0041`) + 첫 4-seed 공정추정**: `agent/research-log/2026-09-13.md` → 9월 보고서 [Phase 4 RS232 분리] 섹션.
+  - **4-seed 성공률**: 부분성공(≥2.95mm) **0.875 (35/40)** · 완전분리(≥5.9mm) **0.75 (30/40)**. per-seed 부분 0.9/0.7/0.9/1.0(42/7/123/2026), 완전분리 0.7/0.6/0.9/0.8. median 변위 7.99~10.21mm.
+  - **완전분리 0.75 > 근단 기하 상한 ≈37.5%(9/11)** — 정책이 근단 약세 배치 상당수 처리. 실패 rollout 이 seed마다 이동(배치 커버리지/모방격차 패턴, floor·DR 트랙과 동일).
+  - **측정 timeout 우려 해소**: 실측 **79.6s/seed**(device=cpu, max_frames=240), 개별 seed 프로세스라 300s 무위험. external-deps 결정 불필요.
+  - 산출물: `rollout_summary_rs232{,_seed7/123/2026}.json`, history 5종, video `inference_act_rs232_sim_epoch_0041_20260913.mp4`.
+  - **관찰(미수정)**: `cop_measured.marker`=`episodes_s1:...` 잔존(rollout 은 rs232 측정 완료) — 다음 사이클 재측정 유발 가능, 관찰만.

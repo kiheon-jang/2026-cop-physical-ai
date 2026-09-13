@@ -1,0 +1,107 @@
+{
+  "status": "ok",
+  "task": "rs232_unplug",
+  "metric": "plug_partial_latch",
+  "checkpoint": "checkpoints/act_rs232_sim/epoch_0041",
+  "ckpt_dir": "act_rs232_sim",
+  "scene": "rs232_unplug_scene.xml",
+  "measured_at": "2026-09-13T23:04:08",
+  "seed": 123,
+  "rollouts": 10,
+  "success": 9,
+  "success_rate": 0.9,
+  "full_success": 9,
+  "full_rate": 0.9,
+  "median_disp_mm": 8.52,
+  "median_lift_mm": 8.52,
+  "partial_threshold_mm": 2.95,
+  "full_threshold_mm": 5.9,
+  "max_frames": 240,
+  "dr": false,
+  "dr_axes": null,
+  "video_path": null,
+  "wall_clock_sec": 79.6,
+  "device": "cpu",
+  "results": [
+    {
+      "rollout": 0,
+      "success": true,
+      "full_success": true,
+      "max_disp_mm": 7.7,
+      "partial_frame": 114,
+      "full_frame": 129
+    },
+    {
+      "rollout": 1,
+      "success": true,
+      "full_success": true,
+      "max_disp_mm": 17.3,
+      "partial_frame": 65,
+      "full_frame": 79
+    },
+    {
+      "rollout": 2,
+      "success": true,
+      "full_success": true,
+      "max_disp_mm": 9.48,
+      "partial_frame": 113,
+      "full_frame": 125
+    },
+    {
+      "rollout": 3,
+      "success": true,
+      "full_success": true,
+      "max_disp_mm": 6.86,
+      "partial_frame": 124,
+      "full_frame": 137
+    },
+    {
+      "rollout": 4,
+      "success": false,
+      "full_success": false,
+      "max_disp_mm": 2.81,
+      "partial_frame": null,
+      "full_frame": null
+    },
+    {
+      "rollout": 5,
+      "success": true,
+      "full_success": true,
+      "max_disp_mm": 9.94,
+      "partial_frame": 111,
+      "full_frame": 122
+    },
+    {
+      "rollout": 6,
+      "success": true,
+      "full_success": true,
+      "max_disp_mm": 8.94,
+      "partial_frame": 107,
+      "full_frame": 120
+    },
+    {
+      "rollout": 7,
+      "success": true,
+      "full_success": true,
+      "max_disp_mm": 5.99,
+      "partial_frame": 171,
+      "full_frame": 192
+    },
+    {
+      "rollout": 8,
+      "success": true,
+      "full_success": true,
+      "max_disp_mm": 8.14,
+      "partial_frame": 116,
+      "full_frame": 131
+    },
+    {
+      "rollout": 9,
+      "success": true,
+      "full_success": true,
+      "max_disp_mm": 8.9,
+      "partial_frame": 115,
+      "full_frame": 130
+    }
+  ]
+}
