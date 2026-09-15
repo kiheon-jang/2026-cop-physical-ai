@@ -24,3 +24,9 @@
   - **4-seed 재측정**(동일 `epoch_0041`, 결정론적): 부분 **0.875 (35/40)** · 완전분리 **0.75 (30/40)** — 9/13 과 완전 일치 = 결과 안정 재현. wall time 78.7~79.3s/seed(2일 연속 안정).
   - **렌더 헬스체크**: `sim_camera_verification`(듀얼 30f)·`sim_headless_6dof_video`(2501f) 둘 다 PASS → 시뮬 스택 무회귀.
   - **재측정 churn 확정(2일 연속)**: `cop_measured.marker`=`episodes_s1` stale 로 드라이버가 매 야간 동일 4-seed 재측정. 무해(결정론적·~319s·baseline 무손상)하나 근본=드라이버 measured 승격 누락. 자가치유 미실행(하드룰상 마커 직접수정 회피).
+
+## 2026-09-15
+- Phase 4 W2 — **RS232 4-seed 재측정 hold (3일 안정 재현) + 렌더 헬스체크**: `agent/research-log/2026-09-15.md` → 9월 보고서 [Phase 4 RS232 분리] 섹션.
+  - **4-seed 재측정**(동일 `epoch_0041`, 결정론적): 부분 **0.875 (35/40)** · 완전분리 **0.75 (30/40)** — 9/13·9/14 와 완전 일치 = 3일 안정 재현. wall time 79.5~79.7s/seed(3일 연속 안정).
+  - **렌더 헬스체크**: `sim_camera_verification`(듀얼 30f)·`sim_headless_6dof_video`(2501f) 둘 다 PASS → 시뮬 스택 무회귀.
+  - **재측정 churn 3일차**: 근본=드라이버 measured 승격 누락(마커 stale). external-dependencies.md 에 표면화. 자가치유 미실행(드라이버 소유).
