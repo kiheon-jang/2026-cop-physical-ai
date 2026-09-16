@@ -7080,6 +7080,9 @@ function sim3dBuildScene() {
     camera.lookAt(target);
   }
   applyCam();
+  // 에피소드 종류별 시점 재조준 (MuJoCo (x,y,z) → 화면 (x, z, -y): root 가 -90°X 회전)
+  SIM3D.focus = (tx, ty, tz, d) => { target.set(tx, ty, tz); if (d) dist = d; applyCam(); };
+  SIM3D.focusDefault = () => { target.set(0.08, 0.2, 0.0); dist = 0.62; applyCam(); };
   let drag = null;
   canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); });
   canvas.addEventListener('pointermove', e => {
@@ -7149,7 +7152,8 @@ const SIM3D_DS_LABEL = {
 };
 function sim3dIsFloor(ep) {
   if (!ep) return false;
-  if (ep.kind === 'policy') return !!(ep.meta && (ep.meta.scene || '').includes('floor'));
+  // 테이블 메시 숨김 대상 = 테이블이 없는 씬(floor grasp · S1 pcb_reset · RS232 unplug)
+  if (ep.kind === 'policy') return /floor|pcb_reset|rs232/.test((ep.meta && ep.meta.scene) || '');
   // S1(pcb_reset_scene) 도 테이블 없는 바닥 씬 — 테이블 메시 숨김
   return ep.group === 'episodes_floor' || ep.group === 'episodes_s1' || ep.group === 'episodes_rs232';
 }
@@ -7187,11 +7191,11 @@ function sim3dEpisodeList() {
   });
   const srcCount = {};
   (w.dataset_episodes || []).forEach(e => { srcCount[e.source] = (srcCount[e.source] || 0) + 1; });
-  // 노출 순서: ① S1 시연(지금) ② 최신 정책 rollout(1단계 최종 성적) ③ 아카이브(옛 측정·1단계 수집)
+  // 노출 순서: ① 현재 단계 정책 측정(최신) ② 이전 단계 시연 데이터 ③ 아카이브(옛 측정·수집)
+  policyGroups.filter(g => g.latest).forEach(g => groups.push(g));
   if (srcCount.episodes_s1) {
     groups.push({ key: 'episodes_s1', label: `${SIM3D_DS_LABEL.episodes_s1} (${srcCount.episodes_s1})` });
   }
-  policyGroups.filter(g => g.latest).forEach(g => groups.push(g));
   policyGroups.filter(g => !g.latest).reverse().forEach(g => groups.push(g));
   Object.keys(srcCount).filter(s => s !== 'episodes_s1').forEach(src => groups.push({
     key: src, label: `[아카이브] ${(SIM3D_DS_LABEL[src] || '📦 ' + src).replace(/^[^ ]+ /, '')} (${srcCount[src]})`,
@@ -7349,6 +7353,11 @@ function sim3dSelect(id) {
   }
   document.getElementById('s3-meta').innerHTML = meta.map(x => `<span>${escapeHtml(x)}</span>`).join(' · ');
   if (SIM3D.tableMesh) SIM3D.tableMesh.visible = !sim3dIsFloor(ep);
+  // RS232 는 작업점(커넥터)이 보드 가장자리라 기본 시점에선 화면 밖으로 밀린다 → 후드 위치로 재조준
+  if (SIM3D.focus) {
+    if (ep.rs232 && ep.pcb) SIM3D.focus(ep.pcb.x - 0.097, 0.0313, -(ep.pcb.y - 0.018), 0.34);
+    else if (SIM3D.focusDefault) SIM3D.focusDefault();
+  }
   const grp = (SIM3D.groups || []).find(g => g.key === ep.group);
   const osd = document.getElementById('s3-osd');
   if (osd) osd.innerHTML = `
