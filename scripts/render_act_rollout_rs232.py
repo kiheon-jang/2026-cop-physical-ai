@@ -80,7 +80,9 @@ def run_rollout(twin, policy, device, rng, max_frames, collect_frames):
         top = twin.render("top")         # 반전 없음 (수집기와 동일)
         closeup = twin.render("closeup")
         if collect_frames:
-            frames.append(top.copy())
+            # 영상 프레임 = top | closeup 가로 결합 (1280×480). top 단독은 케이블·후드가 화면의 0.2% 라
+            # 무엇을 잡고 빼는지 안 보인다(2026-09-16 측정: top 544px vs closeup 2,654px). 관측 입력은 불변.
+            frames.append(np.hstack([top, closeup]).copy())
 
         img_top = torch.from_numpy(top).permute(2, 0, 1).float().div_(255.0)
         img_cu = torch.from_numpy(closeup).permute(2, 0, 1).float().div_(255.0)
@@ -102,7 +104,9 @@ def run_rollout(twin, policy, device, rng, max_frames, collect_frames):
             partial_frame = step
         if twin.unplugged_full() and full_frame is None:
             full_frame = step
-        traj.append([round(float(q), 4) for q in twin.data.qpos[:N_JOINTS]])
+        # qpos6 + 플러그 변위[m] (7번째 값). 3D 리플레이가 플러그가 빠지는 것을 실제 값으로 그린다.
+        traj.append([round(float(q), 4) for q in twin.data.qpos[:N_JOINTS]]
+                    + [round(float(twin.plug_displacement()), 4)])
 
     return (twin.unplugged_partial(), twin.unplugged_full(), max_disp,
             partial_frame, full_frame, frames, traj, placement)

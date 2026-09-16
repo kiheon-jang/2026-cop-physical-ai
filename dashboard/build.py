@@ -814,6 +814,8 @@ def build_videos() -> list[dict]:
     # 1) 학습 데이터셋 영상 — (데이터셋 루트, 카메라, 라벨) 별로 존재하는 것만 노출.
     #    S1(episodes_s1) 이 최신 트랙이므로 먼저.
     dataset_specs = [
+        ("episodes_rs232", "top", "RS232 케이블 분리 합성 데이터셋 — top(광각)", "3단계 RS232 트랙 · 실기 정합 환경 top 카메라 시점"),
+        ("episodes_rs232", "closeup", "RS232 케이블 분리 합성 데이터셋 — closeup(근접)", "3단계 RS232 트랙 · closeup 카메라 시점 (커넥터·케이블 디테일)"),
         ("episodes_s1", "top", "S1 리셋버튼 합성 데이터셋 — top(광각)", "2단계 S1 트랙 · 실기 정렬 top 카메라 시점"),
         ("episodes_s1", "closeup", "S1 리셋버튼 합성 데이터셋 — closeup(근접)", "2단계 S1 트랙 · 실기 정렬 closeup 카메라 시점 (버튼·LED 디테일)"),
         # 구 data/episodes 는 2ep 스모크 잔재 — 진척 증거 가치 없음, 노출 제거 (2026-08-05 감사)
@@ -1016,7 +1018,8 @@ def build_inference_progress() -> list[dict]:
             "epoch": epoch,
             "run": run.group(1) if run else "act",
             # 트랙 표기 — S1(act_s1*) 이전 산출물은 전부 1단계 pick&place 런
-            "track": 2 if (run and run.group(1).startswith("act_s1")) else 1,
+            "track": (3 if (run and run.group(1).startswith("act_rs232"))
+                      else 2 if (run and run.group(1).startswith("act_s1")) else 1),
             "size_bytes": st.st_size,
             "modified": datetime.fromtimestamp(st.st_mtime, KST).isoformat(timespec="seconds"),
         })
