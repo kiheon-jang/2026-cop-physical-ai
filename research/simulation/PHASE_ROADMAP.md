@@ -848,8 +848,8 @@ uv pip install <패키지명>
   - 🔄 **2026-09-11 야간(23:00) — RS232 ACT 학습 진행 중(STAGE=학습중)**: 드라이버가 재수집 `episodes_rs232`(100ep/16,093f)로 학습 전진, pid **55253** alive(`train_act.py --epochs 42`→`checkpoints/act_rs232_sim`). epoch 0→3 loss 1.902→0.512→0.178→~0.115 정상 수렴, mps ~8.6GB·rss ~1.0GB 평탄(OOM/누수 없음), ~2783s/epoch → **ETA ≈ 9/13 05:00 KST**. 무결성 격리: `trained_on.marker`=`episodes_s1`(불변·baseline 무손상)·`.pending`=`episodes_rs232:1789126035`(대기·미승격), 학습 미완→승격/측정 보류(설계대로). [자가치유] 없음. 학습 미완이라 849 항목 `[ ]` 유지. 상세: `2026-09-11_phase4-w1-rs232-act-training-night.md`.
 - W2: DR 강화 + 학습, 실기 검증
   - 🔄 **2026-09-12 야간(23:00) — RS232 ACT 학습 진행 중(STAGE=학습중 hold)**: pid **55253** alive(state `Ss`=세션 분리, 04:04 killer 회피 유효), `train_act.py --epochs 42`→`checkpoints/act_rs232_sim`. 라이브 epoch **34** step 690 loss **0.0099** 정상 수렴. 체크포인트 3개 신선·균등(epoch_0009 **04:11**=04:04 창 관통 생존·epoch_0019 11:55·epoch_0029 19:39, ~2770s/epoch) → **ETA ≈ 9/13 04:30 KST**. 무결성 격리: `trained_on.marker`=`episodes_s1`(불변·baseline 무손상)·`.pending`=`episodes_rs232:1789126035`(대기·미승격), 학습 미완→승격/측정 보류(설계대로). [자가치유] 없음. 학습 미완이라 850 항목 `[ ]` 유지. 상세: `2026-09-12_phase4-w1-rs232-act-training-hold.md`.
-  - [ ] RS232 ACT 학습 (`data/episodes_rs232` → `checkpoints/act_rs232_sim`)
-  - [ ] RS232 4-seed 측정 (완전분리·부분성공)
+  - [v] RS232 ACT 학습 (`data/episodes_rs232` → `checkpoints/act_rs232_sim`) — **완료 2026-09-13 04:57**: 42epoch 완주(wall 32.5h), 체크포인트 epoch_0009~0041, 마커 승격 `episodes_rs232:1789126035`
+  - [v] RS232 4-seed 측정 (완전분리·부분성공) — **완료 2026-09-13**: epoch_0041 4-seed×10 = **부분성공 0.875(35/40) · 완전분리 0.75(30/40)**, 9/14·9/15 동일 재현. 완료 기준(부분성공 50%) 충족. 측정 79.5s/seed
   - [ ] RS232 DR 합성 + 재학습
   - [ ] *(외부 의존 보류 — 실기 트랙 협업)* RS232 실기 검증
 - W3: 최종 모델 선정 (ACT vs DP), 1차 통합 모델 미세조정
