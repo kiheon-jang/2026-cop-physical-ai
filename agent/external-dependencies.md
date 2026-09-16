@@ -44,13 +44,12 @@
   - 우려: 4-seed 40 rollout 이 ≈416s > 300s 초과 위험 (2026-09-11 제기).
   - 실측: **79.5~79.7s/seed**(device=cpu, max_frames=240), seed별 개별 프로세스라 300s 무위험 (3일 연속 안정).
 
-- [ ] [드라이버/장기헌] **RS232 measured 마커 승격 누락 → 야간 재측정 churn (3일 연속 확정)** *(2026-09-13 관찰→9/15 3일차)*
-  - 증상: `cop_measured.marker`=`episodes_s1:1786060554` (stale) vs `cop_trained_on.marker`=`episodes_rs232:1789126035` 불일치
-    → 드라이버(`cop_pipeline_advance.sh`)가 매 야간 측정 미완 판정 → 동일 `epoch_0041` 4-seed 재측정 반복.
-  - 영향: **무해** (결정론적 동일 수치·~319s·baseline 무손상) 하나 매일 반복 낭비, 전진 없음.
-  - 근본: 드라이버가 측정 완료 후 `cop_measured.marker` 를 `episodes_rs232:...` 로 승격하지 않음.
-  - 야간 에이전트 미실행 사유: 하드룰상 마커 직접수정 회피 + 잘못 세팅 시 향후 정상 측정 억제 위험. 드라이버 소유.
-  - 상세: `agent/research-log/2026-09-13.md`~`2026-09-15.md`.
+- [v] [드라이버/장기헌] **RS232 measured 마커 승격 누락 → 야간 재측정 churn** — **2026-09-16 해소**
+  - 증상(9/13~15 3일 연속): `cop_measured.marker`=`episodes_s1:1786060554`(stale) vs `cop_trained_on.marker`=`episodes_rs232:1789126035` 불일치 → 드라이버가 매 야간 측정 미완 판정 → 동일 `epoch_0041` 4-seed 재측정 반복.
+  - 근본(9/16 규명): `~/.hermes/scripts/cop_sim_env.py` 가 드라이버를 `timeout=300` 으로 호출 → RS232 4-seed 측정(~318s)이 timeout 으로 죽어 stage 5 의 `cop_measured.marker` 기록에 도달 못 함.
+  - 조치(9/16 낮, 사용자 승인): (a) `cop_sim_env.py` 드라이버 호출 timeout 300→600, hermes `cron.script_timeout_seconds` 1800→3600(백업 보존); (b) `cop_measured.marker` = 현 MODEL_SIG `episodes_rs232:1789243031` 기록(옛 값 백업).
+  - 검증: 드라이버 재실행 `STAGE=완료/유지 0.875`, 2초 종료, 재측정 없음. 9/16 야간 STAGE=학습중(낮 재학습 전진)으로 churn 재발 없음 확인.
+  - 상세: `agent/research-log/2026-09-16.md`.
 
 - [ ] [CoP 위원회] **Phase 3/4 차년도 추진 여부 결정**
   - 마감: 2026-09-30
