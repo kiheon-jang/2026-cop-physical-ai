@@ -58,7 +58,7 @@
         '<button type="button" class="docs-viewer__arrow" data-nav="next"' + (idx >= n - 1 ? ' disabled' : '') + '>▶</button>' +
       '</div>';
     var foot = s.commit
-      ? '<div class="docs-viewer__foot">updated ' + esc(fmtDate(s.updated_at)) + ' · commit ' + esc(s.commit) + '</div>'
+      ? '<div class="docs-viewer__foot">updated ' + esc(fmtDate(s.updated_at)) + ' · 버전 ' + esc(s.commit) + '</div>'
       : '';
     return '<div class="docs-viewer" data-deck="' + deck + '">' + head + stage + nav + foot + '</div>';
   }

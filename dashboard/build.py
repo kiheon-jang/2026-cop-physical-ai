@@ -69,13 +69,13 @@ PHASE_META: list[dict] = [
     {
         "id": "phase3", "name": "Phase 3 — S1 리셋버튼 시뮬 (실기 정렬)", "month": "2026-08", "weeks": 4,
         "business_label": "8월: PCB 리셋버튼 누르기 — 실기 트랙과 동일 작업으로 시뮬 정렬",
-        "outcome": "실기(omen)와 동일 관측 스키마의 버튼누르기 시뮬 + 합성 데이터 100ep + LED 자동판정. 실기의 데이터 부족(10/80ep)·성공판정 부재를 시뮬이 메운다.",
+        "outcome": "실기와 동일한 관측 방식의 리셋버튼 누르기 시뮬 + 합성 데이터 100ep + LED 자동판정. 시뮬 4-seed 공정추정 0.925 를 확인했고, 실기 트랙에서 병행 검증이 진행됩니다.",
         "report_label": "ACT 학습",
     },
     {
         "id": "phase4", "name": "Phase 4 — RS232 케이블 분리 · 1차 기능 완성", "month": "2026-09", "weeks": 4,
         "business_label": "9월: RS232 케이블 분리 + 1차 기능 완성",
-        "outcome": "제어반 RS232 포트에 꽂혀 있는 점검 단말기(HHT) 케이블을 로봇팔이 빼는(분리) 작업 자동화. S1 70% / RS232 40% 달성, 10월 시연 준비.",
+        "outcome": "제어반 RS232 포트에 꽂혀 있는 점검 단말기(HHT) 케이블을 로봇팔이 빼는(분리) 작업 자동화. 시뮬 4-seed 측정 결과 부분성공 0.875 · 완전분리 0.75 로 완료 기준(부분성공 50%)을 충족했고, 10월 시연을 준비합니다.",
         "report_label": "DP 비교, 기능 완성",
     },
 ]
@@ -85,8 +85,8 @@ PROJECT_VISION = {
     "title": "CoP Physical AI",
     # 2026-08-05: Phase 3 재정의(실기 정렬)에 맞춰 갱신 — 1단계 pick&place 는 Phase 2 에서
     # 결착(4-seed 1.0), 8월부터는 실기 트랙(omen)과 동일 작업인 S1 리셋버튼.
-    "subtitle": "SO-ARM101 로봇팔 + MuJoCo 시뮬 모방학습 — 1단계 Pick&Place 결착, 2단계 S1 리셋버튼 (실기 트랙 정렬)",
-    "subtitle_secondary": "AI 자동화 운영 — 매일 23:00 시뮬 빌드 · 23:30 테스트 · 01:00 실패 재시도 · 07:00 일일 보고",
+    "subtitle": "SO-ARM101 로봇팔 + MuJoCo 시뮬 모방학습 — 1·2단계 완료, 3단계 RS232 케이블 분리 진행",
+    "subtitle_secondary": "AI 자동화 운영 — 매일 23:00 시뮬 환경 구축 · 23:30 시뮬 테스트 · 07:00 아침 보고",
     "demo_date": "2026-10-31",
     "completion_date": "2026-09-30",  # 작업 완료 기준 (D-day 표시)
     "start_date": "2026-04-01",
@@ -970,7 +970,8 @@ def build_training_metrics() -> dict:
     # 24h 안에 새 epoch 추가됐으면 running, 아니면 paused
     try:
         last_ts = epochs[-1].get("timestamp", "")
-        last_dt = datetime.fromisoformat(last_ts.replace("Z", "+00:00"))
+        last_dt = (datetime.fromtimestamp(last_ts, KST) if isinstance(last_ts, (int, float))
+                   else datetime.fromisoformat(str(last_ts).replace("Z", "+00:00")))
         idle_sec = (datetime.now(KST) - last_dt.astimezone(KST)).total_seconds()
         status = "running" if idle_sec < 86400 else "paused"
     except Exception:
@@ -1376,6 +1377,14 @@ def build_rollout_metrics() -> dict:
                if c["success_rate"] is not None and not c["dr"]
                and (c["name"] == "rollout_summary_s1.json" or c["name"].startswith("rollout_summary_s1_seed"))]
     s1_fair = round(sum(c["success_rate"] for c in s1_rows) / len(s1_rows), 3) if s1_rows else None
+    # 3단계(RS232 케이블 분리). 성공 정의가 부분 분리/완전 분리 2층이라 둘 다 집계한다.
+    rs_rows = [c for c in comparisons
+               if c["success_rate"] is not None and not c["dr"]
+               and (c["name"] == "rollout_summary_rs232.json" or c["name"].startswith("rollout_summary_rs232_seed"))]
+    rs_raw = [_read_json_file(INFER_DIR / c["name"]) or {} for c in rs_rows]
+    rs_rollouts = sum(c.get("rollouts") or 0 for c in rs_rows)
+    rs_partial = sum(c.get("success") or 0 for c in rs_rows)
+    rs_full = sum(d.get("full_success") or 0 for d in rs_raw)
     return {
         "comparisons": comparisons,
         "history": history,
@@ -1389,6 +1398,16 @@ def build_rollout_metrics() -> dict:
             "success": sum(c.get("success") or 0 for c in s1_rows),
             "rollouts": sum(c.get("rollouts") or 0 for c in s1_rows),
             "target": 0.70,             # Phase 3 완료 기준 (LED 자동 판정)
+        },
+        "rs232": {
+            "latest": by_name.get("rollout_summary_rs232.json"),
+            "seeds": len(rs_rows),
+            "rollouts": rs_rollouts,
+            "partial": rs_partial,
+            "full": rs_full,
+            "partial_rate": round(rs_partial / rs_rollouts, 3) if rs_rollouts else None,
+            "full_rate": round(rs_full / rs_rollouts, 3) if rs_rollouts else None,
+            "target": 0.50,             # 로드맵 완료 기준 = 부분 분리 50%
         },
         "expert": {"force3": 0.75, "force6": 0.88},  # closed-loop expert 기준 (6/23 실측)
         "target": 0.90,

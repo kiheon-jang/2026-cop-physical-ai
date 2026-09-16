@@ -1331,36 +1331,36 @@
           <div class="bmc-hero-grid">
             <div>
               <span class="bmc-eyebrow"><i class="sq"></i>CoP · Physical AI &nbsp;|&nbsp; SO-101 · hdel_iot_01</span>
-              <h1 class="bmc-h1"><span class="hl">엘리베이터 제어반</span> 조작을<br>로봇팔이 학습합니다.<br>현장 정비 자동화 검증의 첫 단계입니다.</h1>
-              <p class="bmc-lede">가상 환경(MuJoCo)에서 학습 데이터를 축적하고, 학습된 정책을 실제 로봇팔로 이전합니다.<br>병행하여 실기기에서도 시연 데이터를 수집해 정확도 개선을 진행하고 있습니다.<br>제어반의 전원 버튼을 눌러 리셋하는 작업과 케이블을 분리하는 작업이 목표입니다.</p>
+              <h1 class="bmc-h1"><span class="hl">엘리베이터 제어반</span> 조작을<br>로봇팔이 학습합니다.<br>지금은 3단계, 케이블 분리를 학습했습니다.</h1>
+              <p class="bmc-lede">가상 환경(MuJoCo)에서 학습 데이터를 축적하고, 학습된 정책을 실제 로봇팔로 이전합니다.<br>1단계 집어 옮기기와 2단계 리셋버튼 누르기를 마쳤고, 지금은 3단계 RS232 케이블 분리를 진행하고 있습니다.<br>병행하여 실기기에서도 시연 데이터를 수집해 정확도 개선을 진행하고 있습니다.</p>
               <div class="bmc-chips">
-                <div class="bmc-chip">3단계 RS232 분리 · 시뮬 4-seed<b><span class="u" data-bcount="87.5" data-dec="1">0</span>%</b></div>
-                <div class="bmc-chip">2단계 리셋버튼(S1) · 시뮬 4-seed<b><span data-bcount="92.5" data-dec="1">0</span>%</b></div>
-                <div class="bmc-chip">시연까지<b>D-<span data-bcount="55" data-dec="0">0</span></b></div>
+                <div class="bmc-chip">3단계 RS232 분리 · 부분성공(4-seed 40회)<b><span class="u" data-bcount="87.5" data-dec="1">0</span>%</b></div>
+                <div class="bmc-chip">3단계 RS232 분리 · 완전분리(4-seed 40회)<b><span data-bcount="75" data-dec="1">0</span>%</b></div>
+                <div class="bmc-chip">시연까지<b>D-<span data-bcount="45" data-dec="0">0</span></b></div>
               </div>
             </div>
 
             <div class="bmc-console" id="bmc-console">
               <div class="top">
                 <i class="lamp g"></i><i class="lamp a"></i><i class="lamp r"></i>
-                <span>&nbsp;2단계 리셋버튼(S1) 학습 기록 · hdel_iot_01</span>
+                <span>&nbsp;3단계 RS232 케이블 분리 · 시뮬 학습 기록</span>
                 <span class="rt" id="bmc-clock">00:00:00</span>
               </div>
               <div class="tele tl">
-                <div class="lab">S1 성공률 · 4-seed</div>
-                <div class="val"><span data-bcount="92.5" data-dec="1">0</span><span class="s">%</span></div>
+                <div class="lab">3단계 부분성공 · 4-seed</div>
+                <div class="val"><span data-bcount="87.5" data-dec="1">0</span><span class="s">%</span></div>
                 <svg class="spark" width="112" height="26" viewBox="0 0 112 26"><polyline id="bmcSpkSucc" fill="none" stroke="var(--grn)" stroke-width="1.6" stroke-linejoin="round" points=""/></svg>
               </div>
               <div class="tele tr">
                 <div class="lab">학습 손실 · 최종</div>
-                <div class="val"><span id="bmcLossFinal">0.013</span></div>
+                <div class="val"><span id="bmcLossFinal">0.009</span></div>
                 <svg class="spark" width="112" height="26" viewBox="0 0 112 26"><polyline id="bmcSpkLoss" fill="none" stroke="var(--cyn)" stroke-width="1.6" stroke-linejoin="round" points=""/></svg>
               </div>
-              <canvas id="hero3d" role="img" aria-label="SO-101 로봇팔(hdel_iot_01)이 초록 PCB 기판의 빨간 리셋 버튼을 누르는, 기록된 동작 궤적의 3D 재생 — 드래그로 회전, 휠로 확대"></canvas>
+              <canvas id="hero3d" role="img" aria-label="SO-101 로봇팔이 제어반 RS232 포트에서 케이블을 빼는, 기록된 동작 궤적의 3D 재생 — 드래그로 회전, 휠로 확대"></canvas>
               <div class="foot">
-                <span class="playlab"><i class="d"></i>기록된 동작 궤적 재생</span>
+                <span class="playlab"><i class="d"></i>3단계 RS232 분리 궤적 재생</span>
                 <button class="runbtn" id="playbtn" aria-label="재생/일시정지">❚❚ 일시정지</button>
-                <span class="status">프레임 <b id="framelbl">1/120</b> · 29fps · <span id="ledlab">LED ○</span></span>
+                <span class="status">프레임 <b id="framelbl">1/240</b> · 30fps · <span id="ledlab">RS232 분리 궤적</span></span>
               </div>
             </div>
           </div>
@@ -1368,14 +1368,14 @@
           <div class="bmc-logbox">
             <div class="lh">
               <span class="rep"><i class="d"></i>지금까지 기록된 학습 로그를 반복 재생합니다</span>
-              <span>train.log · ACT · epoch 0→30</span>
+              <span>train.log · ACT · epoch 0→41 · act_rs232_sim</span>
               <svg class="sk" width="150" height="24" viewBox="0 0 150 24"><polyline id="bmcSpkLossBig" fill="none" stroke="var(--cyn)" stroke-width="1.5" stroke-linejoin="round" points=""/></svg>
             </div>
             <div class="statstrip">
-              <div class="st"><div class="k">S1 성공률 · 시뮬</div><div class="v g" id="bmcStatS1">92.5%</div></div>
-              <div class="st"><div class="k">1단계 파지 성공률 · 시뮬</div><div class="v g" id="bmcStatP1">100%</div></div>
+              <div class="st"><div class="k">2단계 S1 · 시뮬(완료)</div><div class="v g" id="bmcStatS1">92.5%</div></div>
+              <div class="st"><div class="k">1단계 파지 · 시뮬(완료)</div><div class="v g" id="bmcStatP1">100%</div></div>
               <div class="st"><div class="k">시연까지</div><div class="v a" id="bmcStatDday">D-—</div></div>
-              <div class="st"><div class="k">총 에폭</div><div class="v c" id="bmcStatEp">31</div></div>
+              <div class="st"><div class="k">3단계 학습 에폭</div><div class="v c" id="bmcStatEp">42</div></div>
             </div>
             <div class="log" id="bmc-log"></div>
           </div>
@@ -1605,7 +1605,7 @@
         <div class="b1-head">
           <div class="b1-eyebrow">AUTONOMOUS OPS · 시스템 토폴로지</div>
           <h2>무인 상태에서 어떤 작업이 자동 실행되는가</h2>
-          <p class="sub">로컬 Mac Mini(24/7)에서 Hermes AI 에이전트가 하루 4번 시뮬·테스트·보고를 자동 실행. 노드를 클릭하면 상세가 열립니다.</p>
+          <p class="sub">로컬 Mac Mini(24/7)에서 Hermes AI 에이전트가 하루 세 번 시뮬·테스트·보고를 자동 실행. 노드를 클릭하면 상세가 열립니다.</p>
         </div>
         <div class="tele" id="b1-tele"></div>
         <div class="main">
@@ -1814,7 +1814,7 @@
     <div class="view hidden" id="view-results">
       <div class="view-head">
         <h2>성과 지표</h2>
-        <div class="sub"><b>여기서 보는 것</b> — 학습된 정책의 측정 결과입니다. 학습에 사용하지 않은 상황 10회를 자율로 수행하는지 측정하며, 측정할 때마다 자동 누적됩니다.</div>
+        <div class="sub"><b>여기서 보는 것</b> — 학습된 정책의 측정 결과입니다. 현재 단계는 3단계 RS232 케이블 분리이며, 학습에 쓰지 않은 배치를 4개 조건 × 10회, 모두 40회 자율로 수행해 부분 분리와 완전 분리를 나눠 집계합니다. 1·2단계 기록도 아래에 함께 남겨 둡니다.</div>
       </div>
 
       <!-- 12살 기준 성적표 요약 — 단계별 한 줄 -->
@@ -2801,7 +2801,7 @@ footer p{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing
           <h5>왜 유망한가</h5>
           <ul class=&quot;li&quot;>
             <li>업무 흐름을 멈추지 않고 현장 그대로의 조건이 기록됨</li>
-            <li>초기 투자 규모가 로봇 원격조종 설비 구축 대비 한 자릿수 낮음 — 소비자급 약 80만원, 산업용 인증 제품 약 500~700만원</li>
+            <li>초기 투자 규모가 로봇 원격조종 설비 구축 대비 한 자릿수 낮음 — 소비자급 장비부터 산업용 인증 제품까지 선택 가능</li>
             <li>실제로 일하게 될 환경에서 촬영된 데이터일수록 학습 가치가 크다는 점을 최신 연구들이 반복 확인</li>
           </ul>
         </div>
@@ -2969,7 +2969,7 @@ footer p{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing
       <div class=&quot;way rv&quot;><span class=&quot;n&quot;>01</span>
         <h4>착용형 외골격</h4>
         <p>로봇 팔과 같은 관절 구조의 착용 장비로 관절 각도를 그대로 기록합니다. 로봇을 현장에 들이지 않고도 로봇 좌표계에 가까운 데이터를 확보합니다.
-          팔당 약 40만원 수준 장비로 원격조종 데이터에 대등한 성능이 보고됐습니다(AirExo).</p>
+          보급형 착용 장비로 원격조종 데이터에 대등한 성능이 보고됐습니다(AirExo).</p>
         <dl><div><dt>적합</dt> <dd>동작 정밀도가 중요한 특정 작업 집중 기록</dd></div>
           <div class=&quot;lim&quot;><dt>한계</dt> <dd>착용 부담으로 상시 사용에는 부적합</dd></div></dl>
       </div>
@@ -3051,9 +3051,10 @@ footer p{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing
         <text x=&quot;500&quot; y=&quot;266&quot; text-anchor=&quot;middle&quot; font-size=&quot;13&quot; class=&quot;t-ink&quot;>2단계 · 제어반 리셋 버튼</text>
         <text x=&quot;500&quot; y=&quot;288&quot; text-anchor=&quot;middle&quot; font-size=&quot;11.5&quot; class=&quot;t-mono t-mut&quot;>시뮬 4개 조건 평균 · 37/40</text>
         <!-- 3단계 -->
-        <rect class=&quot;fade&quot; style=&quot;--d:700ms&quot; x=&quot;740&quot; y=&quot;140&quot; width=&quot;120&quot; height=&quot;100&quot; rx=&quot;4&quot; fill=&quot;none&quot; stroke=&quot;rgba(150,175,220,.3)&quot; stroke-dasharray=&quot;5 5&quot;/>
-        <text class=&quot;fade t-mut&quot; style=&quot;--d:700ms&quot; x=&quot;800&quot; y=&quot;196&quot; text-anchor=&quot;middle&quot; font-size=&quot;12.5&quot;>예정</text>
-        <text x=&quot;800&quot; y=&quot;266&quot; text-anchor=&quot;middle&quot; font-size=&quot;13&quot; class=&quot;t-mut&quot;>3단계</text>
+        <rect class=&quot;barv&quot; style=&quot;--d:600ms&quot; x=&quot;740&quot; y=&quot;65&quot; width=&quot;120&quot; height=&quot;175&quot; rx=&quot;4&quot; fill=&quot;#5fd7f5&quot; opacity=&quot;.82&quot;/>
+        <text class=&quot;fade t-mono&quot; style=&quot;--d:1400ms&quot; x=&quot;800&quot; y=&quot;53&quot; text-anchor=&quot;middle&quot; font-size=&quot;19&quot; fill=&quot;#5fd7f5&quot;>0.875</text>
+        <text x=&quot;800&quot; y=&quot;266&quot; text-anchor=&quot;middle&quot; font-size=&quot;13&quot; class=&quot;t-ink&quot;>3단계 · RS232 케이블 분리</text>
+        <text x=&quot;800&quot; y=&quot;288&quot; text-anchor=&quot;middle&quot; font-size=&quot;11.5&quot; class=&quot;t-mono t-mut&quot;>시뮬 4개 조건 평균 · 부분 35/40 · 완전 30/40</text>
       </svg>
       <p class=&quot;vcap&quot;>평가는 육안이 아니라 자동 판정 — 버튼이 기준 변위 이상 눌려 LED가 점등되어야 성공으로 집계된다.</p>
     </div>
@@ -3072,15 +3073,16 @@ footer p{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing
           실물 트랙에서 동일 작업의 데이터 수집이 병행되고 있습니다.</p>
       </div>
       <div class=&quot;card rv&quot;>
-        <span class=&quot;k&quot;>재현성</span>
-        <h4>동일 조건 재측정 결과 완전 일치</h4>
-        <p>평가는 육안이 아니라 자동 판정으로 이루어집니다. 버튼이 기준 변위 이상 눌려 LED가 점등되어야 성공으로 집계됩니다.</p>
+        <span class=&quot;k&quot;>3단계 — RS232 케이블 분리</span>
+        <span class=&quot;big&quot;><span class=&quot;num&quot; data-to=&quot;0.875&quot; data-dec=&quot;3&quot;>0.000</span></span>
+        <p>시뮬레이션 4개 조건 평균 부분 성공 0.875(35/40), 완전 분리 0.750(30/40)입니다.
+          사흘 연속 같은 조건으로 재측정해 동일한 결과가 재현됐습니다. 판정은 육안이 아니라 자동 집계입니다.</p>
       </div>
     </div>
 
     <div class=&quot;blk grid g3&quot; data-stagger>
-      <div class=&quot;card flat rv&quot;><span class=&quot;k&quot;>진척</span><span class=&quot;big&quot;><span class=&quot;num&quot; data-to=&quot;66.5&quot; data-dec=&quot;1&quot; data-sfx=&quot;%&quot;>0.0%</span></span></div>
-      <div class=&quot;card flat rv&quot;><span class=&quot;k&quot;>시간 경과</span><span class=&quot;big&quot;><span class=&quot;num&quot; data-to=&quot;69.1&quot; data-dec=&quot;1&quot; data-sfx=&quot;%&quot;>0.0%</span></span></div>
+      <div class=&quot;card flat rv&quot;><span class=&quot;k&quot;>진척</span><span class=&quot;big&quot;><span class=&quot;num&quot; data-to=&quot;75.0&quot; data-dec=&quot;1&quot; data-sfx=&quot;%&quot;>0.0%</span></span></div>
+      <div class=&quot;card flat rv&quot;><span class=&quot;k&quot;>시간 경과</span><span class=&quot;big&quot;><span class=&quot;num&quot; data-to=&quot;90.8&quot; data-dec=&quot;1&quot; data-sfx=&quot;%&quot;>0.0%</span></span></div>
       <div class=&quot;card flat rv&quot;><span class=&quot;k&quot;>지연 항목</span><span class=&quot;big g&quot;><span class=&quot;num&quot; data-to=&quot;0&quot;>0</span><span class=&quot;unit&quot;>건</span></span></div>
     </div>
   </div>
@@ -3416,7 +3418,7 @@ a{color:inherit;text-decoration:none}
 .bmc-home .sechead .idx{font-family:var(--mono);font-size:12px;color:var(--cyn);letter-spacing:.1em}
 .bmc-home .sechead h2{font-family:var(--myeong);font-size:clamp(22px,3.4vw,30px);margin:0;letter-spacing:-.01em;font-weight:750;color:var(--ink)}
 .bmc-home .sechead p{color:var(--mut);font-size:13.5px;margin:0}
-.bmc-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.bmc-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:16px}
 .bmc-home .gcard{border:1px solid var(--line2);border-radius:14px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:20px;text-align:center}
 .bmc-home .gwrap{position:relative;width:132px;height:132px;margin:0 auto}
 .bmc-home .gwrap svg{transform:rotate(-90deg)}
@@ -3539,7 +3541,7 @@ a{color:inherit;text-decoration:none}
           <rect x=&quot;308&quot; y=&quot;462&quot; width=&quot;30&quot; height=&quot;22&quot; rx=&quot;3&quot; fill=&quot;#4a4038&quot;/>
           <!-- RS232 port slot -->
           <rect x=&quot;344&quot; y=&quot;464&quot; width=&quot;66&quot; height=&quot;18&quot; rx=&quot;3&quot; fill=&quot;#0e0c0a&quot;/>
-          <text x=&quot;360&quot; y=&quot;446&quot; text-anchor=&quot;middle&quot; font-size=&quot;12.5&quot; style=&quot;fill:var(--ink2)&quot;>RS232 포트 · ±0.5mm</text>
+          <text x=&quot;360&quot; y=&quot;446&quot; text-anchor=&quot;middle&quot; font-size=&quot;12.5&quot; style=&quot;fill:var(--ink2)&quot;>RS232 포트 · DE-9</text>
           <!-- calipers hint -->
           <g style=&quot;stroke:var(--terra)&quot; stroke-width=&quot;2&quot; opacity=&quot;.85&quot;><line x1=&quot;344&quot; y1=&quot;500&quot; x2=&quot;410&quot; y2=&quot;500&quot;/><line x1=&quot;344&quot; y1=&quot;496&quot; x2=&quot;344&quot; y2=&quot;504&quot;/><line x1=&quot;410&quot; y1=&quot;496&quot; x2=&quot;410&quot; y2=&quot;504&quot;/></g>
         </g>
@@ -3595,20 +3597,20 @@ a{color:inherit;text-decoration:none}
 
     <article class=&quot;step&quot; data-stage=&quot;2&quot;>
       <div class=&quot;no&quot;>02</div>
-      <span class=&quot;badge b-live&quot;>● 진행 중</span>
+      <span class=&quot;badge b-done&quot;>● 가상 완료 · 실기 병행</span>
       <h3>제어반의 리셋 버튼을<br>정확히 누릅니다.</h3>
       <p>초록색 기판(PCB) 위의 작은 리셋 버튼을 손끝으로 누릅니다. 정상적으로 눌리면 옆의 초록 LED가 점등되어 성공을 확인합니다.</p>
-      <div class=&quot;kids&quot;>버튼 지름은 <b>수 mm</b> 수준으로, 미세한 오차도 실패로 이어집니다. <b>야간 자동 학습</b>으로 정확도를 지속적으로 높이고 있습니다.</div>
+      <div class=&quot;kids&quot;>버튼 지름은 <b>수 mm</b> 수준으로, 미세한 오차도 실패로 이어집니다. 가상 시험 4개 조건 평균 <b>92.5%</b>를 확인했고, 실물 로봇 트랙에서 같은 작업을 병행하고 있습니다.</div>
       <div class=&quot;stat&quot;><span class=&quot;big num b-live&quot; data-count=&quot;92.5&quot; data-dec=&quot;1&quot;>0</span><span class=&quot;lbl&quot;>현재 가상 성공률 · 4개 조건 평균</span></div>
     </article>
 
     <article class=&quot;step&quot; data-stage=&quot;3&quot;>
       <div class=&quot;no&quot;>03</div>
-      <span class=&quot;badge b-next&quot;>● 예정</span>
+      <span class=&quot;badge b-live&quot;>● 진행 중 · 가상 측정 완료</span>
       <h3>꽂혀 있는 케이블을<br>정확히 뽑습니다.</h3>
-      <p>포트에 체결된 RS232 통신 케이블을 분리하는 고정밀 작업입니다. 허용 오차는 <b>0.5mm</b> 수준입니다.</p>
-      <div class=&quot;kids&quot;>케이블을 정밀하게 파지해 분리하는 고난도 과제입니다. <b>9월 착수</b>, <b>10월 실물 시연</b>을 목표로 합니다.</div>
-      <div class=&quot;stat&quot;><span class=&quot;big num b-next&quot;>±0.5<span style=&quot;font-size:.42em;color:var(--ink2)&quot;>mm</span></span><span class=&quot;lbl&quot;>요구 분리 정밀도</span></div>
+      <p>포트에 체결된 RS232 통신 케이블을 분리하는 정밀 작업입니다. 커넥터가 <b>5.9mm</b> 이상 빠지면 완전 분리, <b>2.95mm</b> 이상이면 부분 분리로 판정합니다.</p>
+      <div class=&quot;kids&quot;>케이블을 정밀하게 파지해 분리하는 고난도 과제입니다. 가상 환경에서 학습을 마치고, 4개 조건 40회 시험에서 <b>부분 성공 87.5%</b>·<b>완전 분리 75%</b>를 확인했습니다. 10월 실물 시연을 목표로 합니다.</div>
+      <div class=&quot;stat&quot;><span class=&quot;big num b-live&quot; data-count=&quot;87.5&quot; data-dec=&quot;1&quot;>0</span><span class=&quot;lbl&quot;>가상 시험 부분 성공률 · 4개 조건 40회</span></div>
     </article>
   </div>
 </div>
@@ -3624,6 +3626,7 @@ a{color:inherit;text-decoration:none}
     <div class=&quot;bmc-metrics&quot;>
       <div class=&quot;gcard up&quot; data-g=&quot;100&quot; data-col=&quot;grn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>1단계 성공률<span>GRASP &amp;amp; LIFT</span></div></div>
       <div class=&quot;gcard up&quot; data-g=&quot;92.5&quot; data-col=&quot;amb&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>2단계 성공률<span>S1 · RESET BUTTON</span></div></div>
+      <div class=&quot;gcard up&quot; data-g=&quot;87.5&quot; data-col=&quot;cyn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>3단계 부분 성공률<span>RS232 · CABLE RELEASE</span></div></div>
       <div class=&quot;gcard up&quot; data-g=&quot;0&quot; data-col=&quot;cyn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>일정 진척<span>TO 2026-09-30</span></div></div>
       <div class=&quot;gcard up&quot; data-g=&quot;90&quot; data-col=&quot;grn&quot; data-manual=&quot;D-—&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>시연까지<span>D-DAY COUNTDOWN</span></div></div>
     </div>
@@ -3872,6 +3875,9 @@ async function refreshFromApi(silent = false) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const fresh = await res.json();
     window.DATA = fresh; D = fresh; REPO_URL = fresh.meta.repo_url || '';
+    // 첫 로드 시 window.DATA 는 빈 자리표시자라, 그 상태로 3D 뷰를 열면 '데이터 없음' 으로 빗장이 걸린다.
+    // 실제 데이터가 도착하면 빗장을 풀고 현재 라우트가 3D 일 때 다시 렌더한다.
+    if (D.web3d && D.web3d.chain && !(SIM3D.episodes || []).length) { _sim3dInit = false; if (currentRoute === 'sim3d') renderSim3d(); }
     initCounts();
     renderProposals(); renderDaily(); renderMagazines(); renderApps(); renderVideos(); renderTech();
     renderBlockers(); renderSamples(); renderDecisions(); renderHome();
@@ -4533,7 +4539,7 @@ function renderApps() {
     });
   });
   // default expand first 진행
-  var def=phases.findIndex(function(p){return p.status==='진행';}); if(def<0) def=0;
+  var curId=(D.business_kpi||{}).current_phase_id; var def=phases.findIndex(function(p){return p.id===curId;}); if(def<0){ for(var q=0;q<phases.length;q++){ if(phases[q].status==='진행') def=q; } } if(def<0) def=0;
   var dRow=root.querySelector('.row[data-i="'+def+'"]'); if(dRow) dRow.click();
 }
 
@@ -4543,7 +4549,7 @@ function renderOps() {
   // telemetry
   document.getElementById('b1-tele').innerHTML =
     '<div class="t"><div class="k">UPTIME</div><div class="v ok"><span class="dot"></span>24/7 OK</div></div>'
-    + '<div class="t"><div class="k">CRON / 일</div><div class="v cy">4</div></div>'
+    + '<div class="t"><div class="k">CRON / 일</div><div class="v cy">3</div></div>'
     + '<div class="t"><div class="k">SELF-HEAL</div><div class="v ok">ON</div></div>'
     + '<div class="t"><div class="k">서빙</div><div class="v cy">hermes-mark</div></div>';
 
@@ -4552,7 +4558,6 @@ function renderOps() {
     {k:'c1',cat:'cron',col:'#39c6f0',t:'cron · 23:00',sub:'시뮬 환경 구축',badge:'23:00'},
     {k:'c2',cat:'cron',col:'#39c6f0',t:'cron · 23:30',sub:'테스트 + 메트릭',badge:'23:30'},
     {k:'c3',cat:'cron',col:'#39c6f0',t:'cron · 07:00',sub:'아침 보고 메일',badge:'07:00'},
-    {k:'c4',cat:'cron',col:'#39c6f0',t:'cron · 일 22:00',sub:'주간 정리',badge:'주간'},
     {k:'heal',cat:'heal',col:'#2ee6a0',t:'self-heal',sub:'실패 자가복구'},
     {k:'claude',cat:'delegate',col:'#f8b64c',t:'claude -p 위임',sub:'복잡 추론'},
     {k:'git',cat:'infra',col:'#39c6f0',t:'Git auto-push',sub:'코드·로그·보고서'},
@@ -4577,12 +4582,11 @@ function renderOps() {
     root:{c:'#8ea0bd',t:'Mac Mini',sub:'로컬 호스트 · 24/7',kv:[['호스트','로컬 Mac Mini (Apple Silicon)'],['가동','24/7 · 재부팅 자동 복구'],['역할','전 자동화의 물리 기반']]},
     hub:{c:'#39c6f0',t:'Hermes Agent',sub:'로컬 AI 에이전트',kv:[['복잡추론','Claude 위임 <code>claude -p</code>'],['스킬','<code>cop-physical-ai-self-heal</code>'],['권한','gh · git · file system · venv']], roles:true},
     c1:{c:'#39c6f0',t:'cron · 매일 23:00',sub:'시뮬 환경 단계별 구축',kv:[['역할','PHASE_ROADMAP 읽어 오늘 단계 식별 → MuJoCo 코드 작성·실행'],['결과물','<code>research/simulation/*.md</code>']]},
-    c2:{c:'#39c6f0',t:'cron · 매일 23:30',sub:'시뮬 테스트 + 메트릭',kv:[['역할','성공률·추론시간·데이터셋 정합 검증 · 자가치유 로그'],['결과물','<code>agent/research-log/*.md</code>']]},
-    c3:{c:'#39c6f0',t:'cron · 매일 07:00',sub:'아침 보고 메일',kv:[['역할','<code>generate_daily_report.py</code> → 담당자·수신자 메일 발송'],['결과물','이메일 · <code>CHANGELOG.md</code> · git push']]},
-    c4:{c:'#39c6f0',t:'cron · 일요 22:00',sub:'주간 정리 + 보고 증거',kv:[['역할','한 주 결과 정리 + 월별 보고서 후보 식별'],['결과물','<code>agent/report-evidence/YYYY-MM/</code>']]},
-    heal:{c:'#2ee6a0',t:'Self-heal',sub:'자가치유',kv:[['동작','매 cron 끝에 실패·차단 자동 기록'],['복구','<code>chore(self-heal)</code> commit → 다음 cron 자동 재시도'],['표시','활동 타임라인의 치유 표식 = 발생 일수']]},
+    c2:{c:'#39c6f0',t:'cron · 매일 23:30',sub:'시뮬 테스트 + 메트릭',kv:[['역할','성공률·추론시간·데이터셋 정합 검증 · 자가치유 로그 · 보고용 증거 후보 정리'],['결과물','<code>agent/research-log/*.md</code> · <code>agent/report-evidence/YYYY-MM/</code>']]},
+    c3:{c:'#39c6f0',t:'cron · 매일 07:00',sub:'아침 보고 메일',kv:[['역할','<code>generate_daily_report.py</code> → 담당자·수신자 메일 발송'],['결과물','이메일 · <code>CHANGELOG.md</code> · 변경 이력 자동 보관']]},
+    heal:{c:'#2ee6a0',t:'Self-heal',sub:'자가치유',kv:[['동작','매 cron 끝에 실패·차단 자동 기록'],['복구','실패 항목 자동 기록 → 다음 cron 자동 재시도'],['표시','활동 타임라인의 치유 표식 = 발생 일수']]},
     claude:{c:'#f8b64c',t:'Claude 위임',sub:'복잡 추론 오프로딩',kv:[['동작','Hermes가 못 푸는 복잡 추론은 <code>claude -p</code>로 위임'],['현재 학습','ACT '+actS]]},
-    git:{c:'#39c6f0',t:'Git auto-push',sub:'자동 커밋',kv:[['동작','코드·로그·보고서 자동 commit + push'],['효과','대시보드 데이터 소스 항상 최신']]},
+    git:{c:'#39c6f0',t:'Git auto-push',sub:'자동 보관',kv:[['동작','코드·로그·보고서 변경 자동 기록·보관'],['효과','대시보드 데이터 소스 항상 최신']]},
     serve:{c:'#39c6f0',t:'hermes-mark 서버',sub:'이 대시보드',kv:[['스택','Fastify + chokidar(파일감지) + WebSocket(라이브)'],['노출','Cloudflare Tunnel → <code>cop-physical-ai.hermesmark.site</code>']]},
   };
   var inspEl=document.getElementById('b1-insp');
@@ -4625,7 +4629,7 @@ function renderOps() {
   // 24h timeline
   var axis=document.getElementById('b1-axis');
   var hrs=[0,6,12,18,24].map(function(h){ return '<span class="hr" style="left:'+(h/24*100)+'%">'+h+'시</span>'; }).join('');
-  var EV=[{h:1,t:'01:00 재시도',cls:'heal alt'},{h:7,t:'07:00 메일',cls:''},{h:23,t:'23:00 구축',cls:''},{h:23.5,t:'23:30 테스트',cls:'alt'}];
+  var EV=[{h:7,t:'07:00 아침 보고',cls:''},{h:23,t:'23:00 구축',cls:''},{h:23.5,t:'23:30 테스트',cls:'alt'}];
   var evs=EV.map(function(e){ return '<span class="ev '+e.cls+'" style="left:'+(e.h/24*100)+'%"><span class="lb">'+escapeHtml(e.t)+'</span><span class="m"></span></span>'; }).join('');
   axis.innerHTML=hrs+evs;
 
@@ -4633,7 +4637,7 @@ function renderOps() {
   document.getElementById('b1-flow').innerHTML =
     '<div class="fh">데이터 흐름 — 학습이 어떻게 진행되는가</div>'
     + '<div class="row"><span class="st s">cron 23:00</span><span class="ar">&#8594;</span><span class="st">MuJoCo 시뮬</span><span class="ar">&#8594;</span><span class="st">episodes (LeRobot)</span><span class="ar">&#8594;</span><span class="st e">ACT 학습 · '+escapeHtml(actS)+'</span></div>'
-    + '<div class="row"><span class="st s">cron 23:30</span><span class="ar">&#8594;</span><span class="st">메트릭 측정</span><span class="ar">&#8594;</span><span class="st">research-log</span><span class="ar">&#8594;</span><span class="st e">git push</span></div>'
+    + '<div class="row"><span class="st s">cron 23:30</span><span class="ar">&#8594;</span><span class="st">메트릭 측정</span><span class="ar">&#8594;</span><span class="st">research-log</span><span class="ar">&#8594;</span><span class="st e">자동 보관</span></div>'
     + '<div class="row"><span class="st s">파일 변경</span><span class="ar">&#8594;</span><span class="st">chokidar</span><span class="ar">&#8594;</span><span class="st">build.py</span><span class="ar">&#8594;</span><span class="st">WebSocket</span><span class="ar">&#8594;</span><span class="st e">브라우저 라이브</span></div>';
 }
 
@@ -4648,11 +4652,11 @@ function renderTech() {
     {n:3,mon:'2026-06',title:'ACT 학습 · 모방학습',stk:'LeRobot ACT',detail:'LeRobot ACT(Transformer)로 200ep 시연을 모방. 관측(영상+qpos6) → 다음 100프레임 액션 청크 예측. Mac Mini 백그라운드 학습(epoch 100, batch 8).',chips:['ACT Transformer','chunk 100','epoch 100','모방학습']},
     {n:4,mon:'2026-07',title:'시뮬 검증',stk:'성공률 측정',detail:'학습된 모델이 시뮬에서 큐브를 잘 집는지 성공률로 측정. Sim2Real 정합 준비 단계.',chips:['큐브 파지율','Sim2Real 준비']},
     {n:5,mon:'2026-08',title:'S1 리셋버튼 · 실기정렬',stk:'합성100ep+ACT',detail:'2단계 — PCB 리셋버튼 누르기. 실기 트랙(omen)과 동일 작업·관측으로 시뮬 정렬. 합성 100ep + ACT 학습 · LED 자동판정.',chips:['S1 리셋버튼','실기 정렬','LED 자동판정']},
-    {n:6,mon:'2026-09',title:'RS232 분리 + 1차 완성',stk:'S1 70·RS232 40',detail:'RS232 케이블 분리 — 가장 어려운 정밀작업(허용오차 ±0.5mm) + 1차 기능 완성. S1 70% · RS232 40% 목표. 작업 완료 후 10월 시연.',chips:['RS232 분리','±0.5mm','10월 시연']},
+    {n:6,mon:'2026-09',title:'RS232 분리 + 1차 완성',stk:'RS232 87.5·S1 92.5',detail:'RS232 케이블 분리 — 제어반 포트에 꽂힌 점검 단말기 케이블 빼기. 가상 시험 4개 조건 40회에서 부분 분리 87.5% · 완전 분리 75%(완료 기준 부분 분리 50%). 10월 시연 준비.',chips:['RS232 분리','부분 분리 87.5%','10월 시연']},
   ];
   const STACK = [
     {name:'MuJoCo 3.8',role:'가상 로봇팔 시뮬 엔진',lic:'Apache 2.0',why:'처음엔 Isaac Lab 검토했으나 Mac Mini(Apple Silicon ARM64) 미지원. MuJoCo는 네이티브 + pip 한 줄 설치 + 경량.',how:'SO-ARM101 MJCF import → 헤드리스 렌더로 천장카메라+6축 관측 수집. IK로 파지 시연 자동 생성.'},
-    {name:'SO-ARM101',role:'오픈소스 6-DoF 로봇팔',lic:'CC-BY-SA',why:'TheRobotStudio 오픈소스 + LeRobot 공식 지원. ≈$500 · Leader+Follower 텔레오퍼레이션 가능.',how:'so101_new_calib.xml로 시뮬/실기 동일 캘리브. 6관절 + 그리퍼. 실기 서보 Feetech STS3215.'},
+    {name:'SO-ARM101',role:'오픈소스 6-DoF 로봇팔',lic:'CC-BY-SA',why:'TheRobotStudio 오픈소스 + LeRobot 공식 지원. Leader+Follower 텔레오퍼레이션 가능.',how:'so101_new_calib.xml로 시뮬/실기 동일 캘리브. 6관절 + 그리퍼. 실기 서보 Feetech STS3215.'},
     {name:'HF LeRobot',role:'로봇 학습 프레임워크',lic:'Apache 2.0',why:'데이터셋→학습(ACT/DP/π0)→추론 end-to-end 표준. SO-ARM101 공식 지원. 검증된 코드베이스.',how:'200ep를 LeRobot Dataset v3.0(parquet 관절 + mp4 영상)로 저장 → ACT 학습 입력.'},
     {name:'ACT',role:'Action Chunking Transformer',lic:'2023 · MIT',why:'Diffusion Policy 대비 가볍고 빠름 → 1차 학습 적합. 다음 100프레임을 한 번에 예측 → 시간적 일관성.',how:'train_act.py가 ACTConfig/ACTPolicy 호출. 입력 카메라+6축, 출력 6축 시퀀스(chunk 100). epoch 100, batch 8.'},
     {name:'모방학습',role:'시연을 관측해 학습',lic:'Imitation',why:'강화학습은 실기 파손위험 + 데이터 저효율. 정확한 시연이 가능한 작업엔 모방학습이 적합.',how:'IK가 정답 액션 자동생성 → 카메라 관측과 짝지어 200ep 저장 → ACT가 관측과 동작의 대응 관계를 학습.'},
@@ -4750,11 +4754,11 @@ function renderTrainingProgress() {
     const isS1 = (tm.job_name || '').startsWith('act_s1');
     const isRs232Job = (tm.job_name || '').startsWith('act_rs232');
     blocks.push(`
-      <div class="section-head"><h3>${isRs232Job ? '3단계 학습 현황 — AI 가 케이블 분리를 배우는 중' : isS1 ? '2단계 학습 현황 — AI 가 리셋버튼 누르기를 배우는 중' : '1단계 학습 히스토리 — AI 가 집기를 배워간 기록'}</h3><div class="right">자동 갱신</div></div>
+      <div class="section-head"><h3>${isRs232Job ? (tm.status === 'running' ? '3단계 학습 현황 — AI 가 케이블 분리를 배우는 중' : '3단계 학습 완료 — AI 가 케이블 분리를 배운 기록') : isS1 ? '2단계 학습 현황 — AI 가 리셋버튼 누르기를 배우는 중' : '1단계 학습 히스토리 — AI 가 집기를 배워간 기록'}</h3><div class="right">자동 갱신</div></div>
       <div class="training-block">
         <div class="tb-head">
           <h4>학습 메트릭 · ${escapeHtml(tm.job_name || 'act_train')}</h4>
-          <span class="badge ${tm.status}">${tm.status === 'running' ? '학습 중' : '일시중지'}</span>
+          <span class="badge ${tm.status}">${tm.status === 'running' ? '학습 중' : '학습 종료'}</span>
           <span class="right">${escapeHtml(tm.metrics_path || '')}</span>
         </div>
         <div class="tb-metrics">
@@ -4884,15 +4888,19 @@ function renderVideos() {
         </video>
       </div>`;
 
-  // 1) 지금 진행(2단계 S1) 데이터셋 영상 — 맨 위, 목적 설명과 함께
+  // 1) 지금 진행(3단계 RS232) 데이터셋 영상 — 맨 위, 목적 설명과 함께
   const heroWrap = document.getElementById('dataset-hero-wrap');
   if (heroWrap) {
     heroWrap.innerHTML = (curSets.length || s1sets.length) ? `
       <div class="section-head" style="margin-top:20px;"><h3>${curSets.length ? '지금 진행 — 3단계 · RS232 케이블 분리 시범 영상' : '지금 진행 — 2단계 · PCB 리셋버튼 누르기 시범 영상'}</h3><div class="right">100회 시범 · AI 가 이걸 보고 배운다 · ▶ 클릭 시 로드</div></div>
       <p style="font-size:13px;color:var(--text-sub);line-height:1.6;margin:6px 0 12px;">
-        가상 로봇의 <b>선생님(정답 프로그램)</b>이 위치가 매번 바뀌는 PCB 보드의 리셋 버튼을 눌러
-        초록 LED 를 켜는 시범 100번을 녹화한 것입니다. AI 는 이 영상과 팔 움직임 기록만 보고
-        <b>스스로 누르는 법</b>을 배우는 중입니다 (학습이 끝나면 AI 본인의 시험 영상이 여기 추가됩니다).</p>
+        ${curSets.length
+          ? `가상 로봇의 <b>선생님(정답 프로그램)</b>이 실기 프레임대로 배치한 DE-9 포트에서 RS232 케이블을 빼내는 시범 100회(16,093프레임)를 녹화한 것입니다.
+             같은 시범을 <b>top(광각)</b>과 <b>closeup(근접)</b> 두 시점으로 각각 기록했고, AI 는 이 영상과 팔 움직임 기록만 보고 <b>스스로 빼는 법</b>을 배웠습니다.
+             학습을 마친 정책의 시험 영상은 아래 시험 영상 히스토리에 있습니다.`
+          : `가상 로봇의 <b>선생님(정답 프로그램)</b>이 위치가 매번 바뀌는 PCB 보드의 리셋 버튼을 눌러
+             초록 LED 를 켜는 시범 100번을 녹화한 것입니다. AI 는 이 영상과 팔 움직임 기록만 보고
+             <b>스스로 누르는 법</b>을 배우는 중입니다.`}</p>
       ${[...curSets, ...s1sets].map(dsCard).join('')}` : '';
   }
   // 1b) 구세대(1단계) 데이터셋 영상 — 아카이브
@@ -5002,7 +5010,7 @@ function renderDaily() {
   }
   const totalCommits = tl.reduce((a, x) => a + (x.commit_count || 0), 0);
   const totalHeals = tl.reduce((a, x) => a + (x.self_heal_count || 0), 0);
-  if (subEl) subEl.textContent = `${tl.length}일 · 커밋 ${totalCommits}회 · 자동 복구 ${totalHeals}회 (시스템이 일시 장애를 스스로 해결)`;
+  if (subEl) subEl.textContent = `${tl.length}일 · 자동 작업 ${totalCommits}회 · 자동 복구 ${totalHeals}회 (시스템이 일시 장애를 스스로 해결)`;
 
   wrap.innerHTML = tl.map(d => {
     const classes = ['tl-row'];
@@ -5012,7 +5020,7 @@ function renderDaily() {
     const tasks = (d.sim_task_titles || []).slice(0, 3)
       .map(t => `<div class="t">${escapeHtml(t)}</div>`).join('');
     const metrics = [];
-    if (d.commit_count) metrics.push(`<span class="m">커밋 <b>${d.commit_count}</b></span>`);
+    if (d.commit_count) metrics.push(`<span class="m">자동 작업 <b>${d.commit_count}</b></span>`);
     if (d.self_heal_count) metrics.push(`<span class="m">🛟 자동 복구 <b>${d.self_heal_count}</b></span>`);
     if ((d.scripts_run || []).length) metrics.push(`<span class="m">스크립트 실행 <b>${d.scripts_run.length}</b></span>`);
     const commitDetail = (d.commits || []).map(c =>
@@ -5683,7 +5691,7 @@ function renderRealTrack() {
     <div class="rt-status">
       <span class="chip done"><span class="dot"></span>실기 시연 데이터 수집 완료</span>
       <span class="chip done"><span class="dot"></span>1차 정책 학습 완료</span>
-      <span class="chip now"><span class="dot"></span>시뮬 정렬 진행 중</span>
+      <span class="chip done"><span class="dot"></span>시뮬 정렬 완료</span>
       <span class="chip next"><span class="dot"></span>실물 롤아웃 검증 예정</span>
     </div>
 
@@ -5698,7 +5706,7 @@ function renderRealTrack() {
     <div class="rt-plan">
       <div class="rt-step done"><div class="tag"><span class="dot"></span>1 · 완료</div><h4>실기 데이터 수집</h4><p>실물 로봇으로 리셋 버튼 누르기를 위·근접 2대 카메라로 녹화했습니다. (${epTotal}회 시연)</p></div>
       <div class="rt-step done"><div class="tag"><span class="dot"></span>2 · 완료</div><h4>정책 학습</h4><p>수집한 시연 영상으로 ACT 모델을 학습했습니다. 카메라 관측만으로 버튼을 찾아 누르는 동작이 학습 대상입니다.</p></div>
-      <div class="rt-step now"><div class="tag"><span class="dot"></span>3 · 진행 중</div><h4>시뮬 정렬</h4><p>가상 시뮬을 실기와 같은 작업·카메라로 맞추고, 버튼 위치·조명을 다양하게 바꾼 합성 데이터로 보강합니다.</p></div>
+      <div class="rt-step done"><div class="tag"><span class="dot"></span>3 · 완료</div><h4>시뮬 정렬</h4><p>가상 시뮬을 실기와 같은 작업·카메라로 맞추고, 버튼 위치·조명을 다양하게 바꾼 합성 데이터로 보강했습니다. 가상 트랙은 이어서 3단계 RS232 케이블 분리로 넘어갔습니다.</p></div>
       <div class="rt-step next"><div class="tag"><span class="dot"></span>4 · 예정</div><h4>실기 검증 → 시연</h4><p>학습한 정책을 실물 로봇에서 실행하고, 녹색 LED 자동판정으로 성공률을 측정합니다. 10월 실물 시연 목표.</p></div>
     </div>
 
@@ -6502,6 +6510,34 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
     pcbG.rotation.set(0, 0, (pcb.yaw_deg || 0) * Math.PI / 180);
     root.add(pcbG);
 
+    // ── 3단계 RS232 무대: DE-9 포트 3개 + 플러그(쉘·플랜지·후드) + 케이블 (씬 XML 치수 그대로) ──
+    // 보드는 위 pcbG 를 공유하고, 2단계 소품(버튼·LED)은 RS232 궤적일 때 숨긴다.
+    var isRs232 = !!(RT && RT.rs232), plugMover = null;
+    {
+      var conn = new THREE.Group();
+      var metal = new THREE.MeshStandardMaterial({ color: 0xb9bcc2, roughness: 0.45, metalness: 0.5 });
+      [-0.018, 0.018, 0.054].forEach(function (py) {
+        var fl = new THREE.Mesh(new THREE.BoxGeometry(0.001, 0.0308, 0.01256), metal);
+        fl.position.set(-0.075, py, 0.01128); conn.add(fl);
+      });
+      plugMover = new THREE.Group();
+      var pshell = new THREE.Mesh(new THREE.BoxGeometry(0.0059, 0.017, 0.0079), metal);
+      pshell.position.set(-0.07795, -0.018, 0.01128);
+      var pflange = new THREE.Mesh(new THREE.BoxGeometry(0.001, 0.0308, 0.01256), metal);
+      pflange.position.set(-0.08145, -0.018, 0.01128);
+      var hood = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.031, 0.0155),
+        new THREE.MeshStandardMaterial({ color: 0xd9c89e, roughness: 0.6 }));
+      hood.position.set(-0.0969, -0.018, 0.01128); hood.castShadow = true;
+      var cable = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.0445, 12),
+        new THREE.MeshStandardMaterial({ color: 0xd9d3c4, roughness: 0.8 }));
+      cable.position.set(-0.1029, -0.0558, 0.01128);
+      plugMover.add(pshell, pflange, hood, cable);
+      conn.add(plugMover);
+      conn.visible = isRs232;
+      pcbG.add(conn);
+      if (isRs232) { btn.visible = false; led.visible = false; }
+    }
+
     // ── 간이 오빗(sim3d applyCam 그대로) — 팔+PCB+버튼 누름이 보이는 초기각 ──
     var target = new THREE.Vector3(0.15, 0.07, 0.0);
     var az = 0.82, el = 0.30, dist = 0.62;
@@ -6532,7 +6568,8 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 
     return {
       renderer: renderer, scene: scene, camera: camera, canvas: canvas,
-      hinges: hinges, led: led, applyCam: applyCam, inner: inner, bodyGroup: bodyGroup, btn: btn
+      hinges: hinges, led: led, applyCam: applyCam, inner: inner, bodyGroup: bodyGroup, btn: btn,
+      plugMover: plugMover, isRs232: isRs232
     };
   }
 
@@ -6563,7 +6600,10 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
     if (!r) r = m.rollouts[0];
     if (!r || !r.frames || !r.frames.length) return null;
     return { frames: r.frames, fps: m.fps || r.fps || 29.4, n: r.frames.length,
-             led_frame: (r.led_frame != null ? r.led_frame : null), pcb: r.pcb || null };
+             led_frame: (r.led_frame != null ? r.led_frame : null), pcb: r.pcb || null,
+             rs232: /rs232/.test(String(m.scene || '') + String(m.ckpt_dir || '')),
+             maxDisp: (r.max_disp_m != null ? r.max_disp_m : null),
+             partialFrame: r.partial_frame, fullFrame: r.full_frame };
   }
 
   /* ── 부팅: 씬 + 재생 루프 + 콘솔 라벨 갱신 ──
@@ -6590,6 +6630,20 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
     var ledOn = false;
     function renderFrame(i) {
       applyFrame(H, FR[i]);
+      if (H.isRs232 && H.plugMover) {
+        // 프레임별 변위가 있으면 실제 값, 없으면 판정 프레임 기준(부분성공 2.95mm → 최종 변위)
+        var fr = FR[i], d = (fr && fr.length > 6) ? fr[6]
+          : (RT.fullFrame != null && i >= RT.fullFrame) ? (RT.maxDisp || 0.0059)
+          : (RT.partialFrame != null && i >= RT.partialFrame) ? 0.00295 : 0;
+        H.plugMover.position.set(-d, 0, 0);
+        if (ledLab) {
+          var mm = d * 1000;
+          ledLab.textContent = mm >= 5.9 ? "완전분리 ●" : "분리 " + mm.toFixed(1) + "mm";
+          ledLab.style.color = mm >= 5.9 ? "var(--grn)" : "";
+        }
+        if (frameLbl) frameLbl.textContent = (i + 1) + "/" + N;
+        return;
+      }
       var on = i >= LEDF;
       if (on !== ledOn) {
         ledOn = on; setLED(H, on);
@@ -6768,7 +6822,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 <script id="bmc-home-js">
 (function(){
   "use strict";
-  var REAL_TRAIN=[{"epoch":0,"loss":74.5122,"l1":0.2656,"sec":10},{"epoch":0,"loss":2.832,"l1":0.0627,"sec":1362},{"epoch":1,"loss":1.1658,"l1":0.036,"sec":1256},{"epoch":2,"loss":0.6962,"l1":0.0282,"sec":1254},{"epoch":3,"loss":0.4121,"l1":0.0231,"sec":1309},{"epoch":4,"loss":0.2586,"l1":0.0202,"sec":1404},{"epoch":5,"loss":0.177,"l1":0.0174,"sec":1486},{"epoch":6,"loss":0.1327,"l1":0.0155,"sec":1366},{"epoch":7,"loss":0.1043,"l1":0.0141,"sec":1388},{"epoch":8,"loss":0.0864,"l1":0.0135,"sec":1250},{"epoch":9,"loss":0.0736,"l1":0.0125,"sec":1246},{"epoch":10,"loss":0.0632,"l1":0.0116,"sec":1240},{"epoch":11,"loss":0.0551,"l1":0.0109,"sec":1240},{"epoch":12,"loss":0.0487,"l1":0.0105,"sec":1241},{"epoch":13,"loss":0.0437,"l1":0.0101,"sec":1240},{"epoch":14,"loss":0.0396,"l1":0.0096,"sec":1237},{"epoch":15,"loss":0.0352,"l1":0.0091,"sec":1240},{"epoch":16,"loss":0.0326,"l1":0.0088,"sec":1237},{"epoch":17,"loss":0.0298,"l1":0.0088,"sec":1240},{"epoch":18,"loss":0.0273,"l1":0.0083,"sec":1229},{"epoch":19,"loss":0.0252,"l1":0.0081,"sec":1239},{"epoch":20,"loss":0.0233,"l1":0.0079,"sec":1239},{"epoch":21,"loss":0.0215,"l1":0.0076,"sec":1241},{"epoch":22,"loss":0.0203,"l1":0.0075,"sec":1236},{"epoch":23,"loss":0.0187,"l1":0.0072,"sec":1234},{"epoch":24,"loss":0.0178,"l1":0.0072,"sec":1235},{"epoch":25,"loss":0.0168,"l1":0.007,"sec":1234},{"epoch":26,"loss":0.0159,"l1":0.0069,"sec":1231},{"epoch":27,"loss":0.0148,"l1":0.0067,"sec":1231},{"epoch":28,"loss":0.0141,"l1":0.0065,"sec":1235},{"epoch":29,"loss":0.0133,"l1":0.0064,"sec":1234}];
+  var REAL_TRAIN=[{"epoch":0,"loss":1.9024,"l1":0.1132,"sec":2791},{"epoch":1,"loss":0.5124,"l1":0.0627,"sec":2783},{"epoch":2,"loss":0.1777,"l1":0.0382,"sec":2782},{"epoch":3,"loss":0.0976,"l1":0.03,"sec":2783},{"epoch":4,"loss":0.0702,"l1":0.0262,"sec":2784},{"epoch":5,"loss":0.0545,"l1":0.0228,"sec":2779},{"epoch":6,"loss":0.0462,"l1":0.0218,"sec":2792},{"epoch":7,"loss":0.0386,"l1":0.0193,"sec":2780},{"epoch":8,"loss":0.034,"l1":0.0182,"sec":2781},{"epoch":9,"loss":0.0304,"l1":0.0173,"sec":2777},{"epoch":10,"loss":0.0274,"l1":0.0163,"sec":2774},{"epoch":11,"loss":0.0251,"l1":0.0155,"sec":2777},{"epoch":12,"loss":0.0238,"l1":0.0155,"sec":2776},{"epoch":13,"loss":0.0214,"l1":0.0143,"sec":2778},{"epoch":14,"loss":0.0201,"l1":0.0137,"sec":2783},{"epoch":15,"loss":0.0192,"l1":0.0134,"sec":2781},{"epoch":16,"loss":0.0184,"l1":0.0133,"sec":2784},{"epoch":17,"loss":0.017,"l1":0.0124,"sec":2788},{"epoch":18,"loss":0.0163,"l1":0.0121,"sec":2781},{"epoch":19,"loss":0.0155,"l1":0.0117,"sec":2782},{"epoch":20,"loss":0.0149,"l1":0.0114,"sec":2780},{"epoch":21,"loss":0.0145,"l1":0.0112,"sec":2787},{"epoch":22,"loss":0.0139,"l1":0.0109,"sec":2783},{"epoch":23,"loss":0.0134,"l1":0.0106,"sec":2786},{"epoch":24,"loss":0.0129,"l1":0.0103,"sec":2793},{"epoch":25,"loss":0.0125,"l1":0.0101,"sec":2787},{"epoch":26,"loss":0.0122,"l1":0.0099,"sec":2788},{"epoch":27,"loss":0.0118,"l1":0.0096,"sec":2783},{"epoch":28,"loss":0.0115,"l1":0.0095,"sec":2787},{"epoch":29,"loss":0.0112,"l1":0.0092,"sec":2791},{"epoch":30,"loss":0.0109,"l1":0.009,"sec":2791},{"epoch":31,"loss":0.0106,"l1":0.0088,"sec":2787},{"epoch":32,"loss":0.0104,"l1":0.0087,"sec":2783},{"epoch":33,"loss":0.0103,"l1":0.0086,"sec":2781},{"epoch":34,"loss":0.01,"l1":0.0084,"sec":2785},{"epoch":35,"loss":0.0097,"l1":0.0082,"sec":2785},{"epoch":36,"loss":0.0097,"l1":0.0082,"sec":2781},{"epoch":37,"loss":0.0093,"l1":0.0079,"sec":2787},{"epoch":38,"loss":0.0091,"l1":0.0078,"sec":2787},{"epoch":39,"loss":0.0089,"l1":0.0076,"sec":2786},{"epoch":40,"loss":0.0089,"l1":0.0077,"sec":2789},{"epoch":41,"loss":0.0086,"l1":0.0075,"sec":2785}];
   var RM=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   function host(){ return document.getElementById('bmc-home'); }
   function $all(sel){ var h=host(); return h?Array.prototype.slice.call(h.querySelectorAll(sel)):[]; }
@@ -6807,7 +6861,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
     var l1=document.getElementById("bmcSpkLoss"), l2=document.getElementById("bmcSpkLossBig");
     if(l1)l1.setAttribute("points",mapPoints(lossLog,112,26,3));
     if(l2)l2.setAttribute("points",mapPoints(lossLog,150,24,3));
-    var sp=document.getElementById("bmcSpkSucc"); if(sp)sp.setAttribute("points",mapPoints([90,100,80,100],112,26,3));
+    var sp=document.getElementById("bmcSpkSucc"); if(sp)sp.setAttribute("points",mapPoints([90,90,100,70],112,26,3));
     [l1,l2,sp].forEach(drawSpark);
   }
   var logEl=null, li=0;
@@ -7010,6 +7064,9 @@ function sim3dBuildScene() {
   chain.geoms.forEach(ge => {
     const m = geomMesh(ge); if (!m) return;
     if (ge.name === 'table') SIM3D.tableMesh = m; // 바닥 씬 에피소드에서 숨김
+    // fixed_pad·moving_pad = 1단계 파지 씬(scene_grasp_pads)의 그리퍼 고무패드.
+    // 체인이 그 씬에서 추출돼 모든 에피소드에 딸려오지만 S1·RS232 씬에는 없는 부품이라 트랙별로 숨긴다.
+    if (ge.name === 'fixed_pad' || ge.name === 'moving_pad') (SIM3D.padMeshes = SIM3D.padMeshes || []).push(m);
     inner[ge.body].add(m);
   });
   chain.bodies.forEach(b => {
@@ -7056,13 +7113,19 @@ function sim3dBuildScene() {
       g.add(flange);
     });
     const plug = new THREE.Group();
+    const shellMat = new THREE.MeshStandardMaterial({ color: 0xb2b5bb, roughness: .45, metalness: .5 });
+    // 플러그 쉘(포트에 물린 부분 5.9mm) + 플랜지 — 없으면 후드만 떠 있어 포트와 분리돼 보인다
+    const pshell = new THREE.Mesh(new THREE.BoxGeometry(0.0059, 0.017, 0.0079), shellMat);
+    pshell.position.set(-0.07795, -0.018, 0.01128);
+    const pflange = new THREE.Mesh(new THREE.BoxGeometry(0.001, 0.0308, 0.01256), shellMat);
+    pflange.position.set(-0.08145, -0.018, 0.01128);
     const hood = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.031, 0.0155),
       new THREE.MeshStandardMaterial({ color: 0xd9c89e, roughness: .6 }));
     hood.position.set(-0.0969, -0.018, 0.01128);
     const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.0445, 12),
       new THREE.MeshStandardMaterial({ color: 0xd9d3c4, roughness: .8 }));
     cable.position.set(-0.1029, -0.0558, 0.01128);   // 후드 옆(-y)으로 빠지는 케이블
-    plug.add(hood, cable);
+    plug.add(pshell, pflange, hood, cable);
     g.add(board, plug);
     g.visible = false;
     root.add(g);
@@ -7343,7 +7406,10 @@ function sim3dSelect(id) {
   const meta = [];
   if (ep.kind === 'policy') {
     const m = ep.meta || {};
-    meta.push(`체크포인트: ${m.checkpoint || '—'}`, `측정: ${m.measured_at || '—'}`, `큐브 궤적 포함 (qpos6 + cube_xyz)`);
+    meta.push(`체크포인트: ${m.checkpoint || '—'}`, `측정: ${m.measured_at || '—'}`,
+      ep.rs232 ? `케이블 분리 변위 궤적 포함 (qpos6 + 변위)`
+      : ep.pcb ? `버튼 눌림·LED 점등 프레임 포함 (qpos6)`
+      : `큐브 궤적 포함 (qpos6 + cube_xyz)`);
   } else if (ep.pcb) {
     meta.push(`데이터셋: data/${ep.group}`, `closed-loop expert 시연 — 버튼 눌림 + LED 점등으로 성공 판정`,
       `PCB 배치 사이드카 (x ${ep.pcb.x.toFixed(3)}, y ${ep.pcb.y.toFixed(3)}, yaw ${(ep.pcb.yaw_deg || 0).toFixed(1)}°)`);
@@ -7353,6 +7419,11 @@ function sim3dSelect(id) {
   }
   document.getElementById('s3-meta').innerHTML = meta.map(x => `<span>${escapeHtml(x)}</span>`).join(' · ');
   if (SIM3D.tableMesh) SIM3D.tableMesh.visible = !sim3dIsFloor(ep);
+  // PCB 트랙(S1 리셋버튼·RS232 케이블 분리) 에는 파지 패드가 없다
+  const pcbTrack = ep.kind === 'policy'
+    ? /pcb_reset|rs232/.test((ep.meta && ep.meta.scene) || '')
+    : (ep.group === 'episodes_s1' || ep.group === 'episodes_rs232');
+  (SIM3D.padMeshes || []).forEach(m => { m.visible = !pcbTrack; });
   // RS232 는 작업점(커넥터)이 보드 가장자리라 기본 시점에선 화면 밖으로 밀린다 → 후드 위치로 재조준
   if (SIM3D.focus) {
     if (ep.rs232 && ep.pcb) SIM3D.focus(ep.pcb.x - 0.097, 0.0313, -(ep.pcb.y - 0.018), 0.34);
@@ -7402,9 +7473,9 @@ function renderSim3d() {
   // 소스 셀렉트: 측정 히스토리(정책 rollout, 시간순) + 데이터셋 그룹. 기본 = 최신 측정.
   const srcSel = document.getElementById('s3-source');
   srcSel.innerHTML = (SIM3D.groups || []).map(g => `<option value="${g.key}">${escapeHtml(g.label)}</option>`).join('');
-  // 기본 선택 = 지금 진행 중인 트랙 (S1 시연). 없으면 최신 정책 rollout.
-  const defaultGroup = (SIM3D.groups || []).find(g => g.key === 'episodes_s1')
-    || (SIM3D.groups || []).find(g => g.key.startsWith('policy-') && g.latest);
+  // 기본 선택 = 현재 단계의 최신 정책 측정. 없으면 이전 단계 시연 데이터.
+  const defaultGroup = (SIM3D.groups || []).find(g => g.key.startsWith('policy-') && g.latest)
+    || (SIM3D.groups || []).find(g => g.key === 'episodes_s1');
   if (defaultGroup) srcSel.value = defaultGroup.key;
 
   srcSel.addEventListener('change', sim3dFillEpisodeSelect);
@@ -7502,10 +7573,26 @@ function renderResults() {
              합격선은 ${Math.round(s1target * 100)}%이며, 버튼이 기준 깊이 이상 눌려 LED가 점등되어야 성공으로 집계됩니다.`
           : `시연 100회를 학습하는 단계입니다. 학습이 끝나면 <b>첫 측정 결과가 여기에</b> 추가됩니다.
              목표는 10회 중 7회(70%) 이상이며, LED 점등으로 자동 판정합니다.`}
-      </div>`;
+      </div>
+      ${(() => { const rs = rm.rs232 || {}; if (rs.partial_rate == null) return ''; return `
+      <div class="story-step now">
+        <span class="tag">3단계 · RS232 케이블 분리 — 현재 진행</span><br>
+        학습에 쓰지 않은 배치를 4개 조건 × 10회, 모두 ${rs.rollouts}회 측정해
+        <b>부분 분리 ${(rs.partial_rate * 100).toFixed(1)}%</b>(${rs.partial}/${rs.rollouts}) ·
+        <b>완전 분리 ${(rs.full_rate * 100).toFixed(1)}%</b>(${rs.full}/${rs.rollouts})를 기록했습니다.
+        완료 기준인 부분 분리 ${Math.round((rs.target || 0.5) * 100)}%를 넘겼고, 사흘 연속 같은 결과가 재현됐습니다.
+        다만 보드가 로봇 쪽에 가까운 배치는 어깨 간섭으로 기하학적 상한이 약 37.5%이며, 이 구간이 남은 과제입니다.
+      </div>`; })()}`;
   }
 
   document.getElementById('results-kpis').innerHTML = `
+    ${(() => { const rs = rm.rs232 || {}; if (rs.partial_rate == null) return ''; return `
+    <div class="kpi"><div class="l">3단계 RS232 · 부분 분리 (4-seed 40회)</div>
+      <div class="n" style="color:${rateColor(rs.partial_rate)}">${pct(rs.partial_rate)}</div>
+      <div class="d">${rs.partial}/${rs.rollouts} rollout · 완료 기준 ${Math.round((rs.target || 0.5) * 100)}% 충족</div></div>
+    <div class="kpi"><div class="l">3단계 RS232 · 완전 분리 (4-seed 40회)</div>
+      <div class="n" style="color:${rateColor(rs.full_rate)}">${pct(rs.full_rate)}</div>
+      <div class="d">${rs.full}/${rs.rollouts} rollout · 커넥터가 포트에서 끝까지 빠진 경우만 집계</div></div>`; })()}
     <div class="kpi"><div class="l">1단계 최신 성공률 (nominal·seed42)</div>
       <div class="n" style="color:${rateColor(latest.success_rate)}">${pct(latest.success_rate)}</div>
       <div class="d">${latest.success ?? '—'}/${latest.rollouts ?? '—'} rollout · median lift ${latest.median_lift_mm ?? '—'}mm</div></div>
@@ -7544,7 +7631,7 @@ function renderResults() {
       <div class="r4-bar-val">${pct(c.success_rate)}</div>
       ${dotGrid(c.results)}
     </div>`;
-  }).join('') + `<div class="r4-hint" style="margin-top:8px">기준선: closed-loop expert 75%(12V 실스펙) · 목표 90% · 아래 회색 항목은 6~7월 구모델 측정(성장 과정 기록)</div>`;
+  }).join('') + `<div class="r4-hint" style="margin-top:8px">단계마다 기준이 다릅니다 — 1단계 파지는 목표 90%(시범 프로그램 기준선 75%), 2단계 리셋버튼은 합격선 70%, 3단계 RS232 분리는 완료 기준이 부분 분리 50%입니다. RS232 항목의 막대·점은 부분 분리 기준이며, 완전 분리 비율은 위 지표 카드에 따로 표시합니다. 회색 항목은 지난 단계·구모델 측정으로 성장 과정 기록입니다.</div>`;
 
   // 히스토리
   const hist = rm.history || [];

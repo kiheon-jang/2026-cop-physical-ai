@@ -226,7 +226,7 @@ a{color:inherit;text-decoration:none}
 .bmc-home .sechead .idx{font-family:var(--mono);font-size:12px;color:var(--cyn);letter-spacing:.1em}
 .bmc-home .sechead h2{font-family:var(--myeong);font-size:clamp(22px,3.4vw,30px);margin:0;letter-spacing:-.01em;font-weight:750;color:var(--ink)}
 .bmc-home .sechead p{color:var(--mut);font-size:13.5px;margin:0}
-.bmc-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.bmc-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:16px}
 .bmc-home .gcard{border:1px solid var(--line2);border-radius:14px;background:linear-gradient(180deg,var(--panel2),var(--panel));padding:20px;text-align:center}
 .bmc-home .gwrap{position:relative;width:132px;height:132px;margin:0 auto}
 .bmc-home .gwrap svg{transform:rotate(-90deg)}
@@ -349,7 +349,7 @@ a{color:inherit;text-decoration:none}
           <rect x="308" y="462" width="30" height="22" rx="3" fill="#4a4038"/>
           <!-- RS232 port slot -->
           <rect x="344" y="464" width="66" height="18" rx="3" fill="#0e0c0a"/>
-          <text x="360" y="446" text-anchor="middle" font-size="12.5" style="fill:var(--ink2)">RS232 포트 · ±0.5mm</text>
+          <text x="360" y="446" text-anchor="middle" font-size="12.5" style="fill:var(--ink2)">RS232 포트 · DE-9</text>
           <!-- calipers hint -->
           <g style="stroke:var(--terra)" stroke-width="2" opacity=".85"><line x1="344" y1="500" x2="410" y2="500"/><line x1="344" y1="496" x2="344" y2="504"/><line x1="410" y1="496" x2="410" y2="504"/></g>
         </g>
@@ -405,20 +405,20 @@ a{color:inherit;text-decoration:none}
 
     <article class="step" data-stage="2">
       <div class="no">02</div>
-      <span class="badge b-live">● 진행 중</span>
+      <span class="badge b-done">● 가상 완료 · 실기 병행</span>
       <h3>제어반의 리셋 버튼을<br>정확히 누릅니다.</h3>
       <p>초록색 기판(PCB) 위의 작은 리셋 버튼을 손끝으로 누릅니다. 정상적으로 눌리면 옆의 초록 LED가 점등되어 성공을 확인합니다.</p>
-      <div class="kids">버튼 지름은 <b>수 mm</b> 수준으로, 미세한 오차도 실패로 이어집니다. <b>야간 자동 학습</b>으로 정확도를 지속적으로 높이고 있습니다.</div>
+      <div class="kids">버튼 지름은 <b>수 mm</b> 수준으로, 미세한 오차도 실패로 이어집니다. 가상 시험 4개 조건 평균 <b>92.5%</b>를 확인했고, 실물 로봇 트랙에서 같은 작업을 병행하고 있습니다.</div>
       <div class="stat"><span class="big num b-live" data-count="92.5" data-dec="1">0</span><span class="lbl">현재 가상 성공률 · 4개 조건 평균</span></div>
     </article>
 
     <article class="step" data-stage="3">
       <div class="no">03</div>
-      <span class="badge b-next">● 예정</span>
+      <span class="badge b-live">● 진행 중 · 가상 측정 완료</span>
       <h3>꽂혀 있는 케이블을<br>정확히 뽑습니다.</h3>
-      <p>포트에 체결된 RS232 통신 케이블을 분리하는 고정밀 작업입니다. 허용 오차는 <b>0.5mm</b> 수준입니다.</p>
-      <div class="kids">케이블을 정밀하게 파지해 분리하는 고난도 과제입니다. <b>9월 착수</b>, <b>10월 실물 시연</b>을 목표로 합니다.</div>
-      <div class="stat"><span class="big num b-next">±0.5<span style="font-size:.42em;color:var(--ink2)">mm</span></span><span class="lbl">요구 분리 정밀도</span></div>
+      <p>포트에 체결된 RS232 통신 케이블을 분리하는 정밀 작업입니다. 커넥터가 <b>5.9mm</b> 이상 빠지면 완전 분리, <b>2.95mm</b> 이상이면 부분 분리로 판정합니다.</p>
+      <div class="kids">케이블을 정밀하게 파지해 분리하는 고난도 과제입니다. 가상 환경에서 학습을 마치고, 4개 조건 40회 시험에서 <b>부분 성공 87.5%</b>·<b>완전 분리 75%</b>를 확인했습니다. 10월 실물 시연을 목표로 합니다.</div>
+      <div class="stat"><span class="big num b-live" data-count="87.5" data-dec="1">0</span><span class="lbl">가상 시험 부분 성공률 · 4개 조건 40회</span></div>
     </article>
   </div>
 </div>
@@ -434,6 +434,7 @@ a{color:inherit;text-decoration:none}
     <div class="bmc-metrics">
       <div class="gcard up" data-g="100" data-col="grn"><div class="gwrap"></div><div class="cap">1단계 성공률<span>GRASP &amp; LIFT</span></div></div>
       <div class="gcard up" data-g="92.5" data-col="amb"><div class="gwrap"></div><div class="cap">2단계 성공률<span>S1 · RESET BUTTON</span></div></div>
+      <div class="gcard up" data-g="87.5" data-col="cyn"><div class="gwrap"></div><div class="cap">3단계 부분 성공률<span>RS232 · CABLE RELEASE</span></div></div>
       <div class="gcard up" data-g="0" data-col="cyn"><div class="gwrap"></div><div class="cap">일정 진척<span>TO 2026-09-30</span></div></div>
       <div class="gcard up" data-g="90" data-col="grn" data-manual="D-—"><div class="gwrap"></div><div class="cap">시연까지<span>D-DAY COUNTDOWN</span></div></div>
     </div>

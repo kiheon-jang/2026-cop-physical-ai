@@ -839,7 +839,7 @@ footer p{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing
           <h5>왜 유망한가</h5>
           <ul class="li">
             <li>업무 흐름을 멈추지 않고 현장 그대로의 조건이 기록됨</li>
-            <li>초기 투자 규모가 로봇 원격조종 설비 구축 대비 한 자릿수 낮음 — 소비자급 약 80만원, 산업용 인증 제품 약 500~700만원</li>
+            <li>초기 투자 규모가 로봇 원격조종 설비 구축 대비 한 자릿수 낮음 — 소비자급 장비부터 산업용 인증 제품까지 선택 가능</li>
             <li>실제로 일하게 될 환경에서 촬영된 데이터일수록 학습 가치가 크다는 점을 최신 연구들이 반복 확인</li>
           </ul>
         </div>
@@ -1007,7 +1007,7 @@ footer p{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing
       <div class="way rv"><span class="n">01</span>
         <h4>착용형 외골격</h4>
         <p>로봇 팔과 같은 관절 구조의 착용 장비로 관절 각도를 그대로 기록합니다. 로봇을 현장에 들이지 않고도 로봇 좌표계에 가까운 데이터를 확보합니다.
-          팔당 약 40만원 수준 장비로 원격조종 데이터에 대등한 성능이 보고됐습니다(AirExo).</p>
+          보급형 착용 장비로 원격조종 데이터에 대등한 성능이 보고됐습니다(AirExo).</p>
         <dl><div><dt>적합</dt> <dd>동작 정밀도가 중요한 특정 작업 집중 기록</dd></div>
           <div class="lim"><dt>한계</dt> <dd>착용 부담으로 상시 사용에는 부적합</dd></div></dl>
       </div>
@@ -1089,9 +1089,10 @@ footer p{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing
         <text x="500" y="266" text-anchor="middle" font-size="13" class="t-ink">2단계 · 제어반 리셋 버튼</text>
         <text x="500" y="288" text-anchor="middle" font-size="11.5" class="t-mono t-mut">시뮬 4개 조건 평균 · 37/40</text>
         <!-- 3단계 -->
-        <rect class="fade" style="--d:700ms" x="740" y="140" width="120" height="100" rx="4" fill="none" stroke="rgba(150,175,220,.3)" stroke-dasharray="5 5"/>
-        <text class="fade t-mut" style="--d:700ms" x="800" y="196" text-anchor="middle" font-size="12.5">예정</text>
-        <text x="800" y="266" text-anchor="middle" font-size="13" class="t-mut">3단계</text>
+        <rect class="barv" style="--d:600ms" x="740" y="65" width="120" height="175" rx="4" fill="#5fd7f5" opacity=".82"/>
+        <text class="fade t-mono" style="--d:1400ms" x="800" y="53" text-anchor="middle" font-size="19" fill="#5fd7f5">0.875</text>
+        <text x="800" y="266" text-anchor="middle" font-size="13" class="t-ink">3단계 · RS232 케이블 분리</text>
+        <text x="800" y="288" text-anchor="middle" font-size="11.5" class="t-mono t-mut">시뮬 4개 조건 평균 · 부분 35/40 · 완전 30/40</text>
       </svg>
       <p class="vcap">평가는 육안이 아니라 자동 판정 — 버튼이 기준 변위 이상 눌려 LED가 점등되어야 성공으로 집계된다.</p>
     </div>
@@ -1110,15 +1111,16 @@ footer p{font-family:var(--mono);font-size:11px;color:var(--mut2);letter-spacing
           실물 트랙에서 동일 작업의 데이터 수집이 병행되고 있습니다.</p>
       </div>
       <div class="card rv">
-        <span class="k">재현성</span>
-        <h4>동일 조건 재측정 결과 완전 일치</h4>
-        <p>평가는 육안이 아니라 자동 판정으로 이루어집니다. 버튼이 기준 변위 이상 눌려 LED가 점등되어야 성공으로 집계됩니다.</p>
+        <span class="k">3단계 — RS232 케이블 분리</span>
+        <span class="big"><span class="num" data-to="0.875" data-dec="3">0.000</span></span>
+        <p>시뮬레이션 4개 조건 평균 부분 성공 0.875(35/40), 완전 분리 0.750(30/40)입니다.
+          사흘 연속 같은 조건으로 재측정해 동일한 결과가 재현됐습니다. 판정은 육안이 아니라 자동 집계입니다.</p>
       </div>
     </div>
 
     <div class="blk grid g3" data-stagger>
-      <div class="card flat rv"><span class="k">진척</span><span class="big"><span class="num" data-to="66.5" data-dec="1" data-sfx="%">0.0%</span></span></div>
-      <div class="card flat rv"><span class="k">시간 경과</span><span class="big"><span class="num" data-to="69.1" data-dec="1" data-sfx="%">0.0%</span></span></div>
+      <div class="card flat rv"><span class="k">진척</span><span class="big"><span class="num" data-to="75.0" data-dec="1" data-sfx="%">0.0%</span></span></div>
+      <div class="card flat rv"><span class="k">시간 경과</span><span class="big"><span class="num" data-to="90.8" data-dec="1" data-sfx="%">0.0%</span></span></div>
       <div class="card flat rv"><span class="k">지연 항목</span><span class="big g"><span class="num" data-to="0">0</span><span class="unit">건</span></span></div>
     </div>
   </div>

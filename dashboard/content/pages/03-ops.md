@@ -24,27 +24,25 @@ AI 자동화 운영 방법 화면(`view-ops`)은 이 프로젝트의 자동화 �
     - cron 1 · 매일 23:00: 시뮬 환경 단계별 구축(MuJoCo)
     - cron 2 · 매일 23:30: 시뮬 테스트 + 메트릭 수집
     - cron 3 · 매일 07:00: 아침 보고 메일 자동 발송
-    - cron 4 · 일요 22:00: 주간 정리 + 보고용 증거 식별
   - **Self-heal**: 실패 자동 기록 + 다음 cron 재시도
   - **Claude 위임**: 복잡 추론은 `claude -p`로 위임
-  - **Git auto-push**: 코드/로그/보고서 자동 commit+push
+  - **자동 보관**: 코드·로그·보고서 변경을 자동으로 기록·보관
   - **hermes-mark**: 대시보드 서버(Fastify + Cloudflare Tunnel)
     - chokidar(파일 변경 감지), WebSocket(브라우저 라이브 갱신), Cloudflare Tunnel(외부 도메인)
 
 <!-- slide title="크론 작업 표 + 하루 흐름" screenshot="" -->
 
 **크론 작업 표 (cron-table)**
-4행 테이블(시각 / 잡 이름·설명 / 역할 / 결과물):
+3행 테이블(시각 / 잡 이름·설명 / 역할 / 결과물):
 
 | 시각 | 역할 | 결과물 |
 |------|------|--------|
 | 매일 23:00 | 시뮬 환경 단계별 구축 (PHASE_ROADMAP 읽어 오늘 단계 식별 → MuJoCo 코드 작성/실행) | `research/simulation/*.md`, `samples/training/*.py` |
-| 매일 23:30 | 시뮬 테스트 + 메트릭 (Pick-Place 성공률, 추론 시간, 200ep 데이터셋 정합성 검증) | `agent/research-log/YYYY-MM-DD.md` |
-| 매일 07:00 | 아침 보고 메일 (`generate_daily_report.py` → 이메일 4명 발송, CHANGELOG/README 자동 갱신 후 git push) | 이메일(담당자+수신자), `CHANGELOG.md` |
-| 일요 22:00 | 주간 정리 + 보고용 증거 (한 주 결과 정리 + 월별 보고서 후보 식별) | `agent/report-evidence/YYYY-MM/INDEX.md` |
+| 매일 23:30 | 시뮬 테스트 + 메트릭 (현재 단계 작업의 성공률, 추론 시간, 데이터셋 정합성 검증) + 보고용 증거 후보 정리 | `agent/research-log/YYYY-MM-DD.md`, `agent/report-evidence/YYYY-MM/INDEX.md` |
+| 매일 07:00 | 아침 보고 메일 (담당자·수신자에게 발송, 변경 이력·현황 문서 자동 갱신) | 이메일(담당자+수신자), `CHANGELOG.md` |
 
 **하루 자동화 흐름 (day-timeline)**
-00:00~24:00 KST 타임라인 축에 4개 이벤트 마커를 배치한 시각적 타임라인. 텍스트 설명: "밤 시간대(23:00, 23:30) 시뮬·학습 작업 → 다음 날 07:00 메일로 결과 수신. 일요일 밤은 주간 정리 추가."
+00:00~24:00 KST 타임라인 축에 3개 이벤트 마커를 배치한 시각적 타임라인. 텍스트 설명: "밤 시간대(23:00 시뮬 환경 구축, 23:30 시뮬 테스트) → 다음 날 07:00 아침 보고로 결과 수신."
 
 <!-- slide title="Hermes Agent 카드" screenshot="" -->
 
@@ -58,14 +56,14 @@ AI 자동화 운영 방법 화면(`view-ops`)은 이 프로젝트의 자동화 �
 - 권한: gh CLI · git · file system · Python venv
 - OpenClaw → Hermes 마이그레이션 2026-04-29 완료
 
-자가치유(Self-heal) 설명: 매 cron 작업 끝에 실패/차단 항목 자동 기록 → `chore(self-heal)` commit → 다음 cron에서 자동 재시도. 활동 타임라인의 heal 점 표시가 발생 일수.
+자가치유(Self-heal) 설명: 매 cron 작업 끝에 실패/차단 항목 자동 기록 → 다음 cron에서 자동 재시도. 활동 타임라인의 heal 점 표시가 발생 일수.
 
 <!-- slide title="데이터 흐름 + 역할 분담" screenshot="" -->
 
 **데이터 흐름 다이어그램 (dataflow)**
 4개 행:
 1. Hermes cron(23:00) → MuJoCo 시뮬 실행 → `data/episodes/` (LeRobot Dataset) → ACT 학습 (상태 동적, `ops-act-status`)
-2. Hermes cron(23:30) → 메트릭 측정 → `research-log/*.md` → git push
+2. Hermes cron(23:30) → 메트릭 측정 → `research-log/*.md` 자동 보관
 3. 파일 변경 → hermes-mark chokidar → `build.py` 자동 실행 → WebSocket 푸시 → 브라우저 라이브 갱신
 4. Obsidian 월별 보고서 → `build.py` 읽음 → renderMarkdown → 보고용 자료 메뉴 임베드
 

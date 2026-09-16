@@ -64,11 +64,10 @@ dashboard/content/   → site_docs.build_site_docs() → data.docs (spec/guide �
 | 시각 | 작업 | 출력 파일 |
 |------|------|-----------|
 | 매일 23:00 | Hermes Agent: PHASE_ROADMAP에서 오늘 단계 식별 → MuJoCo 코드 작성/실행 | `research/simulation/*.md`, `samples/training/*.py` |
-| 매일 23:30 | 시뮬 테스트 + 메트릭 + `build.py` 실행 → `data.json` 갱신 + WebSocket 푸시 | `agent/research-log/YYYY-MM-DD.md`, `dashboard/data.json` |
-| 매일 07:00 | 아침 보고 메일 (4명 발송) + `CHANGELOG.md` 갱신 + git push | 이메일, `CHANGELOG.md` |
-| 일요 22:00 | 주간 정리 + 보고용 증거 식별 | `agent/report-evidence/YYYY-MM/INDEX.md` |
+| 매일 23:30 | 시뮬 테스트 + 메트릭 + 보고용 증거 후보 정리 + `build.py` 실행 → `data.json` 갱신 + WebSocket 푸시 | `agent/research-log/YYYY-MM-DD.md`, `agent/report-evidence/YYYY-MM/INDEX.md`, `dashboard/data.json` |
+| 매일 07:00 | 아침 보고 메일 (담당자·수신자 발송) + `CHANGELOG.md` 갱신 + 변경 이력 자동 보관 | 이메일, `CHANGELOG.md` |
 
-자가치유(Self-heal): 매 cron 종료 시 실패 항목 자동 기록(`chore(self-heal)` commit) → 다음 cron에서 자동 재시도.
+자가치유(Self-heal): 매 cron 종료 시 실패 항목 자동 기록 → 다음 cron에서 자동 재시도.
 
 <!-- slide title="서버·빌드 내부 구조" -->
 ## 대시보드 서버 구조
