@@ -103,8 +103,10 @@
         <geom name="rs232_plug_hood" type="box" pos="-0.016 0 0" size="0.015 0.0155 0.00775"
               rgba="0.85 0.78 0.62 1" mass="0.020"
               priority="1" solref="0.004 1" solimp="0.99 0.999 0.001 0.5 2"/>
-        <!-- 케이블: 시각 전용(충돌 없음), 후드 옆(-y)으로 빠짐 -->
-        <geom name="rs232_cable" type="capsule" fromto="-0.022 -0.0155 0 -0.022 -0.060 0" size="0.003"
+        <!-- 케이블: 시각 전용(충돌 없음). 실기 영상(assets/reports/realtrack/rt_closeup.mp4) 기준 후드 뒷면에서
+             커넥터 축 방향(-x)으로 곧게 빠진 뒤 HHT 단말기 쪽으로 올라간다. 후드 뒷면 x=-0.031 에서 45mm + 완만한 상승.
+             (2026-09-16 정정: 이전에는 후드 옆(-y)으로 빠져 있어 집게가 잡는 자리와 겹쳐 보였다) -->
+        <geom name="rs232_cable" type="capsule" fromto="-0.031 0 0 -0.076 0 0.008" size="0.003"
               contype="0" conaffinity="0" rgba="0.85 0.82 0.72 1" mass="0.005"/>
       </body>
     </body>

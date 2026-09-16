@@ -6528,9 +6528,9 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
       var hood = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.031, 0.0155),
         new THREE.MeshStandardMaterial({ color: 0xd9c89e, roughness: 0.6 }));
       hood.position.set(-0.0969, -0.018, 0.01128); hood.castShadow = true;
-      var cable = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.0445, 12),
+      var cable = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.0445, 12).rotateZ(Math.PI / 2),
         new THREE.MeshStandardMaterial({ color: 0xd9d3c4, roughness: 0.8 }));
-      cable.position.set(-0.1029, -0.0558, 0.01128);
+      cable.position.set(-0.13415, -0.018, 0.0153);   // 실기와 동일: 후드 뒷면에서 커넥터 축 방향으로
       plugMover.add(pshell, pflange, hood, cable);
       conn.add(plugMover);
       conn.visible = isRs232;
@@ -7122,9 +7122,9 @@ function sim3dBuildScene() {
     const hood = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.031, 0.0155),
       new THREE.MeshStandardMaterial({ color: 0xd9c89e, roughness: .6 }));
     hood.position.set(-0.0969, -0.018, 0.01128);
-    const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.0445, 12),
+    const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.0445, 12).rotateZ(Math.PI / 2),
       new THREE.MeshStandardMaterial({ color: 0xd9d3c4, roughness: .8 }));
-    cable.position.set(-0.1029, -0.0558, 0.01128);   // 후드 옆(-y)으로 빠지는 케이블
+    cable.position.set(-0.13415, -0.018, 0.0153);   // 실기와 동일: 후드 뒷면에서 커넥터 축 방향으로
     plug.add(pshell, pflange, hood, cable);
     g.add(board, plug);
     g.visible = false;
