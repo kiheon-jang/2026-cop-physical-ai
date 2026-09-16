@@ -7,8 +7,11 @@ S1 측정기와 같은 규약, 다른 점만:
   - 판정 = 플러그 슬라이드 변위 latch 2종 (트윈 UNPLUG_* 상수 import, 수집기와 공유):
       partial = 변위 ≥ UNPLUG_PARTIAL_M (결합 깊이 절반, 2.95mm)
       full    = 변위 ≥ UNPLUG_FULL_M    (D 쉘 결합 깊이, 5.90mm = 완전 분리)
-    success / success_rate = **부분성공(partial)** — 로드맵 Phase 4 완료 기준 '시뮬 분리 부분성공 50%'
+    success / success_rate = **부분성공(partial, 핀치 확인)** — 로드맵 Phase 4 완료 기준 '시뮬 분리 부분성공 50%'
     와 드라이버 TARGET_RATE(0.50) 가 같은 단위가 되도록. 완전분리는 full_success / full_rate 로 항상 병기.
+    2026-09-16: 목표치·임계(2.95/5.9mm)는 그대로 두고 "임계를 넘는 순간 양 jaw 가 후드에 접촉" 조건만 추가.
+    닫은 집게로 누르고 끄는 비핀치 동작이 부분성공으로 잡히던 측정 결함을 막는다(수치를 낮추기만 함).
+    비교용으로 옛 방식 수치를 success_rate_nopinch_legacy / full_rate_nopinch_legacy 에 병기한다.
   - 물리 스텝은 twin.step() — latch 가 그 안에서 갱신.
   - DR 측정 모드 없음 (Phase 4 W2 'DR 강화' 때 S1 판본 --dr 을 이식).
 
@@ -67,14 +70,38 @@ def _rel(p: Path) -> str:
 
 
 def run_rollout(twin, policy, device, rng, max_frames, collect_frames):
-    """단일 rollout. (partial, full, max_disp_m, partial_frame, full_frame, top_frames, traj, placement)."""
+    """단일 rollout. (partial, full, max_disp_m, partial_frame, full_frame, top_frames, traj, placement, pinch)."""
     import torch
+    import mujoco as mj
 
     placement = twin.reset(rng)          # 홈 자세 + S1 존 무작위화(관통 배치 재추첨) + latch 해제
     policy.reset()
     frames, traj = [], []
     partial_frame = full_frame = None
     max_disp = 0.0
+
+    # 핀치 판정(2026-09-16 추가): 판정 임계(2.95/5.9mm)와 목표치(부분성공 50%)는 그대로 두고,
+    # "임계를 넘는 그 순간 고정 jaw·가동 jaw 가 모두 후드에 닿아 있었는가" 만 추가로 확인한다.
+    # 닫은 집게로 후드를 누르고 끄는 비핀치 동작이 부분성공으로 잡히던 구멍을 막는 것(측정 결함 수정,
+    # 기준 완화 아님 — 이 조건은 수치를 낮추기만 한다). 옛 방식 수치는 *_nopinch_legacy 로 병기.
+    m = twin.model
+    HOOD = mj.mj_name2id(m, mj.mjtObj.mjOBJ_GEOM, "rs232_plug_hood")
+    GRIP_B = mj.mj_name2id(m, mj.mjtObj.mjOBJ_BODY, "gripper")
+    JAW_B = mj.mj_name2id(m, mj.mjtObj.mjOBJ_BODY, "moving_jaw_so101_v1")
+
+    def pinched():
+        d = twin.data
+        static = jaw = False
+        for c in d.contact[:d.ncon]:
+            if HOOD in (c.geom1, c.geom2):
+                b = m.geom_bodyid[c.geom2 if c.geom1 == HOOD else c.geom1]
+                static |= (b == GRIP_B)
+                jaw |= (b == JAW_B)
+        return static and jaw
+
+    pinch_partial = pinch_full = False
+    pinch_steps = 0
+    p_latched = f_latched = False
 
     for step in range(max_frames):
         top = twin.render("top")         # 반전 없음 (수집기와 동일)
@@ -98,6 +125,14 @@ def run_rollout(twin, policy, device, rng, max_frames, collect_frames):
 
         for _ in range(DATA_SAMPLE_EVERY):
             twin.step()                  # partial/full latch 갱신
+            pin_now = pinched()
+            pinch_steps += int(pin_now)
+            prev_p, prev_f = p_latched, f_latched
+            p_latched, f_latched = twin.unplugged_partial(), twin.unplugged_full()
+            if p_latched and not prev_p and pin_now:
+                pinch_partial = True     # 임계를 넘은 그 스텝에 양 jaw 접촉
+            if f_latched and not prev_f and pin_now:
+                pinch_full = True
 
         max_disp = max(max_disp, twin.plug_displacement())
         if twin.unplugged_partial() and partial_frame is None:
@@ -109,7 +144,8 @@ def run_rollout(twin, policy, device, rng, max_frames, collect_frames):
                     + [round(float(twin.plug_displacement()), 4)])
 
     return (twin.unplugged_partial(), twin.unplugged_full(), max_disp,
-            partial_frame, full_frame, frames, traj, placement)
+            partial_frame, full_frame, frames, traj, placement,
+            {"partial": pinch_partial, "full": pinch_full, "steps": pinch_steps})
 
 
 def measure_seed(twin, policy, device, seed, rollouts, max_frames, video_rollouts):
@@ -118,23 +154,28 @@ def measure_seed(twin, policy, device, seed, rollouts, max_frames, video_rollout
     for i in range(rollouts):
         collect = i < video_rollouts
         try:
-            part, full, disp, pf, ff, frames, traj, placement = run_rollout(
+            part, full, disp, pf, ff, frames, traj, placement, pin = run_rollout(
                 twin, policy, device, rng, max_frames, collect)
         except Exception as e:  # 한 rollout 실패가 전체 측정을 죽이지 않게
             results.append({"rollout": i, "success": False, "full_success": False,
-                            "max_disp_mm": 0.0, "error": str(e)[:120]})
+                            "success_nopinch": False, "full_success_nopinch": False,
+                            "pinch_steps": 0, "max_disp_mm": 0.0, "error": str(e)[:120]})
             print(f"  seed{seed} rollout {i+1}/{rollouts}: ⚠ {str(e)[:80]}", flush=True)
             continue
-        results.append({"rollout": i, "success": part, "full_success": full,
+        results.append({"rollout": i, "success": pin["partial"], "full_success": pin["full"],
+                        "success_nopinch": part, "full_success_nopinch": full,
+                        "pinch_steps": pin["steps"],
                         "max_disp_mm": round(disp * 1000, 2),
                         "partial_frame": pf, "full_frame": ff})
-        trajectories.append({"rollout": i, "success": part, "full_success": full,
+        trajectories.append({"rollout": i, "success": pin["partial"], "full_success": pin["full"],
+                             "success_nopinch": part, "full_success_nopinch": full,
                              "max_disp_m": round(disp, 4), "partial_frame": pf, "full_frame": ff,
                              "pcb": placement, "frames": traj})
         if collect:
             video_frames.extend(frames)
-        tag = "완전분리" if full else ("부분성공" if part else "실패")
-        print(f"  seed{seed} rollout {i+1}/{rollouts}: {tag} (max 변위={disp*1000:.2f}mm)", flush=True)
+        tag = "완전분리" if pin["full"] else ("부분성공" if pin["partial"] else "실패")
+        note = "" if (pin["partial"] == part and pin["full"] == full) else " [핀치 미확인 — 옛 방식이면 성공]"
+        print(f"  seed{seed} rollout {i+1}/{rollouts}: {tag} (max 변위={disp*1000:.2f}mm){note}", flush=True)
     return results, trajectories, video_frames
 
 
@@ -143,6 +184,8 @@ def write_outputs(out_dir, ckpt, seed, is_nominal, results, trajectories, video_
     n = len(results)
     n_part = sum(r["success"] for r in results)
     n_full = sum(r["full_success"] for r in results)
+    n_part_legacy = sum(r.get("success_nopinch", r["success"]) for r in results)
+    n_full_legacy = sum(r.get("full_success_nopinch", r["full_success"]) for r in results)
     median_disp = statistics.median(r["max_disp_mm"] for r in results) if results else 0.0
     date_tag = time.strftime("%Y%m%d")
     seed_tag = "" if is_nominal else f"_seed{seed}"
@@ -157,13 +200,17 @@ def write_outputs(out_dir, ckpt, seed, is_nominal, results, trajectories, video_
     summary = {
         "status": "ok",
         "task": "rs232_unplug",
-        "metric": "plug_partial_latch",          # success/success_rate = 부분성공, full_* = 완전분리
+        "metric": "plug_partial_latch_pinch",    # success/success_rate = 부분성공(핀치 확인), full_* = 완전분리(핀치 확인)
         "checkpoint": _rel(ckpt),
         "ckpt_dir": RUN_TAG,
         "scene": "rs232_unplug_scene.xml",
         "measured_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "seed": seed,
         "rollouts": n,
+        "success_nopinch_count_legacy": n_part_legacy,          # 핀치 조건 추가 전 옛 방식(비교용, 1사이클 병기)
+        "success_rate_nopinch_legacy": round(n_part_legacy / n, 3) if n else 0.0,
+        "full_success_nopinch_count_legacy": n_full_legacy,
+        "full_rate_nopinch_legacy": round(n_full_legacy / n, 3) if n else 0.0,
         "success": n_part,
         "success_rate": round(n_part / n, 3) if n else 0.0,
         "full_success": n_full,
@@ -261,16 +308,24 @@ def main(argv=None):
                           args.max_frames, time.time() - t0, str(device),
                           UNPLUG_PARTIAL_M * 1000, UNPLUG_FULL_M * 1000, timestep)
         summaries.append(s)
+        legacy = "" if (s['success'] == s['success_nopinch_count_legacy']
+                        and s['full_success'] == s['full_success_nopinch_count_legacy']) else (
+            f" [옛 방식: 부분 {s['success_rate_nopinch_legacy']} · 완전 {s['full_rate_nopinch_legacy']}]")
         print(f"seed{seed}: 부분성공 {s['success_rate']} ({s['success']}/{s['rollouts']}) · "
-              f"완전분리 {s['full_rate']} ({s['full_success']}/{s['rollouts']}) · {s['wall_clock_sec']}s", flush=True)
+              f"완전분리 {s['full_rate']} ({s['full_success']}/{s['rollouts']}) · {s['wall_clock_sec']}s{legacy}", flush=True)
 
     twin.close()
     mean = lambda xs: round(sum(xs) / len(xs), 3)
     part = [s["success_rate"] for s in summaries]
     full = [s["full_rate"] for s in summaries]
+    part_legacy = [s["success_rate_nopinch_legacy"] for s in summaries]
+    full_legacy = [s["full_rate_nopinch_legacy"] for s in summaries]
     print(json.dumps({
         "status": "ok", "checkpoint": _rel(ckpt),
         "seeds": seeds, "per_seed": part, "per_seed_full": full,
+        # 옛 방식(핀치 미확인) 공정추정 — 판정 변경의 영향을 한 사이클 병기해 비교 가능하게
+        "per_seed_nopinch_legacy": part_legacy, "per_seed_full_nopinch_legacy": full_legacy,
+        "fair_estimate_nopinch_legacy": mean(part_legacy), "full_fair_estimate_nopinch_legacy": mean(full_legacy),
         "fair_estimate": mean(part), "full_fair_estimate": mean(full),
         "success_rate": mean(part),  # 드라이버 stage6 grep 호환 (= 부분성공 4-seed 공정추정, TARGET_RATE 0.50 과 같은 단위)
     }, ensure_ascii=False, indent=2))
