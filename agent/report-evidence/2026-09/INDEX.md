@@ -30,3 +30,12 @@
   - **4-seed 재측정**(동일 `epoch_0041`, 결정론적): 부분 **0.875 (35/40)** · 완전분리 **0.75 (30/40)** — 9/13·9/14 와 완전 일치 = 3일 안정 재현. wall time 79.5~79.7s/seed(3일 연속 안정).
   - **렌더 헬스체크**: `sim_camera_verification`(듀얼 30f)·`sim_headless_6dof_video`(2501f) 둘 다 PASS → 시뮬 스택 무회귀.
   - **재측정 churn 3일차**: 근본=드라이버 measured 승격 누락(마커 stale). external-dependencies.md 에 표면화. 자가치유 미실행(드라이버 소유).
+
+## 2026-09-16
+- Phase 4 W2 — **RS232 실기 정합(케이블 출구·측정 핀치 판정) + churn 해소 + ACT 재학습 in-flight + 렌더 헬스체크**: `agent/research-log/2026-09-16.md`, `research/simulation/2026-09-16_rs232-act-retrain-inflight.md`, `research/simulation/2026-09-16_session-handoff.md` → 9월 보고서 [Phase 4 RS232 분리] 섹션.
+  - **재측정 churn(9/13~15) 근본원인 확정·해소**: 드라이버 `cop_sim_env.py` timeout 300s < RS232 측정 ~318s → 3일 연속 exit 2 → 23:00 잡 Claude 단계 미실행(진척률 0.722 고착). 조치: measured 마커 기록 + timeout 600/3600 상향.
+  - **케이블 출구 실기 정합**: 옆(-y) → 후드 뒤쪽(커넥터 축) 정정. 동작 무영향(시각 전용, 동일 시드 5/5 동일) 확인 후 렌더 관측 변경분 재수집.
+  - **측정 판정 보강**: 부분성공에 파지(핀치) 확인 추가(양 jaw 후드 접촉), 목표치·임계 불변, `*_nopinch_legacy` 병기.
+  - **ACT 재학습 in-flight**: pid 48360, `--epochs 42`, `episodes_rs232`(100ep/16,093f 재수집본) → `checkpoints/act_rs232_sim`. 23:00 epoch 7/42 loss 0.0416 정상 수렴, 완료 예상 9/18 새벽. 야간 측정 hold(설계대로).
+  - **렌더 헬스체크(23:30)**: `sim_camera_verification`(듀얼 30f)·`sim_headless_6dof_video`(2501f, ≈6.5ms/frame) PASS(학습 동시). `sim_pick_place` = Phase 0 레거시 결정론적 0%(무회귀).
+  - **baseline(옛 케이블·옛 판정)**: 부분성공 0.875 / 완전분리 0.75, 사이트 진척률 0.750(D-45). 새 기준 수치는 9/18 재측정 후 병기.
