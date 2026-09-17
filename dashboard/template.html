@@ -6684,6 +6684,10 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
       var gh = null; H.hinges.forEach(function (h) { if (h.qposadr === 5) gh = h; });
       var GRIP_OPEN = 0.82, GRIP_CLOSED = -0.006;   // RS232 롤아웃 qpos[5] 실측 범위(-0.0059~0.8231). 큰 값=열림
       var PULL_MAX = 0.040;                         // 씬 슬라이드 조인트 range 와 동일(0~40mm)
+      // 파지 근접 게이트: 집게 그룹 박스 중심 ↔ 후드 수평거리.
+      // 2026-09-17 실측(커서 추종 자세): 후드 지점 0.026~0.033 / 케이블 지점 0.048 / 허공 0.103.
+      // 0.045 로는 케이블(전선)을 눌렀을 때 아슬하게 막혔다 → 0.055. 허공과는 여전히 두 배 차이라 안전.
+      var GRAB_XZ = 0.055;
       var FULL_M = 0.0059;                          // 완전 분리 5.90mm — 측정 기준과 같은 값
       var closing = false, grabbed = false, grabLocalX = 0, pulled = 0, fullDone = false;
       var lastNX = null, lastNY = null;             // 마지막 커서 NDC (레이캐스트 파지 판정용)
@@ -6709,6 +6713,8 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
       var BOARD_TOP = 0.026;  // 보드 윗면 world y — 손끝이 여기까지 내려가 버튼(중심 0.028)에 닿음. 이 아래로는 관통 방지.
       var TOUCH_R = 0.022;    // 손끝이 버튼에 이만큼(2.2cm) 이내 실제 근접 시에만 성공.
       var FLOOR_Y = 0.05;     // 타깃 1차 하한. 실측 튜닝 knob.
+      // 주의: RS232 라고 이 하한을 낮추면 안 된다. 2026-09-17 실측 — 0.028 로 낮추고 관통 가드를
+      // 끄면 jawMinY 가 -0.045 까지 내려가 보드를 뚫고, 집게가 후드에서 오히려 멀어졌다.
       var planeC = new THREE.Vector3(0.15, 0.10, 0.0);   // 커서 투영 평면 중심(작업영역)
 
       // 커서 → 카메라 정면 3D 평면 타깃(좌우=베이스 yaw, 상하=팔 리치)
@@ -6768,8 +6774,11 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
           ang[5] += (gt - ang[5]) * 0.35;
           gh.pivot.quaternion.setFromAxisAngle(gh.axisV, ang[5]);
         }
-        if (pending) {                              // 팔 끝 커서 추종 + 보드 관통 방지
+        if (pending) {
           ccd(pending, 12);
+          // 보드 관통 가드는 RS232 에서도 유지한다. 2026-09-17 실측: 이 가드를 끄고 바닥을 0.028 로
+          // 낮췄더니 jawMinY 가 쉬는 자세 +0.033 → 커서 추종 시 -0.045 로, 보드(윗면 0.025)를 7cm
+          // 뚫고 내려가면서 집게가 오히려 후드에서 멀어졌다(horiz 0.026 → 0.047~0.066).
           for (var pass = 0; pass < 3; pass++) {
             H.scene.updateMatrixWorld(true);
             var minY = gripMinY();
@@ -6781,11 +6790,21 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
         eff.getWorldPosition(_ew);
         // 파지 판정 = 커서 레이가 후드에 맞는가. 3D 근접(집게 바운딩박스)은 쓸 수 없다 —
         // inner[7]/inner[6] 이 손목·그리퍼 그룹 전체(박스 13cm)라 쉬는 자세에서도 후드를 품는다(실측).
-        var near = false;
-        if (H.hood && lastNX != null) {
+        // 커서는 플러그 전체(쉘·플랜지·후드·케이블) 중 아무 데나 맞으면 된다 — 사용자는 '전선'을 누른다.
+        var onPlug = false;
+        if (lastNX != null && (H.plugMover || H.hood)) {
           ray.setFromCamera({ x: lastNX, y: lastNY }, H.camera);
-          near = ray.intersectObject(H.hood, true).length > 0;
+          onPlug = ray.intersectObject(H.plugMover || H.hood, true).length > 0;
         }
+        // 집게가 실제로 커넥터 근처에 있어야 한다. 높이는 박스가 13cm 라 쓸 수 없어 수평거리로만 건다.
+        var reach = false;
+        if (H.hood) {
+          H.hood.getWorldPosition(_hw);
+          _bb.makeEmpty(); for (var gi = 0; gi < gripNodes.length; gi++) _bb.expandByObject(gripNodes[gi]);
+          _bb.getCenter(_el);
+          reach = Math.hypot(_el.x - _hw.x, _el.z - _hw.z) < GRAB_XZ;
+        }
+        var near = onPlug && reach;
         if (closing && !grabbed && !grabArm && near) {   // 닫는 중 + 커서가 후드 → 다음 프레임에 기준점 확정
           grabArm = true;
         } else if (grabArm && closing) {                 // 정착 1프레임 뒤 기준점 — 파지 순간의 수렴 점프를 버린다
