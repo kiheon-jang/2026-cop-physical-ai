@@ -3786,13 +3786,13 @@ a{color:inherit;text-decoration:none}
       <div class="bmc-home" id="play-wrap" style="padding:20px 22px; margin:0; min-height:0">
         <div style="text-align:center; margin:0 0 14px">
           <span class="bmc-eyebrow"><i class="sq"></i>직접 조작 · SO-101 · hdel_iot_01</span>
-          <h1 class="bmc-h1" style="font-size:clamp(23px,2.8vw,34px); margin:12px 0 8px">로봇팔 끝을 빨간 버튼에 접촉시켜 봅니다</h1>
-          <p class="bmc-lede" style="margin:0 auto; max-width:48ch">마우스를 움직이면 실기 SO-101 팔 끝이 그 위치를 따라가며, <b>팔 끝이 빨간 리셋 버튼에 닿으면</b> 초록 LED가 점등합니다.</p>
+          <h1 class="bmc-h1" style="font-size:clamp(23px,2.8vw,34px); margin:12px 0 8px">집게로 RS232 케이블을 잡아 뽑아 봅니다</h1>
+          <p class="bmc-lede" style="margin:0 auto; max-width:48ch">마우스를 움직이면 SO-101 팔 끝이 따라옵니다. <b>왼쪽 버튼을 누르고 있으면 집게가 닫힙니다.</b> 커넥터 후드를 잡은 채 왼쪽으로 당기면 플러그가 빠지고, <b>5.9mm</b> 이상 빠지면 완전 분리입니다.</p>
         </div>
         <div class="bmc-console" style="max-width:920px; margin:0 auto; position:relative">
-          <div class="top"><i class="lamp g"></i><i class="lamp a"></i><i class="lamp r"></i><span>&nbsp;PLAYGROUND / SO-101 · 마우스 조종</span><span class="rt" style="margin-left:auto">버튼 터치 성공 <b id="play-count">0</b></span></div>
-          <canvas id="play3d" role="img" aria-label="SO-101 로봇팔 3D — 마우스 좌우로 조종, 클릭으로 버튼 누름" style="display:block; width:100%; height:min(56vh,500px); touch-action:none; cursor:pointer; background:radial-gradient(80% 60% at 50% 30%,rgba(57,198,240,.07),transparent 70%),linear-gradient(180deg,#0a0f1c,#070b14)"></canvas>
-          <div id="play-hint" style="position:absolute; left:50%; bottom:16px; transform:translateX(-50%); font-family:var(--mono); font-size:12px; color:var(--ink); background:rgba(11,16,28,.82); border:1px solid var(--line2); border-radius:999px; padding:8px 15px; pointer-events:none; transition:opacity .3s">마우스로 팔 끝 위치를 조작합니다 · 팔 끝이 빨간 버튼에 닿으면 성공입니다</div>
+          <div class="top"><i class="lamp g"></i><i class="lamp a"></i><i class="lamp r"></i><span>&nbsp;PLAYGROUND / SO-101 · 마우스=팔 · 클릭=집게</span><span class="rt" style="margin-left:auto"><span id="play-disp">분리 0.0mm</span> · 완전 분리 <b id="play-count">0</b></span></div>
+          <canvas id="play3d" role="img" aria-label="SO-101 로봇팔 3D — 마우스로 팔 끝을 조종하고, 왼쪽 버튼을 누르면 집게가 닫힙니다" style="display:block; width:100%; height:min(56vh,500px); touch-action:none; cursor:pointer; background:radial-gradient(80% 60% at 50% 30%,rgba(57,198,240,.07),transparent 70%),linear-gradient(180deg,#0a0f1c,#070b14)"></canvas>
+          <div id="play-hint" style="position:absolute; left:50%; bottom:16px; transform:translateX(-50%); font-family:var(--mono); font-size:12px; color:var(--ink); background:rgba(11,16,28,.82); border:1px solid var(--line2); border-radius:999px; padding:8px 15px; pointer-events:none; transition:opacity .3s">마우스로 팔 끝 이동 · 왼쪽 버튼을 누른 채 커넥터 후드를 잡고 왼쪽으로 당기세요</div>
         </div>
       </div>
     </div>
@@ -6569,7 +6569,7 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
     return {
       renderer: renderer, scene: scene, camera: camera, canvas: canvas,
       hinges: hinges, led: led, applyCam: applyCam, inner: inner, bodyGroup: bodyGroup, btn: btn,
-      plugMover: plugMover, isRs232: isRs232
+      plugMover: plugMover, isRs232: isRs232, hood: hood, pcbG: pcbG
     };
   }
 
@@ -6678,6 +6678,25 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
       var buttonPos = new THREE.Vector3(); if (H.btn) H.btn.getWorldPosition(buttonPos);   // 빨간 리셋버튼 월드좌표
       var wasTouching = false, aiming = false, BTN_SNAP = 0.09;   // BTN_SNAP=커서가 화면상 버튼 이만큼(NDC) 이내면 '조준' → 타깃을 실제 버튼으로 스냅. 성공=조준+팔 하강.
 
+      // ── 3단계 RS232 모드: 마우스=팔 끝 / 왼쪽 버튼=집게 닫기 / 잡은 채 왼쪽으로 당기면 플러그가 빠진다 ──
+      // 2단계(S1) 궤적일 때는 아래 버튼 누름 로직을 그대로 쓴다.
+      var RS = !!H.isRs232;
+      var gh = null; H.hinges.forEach(function (h) { if (h.qposadr === 5) gh = h; });
+      var GRIP_OPEN = 0.82, GRIP_CLOSED = -0.006;   // RS232 롤아웃 qpos[5] 실측 범위(-0.0059~0.8231). 큰 값=열림
+      var PULL_MAX = 0.040;                         // 씬 슬라이드 조인트 range 와 동일(0~40mm)
+      var FULL_M = 0.0059;                          // 완전 분리 5.90mm — 측정 기준과 같은 값
+      var closing = false, grabbed = false, grabLocalX = 0, pulled = 0, fullDone = false;
+      var lastNX = null, lastNY = null;             // 마지막 커서 NDC (레이캐스트 파지 판정용)
+      // 당김 감도: 파지 직후 팔이 타깃으로 수렴하며 생기는 점프를 버리려고 기준점을 한 프레임 뒤에 잡고,
+      // 손 이동량에 배율을 건다. 실측 이력(완전분리 5.9mm 까지 필요한 커서 이동):
+      //   배율 없음 → 8px (첫 스텝에 바로 분리) / 0.35 + 손목 -70° → 24px / 0.18 → 약 45~50px 목표.
+      // 관절 한계에 걸려 당김이 잠시 멈췄다 튀는 계단 현상은 남는다(IK 포화 — 감도와 별개 문제).
+      var PULL_GAIN = 0.18, grabArm = false;
+      // 완전분리 후 원복: 카운트한 뒤 잠시 두었다가 플러그를 제자리로 되돌리고 집게를 연다(반복 시연용).
+      var RESET_MS = 1500, resetAt = 0;
+      var dispEl = document.getElementById('play-disp');
+      var _hw = new THREE.Vector3(), _ew = new THREE.Vector3(), _el = new THREE.Vector3();
+
       // 가동범위: base_pan(0)=플레이그라운드 좌우 자유(±YAW, 회전 감김만 방지). 1·2·3=녹화 프레임 자연범위+마진.
       // 실기 S1 실측 범위 기반 — 베이스 팬은 실기서 거의 잠금(±0.5°)이라 좁게, 나머지는 녹화 프레임 min/max + 소폭 마진(자연 포즈 유지)
       var YAW = 0.5, lim = { 0: { mn: -YAW, mx: YAW } };
@@ -6695,9 +6714,12 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
       // 커서 → 카메라 정면 3D 평면 타깃(좌우=베이스 yaw, 상하=팔 리치)
       var ray = new THREE.Raycaster(), planeN = new THREE.Vector3(), plane = new THREE.Plane(), hitP = new THREE.Vector3();
       function cursorTarget(nx, ny) {
-        _btnN.copy(buttonPos).project(H.camera);                                   // 버튼 화면좌표
-        aiming = Math.hypot(nx - _btnN.x, ny - _btnN.y) < BTN_SNAP;                 // 커서가 버튼 조준 중?
-        if (aiming) return hitP.copy(buttonPos);                                    // 조준 → 실제 버튼으로 스냅(정확 터치)
+        if (RS) { aiming = false; }                                                // RS232 모드: 버튼은 숨겨져 있다 — 조준/스냅 없음
+        else {
+          _btnN.copy(buttonPos).project(H.camera);                                 // 버튼 화면좌표
+          aiming = Math.hypot(nx - _btnN.x, ny - _btnN.y) < BTN_SNAP;               // 커서가 버튼 조준 중?
+          if (aiming) return hitP.copy(buttonPos);                                  // 조준 → 실제 버튼으로 스냅(정확 터치)
+        }
         ray.setFromCamera({ x: nx, y: ny }, H.camera);
         H.camera.getWorldDirection(planeN);
         plane.setFromNormalAndCoplanarPoint(planeN, planeC);
@@ -6738,8 +6760,66 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
       var PRESS = FR[LEDF < N ? LEDF : N - 1];
 
       var pending = null, scheduled = false;
+
+      // RS232: 집게 개폐 + 커서 추종 + 후드 파지 + 당기기 → plugMover 변위
+      function solveRs() {
+        if (gh) {                                   // 집게 개폐(이징)
+          var gt = closing ? GRIP_CLOSED : GRIP_OPEN;
+          ang[5] += (gt - ang[5]) * 0.35;
+          gh.pivot.quaternion.setFromAxisAngle(gh.axisV, ang[5]);
+        }
+        if (pending) {                              // 팔 끝 커서 추종 + 보드 관통 방지
+          ccd(pending, 12);
+          for (var pass = 0; pass < 3; pass++) {
+            H.scene.updateMatrixWorld(true);
+            var minY = gripMinY();
+            if (minY >= BOARD_TOP) break;
+            pending.y += (BOARD_TOP - minY) + 0.005; ccd(pending, 6);
+          }
+        }
+        H.scene.updateMatrixWorld(true);
+        eff.getWorldPosition(_ew);
+        // 파지 판정 = 커서 레이가 후드에 맞는가. 3D 근접(집게 바운딩박스)은 쓸 수 없다 —
+        // inner[7]/inner[6] 이 손목·그리퍼 그룹 전체(박스 13cm)라 쉬는 자세에서도 후드를 품는다(실측).
+        var near = false;
+        if (H.hood && lastNX != null) {
+          ray.setFromCamera({ x: lastNX, y: lastNY }, H.camera);
+          near = ray.intersectObject(H.hood, true).length > 0;
+        }
+        if (closing && !grabbed && !grabArm && near) {   // 닫는 중 + 커서가 후드 → 다음 프레임에 기준점 확정
+          grabArm = true;
+        } else if (grabArm && closing) {                 // 정착 1프레임 뒤 기준점 — 파지 순간의 수렴 점프를 버린다
+          grabArm = false; grabbed = true;
+          _el.copy(_ew); if (H.pcbG) H.pcbG.worldToLocal(_el); grabLocalX = _el.x;
+        }
+        if (!closing) { grabbed = false; grabArm = false; }   // 손 떼면 놓는다
+        if (grabbed) {                               // 당긴 거리 = 기준점 대비 보드 로컬 -x 이동량 × PULL_GAIN
+          _el.copy(_ew); if (H.pcbG) H.pcbG.worldToLocal(_el);
+          var d = Math.max(0, Math.min(PULL_MAX, (grabLocalX - _el.x) * PULL_GAIN));
+          if (d > pulled) pulled = d;                // 되돌려도 빠진 만큼은 유지(마찰 결합)
+        }
+        var now = (global.performance && performance.now) ? performance.now() : Date.now();
+        if (resetAt && now >= resetAt) {             // 원복은 라벨보다 먼저 — 아니면 '곧 초기화' 문구가 한 프레임 늦게 남는다
+          resetAt = 0; pulled = 0; fullDone = false; grabbed = false; grabArm = false;
+          if (gh) { ang[5] = GRIP_OPEN; gh.pivot.quaternion.setFromAxisAngle(gh.axisV, ang[5]); }
+        }
+        if (H.plugMover) H.plugMover.position.set(-pulled, 0, 0);
+        var mm = pulled * 1000;
+        if (dispEl) {
+          dispEl.textContent = resetAt ? "완전분리 ● 곧 초기화" : ("분리 " + mm.toFixed(1) + "mm");
+          dispEl.style.color = pulled >= FULL_M ? "var(--grn)" : "";
+        }
+        if (pulled >= FULL_M && !fullDone) {         // 완전 분리 1회 카운트 → 잠시 뒤 원복
+          fullDone = true; count++; if (counterEl) counterEl.textContent = count;
+          resetAt = now + RESET_MS;
+        }
+        draw();
+      }
+
       function solve() {
-        scheduled = false; if (!pending) return;
+        scheduled = false;
+        if (RS) { solveRs(); return; }
+        if (!pending) return;
         var touching = false;
         if (aiming) {
           // 버튼 조준 → 녹화된 '누름' 포즈로 부드럽게 이징 (실기가 실제 누른 관절 그대로 정확히 버튼 누름)
@@ -6768,12 +6848,39 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
         var r = H.canvas.getBoundingClientRect();
         var nx = ((e.clientX - r.left) / (r.width || 1)) * 2 - 1;
         var ny = -(((e.clientY - r.top) / (r.height || 1)) * 2 - 1);
+        lastNX = nx; lastNY = ny;                 // RS232 파지 판정(레이캐스트)에 쓴다
         var t = cursorTarget(nx, ny); if (!t) return;
         pending = t.clone();
         if (!scheduled) { scheduled = true; requestAnimationFrame(solve); }
         if (hintEl && !hintEl.__hid) { hintEl.__hid = true; hintEl.style.opacity = "0"; }
       });
-      // 클릭 성공 제거 — 성공은 오직 팔 끝이 버튼에 닿을 때(solve 의 터치 판정)
+      // RS232: 왼쪽 버튼을 누르는 동안 집게가 닫힌다 (S1 모드는 클릭 성공 없음 — 팔 끝이 버튼에 닿을 때만)
+      function kick() { if (!scheduled) { scheduled = true; requestAnimationFrame(solve); } }
+      H.canvas.addEventListener("pointerdown", function (e) {
+        if (!RS || e.button !== 0) return;
+        e.preventDefault(); closing = true;
+        try { H.canvas.setPointerCapture(e.pointerId); } catch (_) {}
+        kick();
+      });
+      function release() { if (!RS) return; closing = false; kick(); }
+      H.canvas.addEventListener("pointerup", release);
+      H.canvas.addEventListener("pointercancel", release);
+      H.canvas.addEventListener("pointerleave", release);
+      if (RS) {
+        // 집게를 열린 상태로 시작(녹화 궤적 FR[0] 은 닫힘이라 그대로 두면 처음부터 닫혀 보인다)
+        if (gh) { ang[5] = GRIP_OPEN; gh.pivot.quaternion.setFromAxisAngle(gh.axisV, ang[5]); }
+        // 손목 비틀기: 정책은 후드를 '옆으로' 집는다 — 녹화 궤적 wrist_roll 이 파지 구간에서 -69.9°까지 간다
+        // (수집기 plan_grasp 가 jaw 개폐축을 ±y_pcb 로 roll 정렬). FR[0] 의 1.5° 로 두면 집게 방향이 영영 안 맞는다.
+        // 실기 한계 wrist_roll (-2.74385, 2.84121) 안쪽이라 안전하다.
+        var rh = null; H.hinges.forEach(function (h) { if (h.qposadr === 4) rh = h; });
+        if (rh) {
+          var rmin = 1e9; for (var fi = 0; fi < FR.length; fi++) { if (FR[fi][4] < rmin) rmin = FR[fi][4]; }
+          ang[4] = rmin;                               // 파지 자세의 roll (약 -70°)
+          rh.pivot.quaternion.setFromAxisAngle(rh.axisV, ang[4]);
+        }
+        // 상시 루프 — 이벤트당 1스텝만 돌면 개폐 이징이 끝까지 가지 않는다. 탭이 안 보이면 건너뛴다.
+        (function loop() { if (H.canvas.offsetParent !== null) solveRs(); requestAnimationFrame(loop); })();
+      }
       return true;
     }
 
