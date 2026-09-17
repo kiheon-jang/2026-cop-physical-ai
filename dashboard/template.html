@@ -6829,6 +6829,20 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
 
   function applyScalars(){
     var D=window.DATA||{}, kpi=D.business_kpi||{};
+    // RS232 칩: 하드코딩 금지 — 측정이 갱신되면 지표 페이지만 움직이고 히어로가 옛 숫자로 남는다.
+    var rs=((D.rollout_metrics||{}).rs232)||{};
+    if(rs.partial_rate!=null||rs.full_rate!=null){
+      var rn=rs.rollouts||40, rsd=rs.seeds||4;
+      $all('.bmc-chip').forEach(function(c){
+        var sp=c.querySelector('[data-bcount]'); if(!sp) return;
+        var isPart=c.textContent.indexOf('부분성공')>=0, isFull=c.textContent.indexOf('완전분리')>=0;
+        if(!isPart&&!isFull) return;
+        var v=isPart?rs.partial_rate:rs.full_rate; if(v==null) return;
+        sp.setAttribute('data-bcount',(v*100).toFixed(1));
+        if(c.firstChild&&c.firstChild.nodeType===3)
+          c.firstChild.nodeValue='3단계 RS232 분리 · '+(isPart?'부분성공':'완전분리')+'('+rsd+'-seed '+rn+'회)';
+      });
+    }
     var dday=kpi.d_day_demo; if(dday==null) return;  // 시연(10/31)까지. d_day 는 기능 완성(9/30) 기준이라 '시연까지' 라벨과 맞지 않는다
     $all('.bmc-chip').forEach(function(c){ if(c.textContent.indexOf('시연까지')>=0){ var sp=c.querySelector('[data-bcount]'); if(sp)sp.setAttribute('data-bcount',String(dday)); } });
     var dd=document.getElementById('bmcStatDday'); if(dd)dd.textContent='D-'+dday;

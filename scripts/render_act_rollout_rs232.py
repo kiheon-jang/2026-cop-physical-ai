@@ -102,6 +102,18 @@ def run_rollout(twin, policy, device, rng, max_frames, collect_frames):
     pinch_partial = pinch_full = False
     pinch_steps = 0
     p_latched = f_latched = False
+    # 파지 인정 창 (2026-09-17 적용, research/decisions/2026-09-17_dr-headline-and-pinch-window.md):
+    # 임계를 넘는 '그 한 물리 스텝'만 보면 접촉 채터링으로 판정이 흔들린다.
+    # 통과 직전 한 제어프레임(DATA_SAMPLE_EVERY 물리스텝 ≈ 33ms) 안의 파지를 인정한다.
+    # 통과 '이후' 파지는 인정하지 않는다 — 밀어낸 뒤 다시 잡는 경로를 실패로 유지하기 위함.
+    # 임계(5.90/2.95mm)·배치 존·시드는 불변. 기준 완화가 아니라 샘플링 결함 제거다.
+    #
+    # ⚠ 이 창은 '부분 ⊇ 완전' 포함관계를 보장하지 못한다 (2026-09-17 실측: 역전 1건 → 1건).
+    # 부분과 완전은 서로 다른 시점의 독립 latch 라, 2.95mm 를 미파지로 통과하고 5.90mm 를
+    # 파지로 통과하는 경로가 창 크기와 무관하게 남는다. 포함관계가 필요하면 부분 판정을
+    # 완전에 종속시켜야 한다(미결 — 부분성공의 독립적 의미를 잃는 대가가 있다).
+    pinch_window = DATA_SAMPLE_EVERY
+    steps_since_pinch = 10 ** 9
 
     for step in range(max_frames):
         top = twin.render("top")         # 반전 없음 (수집기와 동일)
@@ -127,11 +139,12 @@ def run_rollout(twin, policy, device, rng, max_frames, collect_frames):
             twin.step()                  # partial/full latch 갱신
             pin_now = pinched()
             pinch_steps += int(pin_now)
+            steps_since_pinch = 0 if pin_now else steps_since_pinch + 1
             prev_p, prev_f = p_latched, f_latched
             p_latched, f_latched = twin.unplugged_partial(), twin.unplugged_full()
-            if p_latched and not prev_p and pin_now:
-                pinch_partial = True     # 임계를 넘은 그 스텝에 양 jaw 접촉
-            if f_latched and not prev_f and pin_now:
+            if p_latched and not prev_p and steps_since_pinch <= pinch_window:
+                pinch_partial = True     # 임계 통과 직전 한 제어프레임 안에 양 jaw 접촉
+            if f_latched and not prev_f and steps_since_pinch <= pinch_window:
                 pinch_full = True
 
         max_disp = max(max_disp, twin.plug_displacement())
@@ -166,7 +179,10 @@ def measure_seed(twin, policy, device, seed, rollouts, max_frames, video_rollout
                         "success_nopinch": part, "full_success_nopinch": full,
                         "pinch_steps": pin["steps"],
                         "max_disp_mm": round(disp * 1000, 2),
-                        "partial_frame": pf, "full_frame": ff})
+                        "partial_frame": pf, "full_frame": ff,
+                        # 배치를 요약에도 남긴다 — 지금까지 traj(nominal 시드 전용) 에만 있어
+                        # 4-seed 전체의 배치 커버리지를 사후 분석할 수 없었다. 판정·임계 불변, 기록만 추가.
+                        "pcb": placement})
         trajectories.append({"rollout": i, "success": pin["partial"], "full_success": pin["full"],
                              "success_nopinch": part, "full_success_nopinch": full,
                              "max_disp_m": round(disp, 4), "partial_frame": pf, "full_frame": ff,
