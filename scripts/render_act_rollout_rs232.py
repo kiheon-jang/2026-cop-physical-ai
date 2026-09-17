@@ -229,6 +229,12 @@ def write_outputs(out_dir, ckpt, seed, is_nominal, results, trajectories, video_
         "full_rate_nopinch_legacy": round(n_full_legacy / n, 3) if n else 0.0,
         "success": n_part,
         "success_rate": round(n_part / n, 3) if n else 0.0,
+        # 진단(판정 불변, 기록만): 완전=성공인데 부분=실패인 롤아웃 수.
+        # 부분/완전은 서로 다른 시점의 독립 latch 라 이 역전이 구조적으로 가능하다
+        # (2026-09-17 실측 1/10). 판정 정의를 바꿀지는 이 빈도를 보고 정한다 —
+        # research/decisions/2026-09-17_dr-headline-and-pinch-window.md
+        "pinch_inversions": sum(1 for r in results
+                                if r.get("full_success") and not r.get("success")),
         "full_success": n_full,
         "full_rate": round(n_full / n, 3) if n else 0.0,
         "median_disp_mm": round(median_disp, 2),
