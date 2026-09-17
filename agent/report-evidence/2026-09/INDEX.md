@@ -39,3 +39,13 @@
   - **ACT 재학습 in-flight**: pid 48360, `--epochs 42`, `episodes_rs232`(100ep/16,093f 재수집본) → `checkpoints/act_rs232_sim`. 23:00 epoch 7/42 loss 0.0416 정상 수렴, 완료 예상 9/18 새벽. 야간 측정 hold(설계대로).
   - **렌더 헬스체크(23:30)**: `sim_camera_verification`(듀얼 30f)·`sim_headless_6dof_video`(2501f, ≈6.5ms/frame) PASS(학습 동시). `sim_pick_place` = Phase 0 레거시 결정론적 0%(무회귀).
   - **baseline(옛 케이블·옛 판정)**: 부분성공 0.875 / 완전분리 0.75, 사이트 진척률 0.750(D-45). 새 기준 수치는 9/18 재측정 후 병기.
+
+## 2026-09-17
+- Phase 4 W2 — **RS232 ACT 재학습 in-flight Day 2 + 근거 분석 4종(옛 가중치 고정 측정) + 렌더 헬스체크**: `agent/research-log/2026-09-17.md`, `research/simulation/2026-09-17_rs232-act-retrain-inflight-day2.md`, `research/simulation/2026-09-17_rs232-retention-operating-envelope.md`, `research/simulation/2026-09-17_rs232-three-way-decomposition.md`, `research/simulation/2026-09-17_s1-dr-gate.md`, `research/simulation/2026-09-17_task-transfer-record.md` → 9월 보고서 [Phase 4 RS232 분리 / 기능 완성] 섹션.
+  - **보유력 운영 범위**(옛 가중치 `_published_baseline_20260913/epoch_0041`, seed42×10, 씬 불변): 보유력 1.75~12 N 평탄(옛기준 부분 0.9→0.8), **20 N 에서 붕괴**(부분 0.6·완전 0.3). 7.2 N 공표값이 override no-op 로 운영 baseline 0.9/0.7 재현 = 스윕 도구 타당성 확인. → 공표 수치는 추정 보유력에 민감하지 않음(≤12 N 안정). 당김 저울 1회 실측이 곡선을 예측으로 전환.
+  - **3자 분해(기하/판정/재학습)**: 9/16 3변경을 옛 가중치 고정으로 분리 — ① 케이블 기하(A→B) 옛판정 **+0.00**(중립 재확인)이나 파지 스텝 중앙값 936→592 저하(옛판정이 못 봄) · ② 판정(핀치) 변경 옛씬 −0.30/새씬 −0.60(파지 품질 의존) · ③ 재학습 효과는 9/18 측정 후 확정(기준점 부분 0.3/완전 0.4). → 내일 낮은 수치의 원인은 ②+③이지 기하 아님.
+  - **S1 DR 게이트**(RS232 DR 32.5h 재학습 정당성): DR 학습 정책 교란 하 0.45→**0.80**(유의) 강건성 실증, 그러나 공칭 0.925→**0.675**(−0.25 유의) 거래. → 권고 **(나) DR 재학습하되 공칭·교란 병기**(기준 변경 없이 이득 가시화). 운영 S1 산출물 mtime 불변 확인.
+  - **과제 이식 속도 기록**(내재화 증거): pick&place ~40일 → S1 **1일** → RS232 **2일**. 재사용=학습기/데이터규약/측정규약/드라이버/야간자동화, 신규=씬·전문가·판정 3종뿐. 저장소 459커밋(440 1인), Mac mini M5 16GB 1대. **10월 발표 헤드라인 후보**(성공률은 그 아래 증거).
+  - **렌더 헬스체크(23:30, 학습 비경합)**: `sim_camera_verification` 3회 3/3(듀얼 30f)·`sim_headless_6dof_video` 2501f 둘 다 PASS → 시뮬 스택 무회귀.
+  - **학습 진척**: pid 48360 alive, epoch 38/42 loss 0.0084, ETA ~03:00 9/18. 승격/측정 보류(설계대로) → baseline 무손상.
+  - ⚠ **정직성 단서(전 문서 공통)**: 모두 시뮬 측정, 실물 검증 없음 · n=10~40 CI 넓음(소수 둘째 자리 주장 금지) · 커넥터 보유력·잭스크류 체결 실측 없음.
