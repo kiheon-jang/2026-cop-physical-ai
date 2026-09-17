@@ -6765,6 +6765,26 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
       // 버튼 조준 시 재생할 '누름' 포즈 = 녹화 rollout 의 LED 점등 프레임(실기가 실제로 버튼 누른 관절config)
       var PRESS = FR[LEDF < N ? LEDF : N - 1];
 
+      // RS232 파지 포즈 = 녹화 궤적에서 집게가 후드에 가장 가까워진 프레임(정책이 실제로 잡는 자세).
+      // 커서 평면 타깃은 FLOOR_Y(0.05) 로 바닥이 막혀 커넥터(y=0.0313)에 닿는 명령 자체가 불가능하다
+      // — 2026-09-17 실측: 커서를 어디에 둬도 집게↔후드 수평거리가 0.026~0.046 에서 안 줄었다.
+      // 그래서 S1 의 PRESS 이징과 같은 방식으로, 조준하면 이 녹화 자세로 이징한다.
+      var GRASP = null;
+      if (RS && H.hood) {
+        var _gw = new THREE.Vector3(), _gb = new THREE.Box3(), _gc = new THREE.Vector3(), _gbest = 1e9;
+        H.hood.getWorldPosition(_gw);
+        for (var gf = 0; gf < FR.length; gf++) {
+          H.hinges.forEach(function (h) { if (h.qposadr < 6) h.pivot.quaternion.setFromAxisAngle(h.axisV, FR[gf][h.qposadr]); });
+          H.scene.updateMatrixWorld(true);
+          _gb.makeEmpty(); for (var gn = 0; gn < gripNodes.length; gn++) _gb.expandByObject(gripNodes[gn]);
+          _gb.getCenter(_gc);
+          var _gd = Math.hypot(_gc.x - _gw.x, _gc.z - _gw.z);
+          if (_gd < _gbest) { _gbest = _gd; GRASP = FR[gf]; }
+        }
+        H.hinges.forEach(function (h) { if (h.qposadr < 6) h.pivot.quaternion.setFromAxisAngle(h.axisV, ang[h.qposadr]); });
+        H.scene.updateMatrixWorld(true);
+      }
+
       var pending = null, scheduled = false;
 
       // RS232: 집게 개폐 + 커서 추종 + 후드 파지 + 당기기 → plugMover 변위
@@ -6774,7 +6794,21 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
           ang[5] += (gt - ang[5]) * 0.35;
           gh.pivot.quaternion.setFromAxisAngle(gh.axisV, ang[5]);
         }
-        if (pending) {
+        // 커서가 플러그 위면 녹화 파지 자세로 이징 — 실기 영상처럼 팔이 커넥터 자리로 이동한다.
+        // (커서 평면 추종만으로는 FLOOR_Y 때문에 커넥터 높이에 도달하지 못한다.)
+        var aimPlug = false;
+        if (GRASP && lastNX != null && (H.plugMover || H.hood)) {
+          ray.setFromCamera({ x: lastNX, y: lastNY }, H.camera);
+          aimPlug = ray.intersectObject(H.plugMover || H.hood, true).length > 0;
+        }
+        if (aimPlug && !grabbed) {
+          H.hinges.forEach(function (h) {
+            if (h.qposadr < 5) {                      // 팔 4축 + 손목 roll. 집게(5)는 마우스 버튼이 담당
+              ang[h.qposadr] += (GRASP[h.qposadr] - ang[h.qposadr]) * 0.22;
+              h.pivot.quaternion.setFromAxisAngle(h.axisV, ang[h.qposadr]);
+            }
+          });
+        } else if (pending) {
           ccd(pending, 12);
           // 보드 관통 가드는 RS232 에서도 유지한다. 2026-09-17 실측: 이 가드를 끄고 바닥을 0.028 로
           // 낮췄더니 jawMinY 가 쉬는 자세 +0.033 → 커서 추종 시 -0.045 로, 보드(윗면 0.025)를 7cm
