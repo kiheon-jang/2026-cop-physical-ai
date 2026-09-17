@@ -20,7 +20,7 @@ CoP Physical AI는 정비현장의 PCB 작업(픽앤플레이스, RS232 HHT 케�
 <!-- slide title="하드웨어·시뮬·모방학습" -->
 ## 로봇팔 하드웨어
 
-**SO-ARM101** (TheRobotStudio, CC-BY-SA): 6자유도(6-DoF) 오픈소스 로봇팔. Leader + Follower 2대 구성. 서보 모터: Feetech STS3215(12V/7.4V). MJCF 파일(`so101_new_calib.xml`)로 MuJoCo 시뮬과 실기가 동일한 캘리브레이션 공유. 실기 검증은 Phase 2(2026-07) 이후 진행 예정이며, 현재(2026-06)는 시뮬 단계다.
+**SO-ARM101** (TheRobotStudio, CC-BY-SA): 6자유도(6-DoF) 오픈소스 로봇팔. Leader + Follower 2대 구성. 서보 모터: Feetech STS3215(12V/7.4V). 3단계 RS232 측정 씬은 `sim/assets/so101_real.xml` 을 쓰며, **실기와 공유되는 것은 관절 가동범위와 구동력 한계까지다.** 카메라 파라미터는 창작값, 질량·관성은 CAD 기본값, 관절 마찰·강성은 타사 서보 식별값에서 옮겨온 값이고, 지연·백래시·데드밴드는 모델링되어 있지 않다(상세: 저장소 `ASSUMPTIONS.md`). 1·2단계 씬은 상류 기본 모델을 쓴다. 실기 검증은 연기 상태이며, 현재(2026-09)는 시뮬 단계다.
 
 ## 시뮬레이션 환경
 

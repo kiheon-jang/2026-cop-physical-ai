@@ -63,19 +63,24 @@ PHASE_META: list[dict] = [
     {
         "id": "phase2", "name": "Phase 2 — Sim2Real 검증", "month": "2026-07", "weeks": 4,
         "business_label": "7월: 실기 검증 (시뮬↔실기)",
-        "outcome": "시뮬 학습 모델이 실제 로봇팔에서도 작동하는지 측정. 실기 50 에피소드 수집.",
-        "report_label": "데이터 50 에피소드",
+        "outcome": "실기 수집·검증은 연기되었습니다. 이 달 산출은 시뮬 pick&place 4-seed 측정이며, "
+                   "Phase 2 의 원래 목표였던 Sim2Real 전이 검증은 달성하지 못했습니다.",
+        "report_label": "시뮬 4-seed 측정",
     },
     {
         "id": "phase3", "name": "Phase 3 — S1 리셋버튼 시뮬 (실기 정렬)", "month": "2026-08", "weeks": 4,
         "business_label": "8월: PCB 리셋버튼 누르기 — 실기 트랙과 동일 작업으로 시뮬 정렬",
-        "outcome": "실기와 동일한 관측 방식의 리셋버튼 누르기 시뮬 + 합성 데이터 100ep + LED 자동판정. 시뮬 4-seed 공정추정 0.925 를 확인했고, 실기 트랙에서 병행 검증이 진행됩니다.",
+        "outcome": "실기와 동일한 관측 방식의 리셋버튼 누르기 시뮬 + 합성 데이터 100ep + LED 자동판정. "
+                   "시뮬 4-seed 공정추정 0.925 를 확인했습니다. 실기 병행 검증은 연기 상태입니다.",
         "report_label": "ACT 학습",
     },
     {
         "id": "phase4", "name": "Phase 4 — RS232 케이블 분리 · 1차 기능 완성", "month": "2026-09", "weeks": 4,
         "business_label": "9월: RS232 케이블 분리 + 1차 기능 완성",
-        "outcome": "제어반 RS232 포트에 꽂혀 있는 점검 단말기(HHT) 케이블을 로봇팔이 빼는(분리) 작업 자동화. 시뮬 4-seed 측정 결과 부분성공 0.875 · 완전분리 0.75 로 완료 기준(부분성공 50%)을 충족했고, 10월 시연을 준비합니다.",
+        "outcome": "제어반 RS232 포트에 꽂혀 있는 점검 단말기(HHT) 케이블을 로봇팔이 빼는(분리) 작업 자동화. "
+                   "시뮬 4-seed 40회 측정 결과 부분성공 0.875 · 완전분리 0.75 로 완료 기준(부분성공 50%)을 충족했습니다. "
+                   "모두 시뮬레이션 측정값이며 실물 로봇 검증은 수행되지 않았습니다. "
+                   "이 수치는 2026-09-16 의 케이블 출구 정정과 파지 확인 판정 도입 이전 값으로, 재측정 예정입니다.",
         "report_label": "DP 비교, 기능 완성",
     },
 ]
@@ -1409,7 +1414,9 @@ def build_rollout_metrics() -> dict:
             "full_rate": round(rs_full / rs_rollouts, 3) if rs_rollouts else None,
             "target": 0.50,             # 로드맵 완료 기준 = 부분 분리 50%
         },
-        "expert": {"force3": 0.75, "force6": 0.88},  # closed-loop expert 기준 (6/23 실측)
+        # 1단계 pick&place 의 closed-loop expert 기준 (6/23 실측) — RS232 와 무관한 상수다.
+        # 측정 파일에서 계산되지 않으므로 RS232 화면에 섞어 쓰지 말 것.
+        "expert": {"force3": 0.75, "force6": 0.88},
         "target": 0.90,
     }
 

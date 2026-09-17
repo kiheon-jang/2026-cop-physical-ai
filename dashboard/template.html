@@ -3597,10 +3597,10 @@ a{color:inherit;text-decoration:none}
 
     <article class=&quot;step&quot; data-stage=&quot;2&quot;>
       <div class=&quot;no&quot;>02</div>
-      <span class=&quot;badge b-done&quot;>● 가상 완료 · 실기 병행</span>
+      <span class=&quot;badge b-done&quot;>● 가상 완료 · 실기 연기</span>
       <h3>제어반의 리셋 버튼을<br>정확히 누릅니다.</h3>
       <p>초록색 기판(PCB) 위의 작은 리셋 버튼을 손끝으로 누릅니다. 정상적으로 눌리면 옆의 초록 LED가 점등되어 성공을 확인합니다.</p>
-      <div class=&quot;kids&quot;>버튼 지름은 <b>수 mm</b> 수준으로, 미세한 오차도 실패로 이어집니다. 가상 시험 4개 조건 평균 <b>92.5%</b>를 확인했고, 실물 로봇 트랙에서 같은 작업을 병행하고 있습니다.</div>
+      <div class=&quot;kids&quot;>버튼 지름은 <b>수 mm</b> 수준으로, 미세한 오차도 실패로 이어집니다. 가상 시험 4개 <b>시드</b> 평균 <b>92.5%</b>를 확인했습니다. 실물 로봇 트랙의 병행 검증은 연기 상태이며, 이 수치는 시뮬레이션 측정값입니다.</div>
       <div class=&quot;stat&quot;><span class=&quot;big num b-live&quot; data-count=&quot;92.5&quot; data-dec=&quot;1&quot;>0</span><span class=&quot;lbl&quot;>현재 가상 성공률 · 4개 조건 평균</span></div>
     </article>
 
@@ -3609,7 +3609,7 @@ a{color:inherit;text-decoration:none}
       <span class=&quot;badge b-live&quot;>● 진행 중 · 가상 측정 완료</span>
       <h3>꽂혀 있는 케이블을<br>정확히 뽑습니다.</h3>
       <p>포트에 체결된 RS232 통신 케이블을 분리하는 정밀 작업입니다. 커넥터가 <b>5.9mm</b> 이상 빠지면 완전 분리, <b>2.95mm</b> 이상이면 부분 분리로 판정합니다.</p>
-      <div class=&quot;kids&quot;>케이블을 정밀하게 파지해 분리하는 고난도 과제입니다. 가상 환경에서 학습을 마치고, 4개 조건 40회 시험에서 <b>부분 성공 87.5%</b>·<b>완전 분리 75%</b>를 확인했습니다. 10월 실물 시연을 목표로 합니다.</div>
+      <div class=&quot;kids&quot;>케이블을 정밀하게 파지해 분리하는 고난도 과제입니다. 가상 환경에서 학습을 마치고, 4개 <b>시드</b> 40회 시험에서 <b>부분 성공 87.5%</b>·<b>완전 분리 75%</b>를 확인했습니다. 모두 시뮬레이션 측정값이며 <b>실물 로봇 검증은 수행되지 않았습니다.</b> 10월 발표는 시뮬 측정 결과와 실기 녹화 영상으로 진행합니다.</div>
       <div class=&quot;stat&quot;><span class=&quot;big num b-live&quot; data-count=&quot;87.5&quot; data-dec=&quot;1&quot;>0</span><span class=&quot;lbl&quot;>가상 시험 부분 성공률 · 4개 조건 40회</span></div>
     </article>
   </div>
@@ -5689,10 +5689,10 @@ function renderRealTrack() {
 
   body.innerHTML = `
     <div class="rt-status">
-      <span class="chip done"><span class="dot"></span>실기 시연 데이터 수집 완료</span>
+      <span class="chip done"><span class="dot"></span>실기 녹화 확보 (2단계 S1 한정)</span>
       <span class="chip done"><span class="dot"></span>1차 정책 학습 완료</span>
       <span class="chip done"><span class="dot"></span>시뮬 정렬 완료</span>
-      <span class="chip next"><span class="dot"></span>실물 롤아웃 검증 예정</span>
+      <span class="chip next"><span class="dot"></span>실물 롤아웃 검증 연기</span>
     </div>
 
     <div class="section-head"><h3>실제 로봇은 이렇게 움직입니다</h3><div class="right">위 · 근접 2뷰 · 실기 녹화</div></div>
@@ -5700,14 +5700,14 @@ function renderRealTrack() {
       <figure><video autoplay muted loop playsinline controls preload="auto" src="${copStatic('assets/reports/realtrack/rt_top.mp4')}"></video><figcaption>위에서 본 시점 (top)</figcaption></figure>
       <figure><video autoplay muted loop playsinline controls preload="auto" src="${copStatic('assets/reports/realtrack/rt_closeup.mp4')}"></video><figcaption>가까이 본 시점 (closeup)</figcaption></figure>
     </div>
-    <p style="font-size:12px;color:var(--text-dim);margin-top:8px">실물 SO-ARM 로봇이 제어반의 리셋 버튼을 누르는 실제 시연 영상입니다. (${epTotal}회 녹화 중 앞부분 · 웹용 경량본)</p>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:8px">실기 벤치에서 녹화한 실물 장비 영상입니다. 카메라 구도·작업 환경 참고용이며, 로봇이 자율로 수행한 성능 측정 결과가 아닙니다. (웹용 경량본 480×360)</p>
 
     <div class="section-head" style="margin-top:28px"><h3>어떻게 진행하는가</h3><div class="right">실기 ↔ 시뮬 정렬로 완성</div></div>
     <div class="rt-plan">
-      <div class="rt-step done"><div class="tag"><span class="dot"></span>1 · 완료</div><h4>실기 데이터 수집</h4><p>실물 로봇으로 리셋 버튼 누르기를 위·근접 2대 카메라로 녹화했습니다. (${epTotal}회 시연)</p></div>
+      <div class="rt-step done"><div class="tag"><span class="dot"></span>1 · 2단계 한정</div><h4>실기 데이터 수집</h4><p>수집 대상은 <b>2단계 S1 리셋 버튼</b>이었습니다. 3단계 RS232 케이블 분리는 실기로 수집된 적이 없습니다. (${epTotal}회 녹화)</p></div>
       <div class="rt-step done"><div class="tag"><span class="dot"></span>2 · 완료</div><h4>정책 학습</h4><p>수집한 시연 영상으로 ACT 모델을 학습했습니다. 카메라 관측만으로 버튼을 찾아 누르는 동작이 학습 대상입니다.</p></div>
       <div class="rt-step done"><div class="tag"><span class="dot"></span>3 · 완료</div><h4>시뮬 정렬</h4><p>가상 시뮬을 실기와 같은 작업·카메라로 맞추고, 버튼 위치·조명을 다양하게 바꾼 합성 데이터로 보강했습니다. 가상 트랙은 이어서 3단계 RS232 케이블 분리로 넘어갔습니다.</p></div>
-      <div class="rt-step next"><div class="tag"><span class="dot"></span>4 · 예정</div><h4>실기 검증 → 시연</h4><p>학습한 정책을 실물 로봇에서 실행하고, 녹색 LED 자동판정으로 성공률을 측정합니다. 10월 실물 시연 목표.</p></div>
+      <div class="rt-step next"><div class="tag"><span class="dot"></span>4 · 연기</div><h4>실기 검증 연기</h4><p>실물 롤아웃 검증은 연기되었으며 재개 일정은 미정입니다. 10월 발표는 시뮬 측정값과 실기 녹화 영상으로 진행하며, <b>실물 성공률은 제시하지 않습니다.</b></p></div>
     </div>
 
     <details class="video-archive" style="margin-top:24px">
