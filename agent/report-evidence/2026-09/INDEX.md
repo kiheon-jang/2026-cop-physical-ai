@@ -49,3 +49,9 @@
   - **렌더 헬스체크(23:30, 학습 비경합)**: `sim_camera_verification` 3회 3/3(듀얼 30f)·`sim_headless_6dof_video` 2501f 둘 다 PASS → 시뮬 스택 무회귀.
   - **학습 진척**: pid 48360 alive, epoch 38/42 loss 0.0084, ETA ~03:00 9/18. 승격/측정 보류(설계대로) → baseline 무손상.
   - ⚠ **정직성 단서(전 문서 공통)**: 모두 시뮬 측정, 실물 검증 없음 · n=10~40 CI 넓음(소수 둘째 자리 주장 금지) · 커넥터 보유력·잭스크류 체결 실측 없음.
+
+## 2026-09-18
+- Phase 4 W2 — **RS232 ACT 재학습 완주 + 4-seed 공정추정 측정(정합·핀치 baseline 확정) + 렌더 헬스체크**: `agent/research-log/2026-09-18.md`, `research/simulation/2026-09-18_rs232-corrected-baseline-4seed-measurement.md` → 9월 보고서 [Phase 4 RS232 분리] 섹션.
+  - **RS232 정합·핀치 baseline 확정**: 신 핀치 판정 4-seed 평균 **부분성공 0.600 · 완전분리 0.600**(seed 42/7/123/2026), legacy(옛 비핀치) 0.925/0.825. **완료 기준(부분 40%) 0.600 > 0.40 PASS**. 재학습 02:42 완주(`act_rs232_sim/epoch_0041`, 42epoch from-scratch). churn(9/13~15) 재발 없음(마커 정합).
+  - **핀치 판정 하락은 성능 하락 아님**: 비핀치 false-positive(누르고 끌기) 제거. legacy 0.925/0.825 > 9/13 옛 baseline 0.875/0.75 → 모델 자체 소폭 개선.
+  - **렌더 헬스체크(23:30)**: `sim_headless_6dof_video`(2501f)·`sim_camera_verification`(듀얼 30f)·`sim_data_collector` 스모크 2/2 yield 100% lift 43.3mm PASS. `sim_pick_place` = Phase 0 레거시 결정론적 fail(approach 0.32m, 무회귀). 시뮬 스택 무회귀, mujoco 3.8.0/.venv.
