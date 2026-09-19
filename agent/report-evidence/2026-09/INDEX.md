@@ -55,3 +55,9 @@
   - **RS232 정합·핀치 baseline 확정**: 신 핀치 판정 4-seed 평균 **부분성공 0.600 · 완전분리 0.600**(seed 42/7/123/2026), legacy(옛 비핀치) 0.925/0.825. **완료 기준(부분 40%) 0.600 > 0.40 PASS**. 재학습 02:42 완주(`act_rs232_sim/epoch_0041`, 42epoch from-scratch). churn(9/13~15) 재발 없음(마커 정합).
   - **핀치 판정 하락은 성능 하락 아님**: 비핀치 false-positive(누르고 끌기) 제거. legacy 0.925/0.825 > 9/13 옛 baseline 0.875/0.75 → 모델 자체 소폭 개선.
   - **렌더 헬스체크(23:30)**: `sim_headless_6dof_video`(2501f)·`sim_camera_verification`(듀얼 30f)·`sim_data_collector` 스모크 2/2 yield 100% lift 43.3mm PASS. `sim_pick_place` = Phase 0 레거시 결정론적 fail(approach 0.32m, 무회귀). 시뮬 스택 무회귀, mujoco 3.8.0/.venv.
+
+## 2026-09-19
+- Phase 4 W2 — **RS232 수집기 DR 배선 + DR 데이터셋 합성 + 렌더 헬스체크**: `agent/research-log/2026-09-19.md`, `research/simulation/2026-09-19_phase4-w2-rs232-dr-wiring-synthesis.md` → 9월 보고서 [Phase 4 RS232 분리] 섹션.
+  - **RS232 수집기 DR 배선**(`sim_rs232_unplug_collector.py`): S1 수집기와 동일 계약(`COP_COLLECT_DR=1` env-gate·카메라노이즈·reset restore→randomize→mj_setConst), 환경치수 불변(조명/마찰/카메라만), 기본 off → nominal 파이프라인 불변. DR 스모크 2/2·비파괴 원복 단위검증 PASS.
+  - **DR 데이터셋 합성**(`data/episodes_rs232_dr`, 100ep): 23:00 잡 6/100 중단(부모-사망 킬) → 23:30 잡 detached 재기동(PID 29014)으로 완주 처리. 완주 검증=`meta/info.json` total_episodes=100(내일). 격리: 운영 `episodes_rs232`·`rollout_summary_rs232.json`(0.600) 불변.
+  - **렌더 헬스체크(23:30)**: `sim_headless_6dof_video`(2501f, 9.4s)·`sim_camera_verification`(듀얼 30f)·`sim_data_collector` 스모크 2/2 yield 100% lift 43.4mm PASS. `sim_pick_place` = 레거시 결정론적 fail(approach 0.323m, 무회귀). mujoco 3.8.0/.venv.
