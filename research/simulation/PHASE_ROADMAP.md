@@ -864,6 +864,15 @@ uv pip install <패키지명>
     `episodes_rs232:1789666953`(측정 종료, pending 없음, churn 재발 없음). 851 재측정·854 정정 사이클 클로즈.
     상세: `2026-09-18_rs232-corrected-baseline-4seed-measurement.md`.
   - [ ] RS232 DR 합성 + 재학습
+    - 🔄 **2026-09-20 — DR 합성 절반 완주 확인 + 재학습 트리거 준비**: 9/19 detached 재기동(PID 29014)한
+      DR 합성이 완주 — `data/episodes_rs232_dr` **100ep/15,337f**(info.json total_episodes=100, top/closeup
+      듀얼, LeRobot v3.0), 수집 프로세스 종료 확인(PID 29014 gone). **무결성 격리 전수 확인**: target
+      `episodes_rs232`·마커 2자(trained_on `episodes_rs232:1789546321`·measured `episodes_rs232:1789666953`)·
+      `rollout_summary_rs232.json`(seed42 0.6/0.5, Sep 18) 전부 불변 → nominal baseline(부분성공/완전분리
+      0.600) 무손상. `.gitignore` 에 `episodes_rs232_dr/` 한 줄 추가(형제 DR 데이터셋 패턴 정합). **남은
+      절반(재학습)=드라이버 담당**: `cop_dataset_target`→`episodes_rs232_dr` 전환 / 마커 삭제 시 드라이버가
+      42epoch 재학습→DR-trained 4-seed 측정→nominal 0.600 공정 비교. 에이전트는 준비 완료 표면화(직접 전환
+      안 함). 학습 미완이라 866 `[ ]` 유지. 상세: `2026-09-20_phase4-w2-rs232-dr-synthesis-complete.md`.
   - [ ] *(외부 의존 보류 — 실기 트랙 협업)* RS232 실기 검증
 - W3: 최종 모델 선정 (ACT vs DP), 1차 통합 모델 미세조정
   - [ ] Diffusion Policy 학습 + ACT 대비 비교 (Phase 2 W4 에서 이관)
