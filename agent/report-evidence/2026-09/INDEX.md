@@ -72,3 +72,8 @@
   - **DR 합성 완주 확인**: `data/episodes_rs232_dr` total_episodes=100·total_frames=15,337·fps=30(info.json 직접 파싱), 9/19 detached 재기동(PID 29014) 정상 종료. 격리: nominal `episodes_rs232`·`rollout_summary_rs232.json`(0.600, Sep 18) 불변, 회귀 0.
   - **렌더 헬스체크(23:30)**: `sim_headless_6dof_video`(2501f)·`sim_camera_verification`(듀얼 30f)·`sim_data_collector` 스모크 2/2 yield 100% lift 42.6mm PASS. `sim_pick_place` = 레거시 open-loop 결정론적 fail(approach 0.323m, 무회귀). mujoco 3.8.0/.venv.
   - **재학습 절반 = 드라이버 담당**: `cop_dataset_target`→`episodes_rs232_dr` 전환/마커 삭제 시 42epoch 재학습→DR-trained 4-seed→nominal 0.600 비교. 에이전트는 준비 완료만 표면화(하드룰상 직접 학습 안 함).
+
+## 2026-09-22
+- Phase 4 W2 — **RS232 DR 재학습 트리거 대기 hold(3일째) + 무결성 감사 + 렌더 헬스체크**: `agent/research-log/2026-09-22.md`, `research/simulation/2026-09-22_phase4-w2-rs232-dr-retrain-pending-hold.md` → 9월 보고서 [Phase 4 RS232 분리] 섹션.
+  - **무결성 감사**: target `data/episodes_rs232`(`.next`/`.pending` 없음)·trained_on `:1789546321`·measured `:1789666953`·`rollout_summary_rs232.json` seed42 partial 0.600/legacy 0.900 mtime Sep 18 불변·`episodes_rs232` 100ep/16,093f·`episodes_rs232_dr` 100ep/15,337f fps30·학습 프로세스 없음 → 회귀 0.
+  - **렌더 헬스체크(23:30)**: `sim_rs232_unplug` 기본 7/7 + 실기정합 [8][9][11] PASS(보유력 7.2N·이탈 7.31N·핀치 21/21·대조군 0/21·HOME |qvel| 5.1e-14)·`sim_headless_6dof_video`(2501f)·`sim_camera_verification`(듀얼 30f) PASS. `sim_pick_place` = 레거시 결정론적 fail(approach 0.323m, 무회귀). mujoco 3.8.0/.venv.
