@@ -891,6 +891,15 @@ uv pip install <패키지명>
       PASS (보유력 7.2N·핀치 FULL 21/21·대조군 0/21·HOME |qvel| max 5.1e-14). 재학습은 드라이버 담당(하드룰상 직접
       실행 금지) → 준비 완료 표면화만, 블로커 아님. [자가치유] 없음. 학습 미트리거라 866 `[ ]` 유지. 상세:
       `2026-09-22_phase4-w2-rs232-dr-retrain-pending-hold.md`.
+    - 🔄 **2026-09-23 — DR 재학습 트리거 대기 hold(4일째) + 무결성 감사**: 드라이버 STAGE=완료/유지(`episodes_rs232`
+      100ep·0.600) — 새 사이클 조건(`cop_dataset_target`→`episodes_rs232_dr` 전환/마커 삭제) 미세팅으로 nominal
+      타겟 유지, 재학습 미트리거. **무결성 전수 감사**: target `data/episodes_rs232`(`.next`/`.pending` 없음)·trained_on
+      `episodes_rs232:1789546321`·measured `episodes_rs232:1789666953`(pending 없음)·`rollout_summary_rs232.json` seed42
+      부분성공 0.600/legacy 0.900 mtime Sep 18 불변·`episodes_rs232` 100ep/16,093f·`episodes_rs232_dr` 100ep/15,337f·학습
+      프로세스 없음 → 회귀/오염 0. **RS232 트윈 렌더 헬스**: `sim_rs232_unplug.py` 기본 7/7 PASS + 실기 정합 [8][9][11]
+      PASS (보유력 7.2N·이탈 7.31N·핀치 FULL 21/21·대조군 0/21·HOME |qvel| max 5.1e-14). 재학습은 드라이버 담당(하드룰상 직접
+      실행 금지) → 준비 완료 표면화만, 블로커 아님. [자가치유] 없음. 학습 미트리거라 866 `[ ]` 유지. 상세:
+      `2026-09-23_phase4-w2-rs232-dr-retrain-pending-hold.md`.
   - [ ] *(외부 의존 보류 — 실기 트랙 협업)* RS232 실기 검증
 - W3: 최종 모델 선정 (ACT vs DP), 1차 통합 모델 미세조정
   - [ ] Diffusion Policy 학습 + ACT 대비 비교 (Phase 2 W4 에서 이관)
