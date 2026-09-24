@@ -118,6 +118,40 @@ cp sim/assets/so101_real.xml /tmp/old/ && ln -s "$PWD/sim/assets/assets" /tmp/ol
 
 크론 멈추기: `hermes cron disable 76b3cd4eb4fc f88b3198c9b6`
 
+### ⚠ 데이터셋 전환(예: RS232 DR 사이클)의 유일한 위험 — 되돌릴 때다
+
+마커 3종은 **데이터셋별이 아니라 전역 단일 파일**이다. 타겟을 바꾸면 그 안의 서명도 새 데이터셋
+것으로 덮인다. 그래서 **전환 자체는 안전하지만 되돌리기는 안전하지 않다.**
+
+```bash
+# 전환 전 — 마커 3종을 반드시 먼저 대피시킨다 (이 한 줄을 빼면 복귀 때 공표 모델이 날아간다)
+# /tmp 는 재부팅에 날아간다. 내장 디스크에 둔다.
+mkdir -p ~/CoP_backup_20260918/markers_nominal_20260924
+cp logs/cop_dataset_target logs/cop_trained_on.marker logs/cop_measured.marker \
+   ~/CoP_backup_20260918/markers_nominal_20260924/
+
+# 전환 (드라이버가 다음 23:00 에 새 사이클 시작)
+echo "data/episodes_rs232_dr" > logs/cop_dataset_target.next
+
+# 복귀 — 타겟만 되돌리면 안 된다. 마커도 같이 복원해야 한다.
+cp ~/CoP_backup_20260918/markers_nominal_20260924/* logs/
+```
+
+**현재 대피본 (2026-09-24 작성, DR 사이클 복귀용)**:
+`~/CoP_backup_20260918/markers_nominal_20260924/` —
+`cop_dataset_target=data/episodes_rs232` · `cop_trained_on.marker=episodes_rs232:1789546321` ·
+`cop_measured.marker=episodes_rs232:1789666953` (원본과 md5 일치 확인)
+
+타겟만 `episodes_rs232` 로 되돌리고 마커를 복원하지 않으면, 드라이버가 서명 불일치로 판단해
+**`STAGE=학습시작` 으로 공칭 모델을 처음부터 재학습하고 `checkpoints/act_rs232_sim/epoch_0041`
+(= 현재 공표 중인 0.600/0.600 의 근거 모델)을 제자리 덮어쓴다.** 33시간 손실 + 공표 근거 소실.
+
+복구본: `~/CoP_backup_20260918/epoch_0041_rs232_published` (sha256 대조 완료, 2026-09-24).
+
+체크포인트 경로는 데이터셋별로 격리돼 있으므로(`episodes_rs232`→`act_rs232_sim`,
+`episodes_rs232_dr`→`act_rs232_dr_sim`) **학습 자체가 공표 모델을 건드리지는 않는다.**
+위험은 오직 위의 마커 복원 누락 하나다.
+
 ---
 
 ## 4. 자주 겪는 함정

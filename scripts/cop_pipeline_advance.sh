@@ -54,7 +54,10 @@ DS_BASE="${DATA_DIR##*/}"
 [[ "${DS_BASE}" == "episodes_s1" ]] && IS_S1=1 || IS_S1=0
 # RS232(3단계 케이블 분리, Phase 4)도 S1 과 같은 합성·2카메라 계약. 목표 = 합성 100ep, 로드맵 완료 기준
 # '시뮬 분리 부분성공 50%' (측정기 success_rate = 부분성공 4-seed 공정추정과 같은 단위). env override 유지.
-[[ "${DS_BASE}" == "episodes_rs232" ]] && IS_RS232=1 || IS_RS232=0
+# 접두 매칭: episodes_rs232 / episodes_rs232_dr 모두 같은 RS232 계약(2카메라·합성 전용·RS232 측정기).
+# 정확일치였을 때 _dr 사이클은 COP_CAMERA_KEYS 미설정으로 1카메라 오학습 + 측정기가 pick-place 로
+# 빠져 매일 밤 실패 반복이었다 (2026-09-24 수정).
+[[ "${DS_BASE}" == episodes_rs232* ]] && IS_RS232=1 || IS_RS232=0
 if [[ "${IS_RS232}" == 1 ]]; then
   TARGET_EP="${COP_TARGET_EP:-100}"
   TARGET_RATE="${COP_TARGET_RATE:-0.50}"
@@ -66,7 +69,9 @@ if [[ "${DS_BASE}" == "episodes_cl" ]]; then
 elif [[ "${IS_S1}" == 1 ]]; then
   CKPT_DIR="${ROOT}/checkpoints/act_s1_sim"   # 수동 W3 학습이 이 경로 사용 (규칙상 act_s1 아님)
 elif [[ "${IS_RS232}" == 1 ]]; then
-  CKPT_DIR="${ROOT}/checkpoints/act_rs232_sim"  # S1 act_s1_sim 과 같은 _sim 규약
+  # 데이터셋별 격리 필수: episodes_rs232→act_rs232_sim(공표 모델), episodes_rs232_dr→act_rs232_dr_sim.
+  # 고정 경로로 두면 DR 사이클이 공표 체크포인트를 제자리 덮어쓴다.
+  CKPT_DIR="${ROOT}/checkpoints/act_${DS_BASE#episodes_}_sim"  # S1 act_s1_sim 과 같은 _sim 규약
 else
   CKPT_DIR="${ROOT}/checkpoints/act_${DS_BASE#episodes_}"
 fi
