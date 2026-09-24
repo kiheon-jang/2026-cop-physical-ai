@@ -900,6 +900,17 @@ uv pip install <패키지명>
       PASS (보유력 7.2N·이탈 7.31N·핀치 FULL 21/21·대조군 0/21·HOME |qvel| max 5.1e-14). 재학습은 드라이버 담당(하드룰상 직접
       실행 금지) → 준비 완료 표면화만, 블로커 아님. [자가치유] 없음. 학습 미트리거라 866 `[ ]` 유지. 상세:
       `2026-09-23_phase4-w2-rs232-dr-retrain-pending-hold.md`.
+    - 🔄 **2026-09-24 — DR 재학습 트리거 발동 + in-flight**: 5일 대기 hold(9/20~23) 종료. 드라이버가
+      nominal `episodes_rs232`(STAGE=완료/유지 100ep·0.600) 닫고 **예약 사이클 `episodes_rs232_dr` 로 전환**
+      → ACT 42epoch 재학습 착수(pid **42079**, `train_act.py --epochs 42 --no-resume`, dataset_root=
+      `episodes_rs232_dr`, ckpt=`checkpoints/act_rs232_dr_sim`, start 23:00:40, epoch0 loss 33.45→21.54 정상 수렴).
+      `cop_dataset_target`=`data/episodes_rs232_dr`(`.next` 없음). **체크포인트 격리**: `act_rs232_dr_sim/` 신규
+      (비어 있음=첫 저장 epoch_0009 미도달, 정상)·baseline `act_rs232_sim/epoch_0041` mtime Sep 18 불변.
+      **무결성 격리**: trained_on `episodes_rs232:1789546321`·measured `episodes_rs232:1789666953` 불변·pending
+      없음·`rollout_summary_rs232.json` 0.600 mtime Sep 18 불변(재측정 없음)·datasets rs232/rs232_dr 각 100ep →
+      회귀/오염 0. 학습 미완→승격/측정 보류(설계대로)→baseline 무손상. [자가치유] 없음. 866 `[ ]` 유지. **다음
+      (드라이버)**: 42epoch 완주(ETA ~9/26)→pending 승격→`act_rs232_dr_sim/epoch_0041` 4-seed 측정→nominal
+      0.600 vs DR-trained 공정 비교. 상세: `2026-09-24_phase4-w2-rs232-dr-retrain-triggered.md`.
   - [ ] *(외부 의존 보류 — 실기 트랙 협업)* RS232 실기 검증
 - W3: 최종 모델 선정 (ACT vs DP), 1차 통합 모델 미세조정
   > **2026-09-24 — 세 항목 모두 이후로 이관.** 사유: (1) DP 학습 경로가 저장소에 존재하지 않는다
@@ -917,6 +928,14 @@ uv pip install <패키지명>
   - [ ] *(외부 의존 보류 — 실기 트랙 협업)* PCB + RS232 통합 실기 검증
   - [ ] 시뮬 실패 케이스 분석
   - [ ] 10월 시연 시나리오 확정
+    - 🔄 **2026-09-24 — 시나리오 초안 작성, 측정 대기 칸 1개**: 25분 구성(8꼭지)·꼭지별 대본·공표 문장·
+      금지 표현·예상 질문 8건·폴백 경로·리허설 일정 확정. 시연 클립은 신규 제작 없이 기존
+      `inference_act_rs232_sim_epoch_0041_20260918.mp4`(1280×480, 24초 = 시드42 롤아웃 0·1·2 각 8초)를 쓴다 —
+      우연히 **성공(11.27mm·파지 1330스텝) / 잡지 않고 밀어냄(4.86mm·파지 0스텝, 옛 판정에선 부분성공으로
+      집계되던 유형) / 판정 역전(10.47mm·파지 907스텝, 부분 실패·완전 성공)** 세 사례가 순서대로 들어 있어
+      기준 강화의 이유와 남은 결함을 한 클립으로 설명할 수 있다. 미완: 시연용 발표 덱(월간보고 pptx 와 별개),
+      10월 pptx 활동현장 슬라이드 이미지 0장, 리허설 미실시. 측정 대기 = 9/26 23:06 DR 4시드 결과(§9).
+      상세: `2026-09-24_october-demo-scenario.md`.
 
 **완료 기준**: 시뮬 분리 부분성공 **50%**
   > 두 숫자가 한 줄에 섞여 있던 것을 2026-09-24 에 분리했다. 최초 로드맵 커밋 `19cf080`(2026-05-01) 기준
