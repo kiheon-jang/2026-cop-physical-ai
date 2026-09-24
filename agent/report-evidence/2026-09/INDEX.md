@@ -82,3 +82,9 @@
 - Phase 4 W2 — **RS232 DR 재학습 트리거 대기 hold(4일째) + 무결성 감사 + 렌더 헬스체크**: `agent/research-log/2026-09-23.md`, `research/simulation/2026-09-23_phase4-w2-rs232-dr-retrain-pending-hold.md` → 9월 보고서 [Phase 4 RS232 분리] 섹션.
   - **무결성 감사**: target `data/episodes_rs232`(`.next`/`.pending` 없음)·trained_on `:1789546321`·measured `:1789666953`·`rollout_summary_rs232.json` seed42 partial 0.600/legacy 0.900 mtime Sep 18 불변·`episodes_rs232` 100ep·`episodes_rs232_dr` 100ep·학습 프로세스 없음 → 회귀 0.
   - **렌더 헬스체크(23:30)**: `sim_rs232_unplug` 기본 7/7 + 실기정합 [8][9][11] PASS(보유력 7.2N·이탈 7.31N·핀치 21/21·대조군 0/21·HOME |qvel| 5.1e-14)·`sim_headless_6dof_video`(2501f)·`sim_camera_verification`(듀얼 30f) PASS. `sim_pick_place` = 레거시 결정론적 fail(approach 0.323m, 무회귀). mujoco 3.8.0/.venv.
+
+## 2026-09-24
+- Phase 4 W2 — **RS232 DR 재학습 트리거 발동 + in-flight + 렌더 헬스체크**: `agent/research-log/2026-09-24.md`, `research/simulation/2026-09-24_phase4-w2-rs232-dr-retrain-triggered.md` → 9월 보고서 [Phase 4 RS232 분리] 섹션.
+  - **DR 재학습 발동**: 5일 대기 hold(9/20~23) 종료. 드라이버가 `episodes_rs232`(STAGE=완료/유지 100ep·0.600) 닫고 예약 사이클 `episodes_rs232_dr` 전환 → ACT 42epoch 재학습 착수(pid 42079, `--no-resume`, ckpt=`act_rs232_dr_sim`, start 23:00:40, epoch0 loss 33.45→2.54 정상 수렴). ETA ~9/26.
+  - **무결성 격리(baseline 무손상)**: trained_on `:1789546321`·measured `:1789666953` 불변·pending 없음·`rollout_summary_rs232.json` 0.600 mtime Sep 18 불변(재측정 없음)·`act_rs232_sim/epoch_0041` mtime Sep 18 불변·datasets rs232/rs232_dr 각 100ep → 회귀/오염 0.
+  - **렌더 헬스체크(23:30)**: `sim_rs232_unplug` 기본 7/7 + 실기정합 [8][9][11] PASS(보유력 7.2N·이탈 7.31N·핀치 21/21·대조군 0/21·리셋 200회 관통 0·HOME |qvel| 5.1e-14)·`sim_camera_verification`(듀얼 30f) PASS. mujoco 3.8.0/.venv.
