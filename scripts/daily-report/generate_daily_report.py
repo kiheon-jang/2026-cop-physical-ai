@@ -900,8 +900,12 @@ def update_readme_status(phase_progress, commits, header):
     if actual_label:
         lag = kpi.get("schedule_lag_phases")
         bits = [actual_label]
+        # 라벨 바로 뒤에 전체 평균만 붙이면 "이 단계가 그만큼 됐다" 로 읽힌다.
+        # 현 단계 진척(advanced_phase_progress)을 먼저, 전체 평균을 그 다음에 — 둘 다 이름을 붙여서.
+        if kpi.get("advanced_phase_progress") is not None:
+            bits.append(f"이 단계 {round(kpi['advanced_phase_progress'] * 100)}%")
         if kpi.get("target_progress") is not None:
-            bits.append(f"진척 {round(kpi['target_progress'] * 100)}%")
+            bits.append(f"전체 5단계 평균 {round(kpi['target_progress'] * 100)}%")
         if kpi.get("time_elapsed") is not None:
             bits.append(f"시간 경과 {round(kpi['time_elapsed'] * 100)}%")
         if lag:
@@ -913,6 +917,8 @@ def update_readme_status(phase_progress, commits, header):
 
 > 매일 07:00 자동 업데이트 (generate_daily_report.py)
 > **현재 Phase** = 달력 기준 구간 · **실제 진척** = PHASE_ROADMAP.md 체크박스 기준
+> **이 단계** = 진행 중 phase 의 체크박스 비율 · **전체 5단계 평균** = Phase 0~4 체크박스 비율의 단순평균
+> (완료된 앞 단계가 평균을 끌어올리므로 둘은 다르다. 현재 상태를 보려면 '이 단계' 를 봐라.)
 
 | 항목 | 내용 |
 |------|------|

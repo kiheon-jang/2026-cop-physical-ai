@@ -1334,8 +1334,8 @@
               <h1 class="bmc-h1"><span class="hl">엘리베이터 제어반</span> 조작을<br>로봇팔이 학습합니다.<br>지금은 3단계, 케이블 분리를 학습했습니다.</h1>
               <p class="bmc-lede">가상 환경(MuJoCo)에서 학습 데이터를 축적하고, 학습된 정책을 실제 로봇팔로 이전합니다.<br>1단계 집어 옮기기와 2단계 리셋버튼 누르기를 마쳤고, 지금은 3단계 RS232 케이블 분리를 진행하고 있습니다.<br>병행하여 실기기에서도 시연 데이터를 수집해 정확도 개선을 진행하고 있습니다.</p>
               <div class="bmc-chips">
-                <div class="bmc-chip">3단계 RS232 분리 · 부분성공(4-seed 40회)<b><span class="u" data-bcount="87.5" data-dec="1">0</span>%</b></div>
-                <div class="bmc-chip">3단계 RS232 분리 · 완전분리(4-seed 40회)<b><span data-bcount="75" data-dec="1">0</span>%</b></div>
+                <div class="bmc-chip">3단계 RS232 분리 · 부분성공(4-seed 40회)<b><span class="u" data-bcount="60.0" data-dec="1">0</span>%</b></div>
+                <div class="bmc-chip">3단계 RS232 분리 · 완전분리(4-seed 40회)<b><span data-bcount="60.0" data-dec="1">0</span>%</b></div>
                 <div class="bmc-chip">시연까지<b>D-<span data-bcount="45" data-dec="0">0</span></b></div>
               </div>
             </div>
@@ -1348,7 +1348,7 @@
               </div>
               <div class="tele tl">
                 <div class="lab">3단계 부분성공 · 4-seed</div>
-                <div class="val"><span data-bcount="87.5" data-dec="1">0</span><span class="s">%</span></div>
+                <div class="val"><span id="bmcTelePart" data-bcount="60.0" data-dec="1">0</span><span class="s">%</span></div>
                 <svg class="spark" width="112" height="26" viewBox="0 0 112 26"><polyline id="bmcSpkSucc" fill="none" stroke="var(--grn)" stroke-width="1.6" stroke-linejoin="round" points=""/></svg>
               </div>
               <div class="tele tr">
@@ -3609,8 +3609,8 @@ a{color:inherit;text-decoration:none}
       <span class=&quot;badge b-live&quot;>● 진행 중 · 가상 측정 완료</span>
       <h3>꽂혀 있는 케이블을<br>정확히 뽑습니다.</h3>
       <p>포트에 체결된 RS232 통신 케이블을 분리하는 정밀 작업입니다. 커넥터가 <b>5.9mm</b> 이상 빠지면 완전 분리, <b>2.95mm</b> 이상이면 부분 분리로 판정합니다.</p>
-      <div class=&quot;kids&quot;>케이블을 정밀하게 파지해 분리하는 고난도 과제입니다. 가상 환경에서 학습을 마치고, 4개 <b>시드</b> 40회 시험에서 <b>부분 성공 87.5%</b>·<b>완전 분리 75%</b>를 확인했습니다. 모두 시뮬레이션 측정값이며 <b>실물 로봇 검증은 수행되지 않았습니다.</b> 10월 발표는 시뮬 측정 결과와 실기 녹화 영상으로 진행합니다.</div>
-      <div class=&quot;stat&quot;><span class=&quot;big num b-live&quot; data-count=&quot;87.5&quot; data-dec=&quot;1&quot;>0</span><span class=&quot;lbl&quot;>가상 시험 부분 성공률 · 4개 조건 40회</span></div>
+      <div class=&quot;kids&quot;>케이블을 정밀하게 파지해 분리하는 고난도 과제입니다. 가상 환경에서 학습을 마치고, 4개 <b>시드</b> 40회 시험에서 <b>부분 성공 60.0%</b>·<b>완전 분리 60.0%</b>를 확인했습니다. 이 수치는 <b>집게가 실제로 케이블을 잡았는지</b>까지 확인하는 엄격한 판정 기준을 적용한 값이며, 잡았는지를 보지 않던 이전 기준으로는 같은 40회가 92.5%·82.5%입니다. 모두 시뮬레이션 측정값이며 <b>실물 로봇 검증은 수행되지 않았습니다.</b> 10월 발표는 시뮬 측정 결과와 실기 녹화 영상으로 진행합니다.</div>
+      <div class=&quot;stat&quot;><span class=&quot;big num b-live&quot; data-count=&quot;60.0&quot; data-dec=&quot;1&quot;>0</span><span class=&quot;lbl&quot;>가상 시험 부분 성공률 · 4개 조건 40회 · 파지 확인 판정</span></div>
     </article>
   </div>
 </div>
@@ -3626,8 +3626,8 @@ a{color:inherit;text-decoration:none}
     <div class=&quot;bmc-metrics&quot;>
       <div class=&quot;gcard up&quot; data-g=&quot;100&quot; data-col=&quot;grn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>1단계 성공률<span>GRASP &amp;amp; LIFT</span></div></div>
       <div class=&quot;gcard up&quot; data-g=&quot;92.5&quot; data-col=&quot;amb&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>2단계 성공률<span>S1 · RESET BUTTON</span></div></div>
-      <div class=&quot;gcard up&quot; data-g=&quot;87.5&quot; data-col=&quot;cyn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>3단계 부분 성공률<span>RS232 · CABLE RELEASE</span></div></div>
-      <div class=&quot;gcard up&quot; data-g=&quot;0&quot; data-col=&quot;cyn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>일정 진척<span>TO 2026-09-30</span></div></div>
+      <div class=&quot;gcard up&quot; data-g=&quot;60.0&quot; data-col=&quot;cyn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>3단계 부분 성공률<span>RS232 · CABLE RELEASE</span></div></div>
+      <div class=&quot;gcard up&quot; data-g=&quot;0&quot; data-col=&quot;cyn&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>현 단계 진척<span>진행 중 단계 · TO 2026-09-30</span></div></div>
       <div class=&quot;gcard up&quot; data-g=&quot;90&quot; data-col=&quot;grn&quot; data-manual=&quot;D-—&quot;><div class=&quot;gwrap&quot;></div><div class=&quot;cap&quot;>시연까지<span>D-DAY COUNTDOWN</span></div></div>
     </div>
   </section>
@@ -4057,8 +4057,11 @@ function setRoute(r) {
       let doc = fr.dataset.srcdoc;
       if (kpi.d_day_demo != null)
         doc = doc.replace(/(data-manual=")[^"]*("><div class="gwrap"><\/div><div class="cap">시연까지)/, '$1D-' + kpi.d_day_demo + '$2');
-      if (kpi.target_progress != null)
-        doc = doc.replace(/(data-g=")[^"]*("[^>]*><div class="gwrap"><\/div><div class="cap">일정 진척)/, '$1' + (kpi.target_progress * 100).toFixed(1) + '$2');
+      // 전체 평균(target_progress)이 아니라 진행 중 단계의 진척을 넣는다 — 평균은 완료된 앞 단계가
+      // 끌어올려 현재 상태보다 높게 읽힌다(2026-09-24 기준 평균 75% vs 현 단계 43%).
+      const _pg = kpi.advanced_phase_progress != null ? kpi.advanced_phase_progress : kpi.target_progress;
+      if (_pg != null)
+        doc = doc.replace(/(data-g=")[^"]*("[^>]*><div class="gwrap"><\/div><div class="cap">현 단계 진척)/, '$1' + (_pg * 100).toFixed(1) + '$2');
       fr.srcdoc = doc;
     }
   }
@@ -4652,7 +4655,7 @@ function renderTech() {
     {n:3,mon:'2026-06',title:'ACT 학습 · 모방학습',stk:'LeRobot ACT',detail:'LeRobot ACT(Transformer)로 200ep 시연을 모방. 관측(영상+qpos6) → 다음 100프레임 액션 청크 예측. Mac Mini 백그라운드 학습(epoch 100, batch 8).',chips:['ACT Transformer','chunk 100','epoch 100','모방학습']},
     {n:4,mon:'2026-07',title:'시뮬 검증',stk:'성공률 측정',detail:'학습된 모델이 시뮬에서 큐브를 잘 집는지 성공률로 측정. Sim2Real 정합 준비 단계.',chips:['큐브 파지율','Sim2Real 준비']},
     {n:5,mon:'2026-08',title:'S1 리셋버튼 · 실기정렬',stk:'합성100ep+ACT',detail:'2단계 — PCB 리셋버튼 누르기. 실기 트랙(omen)과 동일 작업·관측으로 시뮬 정렬. 합성 100ep + ACT 학습 · LED 자동판정.',chips:['S1 리셋버튼','실기 정렬','LED 자동판정']},
-    {n:6,mon:'2026-09',title:'RS232 분리 + 1차 완성',stk:'RS232 87.5·S1 92.5',detail:'RS232 케이블 분리 — 제어반 포트에 꽂힌 점검 단말기 케이블 빼기. 가상 시험 4개 조건 40회에서 부분 분리 87.5% · 완전 분리 75%(완료 기준 부분 분리 50%). 10월 시연 준비.',chips:['RS232 분리','부분 분리 87.5%','10월 시연']},
+    {n:6,mon:'2026-09',title:'RS232 분리 + 1차 완성',stk:'RS232 60.0·S1 92.5',detail:'RS232 케이블 분리 — 제어반 포트에 꽂힌 점검 단말기 케이블 빼기. 가상 시험 4개 조건 40회에서 부분 분리 60.0% · 완전 분리 60.0%(완료 기준 부분 분리 50%). 집게가 실제로 케이블을 잡았는지까지 확인하는 판정이며, 잡았는지를 보지 않던 이전 기준으로는 같은 40회가 92.5% · 82.5%. 10월 시연 준비.',chips:['RS232 분리','부분 분리 60.0%','10월 시연']},
   ];
   const STACK = [
     {name:'MuJoCo 3.8',role:'가상 로봇팔 시뮬 엔진',lic:'Apache 2.0',why:'처음엔 Isaac Lab 검토했으나 Mac Mini(Apple Silicon ARM64) 미지원. MuJoCo는 네이티브 + pip 한 줄 설치 + 경량.',how:'SO-ARM101 MJCF import → 헤드리스 렌더로 천장카메라+6축 관측 수집. IK로 파지 시연 자동 생성.'},
@@ -7002,6 +7005,9 @@ console.warn( 'Scripts "build/three.js" and "build/three.min.js" are deprecated 
         if(c.firstChild&&c.firstChild.nodeType===3)
           c.firstChild.nodeValue='3단계 RS232 분리 · '+(isPart?'부분성공':'완전분리')+'('+rsd+'-seed '+rn+'회)';
       });
+      // 히어로 콘솔 텔레메트리도 같은 소스에 묶는다 — .bmc-chip 이 아니라 위 forEach 가 못 잡는다.
+      var tp=document.getElementById('bmcTelePart');
+      if(tp&&rs.partial_rate!=null) tp.setAttribute('data-bcount',(rs.partial_rate*100).toFixed(1));
     }
     var dday=kpi.d_day_demo; if(dday==null) return;  // 시연(10/31)까지. d_day 는 기능 완성(9/30) 기준이라 '시연까지' 라벨과 맞지 않는다
     $all('.bmc-chip').forEach(function(c){ if(c.textContent.indexOf('시연까지')>=0){ var sp=c.querySelector('[data-bcount]'); if(sp)sp.setAttribute('data-bcount',String(dday)); } });
