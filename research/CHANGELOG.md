@@ -99,6 +99,11 @@
 
 
 
+
+### 2026-09-25
+- 📊 [로그] 2026-09-25 시뮬 테스트 — RS232 DR 재학습 in-flight Day2(pid42079 ep32 loss0.011·ckpt3신선) + 렌더헬스 camera30f·6dof2501f PASS + baseline 0.600 무손상 + pending마커 정정
+- 🛠 [시뮬] RS232 DR 재학습 in-flight Day2 문서화(pid42079 epoch31 loss0.011·ckpt 3개 신선·baseline 무손상) — 2026-09-25
+
 ### 2026-09-24
 - 📊 [로그] 2026-09-24 시뮬 테스트 — RS232 DR 재학습 in-flight(pid42079 epoch0 loss2.54) + 렌더 헬스 rs232 7/7·듀얼30f PASS + baseline 0.600 무손상
 - 🛠 [시뮬] RS232 DR 재학습 트리거 발동(episodes_rs232_dr 42ep in-flight, baseline 격리 무손상) — 2026-09-24
