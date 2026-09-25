@@ -911,6 +911,16 @@ uv pip install <패키지명>
       회귀/오염 0. 학습 미완→승격/측정 보류(설계대로)→baseline 무손상. [자가치유] 없음. 866 `[ ]` 유지. **다음
       (드라이버)**: 42epoch 완주(ETA ~9/26)→pending 승격→`act_rs232_dr_sim/epoch_0041` 4-seed 측정→nominal
       0.600 vs DR-trained 공정 비교. 상세: `2026-09-24_phase4-w2-rs232-dr-retrain-triggered.md`.
+    - 🔄 **2026-09-25 — DR 재학습 진행 중(STAGE=학습중, Day 2)**: 어제 트리거된 재학습(pid **42079**
+      alive, 세션 분리) 전진, 라이브 **epoch 31/42 loss 0.01145**(l1 0.00965·kl 0.00018) from-scratch
+      정상 수렴. **체크포인트 3개 신선·균등**: `act_rs232_dr_sim/epoch_0009`(Sep 25 06:56)·`epoch_0019`
+      (14:17)·`epoch_0029`(21:38), ~44min/epoch → **ETA ~05:40 KST 9/26**(04:04 창 관통하나 세션 분리로
+      killer 회피). 어제 "비어 있음"→첫 저장 도달 = 정상. **무결성 격리(baseline 무손상)**: target
+      `data/episodes_rs232_dr`(`.next`/`.pending` 없음)·trained_on `episodes_rs232:1789546321`·measured
+      `episodes_rs232:1789666953` 불변·pending 없음·`rollout_summary_rs232.json` seed42 0.600 mtime Sep 18
+      불변(재측정 없음)·baseline `act_rs232_sim/epoch_0041` mtime Sep 18 불변·datasets rs232/rs232_dr 각
+      100ep → 회귀/오염 0. 학습 미완→승격/측정 보류(설계대로)→baseline 무손상. [자가치유] 없음. 866 `[ ]`
+      유지. 상세: `2026-09-25_phase4-w2-rs232-dr-retrain-inflight-day2.md`.
   - [ ] *(외부 의존 보류 — 실기 트랙 협업)* RS232 실기 검증
 - W3: 최종 모델 선정 (ACT vs DP), 1차 통합 모델 미세조정
   > **2026-09-24 — 세 항목 모두 이후로 이관.** 사유: (1) DP 학습 경로가 저장소에 존재하지 않는다
