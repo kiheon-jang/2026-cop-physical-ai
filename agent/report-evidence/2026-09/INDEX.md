@@ -88,3 +88,10 @@
   - **DR 재학습 발동**: 5일 대기 hold(9/20~23) 종료. 드라이버가 `episodes_rs232`(STAGE=완료/유지 100ep·0.600) 닫고 예약 사이클 `episodes_rs232_dr` 전환 → ACT 42epoch 재학습 착수(pid 42079, `--no-resume`, ckpt=`act_rs232_dr_sim`, start 23:00:40, epoch0 loss 33.45→2.54 정상 수렴). ETA ~9/26.
   - **무결성 격리(baseline 무손상)**: trained_on `:1789546321`·measured `:1789666953` 불변·pending 없음·`rollout_summary_rs232.json` 0.600 mtime Sep 18 불변(재측정 없음)·`act_rs232_sim/epoch_0041` mtime Sep 18 불변·datasets rs232/rs232_dr 각 100ep → 회귀/오염 0.
   - **렌더 헬스체크(23:30)**: `sim_rs232_unplug` 기본 7/7 + 실기정합 [8][9][11] PASS(보유력 7.2N·이탈 7.31N·핀치 21/21·대조군 0/21·리셋 200회 관통 0·HOME |qvel| 5.1e-14)·`sim_camera_verification`(듀얼 30f) PASS. mujoco 3.8.0/.venv.
+
+## 2026-09-25
+- Phase 4 W2 — **RS232 DR 재학습 in-flight Day 2 + 렌더 헬스체크 + 마커 정정**: `agent/research-log/2026-09-25.md`, `research/simulation/2026-09-25_phase4-w2-rs232-dr-retrain-inflight-day2.md` → 9월 보고서 [Phase 4 RS232 분리] 섹션.
+  - **DR 재학습 진행**: pid 42079 alive `--epochs 42` `episodes_rs232_dr`→`act_rs232_dr_sim`, 라이브 epoch 32 loss 0.0111 정상 수렴. ckpt 3개 신선(ep9 06:56·ep19 14:17·ep29 21:38, ~44min/ep) ETA ~05:40 9/26(세션 분리 04:04 회피).
+  - **무결성 격리(baseline 무손상)**: trained_on `:1789546321`·measured `:1789666953` 불변·`rollout_summary_rs232.json` 0.600 mtime Sep 18 불변·`act_rs232_sim/epoch_0041` mtime Sep 18 불변·datasets rs232/rs232_dr 각 100ep → 회귀/오염 0.
+  - **⚠ 정정**: 23:00 문서/로그 "pending 없음" 오기 — 실제 `.pending`=`episodes_rs232_dr:1789829787`(Sep 24 트리거 대기 마커) **존재**, 설계상 정상 상태(승격 대기, baseline 무손상).
+  - **렌더 헬스체크(23:30, 학습 동시)**: `sim_camera_verification`(듀얼 30f) PASS·`sim_headless_6dof_video`(2501f mp4) PASS. `sim_pick_place` = Phase 0 레거시 open-loop 결정론적 fail(approach 0.323m, 무회귀). `sim_data_collector` = SKIP(in-flight 학습 MPS 경합 회피, 데이터셋 무결성 파일시스템 검증 대체). mujoco 3.8.0/.venv.
