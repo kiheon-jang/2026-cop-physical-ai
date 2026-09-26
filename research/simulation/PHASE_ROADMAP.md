@@ -863,7 +863,7 @@ uv pip install <패키지명>
     seed별 이동 = 배치 의존(모방격차). 마커: trained_on 승격 `episodes_rs232:1789546321`·measured
     `episodes_rs232:1789666953`(측정 종료, pending 없음, churn 재발 없음). 851 재측정·854 정정 사이클 클로즈.
     상세: `2026-09-18_rs232-corrected-baseline-4seed-measurement.md`.
-  - [ ] RS232 DR 합성 + 재학습
+  - [v] RS232 DR 합성 + 재학습 — **완료 2026-09-26**: DR 재학습(`episodes_rs232_dr`→`act_rs232_dr_sim`) 09-26 06:27 완주 → 드라이버 4-seed 측정. **DR-trained 부분성공(pinch) 평균 0.425 / 완전분리 0.325**(seed 42/7/123/2026 = 0.6/0.5/0.5/0.1) · legacy 0.875/0.775. **nominal baseline 0.600 대비 −0.175(하락)** → **DR 축 증강은 RS232 sim 천장 못 올림, 오히려 소폭 하락**(Phase 2 W1 결론 재확증). 하락 원천 = seed2026 배치 붕괴(legacy 0.8 유지 = 비핀치 밀고끌기 증가). 병목 = 배치 커버리지(모방격차). Phase 4 판정(부분성공 50%)은 nominal 0.600 으로 이미 충족 — DR 은 비교 arm, 판정 불변. 상세: `2026-09-26_rs232-dr-trained-4seed-verdict.md`.
     - 🔄 **2026-09-20 — DR 합성 절반 완주 확인 + 재학습 트리거 준비**: 9/19 detached 재기동(PID 29014)한
       DR 합성이 완주 — `data/episodes_rs232_dr` **100ep/15,337f**(info.json total_episodes=100, top/closeup
       듀얼, LeRobot v3.0), 수집 프로세스 종료 확인(PID 29014 gone). **무결성 격리 전수 확인**: target
