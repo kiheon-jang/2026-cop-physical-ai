@@ -100,6 +100,12 @@
 
 
 
+
+### 2026-09-26
+- 📊 [로그] 2026-09-26 시뮬 테스트 — RS232 DR 평결 무결성 재확인(nominal 0.600 무손상·마커 정합) + 렌더헬스 6dof2501f·camera30f·RS232 7/7 PASS + 866 클로즈 확인
+- 🛠 [시뮬] RS232 DR-trained 4-seed 평결(0.425<nominal 0.600, DR 천장 못 올림 재확증) + 866 클로즈 — 2026-09-26
+- 📝 [히스토리] 2026-09-25 작업 기록 + README 현황 업데이트 — 2026-09-26
+
 ### 2026-09-25
 - 📊 [로그] 2026-09-25 시뮬 테스트 — RS232 DR 재학습 in-flight Day2(pid42079 ep32 loss0.011·ckpt3신선) + 렌더헬스 camera30f·6dof2501f PASS + baseline 0.600 무손상 + pending마커 정정
 - 🛠 [시뮬] RS232 DR 재학습 in-flight Day2 문서화(pid42079 epoch31 loss0.011·ckpt 3개 신선·baseline 무손상) — 2026-09-25
