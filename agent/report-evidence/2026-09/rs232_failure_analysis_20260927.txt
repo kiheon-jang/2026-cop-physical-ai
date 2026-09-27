@@ -1,0 +1,72 @@
+[selfcheck] classify OK
+
+===== nominal 배포모델 act_rs232_sim (9/18) (partial 임계 2.95mm, X_NEAR 0.19) =====
+총 rollout: 40  성공률(부분/핀치): 24/40 = 0.600
+seed별 성공률: {42: 0.6, 7: 0.5, 123: 0.7, 2026: 0.6}
+실패 유형 분해:
+  UNREACH  :  0/40  (0.0%)
+  NONPINCH : 13/40  (32.5%)
+  SHORT    :  3/40  (7.5%)
+근단(x<0.19) rollout: 3개 중 실패 1개 (근단 실패율 33.3%)
+실패 rollout (seed → [rollout,유형,x,disp_mm,pinch_steps]):
+  seed 42: [1, 2, 3, 6]
+      r1: NONPINCH  x=0.255 disp=4.86mm pinch=0
+      r2: NONPINCH  x=0.264 disp=10.47mm pinch=907
+      r3: NONPINCH  x=0.218 disp=9.58mm pinch=323
+      r6: SHORT     x=0.203 disp=0.88mm pinch=804
+  seed 7: [2, 3, 4, 6, 7]
+      r2: NONPINCH  x=0.220 disp=7.42mm pinch=1419
+      r3: SHORT     x=0.233 disp=2.48mm pinch=1227
+      r4: NONPINCH  x=0.243 disp=5.44mm pinch=808
+      r6: NONPINCH  x=0.225 disp=4.12mm pinch=1419
+      r7: NONPINCH  x=0.205 disp=8.17mm pinch=30
+  seed 123: [4, 7, 8]
+      r4: NONPINCH  x=0.274 disp=6.33mm pinch=995
+      r7: NONPINCH  x=0.178 disp=8.11mm pinch=0
+      r8: NONPINCH  x=0.259 disp=10.80mm pinch=410
+  seed 2026: [2, 5, 6, 7]
+      r2: NONPINCH  x=0.195 disp=7.05mm pinch=610
+      r5: NONPINCH  x=0.192 disp=12.72mm pinch=0
+      r6: SHORT     x=0.215 disp=1.96mm pinch=1070
+      r7: NONPINCH  x=0.217 disp=3.58mm pinch=1325
+모든 seed 공통 실패 rollout: []  (합집합 [1, 2, 3, 4, 5, 6, 7, 8])
+→ 공통 0 / 합집합 8: 공통 비율 낮을수록 배치 의존(모방격차)
+
+===== DR-trained 비교arm act_rs232_dr_sim (9/26) (partial 임계 2.95mm, X_NEAR 0.19) =====
+총 rollout: 40  성공률(부분/핀치): 17/40 = 0.425
+seed별 성공률: {42: 0.6, 7: 0.5, 123: 0.5, 2026: 0.1}
+실패 유형 분해:
+  UNREACH  :  0/40  (0.0%)
+  NONPINCH : 18/40  (45.0%)
+  SHORT    :  5/40  (12.5%)
+근단(x<0.19) rollout: 3개 중 실패 1개 (근단 실패율 33.3%)
+실패 rollout (seed → [rollout,유형,x,disp_mm,pinch_steps]):
+  seed 42: [1, 3, 5, 9]
+      r1: NONPINCH  x=0.255 disp=6.28mm pinch=0
+      r3: NONPINCH  x=0.218 disp=7.65mm pinch=3
+      r5: SHORT     x=0.274 disp=2.67mm pinch=18
+      r9: NONPINCH  x=0.206 disp=3.79mm pinch=653
+  seed 7: [0, 2, 4, 5, 7]
+      r0: NONPINCH  x=0.244 disp=9.05mm pinch=0
+      r2: SHORT     x=0.220 disp=0.96mm pinch=547
+      r4: NONPINCH  x=0.243 disp=3.59mm pinch=821
+      r5: NONPINCH  x=0.288 disp=7.46mm pinch=11
+      r7: NONPINCH  x=0.205 disp=7.81mm pinch=0
+  seed 123: [0, 2, 4, 6, 7]
+      r0: NONPINCH  x=0.252 disp=8.36mm pinch=7
+      r2: NONPINCH  x=0.289 disp=9.77mm pinch=37
+      r4: SHORT     x=0.274 disp=2.77mm pinch=0
+      r6: NONPINCH  x=0.270 disp=6.97mm pinch=376
+      r7: NONPINCH  x=0.178 disp=32.74mm pinch=0
+  seed 2026: [0, 1, 2, 3, 5, 6, 7, 8, 9]
+      r0: NONPINCH  x=0.206 disp=12.41mm pinch=333
+      r1: NONPINCH  x=0.286 disp=8.55mm pinch=76
+      r2: SHORT     x=0.195 disp=0.63mm pinch=0
+      r3: NONPINCH  x=0.245 disp=9.33mm pinch=3
+      r5: NONPINCH  x=0.192 disp=16.74mm pinch=207
+      r6: SHORT     x=0.215 disp=0.01mm pinch=907
+      r7: NONPINCH  x=0.217 disp=7.21mm pinch=969
+      r8: NONPINCH  x=0.239 disp=9.08mm pinch=29
+      r9: NONPINCH  x=0.241 disp=6.97mm pinch=0
+모든 seed 공통 실패 rollout: []  (합집합 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+→ 공통 0 / 합집합 10: 공통 비율 낮을수록 배치 의존(모방격차)
