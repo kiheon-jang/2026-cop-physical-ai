@@ -24,7 +24,7 @@
   "max_frames": 240,
   "dr": false,
   "dr_axes": null,
-  "video_path": "research/simulation/inference_progress/inference_act_rs232_sim_epoch_0041_20260926.mp4",
+  "video_path": "research/simulation/inference_progress/inference_act_rs232_dr_sim_epoch_0041_20260926.mp4",
   "wall_clock_sec": 79.2,
   "device": "cpu",
   "results": [
