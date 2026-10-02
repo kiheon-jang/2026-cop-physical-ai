@@ -242,7 +242,25 @@ if [[ -n "${LATEST_CKPT}" && ( ! -f "${MEASURED_MARK}" || "$(cat "${MEASURED_MAR
 fi
 
 # ── 6. 측정 완료 → 수렴 판정 (+ 예약된 다음 사이클 자동 전환) ──
-RATE="$(grep -oE '"?success_rate"?[: ]+[0-9.]+' "${ROLLOUT_LOG}" 2>/dev/null | grep -oE '[0-9.]+' | tail -1 || echo '?')"
+# 성공률 출처 = 측정 산출물 JSON (현 사이클 것). ROLLOUT_LOG 은 '마지막 측정 실행'의 stdout
+# 캡처라 다른 사이클 결과가 남아 있을 수 있다 — 2026-09-26 DR 측정분이 10/02 까지 남아,
+# 마커를 공칭으로 되돌린 뒤에도 "데이터 episodes_rs232 … 성공률=0.425" 가 출력됐다.
+# 이 값은 야간 연구로그를 거쳐 대시보드로 들어가므로 오염 경로다. RS232 는 JSON 에서 직접 읽는다.
+# 4-seed 공정추정 = 시드별 success_rate 평균 (측정기 fair_estimate 와 같은 정의).
+if [[ "${IS_RS232}" == 1 ]]; then
+  RATE_VARIANT=""
+  [[ "${DS_BASE}" != "episodes_rs232" ]] && RATE_VARIANT="_${DS_BASE#episodes_rs232_}"
+  RATE="$("${PY}" -c "
+import glob, json, os, statistics
+b = '${ROOT}/research/simulation/inference_progress/rollout_summary_rs232${RATE_VARIANT}'
+fs = [b + '.json'] + sorted(glob.glob(b + '_seed*.json'))
+rs = [json.load(open(p)).get('success_rate') for p in fs if os.path.exists(p)]
+rs = [x for x in rs if isinstance(x, (int, float))]
+print(round(statistics.mean(rs), 3) if rs else '?')
+" 2>/dev/null || echo '?')"
+else
+  RATE="$(grep -oE '"?success_rate"?[: ]+[0-9.]+' "${ROLLOUT_LOG}" 2>/dev/null | grep -oE '[0-9.]+' | tail -1 || echo '?')"
+fi
 echo "STAGE=완료/유지  데이터 ${DS_BASE} ${EP}ep · 최종 성공률=${RATE} (목표 ${TARGET_RATE})"
 
 # 다음 사이클 예약(cop_dataset_target.next): 현 사이클이 완주(측정까지)한 뒤에만 전환.
