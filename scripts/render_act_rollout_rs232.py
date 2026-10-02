@@ -50,7 +50,17 @@ SIM_FPS = 30
 DEFAULT_MAX_FRAMES = 240
 DEFAULT_SEEDS = "42,7,123,2026"
 
-RUN_TAG = "act_rs232_sim"
+RUN_TAG = "act_rs232_sim"          # 공칭(공표) 체크포인트 디렉터리
+
+# 측정 산출물 파일명은 **체크포인트 디렉터리로 구분한다**.
+# 고정 이름이면 다른 사이클(예: DR)의 측정이 공칭 공표 수치 파일을 그대로 덮어쓴다.
+# 2026-09-26 에 실제로 발생했다 — DR 측정이 rollout_summary_rs232*.json 4개를 덮어
+# 대시보드 공표값이 nominal 0.600 에서 DR 0.425 로 바뀌었고, 사전 확정된 채택 규칙
+# (research/decisions/2026-09-24_dr-retrain-adoption-rule.md: 12~34/40 이면 헤드라인 유지)
+# 과 어긋난 상태가 됐다. 드라이버는 CKPT_DIR 을 격리했는데 측정 출력만 공유였다.
+_CKPT_NAME = Path(os.environ.get("COP_CKPT_DIR", str(ROOT / "checkpoints" / RUN_TAG))).name
+# act_rs232_sim → "" (공칭, 기존 파일명 유지) · act_rs232_dr_sim → "_dr"
+VARIANT_TAG = "" if _CKPT_NAME == RUN_TAG else "_" + _CKPT_NAME.removeprefix("act_rs232_").removesuffix("_sim")
 
 
 def find_latest_checkpoint() -> Path | None:
@@ -209,7 +219,7 @@ def write_outputs(out_dir, ckpt, seed, is_nominal, results, trajectories, video_
     video_path = None
     if video_frames:  # 영상은 nominal(seed42)만
         import imageio.v2 as imageio
-        vp = out_dir / f"inference_{RUN_TAG}_epoch_{ckpt.name.replace('epoch_', '')}_{date_tag}{seed_tag}.mp4"
+        vp = out_dir / f"inference_{_CKPT_NAME}_epoch_{ckpt.name.replace('epoch_', '')}_{date_tag}{seed_tag}.mp4"
         imageio.mimsave(str(vp), video_frames, fps=SIM_FPS)
         video_path = _rel(vp)
 
@@ -218,7 +228,7 @@ def write_outputs(out_dir, ckpt, seed, is_nominal, results, trajectories, video_
         "task": "rs232_unplug",
         "metric": "plug_partial_latch_pinch",    # success/success_rate = 부분성공(핀치 확인), full_* = 완전분리(핀치 확인)
         "checkpoint": _rel(ckpt),
-        "ckpt_dir": RUN_TAG,
+        "ckpt_dir": _CKPT_NAME,   # 실제 측정한 디렉터리. RUN_TAG 고정이면 DR 결과가 공칭으로 라벨된다
         "scene": "rs232_unplug_scene.xml",
         "measured_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "seed": seed,
@@ -249,7 +259,7 @@ def write_outputs(out_dir, ckpt, seed, is_nominal, results, trajectories, video_
         "device": device,
         "results": results,
     }
-    (out_dir / f"rollout_summary_rs232{seed_tag}.json").write_text(
+    (out_dir / f"rollout_summary_rs232{VARIANT_TAG}{seed_tag}.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 
     hist_dir = out_dir / "history"
@@ -262,7 +272,7 @@ def write_outputs(out_dir, ckpt, seed, is_nominal, results, trajectories, video_
     traj_payload = {
         "checkpoint": _rel(ckpt),
         "scene": "rs232_unplug_scene.xml",
-        "ckpt_dir": RUN_TAG,
+        "ckpt_dir": _CKPT_NAME,   # 실제 측정한 디렉터리. RUN_TAG 고정이면 DR 결과가 공칭으로 라벨된다
         "measured_at": summary["measured_at"],
         "seed": seed,
         "dr": False,
