@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10월 사내 시연 발표 덱 — RS232 케이블 분리</title>
+<style>
+  :root{ --bg:#0d1117; --fg:#e6edf3; --mut:#9aa7b4; --acc:#58a6ff; --warn:#f0a35e; --line:#2a3340; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; background:var(--bg); color:var(--fg);
+    font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif; }
+  .deck{ height:100vh; width:100vw; }
+  .slide{ display:none; height:100vh; width:100vw; padding:6vh 8vw; flex-direction:column;
+    justify-content:center; }
+  .slide.on{ display:flex; }
+  h1{ font-size:3.2rem; line-height:1.15; margin-bottom:1.2rem; }
+  h2{ font-size:2.0rem; color:var(--acc); margin-bottom:1.6rem; }
+  .tag{ color:var(--mut); font-size:1.0rem; letter-spacing:.04em; margin-bottom:.6rem; }
+  p,li{ font-size:1.35rem; line-height:1.55; color:var(--fg); margin-bottom:.7rem; }
+  ul{ margin-left:1.4rem; } li{ margin-bottom:.9rem; }
+  .mut{ color:var(--mut); } .acc{ color:var(--acc); } .warn{ color:var(--warn); }
+  .big{ font-size:3.4rem; font-weight:700; }
+  blockquote{ border-left:4px solid var(--acc); padding:.4rem 0 .4rem 1.2rem; color:var(--fg);
+    font-size:1.5rem; line-height:1.5; margin:.8rem 0; }
+  table{ border-collapse:collapse; font-size:1.2rem; margin-top:.6rem; }
+  th,td{ border:1px solid var(--line); padding:.55rem .9rem; text-align:left; }
+  th{ color:var(--mut); font-weight:600; }
+  .pageno{ position:fixed; bottom:2vh; right:3vw; color:var(--mut); font-size:.95rem; }
+  .foot{ position:fixed; bottom:2vh; left:3vw; color:var(--mut); font-size:.85rem; }
+  .emph{ background:#1f2a1f; border:1px solid #2f5f2f; border-radius:6px; padding:.9rem 1.2rem;
+    font-size:1.3rem; }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- 1: 표지 -->
+<section class="slide on">
+  <div class="tag">AX CoP · Physical AI · 사내 시연</div>
+  <h1>시뮬레이션에서 학습된 정책의<br>RS232 케이블 분리</h1>
+  <p class="mut">2026-10-31 · 사내 발표 · 25분 + Q&amp;A</p>
+  <p class="mut">6개월간 만든 수집 → 학습 → 측정 → 공표 파이프라인, 그리고 그 결과를
+    스스로 속이지 않는 방식으로 측정하고 한계를 명시해 공표하는 체계의 시연</p>
+</section>
+
+<!-- 2: 무엇이고 무엇이 아닌가 -->
+<section class="slide">
+  <div class="tag">0. 범위</div>
+  <h2>이 시연이 무엇이고 무엇이 아닌가</h2>
+  <p class="acc">이다</p>
+  <ul>
+    <li>시뮬레이션에서 학습된 정책이 RS232 케이블을 분리하는 과정의 시연</li>
+    <li>과제가 바뀌어도 같은 수집기·학습기·측정기가 도는 파이프라인의 시연</li>
+  </ul>
+  <p class="warn">아니다</p>
+  <ul>
+    <li>실물 로봇 시연이 아니다. RS232 과제는 실기로 수행된 적이 없다.</li>
+    <li>실물 성공률의 제시가 아니다. 어떤 형태로도 하지 않는다.</li>
+  </ul>
+  <p class="emph">실물 로봇 검증은 수행되지 않았습니다.</p>
+</section>
+
+<!-- 3: ① 왜 이 과제인가 -->
+<section class="slide">
+  <div class="tag">① · 2분</div>
+  <h2>왜 이 과제인가</h2>
+  <p>정비현장의 PCB 작업 — 픽앤플레이스, RS232 HHT 케이블 분리 — 을 로봇팔로 자동화한다.</p>
+  <p>목적은 Physical AI / Embodied AI 기술의 내재화다.</p>
+  <p class="mut">기존 산업용 로봇은 같은 것을 같은 자리에서 반복할 때만 경제성이 난다.
+    정비현장은 기종·연식·설치환경이 매번 달라 프로그램을 새로 짜는 비용 때문에 성립하지 않았다.
+    프로그램을 짜는 대신 작업을 학습시키는 방식이 이 조건에서 통하는지를 본다.</p>
+</section>
+
+<!-- 4: ② 무엇을 만들었나 -->
+<section class="slide">
+  <div class="tag">② · 4분</div>
+  <h2>무엇을 만들었나 — 파이프라인</h2>
+  <p>수집 → 학습 → 측정 → 공표. 과제가 바뀌어도 같은 도구가 돈다.</p>
+  <blockquote>최초 측정까지 1단계는 <span class="acc">40일</span>,
+    2단계는 <span class="acc">1일</span>, 3단계는 <span class="acc">2일</span> 걸렸습니다.
+    과제가 바뀌어도 같은 수집기·학습기·측정기가 돕니다.</blockquote>
+  <p class="mut">이 문장은 실물 검증 없이 온전히 성립한다. 시연의 중심 주장으로 삼는다.</p>
+</section>
+
+<!-- 5: ③ 실제로 움직이는 것 -->
+<section class="slide">
+  <div class="tag">③ · 5분 · 이 시연의 핵심</div>
+  <h2>실제로 움직이는 것 — 24초 클립</h2>
+  <p class="mut">1280×480, 좌=천장 카메라 / 우=근접 카메라, 시드 42의 롤아웃 0·1·2 를 8초씩.
+    한 클립에 서로 다른 세 이야기가 들어 있다.</p>
+  <table>
+    <tr><th>구간</th><th>실측</th><th>무엇</th></tr>
+    <tr><td>0~8초 · #0</td><td>11.27mm · 파지 1330스텝</td>
+      <td>성공. 집게로 붙잡아 완전 분리 기준 5.90mm 를 넘김</td></tr>
+    <tr><td>8~16초 · #1</td><td>4.86mm · 파지 0스텝</td>
+      <td>잡지 않고 밀어냄. 옛 판정에선 부분 성공으로 집계되던 유형 — 파지 확인을 넣은 이유</td></tr>
+    <tr><td>16~24초 · #2</td><td>10.47mm · 파지 907스텝</td>
+      <td>남은 판정 결함. 완전 분리 성공·부분 분리 실패(그 한 프레임 33ms 접촉 미포착). 40회 중 2건. 미결로 공표</td></tr>
+  </table>
+  <p class="mut">#1 은 기준을 엄격하게 만든 이유를, #2 는 아직 남은 결함을 보여준다. 둘 다 우리가 먼저 말한다.</p>
+</section>
+
+<!-- 6: ④ 숫자 — 헤드라인 -->
+<section class="slide">
+  <div class="tag">④ · 6분</div>
+  <h2>숫자와 그 한계 — 헤드라인</h2>
+  <p class="big">부분 분리 60.0% · 완전 분리 60.0%</p>
+  <p>(4시드 × 10회 = 40회 · 완전 5.90mm / 부분 2.95mm · 파지 확인 포함 판정 ·
+    <code>epoch_0041</code> · 2026-09-18 측정 · Wilson 95% CI [0.446, 0.737] ·
+    시뮬레이션 측정값, 실물 검증 없음)</p>
+  <p class="warn">※ 파지 확인 없는 옛 판정으로는 같은 40회가 부분 92.5% / 완전 82.5%</p>
+  <p class="mut">두 값을 반드시 함께 읽는다. 어느 하나만 쓰면 어느 쪽이든 오도다.</p>
+</section>
+
+<!-- 7: ④ CI가 담지 않는 것 -->
+<section class="slide">
+  <div class="tag">④ 계속</div>
+  <h2>신뢰구간이 담지 않는 것</h2>
+  <p>Wilson 95% CI [0.446, 0.737] 은 롤아웃 표본추출의 이항 불확실성만 담는다. 다음 셋은 들어 있지 않다.</p>
+  <ul>
+    <li>시드 내 비독립 — 같은 시드 10 롤아웃은 독립이 아니라 실제 구간은 더 넓다</li>
+    <li>파라미터 불확실성 — 보유력·지연·카메라 값이 틀렸을 때의 영향</li>
+    <li>모델형태 편향 — 시뮬이 실물과 다른 구조에서 오는 편향(크기·부호 미정)</li>
+  </ul>
+  <p class="emph">총 불확실성 = 표집오차 ⊕ 시뮬-실물 편향. 표기된 건 앞항뿐이다.</p>
+</section>
+
+<!-- 8: 실패 16건 분해 -->
+<section class="slide">
+  <div class="tag">④ 계속</div>
+  <h2>실패 16건 분해</h2>
+  <table>
+    <tr><th>실패 유형</th><th>건수</th></tr>
+    <tr><td>변위 &lt; 2.95mm — 거의 못 움직임</td><td>3</td></tr>
+    <tr><td>2.95 ≤ 변위 &lt; 5.90mm</td><td>4</td></tr>
+    <tr><td>변위 ≥ 5.90mm 인데 파지 게이트 탈락</td><td>9</td></tr>
+  </table>
+  <p>그 9건 중 7건은 수백~1419스텝을 실제로 파지했다.</p>
+  <p>전혀 잡지 않고 밀어낸 롤아웃은 40회 중 최대 3건(7.5%).</p>
+</section>
+
+<!-- 9: ⑤ 실기 없이 무엇을 했나 -->
+<section class="slide">
+  <div class="tag">⑤ · 4분</div>
+  <h2>실기 없이 무엇을 했나</h2>
+  <ul>
+    <li><span class="acc">보유력 민감도</span> — 1.75~12N 에서 결과 평탄, 20N 에서 붕괴.
+      실제 보유력이 12N 이하라면 이 결과는 유효하다</li>
+    <li><span class="acc">실패 16건 분해</span> — 무엇이 정책 실패이고 무엇이 판정 아티팩트인지 분리</li>
+    <li><span class="acc">배치 커버리지</span> — 40회 전부의 초기 배치를 기록해 선언 존 전역(x 0.1777~0.2885)을 밟았음을 확인</li>
+    <li><span class="acc">공표 대장·가정 대장</span> — 모든 숫자에 분모·판정·체크포인트·CI, 미검증 가정 8개에 반증 조건</li>
+  </ul>
+</section>
+
+<!-- 10: ⑥ 못 하는 것과 왜 -->
+<section class="slide">
+  <div class="tag">⑥ · 2분</div>
+  <h2>못 하는 것과 왜</h2>
+  <blockquote>시뮬 결과의 신뢰도를 올리려면 결국 실물과 얼마나 맞는지를 보여야 합니다.
+    방법은 둘뿐인데 둘 다 실물에 바닥을 댑니다 — 실물과 직접 대조하거나, 더 충실한 다른 시뮬과 대조하거나.
+    후자는 그 시뮬 자신이 같은 증명을 요구받으니 재귀입니다.</blockquote>
+  <p>그래서 시뮬만으로 도달 가능한 신뢰도에는 천장이 있고, 우리는 그 천장에도 닿지 못합니다 —
+    실물에서 이 작업을 가르는 끼임·비틀림이 우리 모델에선 구조적으로 표현되지 않기 때문입니다.</p>
+  <p class="emph">여기서부터는 정교함이 아니라 실측이 필요합니다.</p>
+</section>
+
+<!-- 11: ⑦ 만져보기 -->
+<section class="slide">
+  <div class="tag">⑦ · 2분</div>
+  <h2>만져보기</h2>
+  <p>대시보드 플레이그라운드. 마우스로 팔을 커넥터로 보내고 버튼으로 집게를 여닫아 케이블을 뽑는다.</p>
+  <p>녹화된 실기 파지 자세로 이징되므로 조준만 하면 자리를 잡는다.</p>
+  <p class="mut">청중 중 한 명에게 마우스를 넘긴다. 실패해도 된다 — 어렵다는 것이 메시지다.</p>
+</section>
+
+<!-- 12: ⑧ 이후 -->
+<section class="slide">
+  <div class="tag">⑧ · 2분</div>
+  <h2>이후</h2>
+  <p class="acc">이후로 이관</p>
+  <ul>
+    <li>Diffusion Policy 비교, 최종 모델 선정, PCB+RS232 통합 미세조정
+      (DP 학습 경로 부재 + 정규화 설계 선행 필요)</li>
+  </ul>
+  <p class="acc">실기 재개 시 즉시 실행 — 측정 프로토콜을 그대로 들고 간다</p>
+  <ul>
+    <li>1순위: 잭스크류 근접 사진 1장. 나사가 조여져 있으면 "당겨 빼기" 과제 정의 자체가 바뀐다</li>
+    <li>2순위: 커넥터 단품 + 당김 저울 1회(보유력). 로봇 없이도 가능하다</li>
+  </ul>
+</section>
+
+<!-- 13: 정직성 재확인 -->
+<section class="slide">
+  <div class="tag">맺음</div>
+  <h2>한계를 우리가 먼저 말한다</h2>
+  <p class="emph">실물 로봇 검증은 수행되지 않았습니다.</p>
+  <p>성공 영상만 트는 발표와 갈리는 지점은 ③이었다 — 잡지 않고 밀어낸 경우와 판정 결함을 먼저 보여줬다.</p>
+  <p class="mut">한계를 우리가 먼저 정확히 말하는 것이 이 발표의 신뢰도 전부다.</p>
+</section>
+
+<!-- 14: 부록 DR -->
+<section class="slide">
+  <div class="tag">부록 · 예측 선커밋</div>
+  <h2>도메인 랜덤화 3단계 결과</h2>
+  <table>
+    <tr><th></th><th>값</th></tr>
+    <tr><td>DR 부분성공</td><td>17 / 40 = 0.425 (시드 42/7/123/2026 = 0.6 / 0.5 / 0.5 / 0.1)</td></tr>
+    <tr><td>DR 완전분리</td><td>13 / 40 = 0.325</td></tr>
+    <tr><td>옛 판정 병기</td><td>0.875 / 0.775</td></tr>
+    <tr><td>공칭 대비</td><td>부분 −0.175 (0.600 → 0.425)</td></tr>
+    <tr><td>채택 판정</td><td>유지 + 부록 병기 (17/40 은 12~34 밴드)</td></tr>
+  </table>
+  <p class="mut">채택 규칙은 숫자가 나오기 전에 커밋돼 있었고, 17/40 은 그 규칙의 "헤드라인 유지" 밴드다.
+    결과를 보고 기준을 정하지 않았다. 손실은 공칭과 사실상 겹치는데 성공률만 떨어졌다 —
+    도메인 랜덤화가 성공률 천장을 못 올린다는 세 번째 확인.</p>
+</section>
+
+</div>
+<div class="pageno" id="pageno">1 / 14</div>
+<div class="foot">← → 또는 Space 로 이동 · 오프라인 단일 파일 · 공표값 0.600/0.600 (옛 판정 92.5/82.5 병기)</div>
+<script>
+  var slides = document.querySelectorAll('.slide');
+  var i = 0, n = slides.length;
+  var pageno = document.getElementById('pageno');
+  function show(k){
+    i = Math.max(0, Math.min(n-1, k));
+    slides.forEach(function(s,j){ s.classList.toggle('on', j===i); });
+    pageno.textContent = (i+1) + ' / ' + n;
+  }
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ show(i+1); e.preventDefault(); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ show(i-1); e.preventDefault(); }
+    else if(e.key==='Home'){ show(0); } else if(e.key==='End'){ show(n-1); }
+  });
+  document.addEventListener('click', function(){ show(i+1); });
+  show(0);
+</script>
+</body>
+</html>
