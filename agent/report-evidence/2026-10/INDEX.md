@@ -10,3 +10,7 @@
   `act_rs232_sim/epoch_0041` mtime Sep 18·335,947,896 B · 마커 정합 · rollout 0.600 · MuJoCo 3.8.0 render OK.
   → 월간 보고 "환경 불변" / 시연 재현성 섹션.
   근거: `agent/research-log/2026-10-08.md`, `research/simulation/2026-10-08_oct-freeze-hold.md`
+- **동결 무결성 검증(10-10)** (2026-10-10) — 환경 불변 연속성: 동일 지표 전수 일치(episodes 100/16093 ·
+  ckpt 335,947,896 B mtime Sep 18 · 마커 정합 · rollout 0.600/9.66mm · render OK 36.7ms/frame). 회귀 0.
+  → 월간 보고 "환경 불변" / 시연 재현성 섹션.
+  근거: `agent/research-log/2026-10-10.md`, `research/simulation/2026-10-10_oct-freeze-integrity-verify.md`
