@@ -19,3 +19,8 @@
   재검증(render 15.7ms) 포함, 회귀 0.
   → 월간 보고 "환경 불변" / 시연 재현성 섹션.
   근거: `agent/research-log/2026-10-11.md`, `research/simulation/2026-10-11_oct-freeze-integrity-hold.md`
+- **동결 무결성 검증(10-12)** (2026-10-12) — 환경 불변 연속성: 동일 지표 전수 일치(episodes 100/16093 ·
+  ckpt 335,947,896 B mtime Sep 18 · 마커 정합·pending 없음 · rollout 0.600/0.5/9.66mm · render OK). 23:30
+  독립 재검증(render 39.6ms, 부하변동 범위) 포함, 회귀 0.
+  → 월간 보고 "환경 불변" / 시연 재현성 섹션.
+  근거: `agent/research-log/2026-10-12.md`, `research/simulation/2026-10-12_freeze-integrity-reverify.md`
