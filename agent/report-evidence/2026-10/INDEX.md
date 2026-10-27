@@ -36,3 +36,7 @@
   6dof 4/4 · camera 3/3, pick_place 레거시 fail 비회귀(0.323m), RSS 3081MB. 회귀 0.
   → 월간 보고 "환경 불변" / 시연 재현성 섹션.
   근거: `agent/research-log/2026-10-25.md`, `research/simulation/2026-10-25_freeze-integrity-reverify.md`
+- **동결 무결성 + 23:30 시뮬 테스트(10-27)** (2026-10-27) — episodes 100/16093 · ckpt 335,947,896 B · rollout 0.600 불변,
+  6dof 4/4 · camera 3/3, pick_place 레거시 fail 비회귀(0.323m), RSS 2967MB. 회귀 0.
+  → 월간 보고 "환경 불변" / 시연 재현성 섹션.
+  근거: `agent/research-log/2026-10-27.md`, `research/simulation/2026-10-27_freeze-integrity-reverify.md`
