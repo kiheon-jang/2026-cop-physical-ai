@@ -1,0 +1,28 @@
+# 동결 유지 (신규 시뮬 작업 없음) — 2026-11-04 (수, 시연 D+4)
+
+## 한 일
+- 드라이버 결과 문서화: STAGE=완료/유지, `episodes_rs232` 100ep · 최종 성공률 0.6 (목표 0.50). 재수집·재학습·재측정 없음(드라이버 담당).
+- 로드맵 잔여 `[ ]` 확인. **오늘 시뮬로 수행할 항목 없음**, 코드·MJCF 변경 없음.
+  - 169 Orin 배포 / 나머지 보류·이관·외부 의존: 규칙상 건너뜀.
+  - 985 pptx 활동현장 이미지: 스틸 파일 존재 확인. 남은 일은 `site_image:` 입력(PARA 읽기전용, 사용자 직접). `[ ]` 유지.
+  - 991 리허설: 사람이 하는 25분 계측. 시뮬 대상 아님. `[ ]` 유지.
+
+## 검증
+동결 무결성 재검증(비파괴):
+
+| 항목 | 값 |
+|---|---|
+| `data/episodes_rs232/meta/info.json` (Sep 16 17:12) | total_episodes=100 / total_frames=16093 |
+| 모델 락 `act_rs232_sim/epoch_0041/model.safetensors` | 335,947,896 B · Sep 18 02:42 |
+| 마커 | target=`data/episodes_rs232`(`.next` 없음) · trained_on=`episodes_rs232:1789546321` · measured=`episodes_rs232:1789666953` · `logs/` 내 pending 마커 없음 |
+| `rollout_summary_rs232.json` (Oct 2 10:20) | success_rate 0.6 · full_rate 0.5 · median_lift 9.66mm |
+| sim sanity `sim/assets/rs232_unplug_scene.xml` | nq=7 nu=6 ncam=3 · MuJoCo 3.8.0 · Renderer 240×320 **14.27 / 14.29 / 14.28 ms/frame** (warmup 5 + 50프레임 × 3세트) |
+
+전부 11-03 과 동일(렌더는 14.24~14.36ms 범위 안). 11-02 23:00 의 15.5ms 는 이번에도 재현 안 됨. 원인은 미규명.
+
+스크린샷 없음. 시각 산출물 변경이 없다. 이 문서는 동결 상태 확인이고 성공률 재추정이 아니다. 0.6 은 Oct 2 요약 파일 값이다.
+
+## 다음 단계와의 연결
+- 시뮬 실행 가능 `[ ]` 0개 상태 지속. 다음 사이클은 **사용자 결정**: 11월 로드맵 신설 후 `logs/cop_dataset_target.next` 전환 또는 마커 삭제로 재수집.
+- 시연(10-31) 실시 여부와 991 리허설 결과는 저장소에 기록 없음. 사용자 확인 후 체크.
+- 결정 전까지 야간 잡은 동결 재검증만 반복한다.
