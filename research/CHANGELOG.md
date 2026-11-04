@@ -128,6 +128,11 @@
 
 
 
+
+### 2026-11-04
+- 📊 [로그] 2026-11-04 시뮬 테스트 — 6dof 4/4·camera 3/3·collector 격리 1/1 정상, pick_place 레거시 fail 비회귀(0.323m), render 14.37ms, 동결 유지
+- 🛠 [시뮬] 동결 유지, 신규 작업 없음 (episodes_rs232 100ep·0.6, render 14.3ms) — 2026-11-04
+
 ### 2026-11-03
 - 📊 [로그] 2026-11-03 시뮬 테스트 — 6dof 4/4·camera 3/3·collector 격리 1/1 정상, pick_place 레거시 fail 비회귀(0.323m), render 14.32ms, 동결 유지
 - 🛠 [시뮬] 동결 유지, 신규 작업 없음 (episodes_rs232 100ep·0.6, render 14.3ms) — 2026-11-03
