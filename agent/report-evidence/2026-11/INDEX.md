@@ -81,3 +81,7 @@
   6dof 4/4 · camera 3/3, pick_place 레거시 fail 비회귀(0.323m), collector 격리 스모크 5ep(시도 5/6, 11-17·11-18과 일치) 87.9s, render 23:30 3세트 14.80~15.07ms(기준선 근처). 11-18 실행시간 증가 해소(11-17 수준 복귀). RS232 0.600 보존.
   → 11월 보고서 [2.X] 시뮬 안정성 / 시연 재현성 섹션.
   근거: `agent/research-log/2026-11-19.md`, `research/simulation/2026-11-19_post-demo-freeze-hold.md`
+- **2026-11-20** 동결 회귀 0 연속(10-21~11-20, 시연 D+20 포함) —
+  6dof 4/4 · camera 3/3, pick_place 레거시 fail 비회귀(0.323m), collector 격리 스모크 5ep(시도 5/6, 11-17~11-19와 일치) 92.6s, render 23:00 16.12~17.58ms → 23:30 15.32~15.51ms(복귀 중, 부하 3.2). RS232 0.600 보존.
+  → 11월 보고서 [2.X] 시뮬 안정성 / 시연 재현성 섹션.
+  근거: `agent/research-log/2026-11-20.md`, `research/simulation/2026-11-20_post-demo-freeze-hold.md`
