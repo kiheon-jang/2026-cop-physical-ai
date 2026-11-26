@@ -103,3 +103,6 @@
 - **2026-11-25 시뮬 동결 회귀 0 (D+25)** — 6dof 3/3 · camera 3/3, pick_place 레거시 fail 비회귀(0.323m), collector 격리 스모크 5ep(시도 5/6, 11-17~11-24와 일치) 90.5s, render 23:00 14.57~14.71ms(기준선). RS232 0.600 보존.
   → 11월 보고서 [2.X] 시뮬 안정성 / 시연 재현성 섹션.
   근거: `agent/research-log/2026-11-25.md`, `research/simulation/2026-11-25_post-demo-freeze-hold.md`
+- **2026-11-26 시뮬 동결 정합성 회귀 0 (D+26)** — 6dof 3/3 · camera 3/3, pick_place 레거시 fail 비회귀(0.323m), collector 격리 스모크 5ep(시도 5/6, 11-17~11-25와 일치). 단 부하 ~11~18로 실행시간 2~6.5배·render 26.8~35.9ms(원인 미규명). RS232 0.600 보존.
+  → 11월 보고서 [2.X] 시뮬 안정성 / 시연 재현성 섹션.
+  근거: `agent/research-log/2026-11-26.md`, `research/simulation/2026-11-26_post-demo-freeze-hold.md`
